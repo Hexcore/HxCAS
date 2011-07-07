@@ -10,20 +10,21 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test1Width()
 	{
-		int expectedResults = 5;
+		int expectedResults = 10;
 		assertEquals(expectedResults, g.getWidth());
 	}
 	
 	public void test2Height()
 	{
-		int expectedResults = 10;
+		int expectedResults = 5;
 		assertEquals(expectedResults, g.getHeight());
 	}
 	
 	public void test3Size()
 	{
 		Vector2i expectedResults = new Vector2i(5, 10);
-		assertEquals(expectedResults, g.getSize());
+		assertEquals(expectedResults.get(0), g.getSize().get(0));
+		assertEquals(expectedResults.get(1), g.getSize().get(1));
 	}
 	
 	/*

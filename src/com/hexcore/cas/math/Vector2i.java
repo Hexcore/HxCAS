@@ -16,12 +16,6 @@ public class Vector2i
 		this.x = x;
 		this.y = y;
 	}
-	
-	public Vector2i(Vector2i v)
-	{
-		this.x = v.x;
-		this.y = v.y;
-	}
 
 	public int	get(int index) {return (index == 0) ? x : y;}
 	
