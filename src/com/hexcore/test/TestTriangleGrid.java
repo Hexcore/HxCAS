@@ -7,8 +7,9 @@ import junit.framework.TestCase;
 
 public class TestTriangleGrid extends TestCase
 {
+	private int[] hVals = {1, 2, 3, 4, 5};
 	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10));
-	private final TriangleGrid h = new TriangleGrid(new Vector2i(4, 4), new Cell());
+	private final TriangleGrid h = new TriangleGrid(new Vector2i(4, 4), new Cell(hVals));
 	
 	public void test1Width()
 	{
@@ -36,8 +37,8 @@ public class TestTriangleGrid extends TestCase
 		assertEquals(c.getValue(0), g.getCell(new Vector2i(0, 0)).getValue(0));
 	}
 	
-	public void test5GetNeighbours()
-	{
+	//public void test5GetNeighbours()
+	//{
 		
-	}
+	//}
 }

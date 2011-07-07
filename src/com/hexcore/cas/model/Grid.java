@@ -22,8 +22,11 @@ public abstract class Grid
 		this.cells = new Cell[size.get(0)][size.get(1)];
 		for(int x = 0; x < size.get(0); x++)
 			for(int y = 0; y < size.get(1); y++)
+			{
+				this.cells[x][y] = new Cell(example.getValueCount());
 				for(int i = 0; i < example.getValueCount(); i++)
-					this.getCell(new Vector2i(x, y)).setValue(i, example.getValue(i));
+					this.cells[x][y].setValue(i, example.getValue(i));
+			}
 	}
 	
 	public abstract Cell[] getNeighbours(Vector2i pos);
