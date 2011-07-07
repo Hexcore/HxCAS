@@ -11,8 +11,11 @@ public class TestCell extends TestCase
 	
 	public void test1CellConstructors()
 	{
-		cell = new Cell(10);
-		assertEquals(10, cell.getValueCount());
+		cell = new Cell(3);
+		assertEquals(3, cell.getValueCount());
+		assertEquals(0, cell.getValue(0));
+		assertEquals(0, cell.getValue(1));
+		assertEquals(0, cell.getValue(2));
 		
 		int[] testValues = {10,5,2};
 		cell =  new Cell(testValues);
