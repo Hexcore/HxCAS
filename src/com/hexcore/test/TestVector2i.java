@@ -1,0 +1,118 @@
+package com.hexcore.test;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+import com.hexcore.cas.math.Vector2i;
+
+public class TestVector2i
+{
+
+	@Test
+	public void testVector2i()
+	{
+		Vector2i point = new Vector2i();
+		assertEquals(0, point.x);
+		assertEquals(0, point.y);
+	}
+
+	@Test
+	public void testVector2iIntInt()
+	{
+		Vector2i point = new Vector2i(7, 9);
+		assertEquals(7, point.x);
+		assertEquals(9, point.y);
+	}
+
+	@Test
+	public void testVector2iVector2i()
+	{
+		Vector2i point = new Vector2i(3, 4);
+		Vector2i copy = new Vector2i(point);
+		assertEquals(3, copy.x);
+		assertEquals(4, copy.y);
+	}
+
+	@Test
+	public void testGet()
+	{
+		Vector2i point = new Vector2i(7, 9);
+		assertEquals(7, point.get(0));
+		assertEquals(9, point.get(1));
+	}
+
+	@Test
+	public void testEqualsVector2i()
+	{
+		Vector2i a, b;
+		
+		a = new Vector2i(7, 9);
+		b = new Vector2i(7, 9);
+		assertTrue(a.equals(b));
+		
+		a = new Vector2i(6, 8);
+		b = new Vector2i(7, 9);
+		assertFalse(a.equals(b));
+		
+		a = new Vector2i(7, 8);
+		b = new Vector2i(7, 9);
+		assertFalse(a.equals(b));
+		
+		a = new Vector2i(6, 9);
+		b = new Vector2i(7, 9);
+		assertFalse(a.equals(b));
+	}
+
+	@Test
+	public void testAddVector2i()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i b = new Vector2i(2, 4);
+		Vector2i c = a.add(b);
+		
+		assertEquals(3, c.x);
+		assertEquals(9, c.y);
+	}
+
+	@Test
+	public void testAddIntInt()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i c = a.add(2, 4);
+		
+		assertEquals(3, c.x);
+		assertEquals(9, c.y);
+	}
+
+	@Test
+	public void testSubtractVector2i()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i b = new Vector2i(2, 4);
+		Vector2i c = a.subtract(b);
+		
+		assertEquals(-1, c.x);
+		assertEquals(1, c.y);
+	}
+
+	@Test
+	public void testSubtractIntInt()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i c = a.subtract(2, 4);
+		
+		assertEquals(-1, c.x);
+		assertEquals(1, c.y);
+	}
+
+	@Test
+	public void testToString()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i b = new Vector2i(-1, -5);
+		
+		assertEquals("Vector2i<1, 5>", a.toString());
+		assertEquals("Vector2i<-1, -5>", b.toString());
+	}
+}
