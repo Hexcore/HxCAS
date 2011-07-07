@@ -61,7 +61,7 @@ public class TestTriangleGrid extends TestCase
 			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
 	}
 	
-	public void test5GetNeighbours01()
+	public void test6GetNeighbours01()
 	{
 		TriangleGrid t = new TriangleGrid(new Vector2i(5, 5));
 		int cnt = 0;
@@ -82,6 +82,32 @@ public class TestTriangleGrid extends TestCase
 		vals[9] = 6;
 		vals[10] = 7;
 		vals[11] = 8;
+		cnt = 0;
+		for(int i = 0; i < 12; i++)
+			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+	}
+	
+	public void test7GetNeighbours22()
+	{
+		TriangleGrid t = new TriangleGrid(new Vector2i(5, 5));
+		int cnt = 0;
+		for(int x = 0; x < 5; x++)
+			for(int y = 0; y < 5; y++)
+				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
+		Vector2i pos = new Vector2i(2, 2);
+		int[] vals = new int[12];
+		vals[0] = 5;
+		vals[1] = 6;
+		vals[2] = 7;
+		vals[3] = 8;
+		vals[4] = 9;
+		vals[5] = 10;
+		vals[6] = 11;
+		vals[7] = 13;
+		vals[8] = 14;
+		vals[9] = 16;
+		vals[10] = 17;
+		vals[11] = 18;
 		cnt = 0;
 		for(int i = 0; i < 12; i++)
 			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
