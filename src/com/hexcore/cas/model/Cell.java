@@ -9,6 +9,11 @@ public class Cell
 	{
 		values = new int[valueCount];
 		this.valueCount = valueCount;
+		
+		for(int i = 0; i < valueCount; i++)
+		{
+			values[i] = 0;
+		}
 	}
 	
 	public Cell(int[] values)
