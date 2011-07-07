@@ -4,8 +4,8 @@ import com.hexcore.cas.math.Vector2i;
 
 public abstract class Grid
 {
-	private Cell[][] cells;
-	private Vector2i size;
+	private Cell[][] cells = null;
+	private Vector2i size = null;
 	
 	public Grid(Vector2i size)
 	{
