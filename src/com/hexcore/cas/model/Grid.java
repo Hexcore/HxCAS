@@ -9,7 +9,7 @@ public abstract class Grid
 	
 	public Grid(Vector2i size)
 	{
-		this.size = size;
+		this.size = new Vector2i(size);
 		this.cells = new Cell[size.get(0)][size.get(1)];
 		for(int x = 0; x < size.get(0); x++)
 			for(int y = 0; y < size.get(1); y++)
