@@ -8,6 +8,11 @@ public class TriangleGrid extends Grid
 	{
 		super(size);
 	}
+	
+	public TriangleGrid(Vector2i size, Cell example)
+	{
+		super(size, example);
+	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{

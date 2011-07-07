@@ -11,6 +11,19 @@ public abstract class Grid
 	{
 		this.size = size;
 		this.cells = new Cell[size.get(0)][size.get(1)];
+		for(int x = 0; x < size.get(0); x++)
+			for(int y = 0; y < size.get(1); y++)
+				this.cells[x][y] = new Cell(1);
+	}
+	
+	public Grid(Vector2i size, Cell example)
+	{
+		this.size = size;
+		this.cells = new Cell[size.get(0)][size.get(1)];
+		for(int x = 0; x < size.get(0); x++)
+			for(int y = 0; y < size.get(1); y++)
+				for(int i = 0; i < example.getValueCount(); i++)
+					this.getCell(new Vector2i(x, y)).setValue(i, example.getValue(i));
 	}
 	
 	public abstract Cell[] getNeighbours(Vector2i pos);

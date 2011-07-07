@@ -1,5 +1,6 @@
 package com.hexcore.test;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
 
 import junit.framework.TestCase;
@@ -7,6 +8,7 @@ import junit.framework.TestCase;
 public class TestTriangleGrid extends TestCase
 {
 	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10));
+	private final TriangleGrid h = new TriangleGrid(new Vector2i(4, 4), new Cell());
 	
 	public void test1Width()
 	{
@@ -27,17 +29,15 @@ public class TestTriangleGrid extends TestCase
 		assertEquals(expectedResults.get(1), g.getSize().get(1));
 	}
 	
-	/*
-	 * Need cell implementation for this test case
-	 * public void test4GetCell()
-	 * {
-	 * }
-	 */
+	public void test4GetCell()
+	{
+		int[] vals = {0};
+		Cell c = new Cell(vals);
+		assertEquals(c.getValue(0), g.getCell(new Vector2i(0, 0)).getValue(0));
+	}
 	
-	/*
-	 * Need cell implementation for this test case
-	 * public void test5GetNeighbours()
-	 * {
-	 * }
-	 */
+	public void test5GetNeighbours()
+	{
+		
+	}
 }
