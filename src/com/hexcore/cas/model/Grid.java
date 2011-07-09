@@ -31,6 +31,11 @@ public abstract class Grid
 	
 	public abstract Cell[] getNeighbours(Vector2i pos);
 	
+	public Cell getCell(int x, int y)
+	{
+		return cells[y][x];
+	}
+	
 	public Cell getCell(Vector2i pos)
 	{
 		return cells[pos.y][pos.x];
