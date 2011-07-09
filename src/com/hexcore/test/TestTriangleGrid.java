@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class TestTriangleGrid extends TestCase
 {
-	private final TriangleGrid g = new TriangleGrid(new Vector2i(10, 5));
+	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10));
 	
 	public void test1Width()
 	{
@@ -23,8 +23,9 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test3Size()
 	{
-		Vector2i expectedResults = new Vector2i(10, 5);
-		assertEquals(expectedResults, g.getSize());
+		Vector2i expectedResults = new Vector2i(5, 10);
+		assertEquals(expectedResults.x, g.getSize().x);
+		assertEquals(expectedResults.y, g.getSize().y);
 	}
 	
 	public void test4GetCell()
@@ -41,7 +42,7 @@ public class TestTriangleGrid extends TestCase
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)
-				t.getCell(new Vector2i(y, x)).setValue(0, cnt++);
+				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(0, 0);
 		int[] vals = new int[12];
 		vals[0] = 23;
@@ -68,7 +69,10 @@ public class TestTriangleGrid extends TestCase
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)
-				t.getCell(new Vector2i(y, x)).setValue(0, cnt++);
+			{
+				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
+				System.out.println("Cell[" + y + "][" + x + "] : " + (cnt - 1));
+			}
 		Vector2i pos = new Vector2i(1, 0);
 		int[] vals = new int[12];
 		vals[0] = 20;
@@ -95,7 +99,7 @@ public class TestTriangleGrid extends TestCase
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)
-				t.getCell(new Vector2i(y, x)).setValue(0, cnt++);
+				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(2, 2);
 		int[] vals = new int[12];
 		vals[0] = 5;

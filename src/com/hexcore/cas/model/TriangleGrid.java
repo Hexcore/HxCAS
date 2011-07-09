@@ -24,15 +24,15 @@ public class TriangleGrid extends Grid
 		
 		int yMIN1 = y - 1;
 		int yPLUS1 = y + 1;
-		if(yPLUS1 >= ySize)
-			yPLUS1 -= ySize;
 		if(yMIN1 < 0)
 			yMIN1 += ySize;
+		if(yPLUS1 >= ySize)
+			yPLUS1 -= ySize;
 		
-		int xMIN2 = y - 2;
-		int xMIN1 = y - 1;
-		int xPLUS1 = y + 1;
-		int xPLUS2 = y + 2;
+		int xMIN2 = x - 2;
+		int xMIN1 = x - 1;
+		int xPLUS1 = x + 1;
+		int xPLUS2 = x + 2;
 		if(xMIN2 < 0)
 			xMIN2 += xSize;
 		if(xMIN1 < 0)
@@ -41,35 +41,36 @@ public class TriangleGrid extends Grid
 			xPLUS1 -= xSize;
 		if(xPLUS2 >= xSize)
 			xPLUS2 -= xSize;
+
 		if(up)
 		{
-			n[0] = this.getCell(new Vector2i(yMIN1, xMIN1));
-			n[1] = this.getCell(new Vector2i(yMIN1, x));
-			n[2] = this.getCell(new Vector2i(yMIN1, xPLUS1));
-			n[3] = this.getCell(new Vector2i(y, xMIN2));
-			n[4] = this.getCell(new Vector2i(y, xMIN1));
-			n[5] = this.getCell(new Vector2i(y, xPLUS1));
-			n[6] = this.getCell(new Vector2i(y, xPLUS2));
-			n[7] = this.getCell(new Vector2i(yPLUS1, xMIN2));
-			n[8] = this.getCell(new Vector2i(yPLUS1, xMIN1));
-			n[9] = this.getCell(new Vector2i(yPLUS1, x));
-			n[10] = this.getCell(new Vector2i(yPLUS1, xPLUS1));
-			n[11] = this.getCell(new Vector2i(yPLUS1, xPLUS2));
+			n[0] = this.getCell(new Vector2i(xMIN1, yMIN1));
+			n[1] = this.getCell(new Vector2i(x, yMIN1));
+			n[2] = this.getCell(new Vector2i(xPLUS1, yMIN1));
+			n[3] = this.getCell(new Vector2i(xMIN2, y));
+			n[4] = this.getCell(new Vector2i(xMIN1, y));
+			n[5] = this.getCell(new Vector2i(xPLUS1, y));
+			n[6] = this.getCell(new Vector2i(xPLUS2, y));
+			n[7] = this.getCell(new Vector2i(xMIN2, yPLUS1));
+			n[8] = this.getCell(new Vector2i(xMIN1, yPLUS1));
+			n[9] = this.getCell(new Vector2i(x, yPLUS1));
+			n[10] = this.getCell(new Vector2i(xPLUS1, yPLUS1));
+			n[11] = this.getCell(new Vector2i(xPLUS2, yPLUS1));
 		}
 		else
 		{
-			n[0] = this.getCell(new Vector2i(yMIN1, xMIN2));
-			n[1] = this.getCell(new Vector2i(yMIN1, xMIN1));
-			n[2] = this.getCell(new Vector2i(yMIN1, x));
-			n[3] = this.getCell(new Vector2i(yMIN1, xPLUS1));
-			n[4] = this.getCell(new Vector2i(yMIN1, xPLUS2));
-			n[5] = this.getCell(new Vector2i(y, xMIN2));
-			n[6] = this.getCell(new Vector2i(y, xMIN1));
-			n[7] = this.getCell(new Vector2i(y, xPLUS1));
-			n[8] = this.getCell(new Vector2i(y, xPLUS2));
-			n[9] = this.getCell(new Vector2i(yPLUS1, xMIN1));
-			n[10] = this.getCell(new Vector2i(yPLUS1, x));
-			n[11] = this.getCell(new Vector2i(yPLUS1, xPLUS1));
+			n[0] = this.getCell(new Vector2i(xMIN2, yMIN1));
+			n[1] = this.getCell(new Vector2i(xMIN1, yMIN1));
+			n[2] = this.getCell(new Vector2i(x, yMIN1));
+			n[3] = this.getCell(new Vector2i(xPLUS1, yMIN1));
+			n[4] = this.getCell(new Vector2i(xPLUS2, yMIN1));
+			n[5] = this.getCell(new Vector2i(xMIN2, y));
+			n[6] = this.getCell(new Vector2i(xMIN1, y));
+			n[7] = this.getCell(new Vector2i(xPLUS1, y));
+			n[8] = this.getCell(new Vector2i(xPLUS2, y));
+			n[9] = this.getCell(new Vector2i(xMIN1, yPLUS1));
+			n[10] = this.getCell(new Vector2i(x, yPLUS1));
+			n[11] = this.getCell(new Vector2i(xPLUS1, yPLUS1));
 		}
 		return n;
 	}
@@ -79,21 +80,21 @@ public class TriangleGrid extends Grid
 	{
 		int x = pos.x;
 		int y = pos.y;
-		if((y % 2) != 0)
+		if((y % 2) == 0)
 		{
 			//Upside-down first triangle
 			if((x % 2) == 0)
-				return getNeighbours(true, pos);
-			else
 				return getNeighbours(false, pos);
+			else
+				return getNeighbours(true, pos);
 		}
 		else
 		{
 			//Right-side up first triangle
 			if((x % 2) == 0)
-				return getNeighbours(false, pos);
-			else
 				return getNeighbours(true, pos);
+			else
+				return getNeighbours(false, pos);
 		}
 	}
 
