@@ -8,33 +8,64 @@ public class RectangleGrid extends Grid
 	public RectangleGrid(Vector2i size) 
 	{
 		super(size);
-	}
+	}//end constructor
 	
 	@Override
+	/**
+	 * Returns the possible neighbours of the a cell on a rectangular grid. Null if the neighbour is the target
+	 * cell itself.
+	 * 
+	 * @param pos - location of cell whose neighbours are requested.
+	 * @return - Cell array of 8 neighbours.
+	 * @author Apurva Kumar
+	 */
 	public Cell[] getNeighbours(Vector2i pos)
 	{
-		//initialise return Value
-		Cell[] neighbours = new Cell[8];
-		Vector2i temp;
-		int i = 0;
-		for(int j = 0; j < 3; j++)
-		{
-			temp = new Vector2i(pos.x-1, pos.y+j-1);
-			neighbours[i++] = getCell(temp);
-		}
+		//Initialisations
+		Cell [] neighbours = new Cell[8];
+		int i = 0;//counter, goes till 8.
+		int xdim = getWidth();//get dimensions stored
+		int ydim = getHeight();
+		int x = pos.x;//get target cell's location stored.
+		int y = pos.y;
 		
-		for(int j = 0; j < 3; j++)
-		{
-			temp = new Vector2i(pos.x+1, pos.y+j-1);
-			neighbours[i++] = getCell(temp);
-		}
-		temp = new Vector2i(pos.x, pos.y-1);
-		neighbours[i++] = getCell(temp);
-		
-		temp = new Vector2i(pos.x, pos.y+1);
-		neighbours[i++] = getCell(temp);
+		//TOP LEFT: y-1, x-1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim), i++);
+		//TOP CENTRE: y-1, x
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
+		//TOP RIGHT: y-1, x+1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
+		//LEFT: y, x-1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i(x, (y+ydim-1)%ydim), i++);
+		//RIGHT: y, x+1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i(x, (y+1)%ydim), i++);
+		//BOTTOM LEFT: y+1, x-1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, (y+ydim-1)%ydim), i++);
+		//BOTTOM CENTRE: y+1, x
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, y), i++);
+		//BOTTOM RIGHT: y+1, x+1
+		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
 		
 		return neighbours;
-	}
+	}//end method getNeighbours
+	
+	/**
+	 * Private internal function. Chooses whether the neighbour is valid or should be set to null.
+	 * @param x - x position of target cell.
+	 * @param y - y position of target cell.
+	 * @param neighbours - array to be altered.
+	 * @param temp - Vector2i where the neighbour should be found.
+	 * @param i - number of neighbour.
+	 * @return - the updated neighbours array.
+	 * @author Apurva Kumar
+	 */
+	private Cell[] setNeighbours(int x, int y, Cell[] neighbours, Vector2i temp, int i)
+	{
+		if((x == temp.x) && (y == temp.y))//if the neighbour is the same as the target cell
+			neighbours[i] = null;//set neighbour to null
+		else
+			neighbours[i] = getCell(temp);//else, get Cell.
+		return neighbours;
+	}//end method setNeighbours
 
 }
