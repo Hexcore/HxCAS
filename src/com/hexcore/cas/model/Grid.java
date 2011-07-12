@@ -9,41 +9,46 @@ public abstract class Grid
 	
 	public Grid(Vector2i size)
 	{
-		this.size = new Vector2i(size);
-		this.cells = new Cell[size.get(0)][size.get(1)];
-		for(int x = 0; x < size.get(0); x++)
-			for(int y = 0; y < size.get(1); y++)
-				this.cells[x][y] = new Cell(1);
+		this.size = size;
+		this.cells = new Cell[size.y][size.x];
+		for(int y = 0; y < size.y; y++)
+			for(int x = 0; x < size.x; x++)
+				this.cells[y][x] = new Cell(1);
 	}
 	
 	public Grid(Vector2i size, Cell example)
 	{
 		this.size = size;
-		this.cells = new Cell[size.get(0)][size.get(1)];
-		for(int x = 0; x < size.get(0); x++)
-			for(int y = 0; y < size.get(1); y++)
+		this.cells = new Cell[size.y][size.x];
+		for(int y = 0; y < size.y; y++)
+			for(int x = 0; x < size.x; x++)
 			{
-				this.cells[x][y] = new Cell(example.getValueCount());
+				this.cells[y][x] = new Cell(example.getValueCount());
 				for(int i = 0; i < example.getValueCount(); i++)
-					this.cells[x][y].setValue(i, example.getValue(i));
+					this.cells[y][x].setValue(i, example.getValue(i));
 			}
 	}
 	
 	public abstract Cell[] getNeighbours(Vector2i pos);
 	
+	public Cell getCell(int x, int y)
+	{
+		return cells[y][x];
+	}
+	
 	public Cell getCell(Vector2i pos)
 	{
-		return cells[pos.get(0)][pos.get(1)];
+		return cells[pos.y][pos.x];
 	}
 	
 	public int getWidth()
 	{
-		return size.get(1);
+		return size.x;
 	}
 	
 	public int getHeight()
 	{
-		return size.get(0);
+		return size.y;
 	}
 	
 	public Vector2i getSize()

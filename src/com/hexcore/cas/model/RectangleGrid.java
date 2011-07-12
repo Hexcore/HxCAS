@@ -30,21 +30,21 @@ public class RectangleGrid extends Grid
 		int y = pos.y;
 		
 		//TOP LEFT: y-1, x-1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim), i++);
 		//TOP CENTRE: y-1, x
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
 		//TOP RIGHT: y-1, x+1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
 		//LEFT: y, x-1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i(x, (y+ydim-1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+ydim-1)%ydim), i++);
 		//RIGHT: y, x+1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i(x, (y+1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+1)%ydim), i++);
 		//BOTTOM LEFT: y+1, x-1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, (y+ydim-1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+ydim-1)%ydim), i++);
 		//BOTTOM CENTRE: y+1, x
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, y), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, y), i++);
 		//BOTTOM RIGHT: y+1, x+1
-		neighbours = setNeighbours( x, y, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
 		
 		return neighbours;
 	}//end method getNeighbours
@@ -59,9 +59,9 @@ public class RectangleGrid extends Grid
 	 * @return - the updated neighbours array.
 	 * @author Apurva Kumar
 	 */
-	private Cell[] setNeighbours(int x, int y, Cell[] neighbours, Vector2i temp, int i)
+	private Cell[] setNeighbours(Vector2i pos, Cell[] neighbours, Vector2i temp, int i)
 	{
-		if((x == temp.x) && (y == temp.y))//if the neighbour is the same as the target cell
+		if(pos.equals(temp))//if the neighbour is the same as the target cell
 			neighbours[i] = null;//set neighbour to null
 		else
 			neighbours[i] = getCell(temp);//else, get Cell.
