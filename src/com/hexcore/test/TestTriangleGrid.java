@@ -24,7 +24,8 @@ public class TestTriangleGrid extends TestCase
 	public void test3Size()
 	{
 		Vector2i expectedResults = new Vector2i(5, 10);
-		assertEquals(expectedResults, g.getSize());
+		assertEquals(expectedResults.x, g.getSize().x);
+		assertEquals(expectedResults.y, g.getSize().y);
 	}
 	
 	public void test4GetCell()
@@ -36,10 +37,11 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test5GetNeighbours00()
 	{
-		TriangleGrid t = new TriangleGrid(new Vector2i(5, 5));
+		int gridSize = 5;
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
 		int cnt = 0;
-		for(int x = 0; x < 5; x++)
-			for(int y = 0; y < 5; y++)
+		for(int y = 0; y < gridSize; y++)
+			for(int x = 0; x < gridSize; x++)
 				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(0, 0);
 		int[] vals = new int[12];
@@ -62,12 +64,16 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test6GetNeighbours01()
 	{
-		TriangleGrid t = new TriangleGrid(new Vector2i(5, 5));
+		int gridSize = 5;
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
 		int cnt = 0;
-		for(int x = 0; x < 5; x++)
-			for(int y = 0; y < 5; y++)
+		for(int y = 0; y < gridSize; y++)
+			for(int x = 0; x < gridSize; x++)
+			{
 				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
-		Vector2i pos = new Vector2i(0, 1);
+				System.out.println("Cell[" + y + "][" + x + "] : " + (cnt - 1));
+			}
+		Vector2i pos = new Vector2i(1, 0);
 		int[] vals = new int[12];
 		vals[0] = 20;
 		vals[1] = 21;
@@ -88,10 +94,11 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test7GetNeighbours22()
 	{
-		TriangleGrid t = new TriangleGrid(new Vector2i(5, 5));
+		int gridSize = 5;
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
 		int cnt = 0;
-		for(int x = 0; x < 5; x++)
-			for(int y = 0; y < 5; y++)
+		for(int y = 0; y < gridSize; y++)
+			for(int x = 0; x < gridSize; x++)
 				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(2, 2);
 		int[] vals = new int[12];
