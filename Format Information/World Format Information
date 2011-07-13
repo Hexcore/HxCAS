@@ -1,0 +1,32 @@
+The world data files are stored as a caw file: Cellular Automaton World file.
+
+The first line has 2 numbers: x and y.
+x == the number of columns the matrix has.
+y == the number of rows the matrix has.
+
+The next line has a single character, either T, H or R.
+T|t == triangle grid world.
+H|h == hexagon grid world.
+R|r == rectangle grid world.
+
+Next follows y blocks of information. Each block has x number of lines.
+The lines each have the following format:
+n v1 v2 ... vn
+n == the number of values to follow for the specific cell.
+v1 v2 ... vn == the n values of the specific cell.
+
+Example:
+2 3
+t
+1 0
+1 1
+
+1 2
+2 3 4
+
+1 5
+1 6
+makes the following triangle grid:
+[ 0 ][ 1 ]
+[ 2 ][3 4]
+[ 5 ][ 6 ]

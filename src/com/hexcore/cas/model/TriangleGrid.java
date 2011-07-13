@@ -7,11 +7,13 @@ public class TriangleGrid extends Grid
 	public TriangleGrid(Vector2i size) 
 	{
 		super(size);
+		this.setType('T');
 	}
 	
 	public TriangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
+		this.setType('T');
 	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
