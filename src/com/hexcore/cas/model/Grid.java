@@ -5,6 +5,7 @@ import com.hexcore.cas.math.Vector2i;
 public abstract class Grid
 {
 	private Cell[][] cells = null;
+	private char gridType = 'x';
 	private Vector2i size = null;
 	
 	public Grid(Vector2i size)
@@ -41,6 +42,11 @@ public abstract class Grid
 		return cells[pos.y][pos.x];
 	}
 	
+	public void setCells(Vector2i pos, int[] vals)
+	{
+		cells[pos.y][pos.x] = new Cell(vals);
+	}
+	
 	public int getWidth()
 	{
 		return size.x;
@@ -54,5 +60,15 @@ public abstract class Grid
 	public Vector2i getSize()
 	{
 		return size;
+	}
+	
+	public void setType(char t)
+	{
+		gridType = t;
+	}
+	
+	public char getType()
+	{
+		return gridType;
 	}
 }

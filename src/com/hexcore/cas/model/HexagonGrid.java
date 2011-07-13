@@ -8,6 +8,7 @@ public class HexagonGrid extends Grid
 	public HexagonGrid(Vector2i size) 
 	{
 		super(size);
+		this.setType('H');
 	}
 	
 	@Override

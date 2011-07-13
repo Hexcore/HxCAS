@@ -8,6 +8,7 @@ public class RectangleGrid extends Grid
 	public RectangleGrid(Vector2i size) 
 	{
 		super(size);
+		this.setType('R');
 	}//end constructor
 	
 	@Override
