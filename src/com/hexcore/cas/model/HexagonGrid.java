@@ -11,6 +11,11 @@ public class HexagonGrid extends Grid
 		this.setType('H');
 	}
 	
+	public HexagonGrid(Grid g)
+	{
+		super(g);
+	}
+	
 	@Override
 	/**
 	 * Returns the possible neighbours of the a cell on a hexagonal grid. Null if the neighbour is the target

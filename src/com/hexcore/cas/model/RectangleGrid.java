@@ -11,6 +11,11 @@ public class RectangleGrid extends Grid
 		this.setType('R');
 	}//end constructor
 	
+	public RectangleGrid(Grid g)
+	{
+		super(g);
+	}
+	
 	@Override
 	/**
 	 * Returns the possible neighbours of the a cell on a rectangular grid. Null if the neighbour is the target

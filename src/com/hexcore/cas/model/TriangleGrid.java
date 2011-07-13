@@ -15,6 +15,11 @@ public class TriangleGrid extends Grid
 		super(size, example);
 		this.setType('T');
 	}
+	
+	public TriangleGrid(Grid g)
+	{
+		super(g);
+	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{
