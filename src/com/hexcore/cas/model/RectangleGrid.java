@@ -14,6 +14,7 @@ public class RectangleGrid extends Grid
 	public RectangleGrid(Grid g)
 	{
 		super(g);
+		this.setType('R');
 	}
 	
 	@Override

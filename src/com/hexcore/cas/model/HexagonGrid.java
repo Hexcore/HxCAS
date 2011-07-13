@@ -14,6 +14,7 @@ public class HexagonGrid extends Grid
 	public HexagonGrid(Grid g)
 	{
 		super(g);
+		this.setType('H');
 	}
 	
 	@Override
