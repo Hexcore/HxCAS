@@ -33,6 +33,15 @@ public class TestCell extends TestCase
 		assertEquals(2, cell2.getValue(2));
 		assertEquals(0, cell2.getValue(-1));
 		assertEquals(0, cell2.getValue(3));
+		
+		// Ensure a proper copy wasa made
+		cell.setValue(0, 99);
+		cell.setValue(1, 98);
+		cell.setValue(2, 97);
+		
+		assertEquals(10, cell2.getValue(0));
+		assertEquals(5, cell2.getValue(1));
+		assertEquals(2, cell2.getValue(2));	
 	}
 	
 	public void test2Values()
@@ -51,6 +60,4 @@ public class TestCell extends TestCase
 		assertEquals(testVals[0], 1);
 		assertEquals(testVals[1], 3);
 	}
-	
-	
 }

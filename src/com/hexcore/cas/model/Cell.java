@@ -30,10 +30,11 @@ public class Cell
 	public Cell(Cell cell)
 	{
 		this.valueCount = cell.valueCount;
+		this.values = new int[valueCount];
 		
 		for(int i = 0; i < valueCount; i++)
 		{
-			this.values = cell.values;
+			this.values[i] = cell.values[i];
 		}
 	}
 	

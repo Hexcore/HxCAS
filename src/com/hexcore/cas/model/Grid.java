@@ -10,7 +10,7 @@ public abstract class Grid
 	
 	public Grid(Vector2i size)
 	{
-		this.size = size;
+		this.size = new Vector2i(size);
 		this.cells = new Cell[size.y][size.x];
 		for(int y = 0; y < size.y; y++)
 			for(int x = 0; x < size.x; x++)
@@ -19,7 +19,7 @@ public abstract class Grid
 	
 	public Grid(Vector2i size, Cell example)
 	{
-		this.size = size;
+		this.size = new Vector2i(size);
 		this.cells = new Cell[size.y][size.x];
 		for(int y = 0; y < size.y; y++)
 			for(int x = 0; x < size.x; x++)
@@ -32,7 +32,7 @@ public abstract class Grid
 	
 	public Grid(Grid grid)
 	{
-		this.size = grid.size;
+		this.size = new Vector2i(grid.size);
 		this.cells = new Cell[grid.size.y][grid.size.x];
 		for(int y = 0; y < size.y; y++)
 			for(int x = 0; x < size.x; x++)
