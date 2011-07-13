@@ -22,7 +22,7 @@ public class TestRectangleGrid extends TestCase
 		TestRectangleGrid.assertEquals(10, grid.getCell(new Vector2i(1,0)).getValue(0));
 		TestRectangleGrid.assertEquals(6, grid.getCell(new Vector2i(1,1)).getValue(0));
 		
-		//Test horizontally rectangular grid :P i.e. 2 x 3 grid
+		//Test vertically rectangular grid :P i.e. 2 x 3 grid
 		grid = addNeighbours(2,3);
 		TestRectangleGrid.assertEquals(27, grid.getCell(new Vector2i(0,0)).getValue(0));
 		TestRectangleGrid.assertEquals(26, grid.getCell(new Vector2i(0,1)).getValue(0));
@@ -31,7 +31,7 @@ public class TestRectangleGrid extends TestCase
 		TestRectangleGrid.assertEquals(14, grid.getCell(new Vector2i(1,1)).getValue(0));
 		TestRectangleGrid.assertEquals(13, grid.getCell(new Vector2i(1,2)).getValue(0));
 		
-		//Test vertically rectangular grid :P i.e. 3 x 1 grid
+		//Test horizontally rectangular grid :P i.e. 3 x 1 grid
 		grid = addNeighbours(3,1);
 		TestRectangleGrid.assertEquals(9, grid.getCell(new Vector2i(0,0)).getValue(0));
 		TestRectangleGrid.assertEquals(6, grid.getCell(new Vector2i(1,0)).getValue(0));
