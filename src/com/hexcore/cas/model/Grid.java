@@ -29,6 +29,17 @@ public abstract class Grid
 			}
 	}
 	
+	public Grid(Grid grid)
+	{
+		this.size = grid.size;
+		this.cells = new Cell[grid.size.y][grid.size.x];
+		for(int y = 0; y < size.y; y++)
+			for(int x = 0; x < size.x; x++)
+			{
+				this.cells[y][x] = new Cell(grid.getCell(x, y));
+			}
+	}
+	
 	public abstract Cell[] getNeighbours(Vector2i pos);
 	
 	public Cell getCell(int x, int y)
