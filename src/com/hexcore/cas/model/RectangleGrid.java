@@ -28,6 +28,7 @@ public class RectangleGrid extends Grid
 	 */
 	public Cell[] getNeighbours(Vector2i pos)
 	{
+		System.out.println("Before : " + getCell(pos).getValue(0));
 		//Initialisations
 		Cell [] neighbours = new Cell[8];
 		int i = 0;//counter, goes till 8.
@@ -39,20 +40,21 @@ public class RectangleGrid extends Grid
 		//TOP LEFT: y-1, x-1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim), i++);
 		//TOP CENTRE: y-1, x
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
-		//TOP RIGHT: y-1, x+1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
-		//LEFT: y, x-1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+ydim-1)%ydim), i++);
-		//RIGHT: y, x+1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+1)%ydim), i++);
-		//BOTTOM LEFT: y+1, x-1
+		//TOP RIGHT: y-1, x+1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+ydim-1)%ydim), i++);
-		//BOTTOM CENTRE: y+1, x
+		//LEFT: y, x-1
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
+		//RIGHT: y, x+1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, y), i++);
+		//BOTTOM LEFT: y+1, x-1
+		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
+		//BOTTOM CENTRE: y+1, x
+		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+1)%ydim), i++);
 		//BOTTOM RIGHT: y+1, x+1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
 		
+		System.out.println("After : " + getCell(pos).getValue(0));
 		return neighbours;
 	}//end method getNeighbours
 	
@@ -68,10 +70,12 @@ public class RectangleGrid extends Grid
 	 */
 	private Cell[] setNeighbours(Vector2i pos, Cell[] neighbours, Vector2i temp, int i)
 	{
+		//System.out.print( temp.x + " " + temp.y + " = ");
 		if(pos.equals(temp))//if the neighbour is the same as the target cell
 			neighbours[i] = null;//set neighbour to null
 		else
-			neighbours[i] = getCell(temp);//else, get Cell.
+			neighbours[i] = new Cell(getCell(temp));//else, get Cell.
+		//System.out.println(getCell(temp).getValue(0));
 		return neighbours;
 	}//end method setNeighbours
 

@@ -3,23 +3,25 @@ package com.hexcore.test;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.TriangleGrid;
 
 public class GameOfLife 
 {
 	public static void main(String [] args)
 	{
 		//start with 10x10 rectangle grid because I know how this is expected to perform.
-		RectangleGrid grid = new RectangleGrid(new Vector2i(10, 10));
+		RectangleGrid grid = new RectangleGrid(new Vector2i(5, 5));
 		
 		//set specific pattern here - can be changed to an input file later.
 		//Going to start with a simple blinker at the moment
-		grid.getCell(new Vector2i(4,5)).setValue(0, 1);
-		grid.getCell(new Vector2i(5,5)).setValue(0, 1);
-		grid.getCell(new Vector2i(6,5)).setValue(0, 1);
+		grid.getCell(new Vector2i(2,1)).setValue(0, 1);
+		grid.getCell(new Vector2i(2,2)).setValue(0, 1);
+		grid.getCell(new Vector2i(2,3)).setValue(0, 1);
 		
 		//specify how many generations you want
-		int iter = 100;
+		int iter = 1;
 		//displayGrid(grid);
 		//run the game of life :P
 		run(grid, iter);
@@ -46,24 +48,45 @@ public class GameOfLife
 			}//for
 			System.out.println();
 		}//for
-		System.out.println("\n\n\n");
+		System.out.println();
 	}//end method displayGrid
 	
 	public static Grid generateNextGeneration(Grid grid)
 	{
 		//make a new copy of the grid.
-		Grid temp = grid;
+		char c = grid.getType();
+		Grid temp = null;
+		switch(c)
+		{
+		case 'R':
+			temp = new RectangleGrid(grid);
+		case 'T':
+			temp = new TriangleGrid(grid);	
+		case 'H':
+			temp = new HexagonGrid(grid);	
+		}
+		//Grid temp = new Grid(grid);
 		
+		displayGrid(temp);
+		System.out.println("Making small change to temp!");
+		grid.getCell(new Vector2i(4,4)).setValue(0, 1);
+		displayGrid(grid);
+		displayGrid(temp);
 		for(int y = 0; y < grid.getHeight(); y++)
 		{
 			for(int x = 0; x < grid.getWidth(); x++)
 			{
 				//for each cell:
 				Cell [] neighbours = grid.getNeighbours(new Vector2i(x,y));//getNeighbours
+				//for(int i = 0; i < neighbours.length; i++)
+					//System.out.println("neighbours[" + i + "] = " + neighbours[i].getValue(0));
+				//System.out.println();
 				//now apply rules, and set the appropriate value to the temporary grid.
 				temp.getCell(x, y).setValue(0, applyRules(neighbours,grid.getCell(x, y).getValue(0)));
 			}
+			//System.out.println();
 		}
+		//displayGrid(temp);
 		return temp;//return the updated grid.
 	}
 	
@@ -71,8 +94,10 @@ public class GameOfLife
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)
+		{
 			if(neighbours[i].getValue(0) == 1)
 				count++;
+		}
 						
 		//apply rules
 		if(count < 2)
