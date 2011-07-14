@@ -1,4 +1,4 @@
-package com.hexcore.cas.model.test;
+package com.hexcore.test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;

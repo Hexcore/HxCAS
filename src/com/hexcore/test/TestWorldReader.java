@@ -1,4 +1,4 @@
-package com.hexcore.cas.model.test;
+package com.hexcore.test;
 
 import java.io.FileNotFoundException;
 
