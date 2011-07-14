@@ -20,13 +20,12 @@ public class ConfigScanner
 		public int		line;
 	}
 	
-	boolean			valid = false;
-	BufferedReader	reader;
-	int				nextChar;
-	Set<Character>	symbols;
-	int				line;
-	
-	Symbol			nextSymbol;
+	private boolean			valid = false;
+	private BufferedReader	reader;
+	private int				nextChar;
+	private Set<Character>	symbols;
+	private int				line;
+	private Symbol			nextSymbol;
 	
 	public ConfigScanner(String filename)
 	{
@@ -54,32 +53,24 @@ public class ConfigScanner
 		
 		nextSymbol();
 	}
-	
-	private void nextChar()
-	{
-		if (nextChar == -1) valid = false;
-		if (nextChar == '\n') line++;
-		
-		try
-		{
-			nextChar = reader.read();
-		}
-		catch(IOException ioe)
-		{
-			nextChar = -1;
-		}
-	}
-		
-	public int getLine()
+			 
+	public int getLineNumber()
 	{
 		return line;
 	}
 	
+	public boolean isValid()
+	{
+		return valid;
+	}
+	
+	// Returns the next symbol without stepping to the next symbol
 	public Symbol peakSymbol()
 	{
 		return nextSymbol;
 	}
 	
+	// Returns a symbol and then steps to the next symbol
 	public Symbol getSymbol()
 	{
 		Symbol symbol = nextSymbol;
@@ -87,6 +78,7 @@ public class ConfigScanner
 		return symbol;
 	}
 	
+	// Steps to the next symbol
 	public void nextSymbol() 
 	{
 		String text = getToken();
@@ -119,10 +111,23 @@ public class ConfigScanner
 			}
 		}
 	}
-
-	public boolean isValid()
+	
+	
+	/// Private Methods
+	
+	private void nextChar()
 	{
-		return valid;
+		if (nextChar == -1) valid = false;
+		if (nextChar == '\n') line++;
+		
+		try
+		{
+			nextChar = reader.read();
+		}
+		catch(IOException ioe)
+		{
+			nextChar = -1;
+		}
 	}
 	
 	private int getChar()
