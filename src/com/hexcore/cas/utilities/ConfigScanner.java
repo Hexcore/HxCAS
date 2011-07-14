@@ -11,7 +11,13 @@ public class ConfigScanner
 {
 	public static class Symbol
 	{
-		public enum Type {STRING, INTEGER, DECIMAL};
+		public enum Type {UNKNOWN, STRING, INTEGER, DECIMAL};
+		
+		public Symbol(String text)
+		{
+			type = Type.UNKNOWN;
+			this.text = text;
+		}
 		
 		public Type		type;
 		public String	text;
@@ -25,6 +31,7 @@ public class ConfigScanner
 	private int				nextChar;
 	private Set<Character>	symbols;
 	private int				line;
+	
 	private Symbol			nextSymbol;
 	
 	public ConfigScanner(String filename)
@@ -81,29 +88,24 @@ public class ConfigScanner
 	// Steps to the next symbol
 	public void nextSymbol() 
 	{
-		String text = getToken();
+		nextSymbol = getToken();
+		if (nextSymbol == null) return;
 		
-		if (text == null)
-		{
-			nextSymbol = null;
-			return;
-		}
-		
-		nextSymbol = new Symbol();
-		nextSymbol.text = text;
-		nextSymbol.type = Symbol.Type.STRING;
 		nextSymbol.line = line;
+		if (nextSymbol.type == Symbol.Type.STRING) return;
+
+		nextSymbol.type = Symbol.Type.STRING;
 
 		try
 		{			
-			nextSymbol.integer = Integer.decode(text);
+			nextSymbol.integer = Integer.decode(nextSymbol.text);
 			nextSymbol.type = Symbol.Type.INTEGER;
 		}
 		catch (NumberFormatException nfe)
 		{
 			try
 			{			
-				nextSymbol.decimal = Float.parseFloat(text);
+				nextSymbol.decimal = Float.parseFloat(nextSymbol.text);
 				nextSymbol.type = Symbol.Type.DECIMAL;
 			}
 			catch (NumberFormatException nfe2)
@@ -135,9 +137,10 @@ public class ConfigScanner
 		return nextChar;
 	}
 	
-	private String getToken()
+	private Symbol getToken()
 	{
-		String buf = "";
+		String 	buf = "";
+		boolean	quoted = false;
 		
 		int	c = -1;
 		while (true)
@@ -145,7 +148,20 @@ public class ConfigScanner
 			c = getChar();
 			if (c < 0) return null;
 			
-			if (c <= 32)
+			if (c == '"')
+			{	
+				nextChar();
+				if (!quoted && !buf.isEmpty()) break;
+				if (quoted) return new Symbol(buf);
+				
+				quoted = !quoted;
+			}
+			else if (quoted)
+			{
+				nextChar();
+				buf += (char)c;
+			}
+			else if (c <= 32)
 			{
 				nextChar();
 				if (!buf.isEmpty()) break;
@@ -156,7 +172,7 @@ public class ConfigScanner
 				{
 					nextChar();
 					buf += (char)c;
-					return buf;
+					return new Symbol(buf);
 				}
 				else
 					break;
@@ -169,6 +185,6 @@ public class ConfigScanner
 		}
 		
 		if (buf.isEmpty()) return null;
-		return buf;
+		return new Symbol(buf);
 	}
 }
