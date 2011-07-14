@@ -28,7 +28,7 @@ public class RectangleGrid extends Grid
 	 */
 	public Cell[] getNeighbours(Vector2i pos)
 	{
-		System.out.println("Before : " + getCell(pos).getValue(0));
+		//System.out.println("Before : " + getCell(pos).getValue(0));
 		//Initialisations
 		Cell [] neighbours = new Cell[8];
 		int i = 0;//counter, goes till 8.
@@ -54,7 +54,7 @@ public class RectangleGrid extends Grid
 		//BOTTOM RIGHT: y+1, x+1
 		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
 		
-		System.out.println("After : " + getCell(pos).getValue(0));
+		//System.out.println("After : " + getCell(pos).getValue(0));
 		return neighbours;
 	}//end method getNeighbours
 	
