@@ -17,6 +17,7 @@ public class TestCell extends TestCase
 		assertEquals(0, cell.getValue(1));
 		assertEquals(0, cell.getValue(2));
 		
+		// Test initialising with an array
 		int[] testValues = {10,5,2};
 		cell =  new Cell(testValues);
 		assertEquals(3, cell.getValueCount());
@@ -26,6 +27,7 @@ public class TestCell extends TestCase
 		assertEquals(0, cell.getValue(-1));
 		assertEquals(0, cell.getValue(3));
 		
+		// Test copy constructor
 		Cell cell2 = new Cell(cell);
 		assertEquals(3, cell2.getValueCount());
 		assertEquals(10, cell2.getValue(0));
@@ -34,7 +36,7 @@ public class TestCell extends TestCase
 		assertEquals(0, cell2.getValue(-1));
 		assertEquals(0, cell2.getValue(3));
 		
-		// Ensure a proper copy wasa made
+		// Ensure a proper copy was made
 		cell.setValue(0, 99);
 		cell.setValue(1, 98);
 		cell.setValue(2, 97);
