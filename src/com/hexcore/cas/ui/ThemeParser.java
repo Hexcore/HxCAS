@@ -42,6 +42,7 @@ public class ThemeParser
 		validTypes.add("DropDownBox");
 		validTypes.add("DropDownBoxArrow");
 		validTypes.add("DropDownBoxList");
+		validTypes.add("DropDownBoxItem");
 		
 		validProperties = new HashSet<String>();
 		validProperties.add("background");

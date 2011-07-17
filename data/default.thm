@@ -138,8 +138,14 @@ DropDownBoxArrow
 
 DropDownBoxList
 {
-	padding: 4 4;
 	background: rgb(1.0, 1.0, 1.0);	
 	border: rgb(0.6, 0.6, 0.6) rgb(0.8, 0.8, 0.8);
+	text-colour: rgb(0.0, 0.0, 0.0);
+}
+
+DropDownBoxItem 
+{
+	padding: 4 4;
+	background: rgba(0.8, 0.9, 1.0, 0.8);
 	text-colour: rgb(0.0, 0.0, 0.0);
 }

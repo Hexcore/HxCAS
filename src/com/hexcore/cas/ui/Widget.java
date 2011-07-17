@@ -154,14 +154,10 @@ public abstract class Widget
 					|| (event.position.x > end.x) || (event.position.y > end.y))
 			{
 				mouseover = false;
-				if (!event.isMouseRelease()) return false;
+				if (!event.isMouseRelease() && !focused) return false;
 			}
 			else
-			{
-				//if (!mouseover) System.out.println(getRealPosition());
-				
 				mouseover = true;
-			}
 		}
 		
 		return handleEvent(event, pos);

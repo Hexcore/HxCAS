@@ -4,11 +4,13 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 
+import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 
 public class DropDownBox extends Widget
 {
-	private int					selected;
+	private int					selected = -1;
+	private int					mouseoverItem = -1;
 	private ArrayList<String>	items;
 	
 	public DropDownBox(Vector2i size)
@@ -46,7 +48,7 @@ public class DropDownBox extends Widget
 	@Override
 	public void renderExtras(GL gl, Vector2i position)
 	{
-		window.getTheme().renderDropDownBoxList(gl, position, size, items, selected);
+		window.getTheme().renderDropDownBoxList(gl, position, size, items, selected, mouseoverItem);
 	}
 
 	@Override
@@ -56,8 +58,25 @@ public class DropDownBox extends Widget
 		
 		if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
 		{
+			if (focused && (mouseoverItem >= 0))
+			{
+				selected = mouseoverItem;
+			}
+			
 			window.toggleFocus(this);
 			handled = true;
+		}
+		else if (event.type == Event.Type.MOUSE_MOTION)
+		{
+			mouseoverItem = -1;
+			for (int i = 0; i < items.size(); i++)
+			{
+				Recti rect = window.getTheme().getDropDownBoxItemRect(position, size, i);
+				
+				if ((rect.position.x <= event.position.x) && (rect.position.y <= event.position.y) &&
+						(rect.position.x + rect.size.x >= event.position.x) && (rect.position.y + rect.size.y >= event.position.y))
+					mouseoverItem = i;
+			}
 		}
 		
 		return handled;

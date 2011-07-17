@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.ui.LinearLayout.Direction;
 
 
 /*

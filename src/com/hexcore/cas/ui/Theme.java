@@ -9,6 +9,7 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
@@ -326,11 +327,23 @@ public class Theme
 		window.renderBorder(gl, arrowPos, arrowSize, getFill("DropDownBoxArrow", stateName, "border"));		
 	}
 	
-	public void renderDropDownBoxList(GL gl, Vector2i position, Vector2i size, List<String> items, int selected)
+	public Recti getDropDownBoxItemRect(Vector2i position, Vector2i size, int selected)
 	{
 		String stateName = "focus";
 		
-		Vector2i	itemPadding = getVector2i("DropDownBoxList", stateName, "border", new Vector2i(3, 3));
+		Vector2i	itemPadding = getVector2i("DropDownBoxItem", stateName, "padding", new Vector2i(3, 3));
+		int			textHeight = calculateTextHeight(Text.Size.SMALL);
+		Vector2i	itemPos = position.add(0, size.y + (textHeight + itemPadding.y * 2) * selected);
+		Vector2i	itemSize = new Vector2i(size.x, textHeight + itemPadding.y * 2);
+		
+		return new Recti(itemPos, itemSize);
+	}
+	
+	public void renderDropDownBoxList(GL gl, Vector2i position, Vector2i size, List<String> items, int selected, int hovered)
+	{
+		String stateName = "focus";
+		
+		Vector2i	itemPadding = getVector2i("DropDownBoxItem", stateName, "padding", new Vector2i(3, 3));
 		int			textHeight = calculateTextHeight(Text.Size.SMALL);
 		Vector2i	boxPos = position.add(0, size.y);
 		Vector2i	boxSize = new Vector2i(size.x, (textHeight + itemPadding.y * 2) * items.size());
@@ -338,11 +351,17 @@ public class Theme
 		window.renderRectangle(gl, boxPos, boxSize, getFill("DropDownBoxList", stateName, "background"));
 		window.renderBorder(gl, boxPos, boxSize, getFill("DropDownBoxList", stateName, "border"));
 		
-		Vector2i	itemPos = new Vector2i(boxPos).add(itemPadding.x, 0);
-		for (String item : items)
+		Vector2i	itemPos = new Vector2i(boxPos);
+		for (int i = 0; i < items.size(); i++)
 		{
+			if (hovered == i)
+			{
+				window.renderRectangle(gl, itemPos, new Vector2i(size.x, textHeight + itemPadding.y * 2), getFill("DropDownBoxItem", stateName, "background"));
+				window.renderBorder(gl, boxPos, boxSize, getFill("DropDownBoxItem", stateName, "border"));
+			}
+			
 			itemPos = itemPos.add(0, itemPadding.y);
-			renderText(gl, item, itemPos, getColour("DropDownBoxList", stateName, "text-colour"), Text.Size.SMALL);
+			renderText(gl, items.get(i), itemPos.add(itemPadding.x, 0), getColour("DropDownBoxItem", stateName, "text-colour"), Text.Size.SMALL);
 			itemPos = itemPos.add(0, textHeight + itemPadding.y);
 		}
 	}
