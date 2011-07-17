@@ -5,6 +5,7 @@ import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
 import com.hexcore.cas.ui.Colour;
 import com.hexcore.cas.ui.Container;
+import com.hexcore.cas.ui.DropDownBox;
 import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
 import com.hexcore.cas.ui.ImageWidget;
@@ -31,6 +32,7 @@ public class UITestApplication implements WindowEventListener
 	
 	public TextBox		nameTextBox;
 	public CheckBox		checkBox;
+	public DropDownBox	dropDownBox;
 	public ShapeWidget	testShape;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
@@ -55,7 +57,8 @@ public class UITestApplication implements WindowEventListener
 	{
 		window.loadTheme("data/default.thm");
 		
-		windowLayout = new LinearLayout(window, LinearLayout.Direction.VERTICAL);
+		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		windowLayout.setFlag(Widget.FILL);
 		windowLayout.setMargin(new Vector2i(0, 0));
 		window.add(windowLayout);
 		
@@ -115,7 +118,7 @@ public class UITestApplication implements WindowEventListener
 		sc.setFlag(Widget.FILL);
 		mainPanel.setContents(sc);
 		
-		innerLayout = new LinearLayout(sc, LinearLayout.Direction.VERTICAL);
+		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		innerLayout.setFlag(Widget.FILL);
 		sc.setContents(innerLayout);
 		
@@ -128,9 +131,19 @@ public class UITestApplication implements WindowEventListener
 		checkBox.setFlag(Widget.FILL_HORIZONTAL);
 		innerLayout.add(checkBox);
 		
+		dropDownBox = new DropDownBox(new Vector2i(200, 20));
+		dropDownBox.addItem("Alpha");
+		dropDownBox.addItem("Beta");
+		dropDownBox.addItem("Delta");
+		dropDownBox.addItem("Omega");
+		dropDownBox.setSelected(1);
+		innerLayout.add(dropDownBox);
+		
 		testShape = new ShapeWidget(new Vector2i(250, 250), new Fill(new Colour(1.0f, 0.0f, 0.0f), new Colour(0.0f, 1.0f, 0.0f)));
 		testShape.setFlag(Widget.CENTER);
 		innerLayout.add(testShape);
+		
+		window.relayout();
 	}
 	
 	static public void main(String args[])

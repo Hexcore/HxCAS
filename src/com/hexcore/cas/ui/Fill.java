@@ -71,6 +71,8 @@ public class Fill
 			out += "Horizontal Gradient: " + colours[0] + ", " + colours[1]; 	
 		else if (type == Type.IMAGE)
 			out += "Image: " + image.getFilename(); 	
+		else if (type == Type.IMAGE_COLOUR)
+			out += "Solid with Image: " + colours[0] + ", " + image.getFilename(); 			
 		else
 			out += "Unknown";
 		

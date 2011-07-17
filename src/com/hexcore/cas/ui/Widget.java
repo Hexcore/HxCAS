@@ -17,9 +17,11 @@ public abstract class Widget
 	protected Vector2i	size;
 	protected Vector2i	margin;
 	
-	protected boolean	visible;
-	protected boolean	focused;
-	protected boolean	mouseover;
+	protected Widget	parent = null;
+	
+	protected boolean	visible = true;
+	protected boolean	focused = false;
+	protected boolean	mouseover = false;
 	protected Window	window;
 	protected int		flags;
 	
@@ -33,18 +35,8 @@ public abstract class Widget
 		this.position = position;
 		this.size = size;
 		this.margin = new Vector2i(-1, -1);
-		mouseover = false;
-		visible = true;
-		focused = false;
 	}
-	
-	public void setWindow(Window window) 
-	{
-		this.window = window;
-		if (margin.x < 0) margin.x = window.getDefaultMargin().x;
-		if (margin.y < 0) margin.y = window.getDefaultMargin().y;
-	}
-	
+		
 	public void setX(int position)
 	{
 		this.position.x = position;
@@ -80,6 +72,24 @@ public abstract class Widget
 		this.margin = margin;
 	}
 	
+	public void setParent(Widget parent)
+	{
+		this.parent = parent;
+		setWindow(parent.getWindow());
+		relayout();
+	}
+	
+	public Vector2i	getRealPosition()
+	{
+		if (parent != null) return parent.getRealPosition().add(position);
+		return position;
+	}
+	
+	public void relayout()
+	{
+		
+	}
+	
 	public void setVisible(boolean state) {this.visible = state;}
 	public void toggleVisibility() {visible = !visible;}
 	
@@ -96,6 +106,7 @@ public abstract class Widget
 	public Vector2i	getPosition() {return position;}
 	public Window	getWindow() {return window;}
 	public Vector2i	getMargin() {return margin;}	
+	public Widget	getParent() {return parent;}
 	public boolean	isMouseOver() {return mouseover;}
 	public boolean	hasFocus() {return focused;}
 	public boolean	isVisible() {return visible;}
@@ -106,6 +117,11 @@ public abstract class Widget
 	public boolean	isSet(int flag) {return (flags & flag) == flag;}
 
 	public void render(GL gl, Vector2i position)
+	{
+		
+	}
+	
+	public void renderExtras(GL gl, Vector2i position)
 	{
 		
 	}
@@ -141,7 +157,11 @@ public abstract class Widget
 				if (!event.isMouseRelease()) return false;
 			}
 			else
+			{
+				//if (!mouseover) System.out.println(getRealPosition());
+				
 				mouseover = true;
+			}
 		}
 		
 		return handleEvent(event, pos);
@@ -150,5 +170,12 @@ public abstract class Widget
 	public boolean handleEvent(Event event, Vector2i position)
 	{
 		return false;
+	}
+	
+	protected void setWindow(Window window) 
+	{
+		this.window = window;
+		if (margin.x < 0) margin.x = window.getDefaultMargin().x;
+		if (margin.y < 0) margin.y = window.getDefaultMargin().y;
 	}
 }

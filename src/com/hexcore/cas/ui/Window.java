@@ -23,16 +23,15 @@ import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class Window extends Widget implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener
+public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener
 {	
 	private Frame 		frame;
 	private GLCanvas	canvas;
 	private FPSAnimator	animator;
 	private	Theme		theme;
 			
-	private Vector2i			defaultMargin;
-	private ArrayList<Widget>	components;
-	private Widget				focusedWidget = null;
+	private Vector2i	defaultMargin;
+	private Widget		focusedWidget = null;
 	
 	private ArrayList<WindowEventListener>	eventListeners;
 
@@ -115,13 +114,7 @@ public class Window extends Widget implements GLEventListener, MouseMotionListen
 	{
 		return animator.getCurrentTime();
 	}
-	
-	public void add(Widget component)
-	{
-		component.setWindow(this);
-		components.add(component);
-	}
-	
+		
 	public String askUserForFile(String title)
 	{
 		FileDialog dialog = new FileDialog(frame, title);
@@ -155,12 +148,13 @@ public class Window extends Widget implements GLEventListener, MouseMotionListen
         gl2.glLoadIdentity();
 	}
 	
-	public void giveupFocus(Widget widget)
+	public void giveUpFocus(Widget widget)
 	{
 		if (focusedWidget != null)
 		{
 			Event event = new Event(Event.Type.LOST_FOCUS);
 			focusedWidget.receiveEvent(event);
+			focusedWidget = null;
 		}
 	}
 	
@@ -168,16 +162,19 @@ public class Window extends Widget implements GLEventListener, MouseMotionListen
 	{
 		if ((widget == null) || !widget.canGetFocus()) return;
 		
-		if (focusedWidget != null)
-		{
-			Event event = new Event(Event.Type.LOST_FOCUS);
-			focusedWidget.receiveEvent(event);
-		}
-		
+		giveUpFocus(focusedWidget);
 		focusedWidget = widget;
 		
 		Event event = new Event(Event.Type.GAINED_FOCUS);
 		focusedWidget.receiveEvent(event);
+	}
+	
+	public void toggleFocus(Widget widget)
+	{
+		if (focusedWidget == widget)
+			giveUpFocus(widget);
+		else
+			requestFocus(widget);
 	}
 				
 	@Override
@@ -224,9 +221,7 @@ public class Window extends Widget implements GLEventListener, MouseMotionListen
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
 	{
 		size = new Vector2i(width, height);
-
-        Event event = new Event(Event.Type.RESIZE);
-        for (Widget component : components) component.receiveEvent(event);
+        relayout();
 	}
 	
 	public void renderRectangle(GL gl, Vector2i pos, Image image)
@@ -399,15 +394,13 @@ public class Window extends Widget implements GLEventListener, MouseMotionListen
 	{
 		if (updateComponents)
 		{
-	        Event event = new Event(Event.Type.RESIZE);
-	        for (Widget component : components) component.receiveEvent(event);
+	        for (Widget component : components) component.relayout();
 	        updateComponents = false;
 		}
 		
-		final GL gl = drawable.getGL();
-				
-		for (Widget component : components)
-			component.render(gl, new Vector2i(0, 0));
+		GL gl = drawable.getGL();
+		render(gl, new Vector2i(0, 0));
+		if (focusedWidget != null) focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
 	}
 			
 	private void sendEvent(Event event)

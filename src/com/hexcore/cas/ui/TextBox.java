@@ -55,7 +55,7 @@ public class TextBox extends Widget
 			}
 			else if (event.button == '\n')
 			{
-				window.giveupFocus(this);
+				window.giveUpFocus(this);
 			}
 		}
 		

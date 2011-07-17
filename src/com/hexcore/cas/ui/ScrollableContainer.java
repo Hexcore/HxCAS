@@ -32,7 +32,8 @@ public class ScrollableContainer extends Container
 	public int		getInnerHeight() {return viewSize.y;}
 	public Vector2i	getInnerSize() {return viewSize;}
 
-	public void resize()
+	@Override
+	public void relayout()
 	{
 		if (contents == null) return;
 		
@@ -89,6 +90,8 @@ public class ScrollableContainer extends Container
 			cPos.y = (maxSize.y - cSize.y) / 2;
 		else if (cPos.y < contents.getMargin().y)
 			cPos.y = contents.getMargin().y;
+		
+		contents.relayout();
 	}
 	
 	@Override

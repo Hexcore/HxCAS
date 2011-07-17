@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.LinearLayout.Direction;
 
 
 /*
@@ -15,29 +16,46 @@ import com.hexcore.cas.math.Vector2i;
  */
 public class Layout extends Widget
 {
-	private Widget				parent;
 	protected Fill 				background = null;
 	protected ArrayList<Widget>	components;
 	
 	public Layout(Vector2i size)
 	{
 		super(size);
-		this.parent = null;
 		components = new ArrayList<Widget>();
 	}
 	
-	public Layout(Widget parent)
+	public Layout()
 	{
-		super(parent.getInnerSize());
-		this.parent = parent;
+		super(new Vector2i(0, 0));
 		components = new ArrayList<Widget>();
-		
-		setSize(parent.getInnerSize().subtract(getMargin()).subtract(getMargin()));
 	}
-	
+		
+	@Override
 	public void relayout()
 	{
-		if (parent != null)	setSize(parent.getInnerSize().subtract(getMargin()).subtract(getMargin()));
+		for (Widget component : components)
+		{
+			Vector2i cPos = component.getPosition(), cSize = component.getSize();
+			
+			if (component.isSet(FILL_HORIZONTAL))
+			{
+				cPos.x = component.getMargin().x; 
+				cSize.x = size.x - component.getMargin().x * 2; 
+			}
+			else if (component.isSet(CENTER_HORIZONTAL))
+				cPos.x = (size.x - cSize.x) / 2;
+			
+			if (component.isSet(FILL_VERTICAL))
+			{
+				cPos.y = component.getMargin().y; 
+				cSize.y = size.y - component.getMargin().y * 2; 
+			}
+			else if (component.isSet(CENTER_VERTICAL))
+				cPos.y = (size.y - cSize.y) / 2;
+		}
+		
+		for (Widget component : components) component.relayout();
 	}
 	
 	@Override
@@ -52,21 +70,19 @@ public class Layout extends Widget
 		for (Widget component : components)
 			component.render(gl, pos);
 		
-		/*if (mouseover)
+		//if (mouseover)
 		{
-			window.renderRectangle(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f, 0.2f));
-			window.renderBorder(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f));		
+			//window.renderRectangle(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f, 0.2f));
+			//window.renderBorder(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f));		
 	
-			window.renderRectangle(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f, 0.2f));
+			//window.renderRectangle(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f, 0.2f));
 			window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
-		}*/
+		}
 	}
 	
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{	
-		if (event.type == Event.Type.RESIZE) relayout();
-		
 		for (Widget component : components)
 			component.receiveEvent(event, position);
 		
@@ -81,7 +97,7 @@ public class Layout extends Widget
 	public void add(Widget component) 
 	{
 		components.add(component); 
-		component.setWindow(window);
+		component.setParent(this);
 		relayout();
 	}
 }

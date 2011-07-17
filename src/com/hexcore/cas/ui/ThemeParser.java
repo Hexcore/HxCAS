@@ -39,6 +39,9 @@ public class ThemeParser
 		validTypes.add("TextBox");
 		validTypes.add("CheckBox");
 		validTypes.add("CheckBoxCaption");
+		validTypes.add("DropDownBox");
+		validTypes.add("DropDownBoxArrow");
+		validTypes.add("DropDownBoxList");
 		
 		validProperties = new HashSet<String>();
 		validProperties.add("background");

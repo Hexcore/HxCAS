@@ -44,34 +44,15 @@ public class TextWidget extends Widget
 		Vector2i pos = this.position.add(position);
 		window.getTheme().renderText(gl, caption, pos, colour, textSize);
 		
-		//window.renderBorder(gl, pos, size, Colour.WHITE);
-	}
-	
-	@Override
-	public void setWindow(Window window)
-	{
-		super.setWindow(window);
+		window.renderBorder(gl, pos, size, Colour.WHITE);
 	}
 	
 	public String 	getCaption() {return caption;}
 	public void		setCaption(String caption) {this.caption = caption;}
 	
-	private void recalculateSize()
+	@Override
+	public void relayout()
 	{
 		if (window != null) setSize(window.getTheme().calculateTextSize(caption, textSize));
-	}
-	
-	@Override	
-	public boolean handleEvent(Event event, Vector2i position)
-	{
-		boolean handled = super.handleEvent(event, position);
-		
-		if (event.type == Event.Type.RESIZE) 
-		{
-			recalculateSize();
-			handled = true;
-		}
-		
-		return handled;
 	}
 }

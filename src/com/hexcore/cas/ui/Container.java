@@ -29,10 +29,11 @@ public class Container extends Widget
 		super(position, size);
 	}
 	
-	public void resize()
+	@Override
+	public void relayout()
 	{
 		if (contents == null) return;
-		
+
 		Vector2i cPos = contents.getPosition(), cSize = contents.getSize();
 		
 		if (contents.isSet(FILL_HORIZONTAL))
@@ -49,7 +50,9 @@ public class Container extends Widget
 			cSize.y = size.y - contents.getMargin().y * 2; 
 		}
 		else if (contents.isSet(CENTER_VERTICAL))
-			cPos.y = (size.y - cSize.y) / 2;		
+			cPos.y = (size.y - cSize.y) / 2;	
+		
+		contents.relayout();
 	}
 	
 	@Override
@@ -60,6 +63,8 @@ public class Container extends Widget
 		Vector2i pos = this.position.add(position);
 		if (background != null) window.renderRectangle(gl, pos, size, background);
 		if (contents != null) contents.render(gl, pos);
+		
+		window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}
 	
 	@Override
@@ -68,13 +73,7 @@ public class Container extends Widget
 		if (contents == null) return false;
 		
 		boolean handled = false;
-		
-		if (event.type == Event.Type.RESIZE) 
-		{
-			resize();
-			handled = true;
-		}
-		
+				
 		if (contents.receiveEvent(event, position)) handled = true;
 		
 		return handled;
@@ -88,6 +87,6 @@ public class Container extends Widget
 	public void setContents(Widget component) 
 	{
 		this.contents = component;
-		component.setWindow(window);
+		component.setParent(this);
 	}
 }

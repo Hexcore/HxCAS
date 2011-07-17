@@ -14,17 +14,14 @@ public class LinearLayout extends Layout
 		this.direction = direction;
 	}
 	
-	public LinearLayout(Widget parent, Direction direction)
+	public LinearLayout(Direction direction)
 	{
-		super(parent);
 		this.direction = direction;
 	}
 	
 	@Override
 	public void relayout()
 	{
-		super.relayout();
-		
 		int	dirIndex = (direction == Direction.VERTICAL) ? 1 : 0;
 		
 		int	posDir = 0;
@@ -97,5 +94,7 @@ public class LinearLayout extends Layout
 				}
 			}
 		}
+		
+		for (Widget component : components) component.relayout();
 	}
 }
