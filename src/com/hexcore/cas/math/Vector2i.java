@@ -27,6 +27,18 @@ public class Vector2i
 		this.y = v.y;
 	}
 
+	public void set(int x, int y) 
+	{
+		this.x = x;
+		this.y = y;
+	}
+	
+	public void set(Vector2i v) 
+	{
+		this.x = v.x;
+		this.y = v.y;
+	}
+	
 	public int	get(int index) {return (index == 0) ? x : y;}
 	
 	public boolean equals(Vector2i p)
@@ -40,6 +52,18 @@ public class Vector2i
 		return "Vector2i<" + x + ", " + y + ">";
 	}
 	
+	public void inc(Vector2i p)
+	{
+		x += p.x;
+		y += p.y;
+	}
+	
+	public void inc(int x, int y)
+	{
+		this.x += x;
+		this.y += y;
+	}
+	
 	public Vector2i add(Vector2i p)
 	{
 		return new Vector2i(x + p.x, y + p.y);
@@ -48,6 +72,18 @@ public class Vector2i
 	public Vector2i add(int x, int y)
 	{
 		return new Vector2i(this.x + x, this.y + y);
+	}
+	
+	public void dec(Vector2i p)
+	{
+		x -= p.x;
+		y -= p.y;
+	}
+	
+	public void dec(int x, int y)
+	{
+		this.x -= x;
+		this.y -= y;
 	}
 	
 	public Vector2i subtract(Vector2i p)

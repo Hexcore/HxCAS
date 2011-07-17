@@ -63,6 +63,32 @@ public class TestVector2i
 		b = new Vector2i(7, 9);
 		assertFalse(a.equals(b));
 	}
+	
+	@Test
+	public void testSetIntInt()
+	{
+		Vector2i a = new Vector2i(1, 2);
+		a.set(3, 4);
+		
+		assertEquals(3, a.x);
+		assertEquals(4, a.y);	
+	}
+	
+	public void testSetVector2i()
+	{
+		Vector2i a = new Vector2i(1, 2);
+		Vector2i b = new Vector2i(5, 6);
+		a.set(b);
+		
+		assertEquals(5, a.x);
+		assertEquals(6, a.y);	
+		
+		// Verify a copy was made
+		b.set(7, 8);
+		
+		assertEquals(5, a.x);
+		assertEquals(6, a.y);		
+	}	
 
 	@Test
 	public void testAddVector2i()
@@ -114,5 +140,47 @@ public class TestVector2i
 		
 		assertEquals("Vector2i<1, 5>", a.toString());
 		assertEquals("Vector2i<-1, -5>", b.toString());
+	}
+		
+	@Test
+	public void testIncVector2i()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i b = new Vector2i(2, 4);
+		a.inc(b);
+		
+		assertEquals(3, a.x);
+		assertEquals(9, a.y);
+	}
+
+	@Test
+	public void testIncIntInt()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		a.inc(2, 4);
+		
+		assertEquals(3, a.x);
+		assertEquals(9, a.y);
+	}
+
+	@Test
+	public void testDecVector2i()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		Vector2i b = new Vector2i(2, 4);
+		a.dec(b);
+		
+		assertEquals(-1, a.x);
+		assertEquals(1, a.y);
+	}
+
+	@Test
+	public void testDecIntInt()
+	{
+		Vector2i a = new Vector2i(1, 5);
+		a.dec(2, 4);
+		
+		assertEquals(-1, a.x);
+		assertEquals(1, a.y);
 	}
 }
