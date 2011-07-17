@@ -1,4 +1,4 @@
-package com.hexcore.test;
+package com.hexcore.cas.model.test;
 
 import static org.junit.Assert.*;
 
