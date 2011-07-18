@@ -27,6 +27,10 @@ public class CheckBox extends ClickableWidget
 	public void handleClick()
 	{
 		checked = !checked;
+		
+		Event changeEvent = new Event(Event.Type.CHANGE);
+		changeEvent.target = this;
+		window.sendWindowEvent(changeEvent);
 	}
 	
 	@Override

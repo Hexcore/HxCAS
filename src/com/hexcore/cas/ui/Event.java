@@ -4,7 +4,7 @@ import com.hexcore.cas.math.Vector2i;
 
 public class Event
 {
-	public enum Type {MOUSE_MOTION, MOUSE_CLICK, MOUSE_SCROLL, KEY_TYPED, GAINED_FOCUS, LOST_FOCUS, ACTION};
+	public enum Type {MOUSE_MOTION, MOUSE_CLICK, MOUSE_SCROLL, KEY_TYPED, GAINED_FOCUS, LOST_FOCUS, ACTION, CHANGE};
 
 	public Event(Type type)
 	{

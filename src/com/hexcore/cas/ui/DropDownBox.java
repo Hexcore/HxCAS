@@ -61,6 +61,10 @@ public class DropDownBox extends Widget
 			if (focused && (mouseoverItem >= 0))
 			{
 				selected = mouseoverItem;
+				
+				Event changeEvent = new Event(Event.Type.CHANGE);
+				changeEvent.target = this;
+				window.sendWindowEvent(changeEvent);
 			}
 			
 			window.toggleFocus(this);

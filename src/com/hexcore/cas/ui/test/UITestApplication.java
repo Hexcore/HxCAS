@@ -168,12 +168,19 @@ public class UITestApplication implements WindowEventListener
 			{
 				window.exit();
 			}
-			else if (event.target == checkBox)
+		}
+		else if (event.type == Event.Type.CHANGE)
+		{
+			if (event.target == checkBox)
 			{
 				if (checkBox.isChecked())
 					nameTextBox.setText("Flying Dutchmen");
 				else
 					nameTextBox.setText("Ostrich");
+			}
+			else if (event.target == dropDownBox)
+			{
+				nameTextBox.setText(dropDownBox.getSelectedText());
 			}
 		}
 	}

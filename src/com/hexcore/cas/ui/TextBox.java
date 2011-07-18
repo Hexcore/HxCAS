@@ -57,6 +57,10 @@ public class TextBox extends Widget
 			{
 				window.giveUpFocus(this);
 			}
+			
+			Event changeEvent = new Event(Event.Type.CHANGE);
+			changeEvent.target = this;
+			window.sendWindowEvent(changeEvent);
 		}
 		
 		return handled;
