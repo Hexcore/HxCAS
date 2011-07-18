@@ -8,36 +8,47 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 
 public class GameOfLife 
-{
+{	
+	Grid	grid;
+	
 	public static void main(String [] args)
 	{
+		GameOfLife 	game = new GameOfLife();
+		int 		iter = 10;
+		
+		//run the game of life :P
+		game.run(iter);
+	}
+	
+	public GameOfLife()
+	{
 		//start with 5x5 rectangle grid because I know how this is expected to perform.
-		RectangleGrid grid = new RectangleGrid(new Vector2i(5, 5));
+		grid = new RectangleGrid(new Vector2i(5, 5));
 		
 		//set specific pattern here - can be changed to an input file later.
 		//Going to start with a simple blinker at the moment
 		grid.getCell(new Vector2i(2,1)).setValue(0, 1);
 		grid.getCell(new Vector2i(2,2)).setValue(0, 1);
 		grid.getCell(new Vector2i(2,3)).setValue(0, 1);
-		
-		//specify how many generations you want
-		int iter = 10;
-		//run the game of life :P
-		run(grid, iter);
-	}//end method main
+	}
 	
-	public static void run(Grid grid, int iter)
+	public GameOfLife(Grid grid)
 	{
-		displayGrid(grid);
+		this.grid = grid;
+	}
+	
+	public void run(int iter)
+	{
+		displayGrid();
 		while (iter > 0)
 		{
-			grid = generateNextGeneration(grid);
-			displayGrid(grid);
+			generateNextGeneration();
+			displayGrid();
 			iter--;
 		}//while
 	}//end method run
 	
-	public static void displayGrid(Grid grid)
+	public void displayGrid()
 	{
 		for(int i = 0; i < grid.getHeight(); i++)
 		{
@@ -50,7 +61,12 @@ public class GameOfLife
 		System.out.println();
 	}//end method displayGrid
 	
-	public static Grid generateNextGeneration(Grid grid)
+	public Grid getGrid()
+	{
+		return grid;
+	}
+	
+	public void generateNextGeneration()
 	{
 		//make a new copy of the grid.
 		char c = grid.getType();
@@ -78,10 +94,11 @@ public class GameOfLife
 				temp.getCell(x, y).setValue(0, applyRules(neighbours,grid.getCell(x, y).getValue(0)));
 			}
 		}
-		return temp;//return the updated grid.
+		
+		grid = temp;//return the updated grid.
 	}
 	
-	public static int applyRules(Cell[] neighbours, int value)
+	public int applyRules(Cell[] neighbours, int value)
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)

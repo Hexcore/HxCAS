@@ -1,6 +1,8 @@
 package com.hexcore.cas.ui.test;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
 import com.hexcore.cas.ui.Colour;
@@ -11,6 +13,7 @@ import com.hexcore.cas.ui.Fill;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.Panel;
+import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.ShapeWidget;
 import com.hexcore.cas.ui.Text;
@@ -33,7 +36,6 @@ public class UITestApplication implements WindowEventListener
 	public TextBox		nameTextBox;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
-	public ShapeWidget	testShape;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
@@ -44,10 +46,23 @@ public class UITestApplication implements WindowEventListener
 	public Button		helpButton;
 	public Button		quitButton;
 	
+	public GameOfLife			gameOfLife;
+	public RectangleGridWidget	gridViewer; 
+	public Button				nextIterationButton;
+	
 	public Panel		mainPanel;
 	
 	UITestApplication()
 	{
+		RectangleGrid grid = new RectangleGrid(new Vector2i(8, 8));
+		grid.getCell(new Vector2i(1,3)).setValue(0, 1);
+		grid.getCell(new Vector2i(2,3)).setValue(0, 1);
+		grid.getCell(new Vector2i(3,3)).setValue(0, 1);
+		grid.getCell(new Vector2i(3,2)).setValue(0, 1);
+		grid.getCell(new Vector2i(2,1)).setValue(0, 1);
+		
+		gameOfLife = new GameOfLife(grid);
+		
 		window = new Window("GUI Test", 800, 600);
 		window.addListener(this);
 		window.show();
@@ -139,9 +154,11 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
 		
-		testShape = new ShapeWidget(new Vector2i(250, 250), new Fill(new Colour(1.0f, 0.0f, 0.0f), new Colour(0.0f, 1.0f, 0.0f)));
-		testShape.setFlag(Widget.CENTER);
-		innerLayout.add(testShape);
+		gridViewer = new RectangleGridWidget((RectangleGrid)gameOfLife.getGrid(), 16);
+		innerLayout.add(gridViewer);
+		
+		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
+		innerLayout.add(nextIterationButton);
 		
 		window.relayout();
 	}
@@ -167,6 +184,11 @@ public class UITestApplication implements WindowEventListener
 			else if (event.target == quitButton)
 			{
 				window.exit();
+			}
+			else if (event.target == nextIterationButton)
+			{
+				gameOfLife.generateNextGeneration();
+				gridViewer.setGrid((RectangleGrid)gameOfLife.getGrid());
 			}
 		}
 		else if (event.type == Event.Type.CHANGE)
