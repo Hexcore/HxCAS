@@ -256,12 +256,24 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			renderRectangleTB(gl, pos, size, fill.getColour(0), fill.getColour(1));
 		else if (fill.getType() == Fill.Type.HORIZONTAL_GRADIENT)
 			renderRectangleLR(gl, pos, size, fill.getColour(0), fill.getColour(1));
-		else if (fill.getType() == Fill.Type.IMAGE)
-			renderRectangle(gl, pos, size, fill.getImage());
-		else if (fill.getType() == Fill.Type.IMAGE_COLOUR)
+		else if ((fill.getType() == Fill.Type.IMAGE) || (fill.getType() == Fill.Type.IMAGE_COLOUR))
 		{
-			renderRectangle(gl, pos, size, fill.getColour(0));
-			renderRectangle(gl, pos, size, fill.getImage());	
+			Vector2i imagePos = new Vector2i(pos);
+			Vector2i imageSize = new Vector2i(size);
+			
+			if ((fill.getFlags() & Fill.CENTER) != 0)
+			{
+				imageSize = fill.getImage().getSize();
+				imagePos = pos.add(new Vector2i((size.x - imageSize.x) / 2, (size.y - imageSize.y) / 2));
+			}
+			
+			if (fill.getType() == Fill.Type.IMAGE)
+				renderRectangle(gl, imagePos, imageSize, fill.getImage());
+			else if (fill.getType() == Fill.Type.IMAGE_COLOUR)
+			{
+				renderRectangle(gl, pos, size, fill.getColour(0));
+				renderRectangle(gl, imagePos, imageSize, fill.getImage());	
+			}
 		}
 	}
 	

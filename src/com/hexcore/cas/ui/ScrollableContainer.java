@@ -13,7 +13,6 @@ public class ScrollableContainer extends Container
 	private Vector2i	scroll;
 	private boolean		verticalScrollbar;
 	private boolean		horizontalScrollbar;
-	private Drag		scrollDrag = Drag.NONE;
 	
 	public ScrollableContainer(Vector2i size)
 	{

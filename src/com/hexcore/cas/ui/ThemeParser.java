@@ -152,7 +152,7 @@ public class ThemeParser
 		
 		Theme.Property	property = new Theme.Property(name);
 				
-		if (value.equals("none") || value.equals("horizontal") || value.equals("vertical") || value.equals("image") || value.equals("rgb") || value.equals("rgba"))
+		if (value.equals("none") || value.equals("center") || value.equals("horizontal") || value.equals("vertical") || value.equals("image") || value.equals("rgb") || value.equals("rgba"))
 		{			
 			Fill fill = readFill();
 
@@ -225,10 +225,19 @@ public class ThemeParser
 			
 			fill = new Fill(fillType, colourA, colourB);
 		}
-		else if (value.equals("image"))
-		{			
+		else if (value.equals("center") || value.equals("image"))
+		{
+			boolean	center = false;	
+			
+			if (value.equals("center")) 
+			{
+				center = true;
+				scanner.nextSymbol();
+			}
+						
 			Image	image = readImage();
 			fill = new Fill(image);
+			if (center) fill.setFlag(Fill.CENTER);
 		}
 		else if (value.equals("rgb") || value.equals("rgba"))
 		{			
@@ -239,11 +248,20 @@ public class ThemeParser
 			{
 				Colour colour2 = readColour();
 				fill = new Fill(colour, colour2);
-			}
-			else if (symbol.text.equals("image"))
+			}		
+			else if (symbol.text.equals("center") || symbol.text.equals("image"))
 			{
+				boolean	center = false;	
+				
+				if (symbol.text.equals("center")) 
+				{
+					center = true;
+					scanner.nextSymbol();
+				}
+				
 				Image	image = readImage();
 				fill = new Fill(image, colour);
+				if (center) fill.setFlag(Fill.CENTER);
 			}
 			else
 			{
@@ -255,7 +273,7 @@ public class ThemeParser
 	}
 	
 	public Image readImage()
-	{
+	{		
 		if (!expect("image")) return null;
 		if (!expect("(")) return null;
 		

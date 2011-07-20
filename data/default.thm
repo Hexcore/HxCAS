@@ -49,13 +49,13 @@ Scrollbar : vertical
 
 ScrollbarHandle
 {
-	background: image("data/scrollbar_vert.png");
+	background: rgb(0.5, 0.5, 0.5) center image("data/scrollbar_vert.png");
 	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
 }
 
 ScrollbarHandle : horizontal
 {
-	background: image("data/scrollbar_horz.png");
+	background: rgb(0.5, 0.5, 0.5) center image("data/scrollbar_horz.png");
 	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
 }
 
