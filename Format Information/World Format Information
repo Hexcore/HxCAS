@@ -1,4 +1,10 @@
+=============================================================================
+
 The world data files are stored as a caw file: Cellular Automaton World file.
+
+These files are essentially each a single generation of the CA.
+These files will initially be stored in a folder of the world's name
+and when stored into final storage, will be deleted.
 
 The first line has 2 numbers: x and y.
 x == the number of columns the matrix has.
@@ -30,3 +36,15 @@ makes the following triangle grid:
 [ 0 ][ 1 ]
 [ 2 ][3 4]
 [ 5 ][ 6 ]
+
+=============================================================================
+=============================================================================
+
+.caw files will be ultimately saved in a .cawzip file, which will represent the world and it's progression over time.
+
+All .caw files must be stored in a folder with the name of the world, such as "World" or "FloodPlane".
+Each .caw file can have any incremental name to them, such as "001" to "999" or "aaaaa" to "zzzzz". 
+Once it has been specified that all generations have been completed in the run, the files will be stored
+in the final storage format, .cawzip.  
+
+=============================================================================
