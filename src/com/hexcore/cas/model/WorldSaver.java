@@ -96,4 +96,10 @@ public class WorldSaver
 	{
 		listWorld.add(w);
 	}
+	
+	//Used for test cases only.
+	public int getListWorldSize()
+	{
+		return listWorld.size();
+	}
 }

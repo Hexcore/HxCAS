@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.model.WorldSaver;
 
@@ -12,21 +13,29 @@ import junit.framework.TestCase;
 
 public class TestWorldSaver extends TestCase
 {
-	private final WorldReader reader = new WorldReader("Test Data/savedWorld.caw");
-	private final WorldSaver saver = new WorldSaver("Test Data/savedWorld.caw");
+	private final WorldReader reader = new WorldReader("Test Data/savedWorld.cawzip");
+	private final WorldSaver saver = new WorldSaver("Test Data/savedWorld.cawzip");
 	
 	public void test1GetName()
 	{
-		assertEquals("savedWorld.caw", saver.getWorldName());
+		assertEquals("savedWorld.cawzip", saver.getWorldName());
 	}
 	
 	public void test2SetName()
 	{
-		saver.setWorldName("Test Data/bleg.caw");
-		assertEquals("bleg.caw", saver.getWorldName());
+		saver.setWorldName("Test Data/bleg.cawzip");
+		assertEquals("bleg.cawzip", saver.getWorldName());
 	}
 	
-	public void test3SaveWorld()
+	public void test3AddGeneration()
+	{
+		WorldSaver s = new WorldSaver("Test Data/addGen.cawzip");
+		TriangleGrid w = new TriangleGrid(new Vector2i(1, 1));
+		s.addGeneration(w);
+		assertEquals(1, s.getListWorldSize());
+	}
+	
+	public void test4SaveWorld()
 		throws IOException
 	{
 		HexagonGrid w1 = new HexagonGrid(new Vector2i(2, 3));
