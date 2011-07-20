@@ -11,6 +11,12 @@ public class RectangleGrid extends Grid
 		this.setType('R');
 	}//end constructor
 	
+	public RectangleGrid(Vector2i size, Cell example)
+	{
+		super(size, example);
+		this.setType('R');
+	}
+	
 	public RectangleGrid(Grid g)
 	{
 		super(g);

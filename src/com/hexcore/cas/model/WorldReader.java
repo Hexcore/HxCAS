@@ -1,56 +1,138 @@
 package com.hexcore.cas.model;
 
-import com.hexcore.cas.math.Vector2i;
-
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import com.hexcore.cas.math.Vector2i;
 
 public class WorldReader
 {
 	private String worldFileName = null;
-	private Grid world = null; 
+	private Grid[] world = null; 
 	
 	public WorldReader(String name)
 	{
 		worldFileName = name;
 	}
 	
-	public Grid readWorld()
-		throws FileNotFoundException
+	public Grid[] readWorld()
+		throws IOException
 	{
-		Scanner scan = new Scanner(new File(worldFileName));
-		int x = scan.nextInt();
-		int y = scan.nextInt();
-		Vector2i size = new Vector2i(x, y);
-		char gridType = scan.next().charAt(0);
-		switch(gridType)
+		File f = new File(worldFileName);
+		ZipFile zip = new ZipFile(f);
+		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
+		
+		int x = -1;
+		int y = -1;
+		char type = 'N';
+		int n = 0;
+		while(true)
 		{
-			case 'H':
-			case 'h':
-				world = new HexagonGrid(size);
+			if(!generationFiles.hasMoreElements())
+			{
+				System.out.println("Config file not found!");
+				return null;
+			}
+			ZipEntry config = (ZipEntry)generationFiles.nextElement();
+			if(config.getName().indexOf(".cawcon") != -1)
+			{
+				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
+				String line;
+				line = in.readLine();
+				if(line.indexOf(" ") != -1)
+				{
+					x = Integer.parseInt(line.substring(0, line.indexOf(" ")));
+					y = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
+				}
+				else
+				{
+					x = Integer.parseInt(line);
+					line = in.readLine();
+					y = Integer.parseInt(line);
+				}
+				
+				line = in.readLine();
+				type = line.charAt(0);
+				line = in.readLine();
+				n = Integer.parseInt(line);
+				for(int i = 0; i < n; i++)
+				{
+					System.out.println("Unable to handle ranges right now.");
+				}
 				break;
-			case 'R':
+			}
+		}
+		Vector2i gridSize = new Vector2i(x, y);
+		Cell cell = new Cell(n);
+		switch(type)
+		{
 			case 'r':
-				world = new RectangleGrid(size);
+			case 'R':
+				world = new RectangleGrid[zip.size()];
+				for(int i = 0; i < zip.size(); i++)
+					world[i] = new RectangleGrid(gridSize, cell);
 				break;
-			case 'T':
+			case 'h':
+			case 'H':
+				world = new HexagonGrid[zip.size()];
+				for(int i = 0; i < zip.size(); i++)
+					world[i] = new HexagonGrid(gridSize, cell);
+				break;
 			case 't':
-				world = new TriangleGrid(size);
+			case 'T':
+				world = new TriangleGrid[zip.size()];
+				for(int i = 0; i < zip.size(); i++)
+					world[i] = new TriangleGrid(gridSize, cell);
 				break;
 			default:
-				System.out.println("Error! Grid cannot be an abstract grid type!");
-				break;
+				System.out.println("Unable to create a grid with no type.");
+				return null;
 		}
-		for(int row = 0; row < y; row++)
+		
+		int worldPos = 0;
+		generationFiles = zip.entries();
+		while(generationFiles.hasMoreElements())
 		{
-			for(int col = 0; col < x; col++)
+			ZipEntry file = (ZipEntry)generationFiles.nextElement();
+			String name = file.getName();
+			long size = file.getSize();
+			if(name.substring(name.length() - 4).equals(".caw"))
 			{
-				int n = scan.nextInt();
-				int[] vals = new int[n];
-				for(int i = 0; i < n; i++)
-					vals[i] = scan.nextInt();
-				world.setCells(new Vector2i(col, row), vals);
+				if(size > 0)
+				{
+					BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(file)));
+					String line;
+					for(int rows = 0; rows < y; rows++)
+					{
+						for(int cols = 0; cols < x; cols++)
+						{
+							line = in.readLine();
+							int[] vals = new int[n];
+							int prevIndex = -1;
+							int currIndex = 0;
+							for(int i = 0; i < (n - 1); i++)
+							{
+								currIndex = line.indexOf(" ", prevIndex);
+								vals[i] = Integer.parseInt(line.substring(prevIndex + 1, currIndex));
+								prevIndex = currIndex;
+							}
+							vals[n - 1] = Integer.parseInt(line.substring(prevIndex + 1));
+							for(int i = 0; i < n; i++)
+								world[worldPos].getCell(cols, rows).setValue(i, vals[i]);
+						}
+						line = in.readLine();
+					}
+					worldPos++;
+				}
+			}
+			else
+			{
+				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
 		return world;
@@ -58,7 +140,7 @@ public class WorldReader
 	
 	public String getWorldName()
 	{
-		return worldFileName.substring(worldFileName.indexOf('/') + 1);
+		return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
 	}
 	
 	public void setWorldName(String name)

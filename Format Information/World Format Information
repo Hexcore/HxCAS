@@ -1,50 +1,121 @@
-=============================================================================
+=======================================================================================
 
-The world data files are stored as a caw file: Cellular Automaton World file.
+Extensions:
+.caw	-> Cellular Automaton World generation file.
+.cawzip -> CAW ZIPped/compressed file.
+.cawcon -> CAW CONfiguration file.
+.cawrul -> CAW RULe set file.
 
-These files are essentially each a single generation of the CA.
-These files will initially be stored in a folder of the world's name
-and when stored into final storage, will be deleted.
+A single world will be stored in a .cawzip file.
+In this compressed file will be the following:
+1x .cawcon configuration file
+1x .cawrul rule set file
+Nx .caw generation files where N is the number of generations that a world was run for.
 
-The first line has 2 numbers: x and y.
-x == the number of columns the matrix has.
-y == the number of rows the matrix has.
+Inside each .cawcon file will be the following:
+x y
+g
+n
+#	alpha - beta [fl1, fl2, fl3]
+...
+	xi - omega [fl1, fl2, fl3]	
+			:
+			:
+#	alpha - beta [fl1, fl2, fl3]
+...
+	xi - omega [fl1, fl2, fl3]
+	
+x is the common number of columns for each generation grid.
+y is the common number of rows for each generation grid.
+g is the common type of grid for each generation grid and can be one of the following:
+	T|t -> triangle type grid.
+	H|h -> hexagon type grid.
+	R|r -> rectangle type grid.
+n is the common number of value counts for each cell in every generation.
+There are n number of the following blocks:
+	#	alpha - beta [fl1, fl2, fl3]
+	...
+		xi - omega [fl1, fl2, fl3]
+which represents the ranges for each value of a cell, going from 1 to n.
+If a default range is wanted, the range can be represented by
+	# ?
 
-The next line has a single character, either T, H or R.
-T|t == triangle grid world.
-H|h == hexagon grid world.
-R|r == rectangle grid world.
+Inside each .cawrul file will be the following:
+<To be completed>
 
-Next follows y blocks of information. Each block has x number of lines.
-The lines each have the following format:
-n v1 v2 ... vn
-n == the number of values to follow for the specific cell.
-v1 v2 ... vn == the n values of the specific cell.
+Inside each .caw file will be the following:
+v1 ... vn
+	:
+	:
+v1 ... vn
 
-Example:
-2 3
-t
-1 0
-1 1
+	:
+	:
 
-1 2
-2 3 4
+v1 ... vn
+	:
+	:
+v1 ... vn
 
-1 5
-1 6
-makes the following triangle grid:
-[ 0 ][ 1 ]
-[ 2 ][3 4]
-[ 5 ][ 6 ]
+There will be y number of the following blocks:
+	v1 ... vn
+		:
+		:
+	v1 ... vn
+Each line of each block represents the column of the ordered pair [y][x].
+Ultimately, these lines represent the cells in a certain row.
+v1 to vn are the values of the cells. 
 
-=============================================================================
-=============================================================================
+=======================================================================================
 
-.caw files will be ultimately saved in a .cawzip file, which will represent the world and it's progression over time.
+=======================================================================================
+Example World
+=======================================================================================
+world.cawzip
+->config.cawcon
+->rules.cawrul
+->a.caw
+->b.caw
+->c.caw
 
-All .caw files must be stored in a folder with the name of the world, such as "World" or "FloodPlane".
-Each .caw file can have any incremental name to them, such as "001" to "999" or "aaaaa" to "zzzzz". 
-Once it has been specified that all generations have been completed in the run, the files will be stored
-in the final storage format, .cawzip.  
-
-=============================================================================
+config.cawcon
+	2 3
+	r
+	2
+	
+a.caw
+	0 1
+	2 3
+	
+	4 5
+	6 7
+	
+	8 9
+	10 11
+	
+b.caw
+	1 2
+	3 4
+	
+	5 6
+	7 8
+	
+	9 10
+	11 12
+	
+c.caw
+	2 3
+	4 5
+	
+	6 7
+	8 9
+	
+	10 11
+	12 13
+	
+The above configuration file and generation files make the following rectangle type grids:
+	Generation 1			Generation 2			Generation 3
+	[0  1][2  3]			[1  2][3   4]			[2   3][4   5]
+	[4  5][6  7]	->		[5  6][7   8]	->		[6   7][8   9]
+	[8 9][10 11]			[9 10][11 12]			[10 11][12 13]
+=======================================================================================

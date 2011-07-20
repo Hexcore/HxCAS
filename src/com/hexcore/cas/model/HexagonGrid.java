@@ -11,6 +11,12 @@ public class HexagonGrid extends Grid
 		this.setType('H');
 	}
 	
+	public HexagonGrid(Vector2i size, Cell example)
+	{
+		super(size, example);
+		this.setType('H');
+	}
+	
 	public HexagonGrid(Grid g)
 	{
 		super(g);
