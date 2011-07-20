@@ -6,11 +6,14 @@ import com.hexcore.cas.math.Vector2i;
 
 public class ScrollableContainer extends Container
 {	
+	enum Drag {NONE, VERTICAL, HORIZONTAL};
+	
 	private	Vector2i 	maxSize;
 	private Vector2i	viewSize;
 	private Vector2i	scroll;
 	private boolean		verticalScrollbar;
 	private boolean		horizontalScrollbar;
+	private Drag		scrollDrag = Drag.NONE;
 	
 	public ScrollableContainer(Vector2i size)
 	{

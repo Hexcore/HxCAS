@@ -224,22 +224,24 @@ public class Theme
 	{
 		Vector2i pos = position.add(size.x - 16, 0);
 		
-		int	scroll = value * (viewable - 16) / (max - viewable);
+		int	scrollBlockSize = viewable * viewable / max;
+		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
 		window.renderRectangle(gl, pos, new Vector2i(16, viewable), getFill("Scrollbar", "vertical", "background"));
-		window.renderRectangle(gl, pos.add(0, scroll), new Vector2i(16, 16), getFill("ScrollbarHandle", "vertical", "background"));
-		window.renderBorder(gl, pos.add(0, scroll), new Vector2i(16, 16), getFill("ScrollbarHandle", "vertical", "border"));
+		window.renderRectangle(gl, pos.add(0, scroll), new Vector2i(16, scrollBlockSize), getFill("ScrollbarHandle", "vertical", "background"));
+		window.renderBorder(gl, pos.add(0, scroll), new Vector2i(16, scrollBlockSize), getFill("ScrollbarHandle", "vertical", "border"));
 	}
 	
 	public void renderHorizontalScrollbar(GL gl, Vector2i position, Vector2i size, int value, int max, int viewable)
 	{
 		Vector2i pos = position.add(0, size.y - 16);
 		
-		int	scroll = value * (viewable - 16) / (max - viewable);
+		int	scrollBlockSize = viewable * viewable / max;
+		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
 		window.renderRectangle(gl, pos, new Vector2i(viewable, 16), getFill("Scrollbar", "horizontal", "background"));
-		window.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(16, 16), getFill("ScrollbarHandle", "horizontal", "background"));
-		window.renderBorder(gl, pos.add(scroll, 0), new Vector2i(16, 16), getFill("ScrollbarHandle", "horizontal", "border"));
+		window.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, 16), getFill("ScrollbarHandle", "horizontal", "background"));
+		window.renderBorder(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, 16), getFill("ScrollbarHandle", "horizontal", "border"));
 	}
 	
 	public void renderScrollbarFill(GL gl, Vector2i position, Vector2i size)
