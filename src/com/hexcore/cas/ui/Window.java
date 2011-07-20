@@ -488,13 +488,19 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-	
+		Event event = new Event(Event.Type.KEY_PRESS);
+		event.pressed = true;
+		event.button = e.getKeyCode();
+		sendEvent(event);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-
+		Event event = new Event(Event.Type.KEY_PRESS);
+		event.pressed = false;
+		event.button = e.getKeyCode();
+		sendEvent(event);
 	}
 
 	@Override

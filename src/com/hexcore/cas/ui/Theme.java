@@ -248,7 +248,7 @@ public class Theme
 		window.renderBorder(gl, position.add(size).subtract(16, 16), new Vector2i(16, 16), getFill("ScrollbarFill", "border"));
 	}
 	
-	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, boolean focus)
+	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -264,7 +264,8 @@ public class Theme
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
-			window.renderRectangle(gl, position.add(textSize.x + padding.x, padding.y), new Vector2i(padding.x, size.y - padding.y * 2), textColour);
+			int cursorPos = window.getTheme().calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
+			window.renderRectangle(gl, position.add(cursorPos + 1, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
 		}
 	}
 	
