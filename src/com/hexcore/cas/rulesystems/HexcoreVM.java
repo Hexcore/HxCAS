@@ -21,8 +21,10 @@ public class HexcoreVM
 
 	
 	//CPU Operational Registers
-	int					SP;			//Stack Pointer
-	boolean				end;
+	int					FP;			//Stack Pointer
+	int					r1;			//Temp Register 1
+	int 				r2;			//Temp Register 2
+	boolean				end;		//End flag
 	
 	private enum OpCodes{	LDC, LDA, LDV, STO, DSP,
 							ADD, SUB, MUL, DIV, REM,
@@ -37,7 +39,7 @@ public class HexcoreVM
 	public HexcoreVM()
 	{
 		oStack = new Stack<Integer>();
-		SP = 0;
+		FP = 0;
 		end = false;
 	}
 	
@@ -84,12 +86,12 @@ public class HexcoreVM
 		int index = IR.indexOf(' ');
 		
 		String operation;
-		String operands;
+		String operand = "0";
 		
 		if(index != -1)
 		{
 			operation = IR.substring(0, index);
-			operands = IR.substring(index + 1);
+			operand = IR.substring(index + 1);
 		}
 		else
 		{
@@ -99,27 +101,141 @@ public class HexcoreVM
 		
 		switch(OpCodes.valueOf(operation))
 		{
-			case LDC:	break;
-			case LDA:	break;
-			case LDV:	break;
-			case STO:	break;
-			case DSP:	break;
-			case ADD:	break;
-			case SUB:	break;
-			case MUL:	break;
-			case DIV:	break;
-			case REM:	break;
-			case CEQ:	break;
-			case CNE:	break;
-			case CGT:	break;
-			case CLT:	break;
-			case CLE:	break;
-			case CGE:	break;
-			case AND:	break;
-			case OR:	break;
-			case NOT:	break;
-			case BRN:	break;
-			case BZE:	break;
+			case LDC:	oStack.push(new Integer(Integer.parseInt(operand)));
+						FP++;
+						break;
+						
+			case LDA:	oStack.push(FP - 1 - Integer.parseInt(operand));
+						FP++;
+						break;
+						
+			case LDV:	r1 = oStack.pop();
+						oStack.push(oStack.get(r1));
+						break;
+						
+			case STO:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						FP -= 2;
+						oStack.set(r2, r1);
+						break;
+						
+			case DSP:	r1 = Integer.parseInt(operand);
+						for(int i = 0; i < r1; i++)
+							oStack.push(new Integer(0));
+						FP += r1;
+						break;
+						
+			case ADD:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r1 + r2);
+						FP--;
+						break;
+						
+			case SUB:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r2 - r1);
+						FP--;
+						break;
+						
+			case MUL:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r2 * r1);
+						FP--;
+						break;
+						
+			case DIV:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r2 / r1);
+						FP--;
+						break;
+						
+			case REM:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r2 % r1);
+						FP--;
+						break;
+						
+			case CEQ:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 == r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case CNE:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 != r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case CGT:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 > r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case CLT:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 < r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case CLE:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 <= r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case CGE:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						if(r1 >= r2)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						FP--;
+						break;
+						
+			case AND:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r1 & r2);
+						FP--;
+						break;
+						
+			case OR:	r1 = oStack.pop();
+						r2 = oStack.pop();
+						oStack.push(r1 | r2);
+						FP--;
+						break;
+						
+			case NOT:	r1 = oStack.pop();
+						if(r1 == 0)
+							oStack.push(1);
+						else
+							oStack.push(0);
+						break;
+						
+			case BRN:	PC = Integer.parseInt(operand);
+						break;
+						
+			case BZE:	r1 = oStack.pop();
+						FP--;
+						if(r1 == 0)
+							PC = Integer.parseInt(operand);
+						break;
 			
 			case END:	end = true;
 						break;
