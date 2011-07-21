@@ -15,7 +15,6 @@ import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.Panel;
 import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
-import com.hexcore.cas.ui.ShapeWidget;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
@@ -47,6 +46,7 @@ public class UITestApplication implements WindowEventListener
 	public Button		quitButton;
 	
 	public GameOfLife			gameOfLife;
+	public ScrollableContainer	gridViewerContainer;
 	public RectangleGridWidget	gridViewer; 
 	public Button				nextIterationButton;
 	
@@ -54,7 +54,7 @@ public class UITestApplication implements WindowEventListener
 	
 	UITestApplication()
 	{
-		RectangleGrid grid = new RectangleGrid(new Vector2i(8, 8));
+		RectangleGrid grid = new RectangleGrid(new Vector2i(16, 16));
 		grid.getCell(new Vector2i(1,3)).setValue(0, 1);
 		grid.getCell(new Vector2i(2,3)).setValue(0, 1);
 		grid.getCell(new Vector2i(3,3)).setValue(0, 1);
@@ -154,8 +154,11 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
 		
+		gridViewerContainer = new ScrollableContainer(new Vector2i(200, 200));
+		innerLayout.add(gridViewerContainer);
+		
 		gridViewer = new RectangleGridWidget((RectangleGrid)gameOfLife.getGrid(), 16);
-		innerLayout.add(gridViewer);
+		gridViewerContainer.setContents(gridViewer);
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
 		innerLayout.add(nextIterationButton);

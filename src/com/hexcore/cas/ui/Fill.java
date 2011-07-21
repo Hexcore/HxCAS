@@ -4,11 +4,14 @@ public class Fill
 {
 	public enum Type {NONE, SOLID, VERTICAL_GRADIENT, HORIZONTAL_GRADIENT, IMAGE, IMAGE_COLOUR};
 	
+	public static final int CENTER = 1;
+	
 	public static final Fill NONE = new Fill();
 	
 	private Type		type;
 	private Colour[]	colours;
 	private Image		image = null;
+	private int			flags = 0;
 	
 	public Fill()
 	{
@@ -52,9 +55,12 @@ public class Fill
 		this.image = image;
 	}	
 	
+	public void		setFlag(int flag) {flags |= flag;}
+	
 	public Type 	getType() {return type;}
 	public Colour	getColour(int index) {return colours[index];}	
 	public Image	getImage() {return image;}
+	public int		getFlags() {return flags;}
 	
 	@Override
 	public String toString()
@@ -75,6 +81,8 @@ public class Fill
 			out += "Solid with Image: " + colours[0] + ", " + image.getFilename(); 			
 		else
 			out += "Unknown";
+		
+		if ((flags & CENTER) != 0) out += ", Centered";
 		
 		return out + ">";
 	}

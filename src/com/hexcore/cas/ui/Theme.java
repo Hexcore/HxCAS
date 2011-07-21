@@ -220,35 +220,45 @@ public class Theme
 		window.renderBorder(gl, pos, size, getFill("Panel", "border"));
 	}
 	
+	public int getScrollbarSize()
+	{
+		return 16;
+	}
+	
 	public void renderVerticalScrollbar(GL gl, Vector2i position, Vector2i size, int value, int max, int viewable)
 	{
-		Vector2i pos = position.add(size.x - 16, 0);
+		int wh = getScrollbarSize();
+		Vector2i pos = position.add(size.x - wh, 0);
 		
-		int	scroll = value * (viewable - 16) / (max - viewable);
+		int	scrollBlockSize = viewable * viewable / max;
+		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
-		window.renderRectangle(gl, pos, new Vector2i(16, viewable), getFill("Scrollbar", "vertical", "background"));
-		window.renderRectangle(gl, pos.add(0, scroll), new Vector2i(16, 16), getFill("ScrollbarHandle", "vertical", "background"));
-		window.renderBorder(gl, pos.add(0, scroll), new Vector2i(16, 16), getFill("ScrollbarHandle", "vertical", "border"));
+		window.renderRectangle(gl, pos, new Vector2i(wh, viewable), getFill("Scrollbar", "vertical", "background"));
+		window.renderRectangle(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), getFill("ScrollbarHandle", "vertical", "background"));
+		window.renderBorder(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), getFill("ScrollbarHandle", "vertical", "border"));
 	}
 	
 	public void renderHorizontalScrollbar(GL gl, Vector2i position, Vector2i size, int value, int max, int viewable)
 	{
-		Vector2i pos = position.add(0, size.y - 16);
+		int wh = getScrollbarSize();
+		Vector2i pos = position.add(0, size.y - wh);
 		
-		int	scroll = value * (viewable - 16) / (max - viewable);
+		int	scrollBlockSize = viewable * viewable / max;
+		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
-		window.renderRectangle(gl, pos, new Vector2i(viewable, 16), getFill("Scrollbar", "horizontal", "background"));
-		window.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(16, 16), getFill("ScrollbarHandle", "horizontal", "background"));
-		window.renderBorder(gl, pos.add(scroll, 0), new Vector2i(16, 16), getFill("ScrollbarHandle", "horizontal", "border"));
+		window.renderRectangle(gl, pos, new Vector2i(viewable, wh), getFill("Scrollbar", "horizontal", "background"));
+		window.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), getFill("ScrollbarHandle", "horizontal", "background"));
+		window.renderBorder(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), getFill("ScrollbarHandle", "horizontal", "border"));
 	}
 	
 	public void renderScrollbarFill(GL gl, Vector2i position, Vector2i size)
 	{
-		window.renderRectangle(gl, position.add(size).subtract(16, 16), new Vector2i(16, 16), getFill("ScrollbarFill", "background"));
-		window.renderBorder(gl, position.add(size).subtract(16, 16), new Vector2i(16, 16), getFill("ScrollbarFill", "border"));
+		int wh = getScrollbarSize();
+		window.renderRectangle(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), getFill("ScrollbarFill", "background"));
+		window.renderBorder(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), getFill("ScrollbarFill", "border"));
 	}
 	
-	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, boolean focus)
+	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -264,7 +274,8 @@ public class Theme
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
-			window.renderRectangle(gl, position.add(textSize.x + padding.x, padding.y), new Vector2i(padding.x, size.y - padding.y * 2), textColour);
+			int cursorPos = window.getTheme().calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
+			window.renderRectangle(gl, position.add(cursorPos + 1, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
 		}
 	}
 	

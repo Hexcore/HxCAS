@@ -6,16 +6,21 @@ import com.hexcore.cas.math.Vector2i;
 
 public class ScrollableContainer extends Container
 {	
+	enum DragState {NONE, VERTICAL, HORIZONTAL};
+	
 	private	Vector2i 	maxSize;
 	private Vector2i	viewSize;
-	private Vector2i	scroll;
+	private Vector2i	scrollPos;
 	private boolean		verticalScrollbar;
 	private boolean		horizontalScrollbar;
+	private DragState	dragState = DragState.NONE;
+	private Vector2i	dragPrev;
 	
 	public ScrollableContainer(Vector2i size)
 	{
 		super(size);
-		scroll = new Vector2i();
+		scrollPos = new Vector2i();
+		dragPrev = new Vector2i();
 		viewSize = new Vector2i(size);
 		maxSize = new Vector2i(size);
 	}
@@ -23,7 +28,8 @@ public class ScrollableContainer extends Container
 	public ScrollableContainer(Vector2i position, Vector2i size)
 	{
 		super(position, size);
-		scroll = new Vector2i();
+		scrollPos = new Vector2i();
+		dragPrev = new Vector2i();
 		viewSize = new Vector2i(size);
 		maxSize = new Vector2i(size);
 	}
@@ -56,18 +62,18 @@ public class ScrollableContainer extends Container
 		if (maxSize.x > viewSize.x) 
 		{
 			horizontalScrollbar = true;
-			viewSize.y = size.y - 16;
+			viewSize.y = size.y - window.getTheme().getScrollbarSize();
 		}
 		
 		if (maxSize.y > viewSize.y) 
 		{
 			verticalScrollbar = true;
-			viewSize.x = size.x - 16;
+			viewSize.x = size.x - window.getTheme().getScrollbarSize();
 			
 			if (maxSize.x > viewSize.x) 
 			{
 				horizontalScrollbar = true;
-				viewSize.y = size.y - 16;
+				viewSize.y = size.y - window.getTheme().getScrollbarSize();
 			}
 		}
 		
@@ -104,14 +110,14 @@ public class ScrollableContainer extends Container
 		if (contents != null)
 		{
 			window.setClipping(gl, pos, size);
-			contents.render(gl, pos.subtract(scroll));
+			contents.render(gl, pos.subtract(scrollPos));
 			window.resetClipping(gl);
 			
 			if (verticalScrollbar)
-				window.getTheme().renderVerticalScrollbar(gl, pos, size, scroll.y, maxSize.y, viewSize.y);
+				window.getTheme().renderVerticalScrollbar(gl, pos, size, scrollPos.y, maxSize.y, viewSize.y);
 
 			if (horizontalScrollbar) 
-				window.getTheme().renderHorizontalScrollbar(gl, pos, size, scroll.x, maxSize.x, viewSize.x);
+				window.getTheme().renderHorizontalScrollbar(gl, pos, size, scrollPos.x, maxSize.x, viewSize.x);
 			
 			if (verticalScrollbar && horizontalScrollbar)
 				window.getTheme().renderScrollbarFill(gl, pos, size);
@@ -121,20 +127,63 @@ public class ScrollableContainer extends Container
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{
-		if (super.handleEvent(event, position)) return true;
-
-		if (event.type == Event.Type.MOUSE_SCROLL)
+		boolean handled = false;
+		
+		if (event.type == Event.Type.MOUSE_MOTION)
 		{
-			scroll.y += event.amount;
-			if (scroll.y < 0) scroll.y = 0;
-			if (scroll.y >= maxSize.y - viewSize.y) scroll.y = maxSize.y - viewSize.y;
+			if (dragState == DragState.VERTICAL)
+			{
+				scroll(0, event.position.y - dragPrev.y);
+				dragPrev.set(event.position);
+			}
+			else if (dragState == DragState.HORIZONTAL)
+			{
+				scroll(event.position.x - dragPrev.x, 0);
+				dragPrev.set(event.position);				
+			}
+		}
+		else if (event.type == Event.Type.MOUSE_SCROLL)
+		{
+			if (contents.receiveEvent(event, position)) return true;
+			scroll(0, event.amount);
 			return true;
 		}
 		else if (event.type == Event.Type.MOUSE_CLICK)
 		{
-			
+			if (event.pressed)
+			{
+				int scrollbarSize = window.getTheme().getScrollbarSize();
+				
+				if (event.position.x > position.x + size.x - scrollbarSize)
+				{
+					dragState = DragState.VERTICAL;
+					dragPrev.set(event.position);
+				}
+				else if (event.position.y > position.y + size.y - scrollbarSize)
+				{
+					dragState = DragState.HORIZONTAL;
+					dragPrev.set(event.position);
+				}				
+			}
+			else
+				dragState = DragState.NONE;
 		}
 		
-		return false;
+		if (!handled)
+		{
+			handled = contents.receiveEvent(event, position);
+		}
+		
+		return handled;
+	}
+	
+	private void scroll(int x, int y)
+	{
+		scrollPos.inc(x, y);
+		if (scrollPos.x < 0) scrollPos.x = 0;
+		if (scrollPos.x >= maxSize.x - viewSize.x) scrollPos.x = maxSize.x - viewSize.x;
+		
+		if (scrollPos.y < 0) scrollPos.y = 0;
+		if (scrollPos.y >= maxSize.y - viewSize.y) scrollPos.y = maxSize.y - viewSize.y;
 	}
 }
