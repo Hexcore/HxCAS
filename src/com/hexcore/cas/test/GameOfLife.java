@@ -13,10 +13,31 @@ public class GameOfLife
 	
 	public static void main(String [] args)
 	{
-		GameOfLife 	game = new GameOfLife();
-		int 		iter = 10;
+		int iter = 10;
+		RectangleGrid g = new RectangleGrid(new Vector2i(5, 5));
+		g.getCell(new Vector2i(2,1)).setValue(0, 1);
+		g.getCell(new Vector2i(2,2)).setValue(0, 1);
+		g.getCell(new Vector2i(2,3)).setValue(0, 1);
+		GameOfLife game = new GameOfLife(g);
+		game.run(iter);
 		
-		//run the game of life :P
+		System.out.println("--------------------------------------");
+		HexagonGrid hex = new HexagonGrid(new Vector2i(10,10));
+		hex.getCell(new Vector2i(5,4)).setValue(0, 1);
+		hex.getCell(new Vector2i(5,5)).setValue(0, 1);
+		hex.getCell(new Vector2i(5,6)).setValue(0, 1);
+		game = new GameOfLife(hex);
+		game.run(iter);
+		
+		System.out.println("--------------------------------------");
+		TriangleGrid tri = new TriangleGrid(new Vector2i(10,10));
+		tri.getCell(new Vector2i(5,4)).setValue(0, 1);
+		tri.getCell(new Vector2i(5,5)).setValue(0, 1);
+		tri.getCell(new Vector2i(5,6)).setValue(0, 1);
+		tri.getCell(new Vector2i(4,4)).setValue(0, 1);
+		tri.getCell(new Vector2i(4,5)).setValue(0, 1);
+		tri.getCell(new Vector2i(4,6)).setValue(0, 1);
+		game = new GameOfLife(tri);
 		game.run(iter);
 	}
 	
@@ -91,14 +112,26 @@ public class GameOfLife
 				//for each cell:
 				Cell [] neighbours = grid.getNeighbours(new Vector2i(x,y));//getNeighbours
 				//now apply rules, and set the appropriate value to the temporary grid.
-				temp.getCell(x, y).setValue(0, applyRules(neighbours,grid.getCell(x, y).getValue(0)));
+				
+				switch(c)
+				{
+				case 'R':
+					temp.getCell(x, y).setValue(0, applyRulesRectangle(neighbours,grid.getCell(x, y).getValue(0)));
+					break;
+				case 'T':
+					temp.getCell(x, y).setValue(0, applyRulesTriangle(neighbours,grid.getCell(x, y).getValue(0)));
+					break;
+				case 'H':
+					temp.getCell(x, y).setValue(0, applyRulesHexagon(neighbours,grid.getCell(x, y).getValue(0)));
+					break;
+				}
 			}
 		}
 		
 		grid = temp;//return the updated grid.
 	}
 	
-	public int applyRules(Cell[] neighbours, int value)
+	public int applyRulesRectangle(Cell[] neighbours, int value)
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)
@@ -115,5 +148,37 @@ public class GameOfLife
 			return 1;
 		else 
 			return value;
+	}
+	
+	public int applyRulesHexagon(Cell[] neighbours, int value)
+	{
+		int count = 0;
+		for(int i = 0; i < neighbours.length; i++)
+		{
+			if(neighbours[i].getValue(0) == 1)
+				count++;
+		}
+		//apply rules
+		if(count == 2)
+			return 1;
+		else if ((count == 1)|| (count == 3))
+			return value;
+		else 
+			return 0;
+	}
+	
+	public int applyRulesTriangle(Cell[] neighbours, int value)
+	{
+		int count = 0;
+		for(int i = 0; i < neighbours.length; i++)
+		{
+			if(neighbours[i].getValue(0) == 1)
+				count++;
+		}
+		//apply rules
+		if((count == 3) || (count == 2) || (count == 0))
+			return 0;
+		else 
+			return 1;
 	}
 }
