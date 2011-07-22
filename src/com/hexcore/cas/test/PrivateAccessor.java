@@ -61,6 +61,22 @@ public class PrivateAccessor
 		return null;
 	}
 	
+	public void setFieldValue(String fieldName, Object val)
+	{
+		try
+		{
+			fieldMap.get(fieldName).set(referencedObject, val);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public Object invokeMethod(String methodName, Object... params)
 	{
 		Assert.assertTrue(methodMap.containsKey(methodName));
