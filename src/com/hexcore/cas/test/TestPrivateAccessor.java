@@ -23,12 +23,25 @@ public class TestPrivateAccessor extends TestCase
 	}
 	
 	
-	public void testPrivateAccessor()
+	public void testGet()
 	{
 		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());
 		
 		assertTrue(pa.getFieldValue("privateString1").equals("This is String 1"));
 		assertTrue(pa.getFieldValue("privateString2").equals("This is String 2"));
+		
+	}
+	
+	public void testInvoke()
+	{
+		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());
 		assertTrue(pa.invokeMethod("getPrivateNumber", 10).equals(10));
+	}
+	
+	public void testSet()
+	{
+		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());
+		pa.setFieldValue("privateString1", "String Changed");
+		assertTrue(pa.getFieldValue("privateString1").equals("String Changed"));
 	}
 }
