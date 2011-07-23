@@ -10,7 +10,7 @@ import junit.framework.Assert;
 /**	Utility Class for easy access to private class data.
  * 	----NOTE: FOR USE FOR JUNIT TESTING ONLY!-----------
  * 
- * @author Karl Zöller
+ * @author Karl ZÃ¶ller
  *
  */
 public class PrivateAccessor

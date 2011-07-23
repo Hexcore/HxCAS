@@ -177,7 +177,7 @@ public class HexcoreVM
 						
 			case CGT:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 > r2)
+						if(r2 > r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
@@ -186,7 +186,7 @@ public class HexcoreVM
 						
 			case CLT:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 < r2)
+						if(r2 < r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
@@ -195,7 +195,7 @@ public class HexcoreVM
 						
 			case CLE:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 <= r2)
+						if(r2 <= r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
@@ -204,7 +204,7 @@ public class HexcoreVM
 						
 			case CGE:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 >= r2)
+						if(r2 >= r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
