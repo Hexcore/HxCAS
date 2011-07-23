@@ -20,6 +20,7 @@ import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.View;
 import com.hexcore.cas.ui.Widget;
 import com.hexcore.cas.ui.Window;
 import com.hexcore.cas.ui.WindowEventListener;
@@ -40,19 +41,21 @@ public class UITestApplication implements WindowEventListener
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
+	public View			mainView;
 	
 	public Button		createWorldButton;
 	public Button		loadWorldButton;
 	public Button		optionsButton;
 	public Button		helpButton;
 	public Button		quitButton;
+		
+	public Panel		mainPanel;
 	
+	public LinearLayout			gridViewLayout;
 	public GameOfLife			gameOfLife;
 	public ScrollableContainer	gridViewerContainer;
 	public HexagonGridWidget	gridViewer; 
 	public Button				nextIterationButton;
-	
-	public Panel		mainPanel;
 	
 	UITestApplication()
 	{
@@ -134,14 +137,14 @@ public class UITestApplication implements WindowEventListener
 		mainPanel.setFlag(Widget.FILL);
 		mainLayout.add(mainPanel);
 		
-		ScrollableContainer	sc = new ScrollableContainer(new Vector2i(10, 10));
-		sc.setMargin(new Vector2i(0, 0));
-		sc.setFlag(Widget.FILL);
-		mainPanel.setContents(sc);
+		mainView = new View(new Vector2i(10, 10));
+		mainView.setMargin(new Vector2i(0, 0));
+		mainView.setFlag(Widget.FILL);
+		mainPanel.setContents(mainView);
 		
 		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		innerLayout.setFlag(Widget.FILL);
-		sc.setContents(innerLayout);
+		mainView.add(innerLayout);
 		
 		nameTextBox = new TextBox(new Vector2i(100, 20));
 		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
@@ -160,16 +163,20 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
 		
-		gridViewerContainer = new ScrollableContainer(new Vector2i(300, 200));
-		gridViewerContainer.setFlag(Widget.FILL_HORIZONTAL);
+		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		gridViewLayout.setFlag(Widget.FILL);
+		mainView.add(gridViewLayout);
+		
+		gridViewerContainer = new ScrollableContainer(new Vector2i(300, 300));
+		gridViewerContainer.setFlag(Widget.FILL);
 		gridViewerContainer.setBackground(new Fill(Colour.BLACK));
-		innerLayout.add(gridViewerContainer);
+		gridViewLayout.add(gridViewerContainer);
 		
 		gridViewer = new HexagonGridWidget((HexagonGrid)gameOfLife.getGrid(), 16);
 		gridViewerContainer.setContents(gridViewer);
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
-		innerLayout.add(nextIterationButton);
+		gridViewLayout.add(nextIterationButton);
 		
 		window.relayout();
 	}
@@ -184,7 +191,11 @@ public class UITestApplication implements WindowEventListener
 	{
 		if (event.type == Event.Type.ACTION)
 		{
-			if (event.target == loadWorldButton)
+			if (event.target == createWorldButton)
+			{
+				mainView.setIndex(1 - mainView.getIndex());
+			}
+			else if (event.target == loadWorldButton)
 			{
 				System.out.println(window.askUserForFile("Load a world"));
 			}

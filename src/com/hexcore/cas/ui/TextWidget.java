@@ -44,7 +44,7 @@ public class TextWidget extends Widget
 		Vector2i pos = this.position.add(position);
 		window.getTheme().renderText(gl, caption, pos, colour, textSize);
 		
-		window.renderBorder(gl, pos, size, Colour.WHITE);
+		//window.renderBorder(gl, pos, size, Colour.WHITE);
 	}
 	
 	public String 	getCaption() {return caption;}
