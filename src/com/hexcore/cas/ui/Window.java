@@ -224,6 +224,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         relayout();
 	}
 	
+	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, Colour colour)
+	{
+		GL2 gl2 = gl.getGL2();
+		
+		applyColour(gl2, colour);
+        gl2.glBegin(GL.GL_TRIANGLE_FAN);
+        for (Vector2i vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
+		gl2.glEnd();
+	}
+	
 	public void renderRectangle(GL gl, Vector2i pos, Image image)
 	{
 		renderRectangle(gl, pos, image.getSize(), image);
