@@ -21,7 +21,8 @@ public class HexcoreVM
 
 	
 	//CPU Operational Registers
-	int					FP;			//Stack Pointer
+	int					FP;			//Frame pointer
+	int					SP;			//Stack Pointer
 	int					r1;			//Temp Register 1
 	int 				r2;			//Temp Register 2
 	boolean				end;		//End flag
@@ -39,7 +40,8 @@ public class HexcoreVM
 	public HexcoreVM()
 	{
 		oStack = new Stack<Integer>();
-		FP = 0;
+		SP = 0;
+		FP = -1;
 		end = false;
 	}
 	
@@ -102,11 +104,11 @@ public class HexcoreVM
 		switch(OpCodes.valueOf(operation))
 		{
 			case LDC:	oStack.push(new Integer(Integer.parseInt(operand)));
-						FP++;
+						SP++;
 						break;
 						
-			case LDA:	oStack.push(FP - 1 - Integer.parseInt(operand));
-						FP++;
+			case LDA:	oStack.push(FP + 1 + Integer.parseInt(operand));
+						SP++;
 						break;
 						
 			case LDV:	r1 = oStack.pop();
@@ -115,44 +117,44 @@ public class HexcoreVM
 						
 			case STO:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						FP -= 2;
+						SP -= 2;
 						oStack.set(r2, r1);
 						break;
 						
 			case DSP:	r1 = Integer.parseInt(operand);
 						for(int i = 0; i < r1; i++)
 							oStack.push(new Integer(0));
-						FP += r1;
+						SP += r1;
 						break;
 						
 			case ADD:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r1 + r2);
-						FP--;
+						SP--;
 						break;
 						
 			case SUB:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r2 - r1);
-						FP--;
+						SP--;
 						break;
 						
 			case MUL:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r2 * r1);
-						FP--;
+						SP--;
 						break;
 						
 			case DIV:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r2 / r1);
-						FP--;
+						SP--;
 						break;
 						
 			case REM:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r2 % r1);
-						FP--;
+						SP--;
 						break;
 						
 			case CEQ:	r1 = oStack.pop();
@@ -161,7 +163,7 @@ public class HexcoreVM
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case CNE:	r1 = oStack.pop();
@@ -170,55 +172,55 @@ public class HexcoreVM
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case CGT:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 > r2)
+						if(r2 > r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case CLT:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 < r2)
+						if(r2 < r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case CLE:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 <= r2)
+						if(r2 <= r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case CGE:	r1 = oStack.pop();
 						r2 = oStack.pop();
-						if(r1 >= r2)
+						if(r2 >= r1)
 							oStack.push(1);
 						else
 							oStack.push(0);
-						FP--;
+						SP--;
 						break;
 						
 			case AND:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r1 & r2);
-						FP--;
+						SP--;
 						break;
 						
 			case OR:	r1 = oStack.pop();
 						r2 = oStack.pop();
 						oStack.push(r1 | r2);
-						FP--;
+						SP--;
 						break;
 						
 			case NOT:	r1 = oStack.pop();
@@ -232,7 +234,7 @@ public class HexcoreVM
 						break;
 						
 			case BZE:	r1 = oStack.pop();
-						FP--;
+						SP--;
 						if(r1 == 0)
 							PC = Integer.parseInt(operand);
 						break;
