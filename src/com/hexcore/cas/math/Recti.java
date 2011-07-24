@@ -29,4 +29,24 @@ public class Recti
 	
 	public void		setPosition(Vector2i position) {this.position.set(position);}
 	public void		setSize(Vector2i size) {this.size.set(size);}
+	
+	public static Recti getBoundingBox(Vector2i[] points)
+	{
+		if (points.length <= 0) return null;
+		
+		Vector2i lowest = new Vector2i(points[0]);
+		Vector2i highest = new Vector2i(points[0]);
+		
+		for (int i = 1; i < points.length; i++)
+		{
+			Vector2i p = points[i];
+			
+			if (p.x < lowest.x) lowest.x = p.x;
+			if (p.y < lowest.y) lowest.y = p.y;
+			if (p.x > highest.x) highest.x = p.x;
+			if (p.y > highest.y) highest.y = p.y;
+		}
+		
+		return new Recti(lowest, highest.subtract(lowest));
+	}
 }

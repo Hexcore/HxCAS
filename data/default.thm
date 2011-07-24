@@ -149,3 +149,20 @@ DropDownBoxItem
 	background: rgba(0.8, 0.9, 1.0, 0.8);
 	text-colour: rgb(0.0, 0.0, 0.0);
 }
+
+Tab
+{
+	padding: 18 6;
+	background: vertical rgb(0.7, 0.68, 0.62) rgb(0.9, 0.88, 0.82);
+}
+
+Tab : selected
+{
+	padding: 18 6;
+	background: vertical rgb(0.62, 0.68, 0.7) rgb(0.82, 0.88, 0.9);
+}
+
+TabInside
+{
+	border: vertical rgb(0.62, 0.68, 0.7) rgb(0.7, 0.68, 0.62);
+}

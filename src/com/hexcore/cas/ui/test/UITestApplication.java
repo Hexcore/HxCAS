@@ -17,6 +17,7 @@ import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.Panel;
 import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
+import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
@@ -52,25 +53,33 @@ public class UITestApplication implements WindowEventListener
 	public Panel		mainPanel;
 	
 	public LinearLayout			gridViewLayout;
-	public GameOfLife			gameOfLife;
+	public TabbedView			tabbedView;
+	
+	public ScrollableContainer	rectGridViewerContainer;
+	public GameOfLife			rectGameOfLife;
+	public RectangleGridWidget	rectGridViewer; 
+	
 	public ScrollableContainer	gridViewerContainer;
+	public GameOfLife			gameOfLife;
 	public HexagonGridWidget	gridViewer; 
+	
 	public Button				nextIterationButton;
 	
 	UITestApplication()
 	{
 		HexagonGrid grid = new HexagonGrid(new Vector2i(10, 10));
-		grid.getCell(new Vector2i(5,4)).setValue(0, 1);
-		grid.getCell(new Vector2i(5,5)).setValue(0, 1);
-		grid.getCell(new Vector2i(5,6)).setValue(0, 1);
-		
-		/*grid.getCell(new Vector2i(1,3)).setValue(0, 1);
-		grid.getCell(new Vector2i(2,3)).setValue(0, 1);
-		grid.getCell(new Vector2i(3,3)).setValue(0, 1);
-		grid.getCell(new Vector2i(3,2)).setValue(0, 1);
-		grid.getCell(new Vector2i(2,1)).setValue(0, 1);*/
-		
+		grid.getCell(5, 4).setValue(0, 1);
+		grid.getCell(5, 5).setValue(0, 1);
+		grid.getCell(5, 6).setValue(0, 1);		
 		gameOfLife = new GameOfLife(grid);
+		
+		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(10, 10));
+		rectGrid.getCell(1, 3).setValue(0, 1);
+		rectGrid.getCell(2, 3).setValue(0, 1);
+		rectGrid.getCell(3, 3).setValue(0, 1);
+		rectGrid.getCell(3, 2).setValue(0, 1);
+		rectGrid.getCell(2, 1).setValue(0, 1);
+		rectGameOfLife = new GameOfLife(rectGrid);
 		
 		window = new Window("GUI Test", 800, 600);
 		window.addListener(this);
@@ -167,13 +176,28 @@ public class UITestApplication implements WindowEventListener
 		gridViewLayout.setFlag(Widget.FILL);
 		mainView.add(gridViewLayout);
 		
-		gridViewerContainer = new ScrollableContainer(new Vector2i(300, 300));
+		tabbedView = new TabbedView(new Vector2i(30, 30));
+		tabbedView.setFlag(Widget.FILL);
+		gridViewLayout.add(tabbedView);
+		
+		
+		gridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
 		gridViewerContainer.setFlag(Widget.FILL);
 		gridViewerContainer.setBackground(new Fill(Colour.BLACK));
-		gridViewLayout.add(gridViewerContainer);
+		tabbedView.add(gridViewerContainer, "Hexagon");
 		
 		gridViewer = new HexagonGridWidget((HexagonGrid)gameOfLife.getGrid(), 16);
 		gridViewerContainer.setContents(gridViewer);
+		
+		
+		rectGridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
+		rectGridViewerContainer.setFlag(Widget.FILL);
+		rectGridViewerContainer.setBackground(new Fill(Colour.BLACK));
+		tabbedView.add(rectGridViewerContainer, "Rectangle");
+		
+		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
+		rectGridViewerContainer.setContents(gridViewer);
+		
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
 		gridViewLayout.add(nextIterationButton);

@@ -29,6 +29,7 @@ public class ThemeParser
 		validStates.add("checked");
 		validStates.add("vertical");
 		validStates.add("horizontal");
+		validStates.add("selected");
 		
 		validTypes = new HashSet<String>();
 		validTypes.add("Button");
@@ -43,6 +44,8 @@ public class ThemeParser
 		validTypes.add("DropDownBoxArrow");
 		validTypes.add("DropDownBoxList");
 		validTypes.add("DropDownBoxItem");
+		validTypes.add("Tab");
+		validTypes.add("TabInside");
 		
 		validProperties = new HashSet<String>();
 		validProperties.add("background");
@@ -158,7 +161,8 @@ public class ThemeParser
 
 			if (fill == null) 
 			{
-				fastForward(";");
+				fastForward(";", "}");
+				System.out.println(type.name + "(" + type.state + ") : " + name + " = invalid property");
 				return;
 			}
 
@@ -221,7 +225,9 @@ public class ThemeParser
 			Fill.Type	fillType = symbol.text.equals("vertical") ? Fill.Type.VERTICAL_GRADIENT : Fill.Type.HORIZONTAL_GRADIENT;
 			
 			Colour	colourA = readColour();
+			if (colourA == null) return null;
 			Colour	colourB = readColour();
+			if (colourB == null) return null;
 			
 			fill = new Fill(fillType, colourA, colourB);
 		}
@@ -242,11 +248,13 @@ public class ThemeParser
 		else if (value.equals("rgb") || value.equals("rgba"))
 		{			
 			Colour	colour = readColour();
+			if (colour == null) return null;
 			Symbol symbol = scanner.peakSymbol();
 			
 			if (symbol.text.equals("rgb") || symbol.text.equals("rgba"))
 			{
 				Colour colour2 = readColour();
+				if (colour2 == null) return null;
 				fill = new Fill(colour, colour2);
 			}		
 			else if (symbol.text.equals("center") || symbol.text.equals("image"))
@@ -324,7 +332,7 @@ public class ThemeParser
 		ConfigScanner.Symbol symbol = scanner.getSymbol();
 		if (!expected.equals(symbol.text))
 		{
-			error("Expected '" + expected + "' - Got '" + symbol.text);
+			error("Expected '" + expected + "' - Got '" + symbol.text + "'");
 			return false;
 		}
 		return true;

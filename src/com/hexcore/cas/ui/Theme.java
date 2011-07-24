@@ -377,6 +377,41 @@ public class Theme
 		}
 	}
 	
+	public int getTabHeight()
+	{
+		Vector2i padding = getVector2i("Tab", "padding", new Vector2i(18, 6));
+		return calculateTextHeight(Text.Size.SMALL) + padding.y;
+	}
+	
+	public Vector2i	getTabSize(String caption)
+	{
+		Vector2i padding = getVector2i("Tab", "padding", new Vector2i(18, 6));
+		return calculateTextSize(caption, Text.Size.SMALL).add(padding);
+	}
+	
+	public void renderTab(GL gl, Vector2i position, String caption, boolean selected)
+	{
+		String stateName = "normal";
+		if (selected) stateName = "selected";
+		
+		Vector2i size = getTabSize(caption);
+		
+		Vector2i[] tabShape = new Vector2i[4];
+		tabShape[0] = new Vector2i(6, 			0);
+		tabShape[1] = new Vector2i(size.x - 6,	0);
+		tabShape[2] = new Vector2i(size.x, 		size.y);
+		tabShape[3] = new Vector2i(0, 			size.y);
+		
+		window.renderPolygon(gl, position, tabShape, getFill("Tab", stateName, "background"));
+		renderText(gl, caption, position, size, getColour("Tab", stateName, "text-colour"), Text.Size.SMALL);
+	}
+	
+	public void renderTabInside(GL gl, Vector2i position, Vector2i size)
+	{
+		window.renderRectangle(gl, position, size, getFill("TabInside", "background"));
+		window.renderBorder(gl, position, size, getFill("TabInside", "border"));
+	}
+	
 	public int calculateTextHeight(Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
@@ -388,8 +423,7 @@ public class Theme
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
-		Rectangle2D	bounds = textRenderer.getBounds(text);
-		return new Vector2i((int)bounds.getMaxX(), -(int)bounds.getMinY());
+		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), calculateTextHeight(textSize));
 	}
 	
 	public void renderText(GL gl, String text, Vector2i position, Colour colour, Text.Size textSize)

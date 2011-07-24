@@ -75,4 +75,35 @@ public class TestRecti
 		assertEquals(size.x, rect.getWidth());
 		assertEquals(size.y, rect.getHeight());
 	}
+	
+	@Test
+	public void testGetBoundingBox()
+	{
+		// Test 1
+		Vector2i[] points = new Vector2i[5];
+		points[0] = new Vector2i(4, 6);
+		points[1] = new Vector2i(3, 7);
+		points[2] = new Vector2i(3, 8);
+		points[3] = new Vector2i(6, 11);
+		points[4] = new Vector2i(7, 9);
+		
+		Recti box = Recti.getBoundingBox(points);
+		assertEquals(3, box.position.x);
+		assertEquals(6, box.position.y);
+		assertEquals(4, box.size.x);
+		assertEquals(5, box.size.y);	
+		
+		// Test 2
+		points = new Vector2i[4];
+		points[0] = new Vector2i(4,  0);
+		points[1] = new Vector2i(8,  0);
+		points[2] = new Vector2i(12, 8);
+		points[3] = new Vector2i(0,  8);
+		
+		box = Recti.getBoundingBox(points);
+		assertEquals(0, box.position.x);
+		assertEquals(0, box.position.y);
+		assertEquals(12, box.size.x);
+		assertEquals(8, box.size.y);	
+	}
 }

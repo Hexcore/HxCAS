@@ -20,6 +20,7 @@ import javax.media.opengl.*;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
+import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -231,6 +232,36 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		applyColour(gl2, colour);
         gl2.glBegin(GL.GL_TRIANGLE_FAN);
         for (Vector2i vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
+		gl2.glEnd();
+	}
+	
+	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, Fill fill)
+	{
+		if (fill.getType() == Fill.Type.SOLID)
+		{
+			renderPolygon(gl, pos, vertices, fill.getColour(0));
+			return;
+		}
+		
+		if ((fill.getType() != Fill.Type.HORIZONTAL_GRADIENT) && (fill.getType() != Fill.Type.VERTICAL_GRADIENT))
+			return;
+		
+		GL2 gl2 = gl.getGL2();
+		
+		Colour	colour = fill.getColour(0);
+		Recti 	rect = Recti.getBoundingBox(vertices);
+		
+        gl2.glBegin(GL.GL_TRIANGLE_FAN);
+        	for (Vector2i vertex : vertices)
+        	{        		
+        		if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
+        			colour = fill.getColour(0).mix(fill.getColour(1), (float)(vertex.y - rect.position.y) / rect.size.y);
+        		else
+        			colour = fill.getColour(0).mix(fill.getColour(1), (float)(vertex.x - rect.position.x) / rect.size.x);
+        		
+        		applyColour(gl2, colour);
+        		gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
+        	}
 		gl2.glEnd();
 	}
 	

@@ -32,22 +32,23 @@ public class View extends Widget
 		if (contents == null) return;
 
 		Vector2i cPos = contents.getPosition(), cSize = contents.getSize();
+		Vector2i innerSize = getInnerSize();
 		
 		if (contents.isSet(FILL_HORIZONTAL))
 		{
 			cPos.x = contents.getMargin().x; 
-			cSize.x = size.x - contents.getMargin().x * 2; 
+			cSize.x = innerSize.x - contents.getMargin().x * 2; 
 		}
 		else if (contents.isSet(CENTER_HORIZONTAL))
-			cPos.x = (size.x - cSize.x) / 2;
+			cPos.x = (innerSize.x - cSize.x) / 2;
 		
 		if (contents.isSet(FILL_VERTICAL))
 		{
 			cPos.y = contents.getMargin().y; 
-			cSize.y = size.y - contents.getMargin().y * 2; 
+			cSize.y = innerSize.y - contents.getMargin().y * 2; 
 		}
 		else if (contents.isSet(CENTER_VERTICAL))
-			cPos.y = (size.y - cSize.y) / 2;	
+			cPos.y = (innerSize.y - cSize.y) / 2;	
 		
 		contents.relayout();
 	}
