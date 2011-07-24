@@ -196,7 +196,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(rectGridViewerContainer, "Rectangle");
 		
 		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
-		rectGridViewerContainer.setContents(gridViewer);
+		rectGridViewerContainer.setContents(rectGridViewer);
 		
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");

@@ -150,8 +150,8 @@ public abstract class Widget
 			Vector2i start = pos;
 			Vector2i end = pos.add(size);
 			
-			if ((event.position.x < start.x) || (event.position.y < start.y)
-					|| (event.position.x > end.x) || (event.position.y > end.y))
+			if ((event.position.x <= start.x) || (event.position.y <= start.y)
+					|| (event.position.x >= end.x) || (event.position.y >= end.y))
 			{
 				mouseover = false;
 				if (!event.isMouseRelease() && !focused) return false;

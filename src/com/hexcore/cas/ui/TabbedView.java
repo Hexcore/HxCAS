@@ -84,4 +84,34 @@ public class TabbedView extends View
 		
 		//window.renderBorder(gl, pos, innerSize, new Colour(0.0f, 0.5f, 1.0f));
 	}
+
+	@Override
+	public boolean handleEvent(Event event, Vector2i position)
+	{
+		boolean handled = false;
+		
+		if ((event.type == Event.Type.MOUSE_CLICK) && !event.pressed)
+		{
+			if ((event.position.x >= position.x) && (event.position.y >= position.y) && (event.position.y <= position.y + window.getTheme().getTabHeight()))
+			{
+				int	x = position.x;
+				for (int i = 0; i < widgets.size(); i++)
+				{
+					Vector2i tabSize = window.getTheme().getTabSize(captions.get(i));
+					x += tabSize.x;
+					if (event.position.x <= x)
+					{
+						setIndex(i);
+						break;
+					}
+				}
+				handled = true;
+			}
+		}
+		
+		if (!handled && super.handleEvent(event, position)) 
+			handled = true;
+		
+		return handled;
+	}
 }
