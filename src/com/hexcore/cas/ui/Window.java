@@ -230,21 +230,84 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         relayout();
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, Colour colour)
+	private int addCornerToArray(int index, Vector2i[] array, Vector2i start, int radius, int quarter)
+	{
+		for (int i = 0; i <= radius; i++)
+		{
+			double angle = ((double)i / radius) * Math.PI / 2.0 + (Math.PI / 2) * (quarter - 2);
+			Vector2i p = new Vector2i(start.x + (int)(Math.sin(angle) * radius), start.y + (int)(Math.cos(angle) * radius));
+			array[index++] = p;
+		}
+		return index;
+	}
+		
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
+	{		
+		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+		int	index = 0;
+		
+		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
+		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		
+		renderPolygon(gl, pos, points, false, colour);
+	}
+	
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
+	{
+		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+		int	index = 0;
+		
+		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
+		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		
+		renderPolygon(gl, pos, points, false, fill);
+	}	
+	
+	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
+	{
+		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+		int	index = 0;
+		
+		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
+		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		
+		renderPolygon(gl, pos, points, true, colour);
+	}	
+	
+	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
+	{
+		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+		int	index = 0;
+		
+		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
+		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
+		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		
+		renderPolygon(gl, pos, points, true, fill);
+	}
+	
+	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Colour colour)
 	{
 		GL2 gl2 = gl.getGL2();
 		
 		applyColour(gl2, colour);
-        gl2.glBegin(GL.GL_TRIANGLE_FAN);
+        gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
         for (Vector2i vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
 		gl2.glEnd();
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, Fill fill)
+	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Fill fill)
 	{
 		if (fill.getType() == Fill.Type.SOLID)
 		{
-			renderPolygon(gl, pos, vertices, fill.getColour(0));
+			renderPolygon(gl, pos, vertices, outline, fill.getColour(0));
 			return;
 		}
 		
@@ -256,7 +319,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		Colour	colour = fill.getColour(0);
 		Recti 	rect = Recti.getBoundingBox(vertices);
 		
-        gl2.glBegin(GL.GL_TRIANGLE_FAN);
+        gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
         	for (Vector2i vertex : vertices)
         	{        		
         		if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
@@ -269,7 +332,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         	}
 		gl2.glEnd();
 	}
-	
+		
 	public void renderRectangle(GL gl, Vector2i pos, Image image)
 	{
 		renderRectangle(gl, pos, image.getSize(), image);
@@ -292,34 +355,61 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		image.unbind();
 	}
 	
-	public void renderRectangle(GL gl, Vector2i pos, Vector2i size, Fill fill)
+	public void renderRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
 	{
 		if (fill == null) return;
 		
-		if (fill.getType() == Fill.Type.SOLID)
-			renderRectangle(gl, pos, size, fill.getColour(0));
-		else if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
-			renderRectangleTB(gl, pos, size, fill.getColour(0), fill.getColour(1));
-		else if (fill.getType() == Fill.Type.HORIZONTAL_GRADIENT)
-			renderRectangleLR(gl, pos, size, fill.getColour(0), fill.getColour(1));
-		else if ((fill.getType() == Fill.Type.IMAGE) || (fill.getType() == Fill.Type.IMAGE_COLOUR))
+		if (radius <= 0)
 		{
-			Vector2i imagePos = new Vector2i(pos);
-			Vector2i imageSize = new Vector2i(size);
-			
-			if ((fill.getFlags() & Fill.CENTER) != 0)
-			{
-				imageSize = fill.getImage().getSize();
-				imagePos = pos.add(new Vector2i((size.x - imageSize.x) / 2, (size.y - imageSize.y) / 2));
-			}
-			
-			if (fill.getType() == Fill.Type.IMAGE)
-				renderRectangle(gl, imagePos, imageSize, fill.getImage());
-			else if (fill.getType() == Fill.Type.IMAGE_COLOUR)
-			{
+			if (fill.getType() == Fill.Type.SOLID)
 				renderRectangle(gl, pos, size, fill.getColour(0));
-				renderRectangle(gl, imagePos, imageSize, fill.getImage());	
+			else if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
+				renderRectangleTB(gl, pos, size, fill.getColour(0), fill.getColour(1));
+			else if (fill.getType() == Fill.Type.HORIZONTAL_GRADIENT)
+				renderRectangleLR(gl, pos, size, fill.getColour(0), fill.getColour(1));
+			else if ((fill.getType() == Fill.Type.IMAGE) || (fill.getType() == Fill.Type.IMAGE_COLOUR))
+			{
+				Vector2i imagePos = new Vector2i(pos);
+				Vector2i imageSize = new Vector2i(size);
+				
+				if ((fill.getFlags() & Fill.CENTER) != 0)
+				{
+					imageSize = fill.getImage().getSize();
+					imagePos = pos.add(new Vector2i((size.x - imageSize.x) / 2, (size.y - imageSize.y) / 2));
+				}
+				
+				if (fill.getType() == Fill.Type.IMAGE)
+					renderRectangle(gl, imagePos, imageSize, fill.getImage());
+				else if (fill.getType() == Fill.Type.IMAGE_COLOUR)
+				{
+					renderRectangle(gl, pos, size, fill.getColour(0));
+					renderRectangle(gl, imagePos, imageSize, fill.getImage());	
+				}
 			}
+		}
+		else
+		{
+			if ((fill.getType() == Fill.Type.IMAGE) || (fill.getType() == Fill.Type.IMAGE_COLOUR))
+			{
+				Vector2i imagePos = new Vector2i(pos);
+				Vector2i imageSize = new Vector2i(size);
+				
+				if ((fill.getFlags() & Fill.CENTER) != 0)
+				{
+					imageSize = fill.getImage().getSize();
+					imagePos = pos.add(new Vector2i((size.x - imageSize.x) / 2, (size.y - imageSize.y) / 2));
+				}
+				
+				if (fill.getType() == Fill.Type.IMAGE)
+					renderRectangle(gl, imagePos, imageSize, fill.getImage());
+				else if (fill.getType() == Fill.Type.IMAGE_COLOUR)
+				{
+					renderRoundedRectangle(gl, pos, size, radius, fill.getColour(0));
+					renderRectangle(gl, imagePos, imageSize, fill.getImage());	
+				}
+			}
+			else
+				renderRoundedRectangle(gl, pos, size, radius, fill);
 		}
 	}
 	
@@ -364,22 +454,27 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		gl2.glEnd();
 	}
 	
-	public void renderBorder(GL gl, Vector2i pos, Vector2i size, Fill fill)
+	public void renderBorder(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
 	{
 		if (fill == null) return;
 		
-		if (fill.getType() == Fill.Type.SOLID)
-			renderBorder(gl, pos, size, fill.getColour(0));
-		else if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
-			renderBorderTB(gl, pos, size, fill.getColour(0), fill.getColour(1));
-		else if (fill.getType() == Fill.Type.HORIZONTAL_GRADIENT)
-			renderBorderLR(gl, pos, size, fill.getColour(0), fill.getColour(1));		
+		if (radius <= 0)
+		{
+			if (fill.getType() == Fill.Type.SOLID)
+				renderBorder(gl, pos, size, fill.getColour(0));
+			else if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
+				renderBorderTB(gl, pos, size, fill.getColour(0), fill.getColour(1));
+			else if (fill.getType() == Fill.Type.HORIZONTAL_GRADIENT)
+				renderBorderLR(gl, pos, size, fill.getColour(0), fill.getColour(1));	
+		}
+		else
+			renderRoundedBorder(gl, pos, size, radius, fill);
 	}
 	
 	public void renderBorder(GL gl, Vector2i pos, Vector2i size, Colour colour)
 	{
 		if (colour.a <= 0.0f) return;
-		
+
 		GL2 gl2 = gl.getGL2();
 		
 		applyColour(gl2, colour); 
@@ -388,7 +483,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	    	gl2.glVertex2f(pos.x+size.x-0.5f,pos.y+size.y-0.5f);
 			gl2.glVertex2f(pos.x+0.5f,pos.y+size.y-0.5f);
 			gl2.glVertex2f(pos.x+0.5f,pos.y+0.5f);
-		gl2.glEnd();
+		gl2.glEnd();			
 	}
 	
 	public void renderBorderTB(GL gl, Vector2i pos, Vector2i size, Colour top, Colour bottom)

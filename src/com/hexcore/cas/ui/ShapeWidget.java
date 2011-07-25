@@ -27,6 +27,6 @@ public class ShapeWidget extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		
-		window.renderRectangle(gl, pos, size, fill);
+		window.renderRectangle(gl, pos, size, 0, fill);
 	}
 }

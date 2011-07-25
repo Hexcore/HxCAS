@@ -4,6 +4,7 @@ Button
 	background: rgb(0.85, 0.85, 0.85) rgb(0.7, 0.7, 0.7);
 	border: rgb(1.0, 1.0, 1.0) rgb(0.5, 0.5, 0.5);
 	text-colour: rgb(0.0, 0.0, 0.0);
+	border-radius: 2;
 }
 
 Button : focus
@@ -102,7 +103,8 @@ CheckBox : checked : focus
 CheckBoxCaption
 {
 	text-colour: rgb(0.0, 0.0, 0.0);
-	padding: 3 3;
+	padding: 5 5;
+	border-radius: 2;
 }
 
 CheckBoxCaption : focus

@@ -110,7 +110,7 @@ public class ScrollableContainer extends Container
 		if (contents != null)
 		{
 			window.setClipping(gl, pos, size);
-			if (background != null) window.renderRectangle(gl, pos, size, background);
+			if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 			contents.render(gl, pos.subtract(scrollPos));
 			window.resetClipping(gl);
 			

@@ -75,7 +75,7 @@ public class TabbedView extends View
 		if (background == null) 
 			window.getTheme().renderTabInside(gl, pos, innerSize);
 		else
-			window.renderRectangle(gl, pos, innerSize, background);
+			window.renderRectangle(gl, pos, innerSize, 0, background);
 		
 		
 		Widget contents = getWidget();

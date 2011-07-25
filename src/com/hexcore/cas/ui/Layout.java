@@ -64,7 +64,7 @@ public class Layout extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		
-		if (background != null) window.renderRectangle(gl, pos, size, background);
+		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		
 		for (Widget component : components)
 			component.render(gl, pos);

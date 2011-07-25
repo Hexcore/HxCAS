@@ -61,7 +61,7 @@ public class View extends Widget
 		Vector2i pos = this.position.add(position);
 		
 		window.setClipping(gl, pos, size);
-		if (background != null) window.renderRectangle(gl, pos, size, background);
+		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		Widget contents = getWidget();
 		if (contents != null) contents.render(gl, pos);
 		window.resetClipping(gl);

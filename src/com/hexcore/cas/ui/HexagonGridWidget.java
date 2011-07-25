@@ -54,7 +54,7 @@ public class HexagonGridWidget extends GridWidget
 				
 				if (cell.getValue(0) > 0) colour = Colour.LIGHT_GREY;
 					
-				window.renderPolygon(gl, p, hexagon, colour);
+				window.renderPolygon(gl, p, hexagon, false, colour);
 				
 				//window.renderRectangle(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), colour);
 				//window.renderBorder(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), Colour.WHITE);
