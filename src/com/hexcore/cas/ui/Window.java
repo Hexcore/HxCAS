@@ -57,7 +57,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		//////////////////
 		
-		canvas = new GLCanvas();
+		GLCapabilities capabilites = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+		capabilites.setDoubleBuffered(true);
+		capabilites.setSampleBuffers(true);
+		capabilites.setNumSamples(4);
+		
+		canvas = new GLCanvas(capabilites);
 		canvas.setPreferredSize(new Dimension(width, height));
 		canvas.setAutoSwapBufferMode(false);
 
@@ -86,7 +91,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		canvas.addMouseListener(this);
 		canvas.addMouseMotionListener(this);
 						
-		animator = new FPSAnimator(canvas, 30);
+		animator = new FPSAnimator(canvas, 60);
 		animator.start();
 	}
 	
