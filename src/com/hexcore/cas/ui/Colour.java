@@ -14,6 +14,14 @@ public class Colour
 	
 	public float r, g, b, a;
 	
+	public Colour(Colour colour)
+	{
+		this.r = colour.r;
+		this.b = colour.b;
+		this.g = colour.g;
+		this.a = colour.a;
+	}	
+	
 	public Colour(float r, float g, float b)
 	{
 		this.r = r;
