@@ -52,12 +52,13 @@ public class HexagonGridWidget extends GridWidget
 				Vector2i	p = pos.add(x*r*2, y*(s+h));
 				if ((y & 1) == 1) p.inc(r, 0);
 				
-				if (cell.getValue(0) > 0) colour = Colour.LIGHT_GREY;
+				if (colourRule != null)
+					colour = colourRule.getColour(cell.getValue(0));
+				else if (cell.getValue(0) > 0) 
+					colour = Colour.LIGHT_GREY;
 					
 				window.renderPolygon(gl, p, hexagon, false, colour);
-				
-				//window.renderRectangle(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), colour);
-				//window.renderBorder(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), Colour.WHITE);
+				window.renderPolygon(gl, p, hexagon, true, Colour.WHITE);
 			}
 	}	
 }

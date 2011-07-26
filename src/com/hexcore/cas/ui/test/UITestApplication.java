@@ -1,6 +1,7 @@
 package com.hexcore.cas.ui.test;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.test.GameOfLife;
@@ -61,7 +62,8 @@ public class UITestApplication implements WindowEventListener
 	
 	public ScrollableContainer	gridViewerContainer;
 	public GameOfLife			gameOfLife;
-	public HexagonGridWidget	gridViewer; 
+	public HexagonGridWidget	gridViewer;
+	public ColourRule			colourRule;
 	
 	public Button				nextIterationButton;
 	
@@ -80,6 +82,10 @@ public class UITestApplication implements WindowEventListener
 		rectGrid.getCell(3, 2).setValue(0, 1);
 		rectGrid.getCell(2, 1).setValue(0, 1);
 		rectGameOfLife = new GameOfLife(rectGrid);
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
 		
 		window = new Window("GUI Test", 800, 600);
 		window.addListener(this);
@@ -187,6 +193,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(gridViewerContainer, "Hexagon");
 		
 		gridViewer = new HexagonGridWidget((HexagonGrid)gameOfLife.getGrid(), 16);
+		gridViewer.setColourRule(colourRule);
 		gridViewerContainer.setContents(gridViewer);
 		
 		
@@ -196,8 +203,9 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(rectGridViewerContainer, "Rectangle");
 		
 		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
+		rectGridViewer.setColourRule(colourRule);
 		rectGridViewerContainer.setContents(rectGridViewer);
-		
+	
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
 		gridViewLayout.add(nextIterationButton);
