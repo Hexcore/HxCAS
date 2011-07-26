@@ -40,13 +40,13 @@ public class Colour
 	
 	public Colour mix(Colour other)
 	{
-		return new Colour(r * 0.5f + other.r * 0.5f, g * 0.5f + other.g * 0.5f, b * 0.5f + other.b * 0.5f);
+		return new Colour((r + other.r) * 0.5f, (g + other.g) * 0.5f, (b + other.b) * 0.5f, (a + other.a) * 0.5f);
 	}
 	
 	public Colour mix(Colour other, float amount)
 	{
 		float inv = 1 - amount;
-		return new Colour(r * inv + other.r * amount, g * inv + other.g * amount, b * inv + other.b * amount);
+		return new Colour(r * inv + other.r * amount, g * inv + other.g * amount, b * inv + other.b * amount, a * inv + other.a * amount);
 	}
 	
 	public String toString()
