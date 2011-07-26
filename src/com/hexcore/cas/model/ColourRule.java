@@ -6,9 +6,12 @@ import com.hexcore.cas.ui.Colour;
 
 public class ColourRule
 {
+	/*
+	 *  A Range doesn't not include the end of the range (the value of 'to')
+	 */
 	public static class Range
 	{
-		enum Type {SOLID, GRADIENT};
+		public enum Type {SOLID, GRADIENT};
 		
 		public double from;
 		public double to;
@@ -64,7 +67,7 @@ public class ColourRule
 	public Colour getColour(double value)
 	{
 		for (Range range : ranges)
-			if ((value >= range.from) && (value <= range.to)) 
+			if ((value >= range.from) && (value < range.to)) 
 				return range.getColourAt(value);
 		
 		return Colour.BLACK;

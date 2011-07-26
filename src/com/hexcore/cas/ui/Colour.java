@@ -49,6 +49,11 @@ public class Colour
 		return new Colour(r * inv + other.r * amount, g * inv + other.g * amount, b * inv + other.b * amount, a * inv + other.a * amount);
 	}
 	
+	public boolean equals(Colour other)
+	{
+		return (r == other.r) && (g == other.g) && (b == other.b) && (a == other.a);
+	}
+	
 	public String toString()
 	{
 		return "Colour<" + r + ", " + g + ", " + b + ", " + a + ">";
