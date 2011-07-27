@@ -4,6 +4,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
@@ -22,6 +23,7 @@ import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.TriangleGridWidget;
 import com.hexcore.cas.ui.View;
 import com.hexcore.cas.ui.Widget;
 import com.hexcore.cas.ui.Window;
@@ -56,6 +58,8 @@ public class UITestApplication implements WindowEventListener
 	public LinearLayout			gridViewLayout;
 	public TabbedView			tabbedView;
 	
+	public ColourRule			colourRule;
+	
 	public ScrollableContainer	rectGridViewerContainer;
 	public GameOfLife			rectGameOfLife;
 	public RectangleGridWidget	rectGridViewer; 
@@ -63,25 +67,37 @@ public class UITestApplication implements WindowEventListener
 	public ScrollableContainer	gridViewerContainer;
 	public GameOfLife			gameOfLife;
 	public HexagonGridWidget	gridViewer;
-	public ColourRule			colourRule;
+	
+	public ScrollableContainer	triGridViewerContainer;
+	public GameOfLife			triGameOfLife;
+	public TriangleGridWidget	triGridViewer;
 	
 	public Button				nextIterationButton;
 	
 	UITestApplication()
 	{
-		HexagonGrid grid = new HexagonGrid(new Vector2i(10, 10));
-		grid.getCell(5, 4).setValue(0, 1);
-		grid.getCell(5, 5).setValue(0, 1);
-		grid.getCell(5, 6).setValue(0, 1);		
+		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
+		grid.getCell(6, 5).setValue(0, 1);
+		grid.getCell(6, 6).setValue(0, 1);
+		grid.getCell(6, 7).setValue(0, 1);		
 		gameOfLife = new GameOfLife(grid);
 		
-		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(10, 10));
-		rectGrid.getCell(1, 3).setValue(0, 1);
-		rectGrid.getCell(2, 3).setValue(0, 1);
-		rectGrid.getCell(3, 3).setValue(0, 1);
+		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(12, 12));
+		rectGrid.getCell(2, 4).setValue(0, 1);
+		rectGrid.getCell(3, 4).setValue(0, 1);
+		rectGrid.getCell(4, 4).setValue(0, 1);
+		rectGrid.getCell(4, 3).setValue(0, 1);
 		rectGrid.getCell(3, 2).setValue(0, 1);
-		rectGrid.getCell(2, 1).setValue(0, 1);
 		rectGameOfLife = new GameOfLife(rectGrid);
+		
+		TriangleGrid triGrid = new TriangleGrid(new Vector2i(14, 14));
+		triGrid.getCell(7, 6).setValue(0, 1);
+		triGrid.getCell(7, 7).setValue(0, 1);
+		triGrid.getCell(7, 8).setValue(0, 1);
+		triGrid.getCell(6, 6).setValue(0, 1);
+		triGrid.getCell(6, 7).setValue(0, 1);
+		triGrid.getCell(6, 8).setValue(0, 1);
+		triGameOfLife = new GameOfLife(triGrid);		
 		
 		colourRule = new ColourRule();
 		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
@@ -186,7 +202,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.setFlag(Widget.FILL);
 		gridViewLayout.add(tabbedView);
 		
-		
+		// Hexagon Grid
 		gridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
 		gridViewerContainer.setFlag(Widget.FILL);
 		gridViewerContainer.setBackground(new Fill(Colour.BLACK));
@@ -196,16 +212,25 @@ public class UITestApplication implements WindowEventListener
 		gridViewer.setColourRule(colourRule);
 		gridViewerContainer.setContents(gridViewer);
 		
-		
+		// Rectangle Grid
 		rectGridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
 		rectGridViewerContainer.setFlag(Widget.FILL);
 		rectGridViewerContainer.setBackground(new Fill(Colour.BLACK));
 		tabbedView.add(rectGridViewerContainer, "Rectangle");
 		
-		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
+		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGridViewer.setColourRule(colourRule);
 		rectGridViewerContainer.setContents(rectGridViewer);
 	
+		// Triangle Grid
+		triGridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
+		triGridViewerContainer.setFlag(Widget.FILL);
+		triGridViewerContainer.setBackground(new Fill(Colour.BLACK));
+		tabbedView.add(triGridViewerContainer, "Triangle");
+		
+		triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
+		triGridViewer.setColourRule(colourRule);
+		triGridViewerContainer.setContents(triGridViewer);	
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
 		gridViewLayout.add(nextIterationButton);
@@ -241,8 +266,21 @@ public class UITestApplication implements WindowEventListener
 			}
 			else if (event.target == nextIterationButton)
 			{
-				gameOfLife.generateNextGeneration();
-				gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
+				switch (tabbedView.getIndex())
+				{
+					case 0:
+						gameOfLife.generateNextGeneration();
+						gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
+						break;
+					case 1:
+						rectGameOfLife.generateNextGeneration();
+						rectGridViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
+						break;
+					case 2:
+						triGameOfLife.generateNextGeneration();
+						triGridViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
+						break;					
+				}
 			}
 		}
 		else if (event.type == Event.Type.CHANGE)
