@@ -6,11 +6,8 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.HexagonGrid;
 
-public class HexagonGridWidget extends GridWidget
+public class HexagonGridWidget extends GridWidget<HexagonGrid>
 {
-	private HexagonGrid		grid;
-	private int				tileSize;
-	
 	public HexagonGridWidget(HexagonGrid grid, int tileSize)
 	{
 		this(new Vector2i(0, 0), grid, tileSize);
@@ -18,14 +15,9 @@ public class HexagonGridWidget extends GridWidget
 
 	public HexagonGridWidget(Vector2i position, HexagonGrid grid, int tileSize)
 	{
-		super(new Vector2i(grid.getWidth() * 2 * (int)(tileSize * 0.866f) + (int)(tileSize * 0.866f), grid.getHeight() * (tileSize + tileSize / 2) + tileSize / 2));
-		this.grid = grid;
-		this.tileSize = tileSize;
-	}
-	
-	public void setGrid(HexagonGrid grid)
-	{
-		this.grid = grid;
+		super(new Vector2i(grid.getWidth() * 2 * (int)(tileSize * 0.866f) + (int)(tileSize * 0.866f), 
+						   grid.getHeight() * (tileSize + tileSize / 2) + tileSize / 2),
+						   grid, tileSize);
 	}
 
 	@Override

@@ -6,28 +6,18 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
 
-public class TriangleGridWidget extends GridWidget
+public class TriangleGridWidget extends GridWidget<TriangleGrid>
 {
-	private TriangleGrid	grid;
-	private int				tileSize;
-	
 	public TriangleGridWidget(TriangleGrid grid, int tileSize)
 	{
-		super(new Vector2i((grid.getWidth() * tileSize) / 2 + tileSize / 2, grid.getHeight() * (int)(tileSize * Math.sqrt(2) * 0.5)));
-		this.grid = grid;
-		this.tileSize = tileSize;
+		this(new Vector2i(0, 0), grid, tileSize);
 	}
 
 	public TriangleGridWidget(Vector2i position, TriangleGrid grid, int tileSize)
 	{
-		super(position, new Vector2i((grid.getWidth() * tileSize) / 2 + tileSize / 2, grid.getHeight() * (int)(tileSize * Math.sqrt(2) * 0.5)));
-		this.grid = grid;
-		this.tileSize = tileSize;
-	}
-
-	public void setGrid(TriangleGrid grid)
-	{
-		this.grid = grid;
+		super(position, new Vector2i((grid.getWidth() * tileSize) / 2 + tileSize / 2, 
+								      grid.getHeight() * (int)(tileSize * Math.sqrt(2) * 0.5)),
+								      grid, tileSize);
 	}
 	
 	@Override
