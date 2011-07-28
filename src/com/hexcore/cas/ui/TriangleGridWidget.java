@@ -45,8 +45,8 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 				Vector2i 	p = new Vector2i(x * r, y * h);
 				
 				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(0));
-				else if (cell.getValue(0) > 0) 
+					colour = colourRule.getColour(cell.getValue(colourProperty));
+				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 				
 				if ((x & 1) == (y & 1)) // Checker-board pattern

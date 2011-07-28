@@ -30,8 +30,8 @@ public class RectangleGridWidget extends GridWidget<RectangleGrid>
 				Colour		colour = Colour.DARK_GREY;
 				
 				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(0));
-				else if (cell.getValue(0) > 0) 
+					colour = colourRule.getColour(cell.getValue(colourProperty));
+				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
 				window.renderRectangle(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), colour);

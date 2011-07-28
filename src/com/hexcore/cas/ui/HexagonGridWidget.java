@@ -25,7 +25,7 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 	{
 		int s = tileSize;
 		int	h = tileSize / 2;
-		int r = (int)(tileSize * 0.866f);
+		int r = (int)(tileSize * Math.cos(30.0 * Math.PI / 180.0));
 		
 		Vector2i 	pos = this.position.add(position);
 		Vector2i[]	hexagon = new Vector2i[6];
@@ -45,8 +45,8 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 				if ((y & 1) == 1) p.inc(r, 0);
 				
 				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(0));
-				else if (cell.getValue(0) > 0) 
+					colour = colourRule.getColour(cell.getValue(colourProperty));
+				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
 				window.renderPolygon(gl, p, hexagon, false, colour);
