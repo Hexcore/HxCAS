@@ -13,7 +13,7 @@
 	<!-- Compiles all Java Source. Location safe -->
 	<target name="compile" depends="clean">
 		<mkdir dir="bin"/>
-		<java jar="CoCo/coco.jar" fork="true" errorproperty="coco.result" failonerror="true">
+		<java jar="CoCo/Coco.jar" fork="true" errorproperty="coco.result" failonerror="true">
 			<arg line="CoCo/CAL.atg -package com.hexcore.cas.rulesystems"/>
 		</java>
 		<mkdir dir="${parser.dir}"/>
