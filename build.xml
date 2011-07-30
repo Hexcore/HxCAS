@@ -1,27 +1,37 @@
 <project name="HexCore CAS" default="compile">
 
+	<!-- WARNING! Some Targets are designed to run on the configured server only!-->
 	<property name="jar.dir" value="jar"/>
 	<property name="testresult.dir" value="testResults"/>
 	<property name="workspace.dir" value="/var/lib/hudson/jobs/HexCore CAS/workspace"/>
-
+	<property name="parser.dir" value="src/com/hexcore/cas/rulesystems"/>
 	
 	<path id="classpath">
 		<fileset dir="${jar.dir}" includes="**/*.jar"/>
 	</path>
 
-
-
-
+	<!-- Compiles all Java Source. Location safe -->
 	<target name="compile" depends="clean">
 		<mkdir dir="bin"/>
+		<java jar="CoCo/Coco.jar" fork="true" errorproperty="coco.result" failonerror="true">
+			<arg line="CoCo/CAL.atg -package com.hexcore.cas.rulesystems"/>
+		</java>
+		<mkdir dir="${parser.dir}"/>
+		<move todir="${parser.dir}">
+			<fileset dir="CoCo" includes="*.java"/>
+		</move>
 		<javac srcdir="src" destdir="bin" classpathref="classpath"/>
+		
 	</target>
 
+	<!-- Removes all previously compiled binaries -->
 	<target name="clean">
 		<delete dir="bin"/>
 	</target>
-
-	<target name="run_tests" depends="compile">
+	
+	<!-- Runs the entire TestSuit. All test files must be named with Test*.java -->
+	<!-- This target is location dependant! -->
+	<target name="run_tests_hudson" depends="compile">
 		<junit printsummary="on" showoutput="true">
 			<classpath>
 				<pathelement path="./bin"/>
@@ -56,5 +66,5 @@
 	</target>
 
 
-	<target name="complete" depends="run_tests"/>
+	<target name="complete" depends="run_tests_hudson"/>
 </project>
