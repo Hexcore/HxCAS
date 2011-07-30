@@ -1,0 +1,60 @@
+<project name="HexCore CAS" default="compile">
+
+	<property name="jar.dir" value="jar"/>
+	<property name="testresult.dir" value="testResults"/>
+	<property name="workspace.dir" value="/var/lib/hudson/jobs/HexCore CAS/workspace"/>
+
+	
+	<path id="classpath">
+		<fileset dir="${jar.dir}" includes="**/*.jar"/>
+	</path>
+
+
+
+
+	<target name="compile" depends="clean">
+		<mkdir dir="bin"/>
+		<javac srcdir="src" destdir="bin" classpathref="classpath"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="bin"/>
+	</target>
+
+	<target name="run_tests" depends="compile">
+		<junit printsummary="on" showoutput="true">
+			<classpath>
+				<pathelement path="./bin"/>
+				<pathelement path="${jar.dir}"/>
+			</classpath>
+
+			<formatter type="xml"/>
+
+			<batchtest todir="${testresult.dir}">
+				<fileset dir="bin">
+					<include name="**/*/Test*"/>
+					<exclude name="**/*/*$*"/>
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<tstamp>
+			<format property="buildtime" pattern="dd-MM-yyyy-hhmmss" offset="2" unit="hour"/>
+		</tstamp>
+
+		<mkdir dir="${testresult.dir}/${buildtime}"/>
+		
+		<move todir="${testresult.dir}/${buildtime}">
+			<fileset dir="${testresult.dir}" includes="*.xml"/>
+		</move>
+		
+		<mkdir dir="${workspace.dir}/${testresult.dir}/${buildtime}"/>
+
+		<copy todir="${workspace.dir}/${testresult.dir}/${buildtime}">
+			<fileset dir="${testresult.dir}/${buildtime}"/>
+		</copy>
+	</target>
+
+
+	<target name="complete" depends="run_tests"/>
+</project>
