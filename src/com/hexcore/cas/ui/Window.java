@@ -128,6 +128,18 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		return dialog.getFile();
 	}
 	
+	public float getAspectRatio()
+	{
+		return (float)size.x / size.y;
+	}
+	
+	public void setViewport(GL gl, Vector2i position, Vector2i size)
+	{
+		GL2 gl2 = gl.getGL2();
+		
+		gl2.glViewport(position.x, this.size.y - (size.y + position.y), size.x, size.y);
+	}
+	
 	public void setClipping(GL gl, Vector2i position, Vector2i size)
 	{
 		GL2 gl2 = gl.getGL2();
@@ -141,7 +153,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl2.glLoadIdentity();
 	}
 	
-	public void resetClipping(GL gl)
+	public void resetView(GL gl)
 	{
 		GL2 gl2 = gl.getGL2();
 		

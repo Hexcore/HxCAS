@@ -8,7 +8,7 @@ public abstract class GridWidget<T extends Grid> extends Widget
 {
 	protected T		grid;
 	protected int	tileSize;
-	protected int	colourProperty; //< The property that is used to determine the colour to draw
+	protected int	colourProperty = 0; //< The property that is used to determine the colour to use
 	
 	protected ColourRule	colourRule = null; // This is temporary
 	
@@ -17,7 +17,6 @@ public abstract class GridWidget<T extends Grid> extends Widget
 		super(size);
 		this.grid = grid;
 		this.tileSize = tileSize;
-		this.colourProperty = 0;
 	}
 
 	public GridWidget(Vector2i position, Vector2i size, T grid, int tileSize)
@@ -25,7 +24,6 @@ public abstract class GridWidget<T extends Grid> extends Widget
 		super(position, size);
 		this.grid = grid;
 		this.tileSize = tileSize;
-		this.colourProperty = 0;
 	}
 
 	public void setColourProperty(int propertyIndex)

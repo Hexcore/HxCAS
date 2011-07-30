@@ -1,5 +1,7 @@
 package com.hexcore.cas.ui;
 
+import java.nio.FloatBuffer;
+
 public class Colour
 {
 	public final static Colour	BLACK = new Colour(0.0f, 0.0f, 0.0f);
@@ -57,5 +59,15 @@ public class Colour
 	public String toString()
 	{
 		return "Colour<" + r + ", " + g + ", " + b + ", " + a + ">";
+	}
+	
+	public FloatBuffer toFloatBuffer()
+	{
+		FloatBuffer fb = FloatBuffer.allocate(4);
+		fb.put(0, r);
+		fb.put(1, g);
+		fb.put(2, b);
+		fb.put(3, a);
+		return fb;
 	}
 }

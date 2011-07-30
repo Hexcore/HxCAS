@@ -64,7 +64,7 @@ public class View extends Widget
 		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		Widget contents = getWidget();
 		if (contents != null) contents.render(gl, pos);
-		window.resetClipping(gl);
+		window.resetView(gl);
 		
 		//window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}

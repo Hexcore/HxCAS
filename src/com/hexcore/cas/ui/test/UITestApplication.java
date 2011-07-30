@@ -17,6 +17,7 @@ import com.hexcore.cas.ui.HexagonGridWidget;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.Panel;
+import com.hexcore.cas.ui.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.TabbedView;
@@ -71,6 +72,8 @@ public class UITestApplication implements WindowEventListener
 	public ScrollableContainer	triGridViewerContainer;
 	public GameOfLife			triGameOfLife;
 	public TriangleGridWidget	triGridViewer;
+	
+	public RectangleGrid3DWidget	rectGrid3DViewer; 	
 	
 	public Button				nextIterationButton;
 	
@@ -235,6 +238,13 @@ public class UITestApplication implements WindowEventListener
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
 		gridViewLayout.add(nextIterationButton);
 		
+		// 3D Rectangle Grid
+		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
+		rectGrid3DViewer.setFlag(Widget.FILL);
+		rectGrid3DViewer.setColourRule(colourRule);
+		rectGrid3DViewer.setHeightScale(16.0f);
+		tabbedView.add(rectGrid3DViewer, "3D Rectangle");
+		
 		window.relayout();
 	}
 	
@@ -273,13 +283,15 @@ public class UITestApplication implements WindowEventListener
 						gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
 						break;
 					case 1:
+					case 3:
 						rectGameOfLife.generateNextGeneration();
 						rectGridViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
+						rectGrid3DViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
 						break;
 					case 2:
 						triGameOfLife.generateNextGeneration();
 						triGridViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
-						break;					
+						break;							
 				}
 			}
 		}
