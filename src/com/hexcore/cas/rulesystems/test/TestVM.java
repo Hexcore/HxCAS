@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import com.hexcore.cas.rulesystems.HexcoreVM;
 import com.hexcore.cas.test.PrivateAccessor;
 
+@SuppressWarnings("unchecked")
 public class TestVM extends TestCase
 {
 	HexcoreVM 			vm;
@@ -602,6 +603,7 @@ public class TestVM extends TestCase
 		
 		pa.setFieldValue("IR", "BZE 23");
 		pa.invokeMethod("execute", (Object[])null);
+		
 		
 		Stack<Integer> stack = (Stack<Integer>)pa.getFieldValue("oStack");
 		Integer SP = (Integer)pa.getFieldValue("SP");
