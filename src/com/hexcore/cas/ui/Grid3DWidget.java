@@ -6,24 +6,29 @@ import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.media.opengl.glu.GLU;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Grid;
 
 public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 {
 	protected int		heightProperty = 0; //< The property that is used to determine the height
 	protected float		heightScale = 1.0f;
-	protected float		yaw = 0.0f, pitch = -30.0f, zoom = -200.0f;
+	
+	protected float		yaw = 0.0f, pitch = -30.0f;
+	protected Vector3f	cameraPosition;
+	
 	protected boolean	cameraMoving = false;
 	protected Vector2i	cameraMoveStart = new Vector2i();
 	
 	public Grid3DWidget(Vector2i size, T grid, int tileSize)
 	{
-		super(size, grid, tileSize);
+		this(new Vector2i(), size, grid, tileSize);
 	}
 
 	public Grid3DWidget(Vector2i position, Vector2i size, T grid, int tileSize)
 	{
 		super(position, size, grid, tileSize);
+		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
 	}
 	
 	public void setHeightProperty(int propertyIndex)
@@ -52,7 +57,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
         glu.gluPerspective(45.0f, (float)size.x / size.y, 0.1f, 1000.0f);
         gl2.glRotatef(pitch, 1.0f, 0.0f, 0.0f);
         gl2.glRotatef(yaw, 0.0f, 0.0f, 1.0f);
-        gl2.glTranslatef(-grid.getWidth() * tileSize / 2.0f, -grid.getHeight() * tileSize / 2.0f, zoom);
+        gl2.glTranslatef(-cameraPosition.x, -cameraPosition.y, -cameraPosition.z);
         gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl2.glLoadIdentity();
         
@@ -104,7 +109,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		}
 		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
-			zoom += event.amount;
+			cameraPosition.z += event.amount;
 		}
 		
 		return false;
