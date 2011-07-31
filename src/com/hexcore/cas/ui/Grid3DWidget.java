@@ -13,6 +13,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 {
 	protected int		heightProperty = 0; //< The property that is used to determine the height
 	protected float		heightScale = 1.0f;
+	protected boolean	drawGrid = true;
 	
 	protected float		yaw = 0.0f, pitch = -30.0f;
 	protected Vector3f	cameraPosition;
@@ -29,6 +30,14 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		super(position, size, grid, tileSize);
 		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
+	}
+	
+	@Override
+	public boolean canGetFocus() {return true;}
+
+	public void setDrawGrid(boolean state)
+	{
+		drawGrid = state;
 	}
 	
 	public void setHeightProperty(int propertyIndex)
@@ -85,9 +94,13 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
 		{
+			window.requestFocus(this);
 			cameraMoveStart.set(event.position);
-			cameraMoving = true;
 			return true;
+		}
+		else if (event.type == Event.Type.GAINED_FOCUS)
+		{
+			cameraMoving = true;
 		}
 		else if ((event.type == Event.Type.LOST_FOCUS) || ((event.type == Event.Type.MOUSE_CLICK) && !event.pressed))
 		{

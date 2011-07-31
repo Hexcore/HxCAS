@@ -90,8 +90,17 @@ public abstract class Widget
 		
 	}
 	
-	public void setVisible(boolean state) {this.visible = state;}
-	public void toggleVisibility() {visible = !visible;}
+	public void setVisible(boolean state) 
+	{
+		this.visible = state;
+		if (focused) window.giveUpFocus(this);
+	}
+	
+	public void toggleVisibility() 
+	{
+		visible = !visible;
+		if (focused) window.giveUpFocus(this);
+	}
 	
 	public boolean	canGetFocus() {return false;}
 	
