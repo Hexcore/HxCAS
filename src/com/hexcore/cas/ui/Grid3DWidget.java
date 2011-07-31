@@ -1,5 +1,7 @@
 package com.hexcore.cas.ui;
 
+import java.awt.event.KeyEvent;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
@@ -96,11 +98,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		{
 			window.requestFocus(this);
 			cameraMoveStart.set(event.position);
-			return true;
-		}
-		else if (event.type == Event.Type.GAINED_FOCUS)
-		{
 			cameraMoving = true;
+			return true;
 		}
 		else if ((event.type == Event.Type.LOST_FOCUS) || ((event.type == Event.Type.MOUSE_CLICK) && !event.pressed))
 		{
@@ -123,6 +122,29 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
 			cameraPosition.z += event.amount;
+		}
+		else if (event.type == Event.Type.KEY_PRESS)
+		{
+			if (event.button == KeyEvent.VK_UP)
+			{
+				cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f);
+				cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f);
+			}
+			else if (event.button == KeyEvent.VK_DOWN)
+			{
+				cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f);
+				cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f);
+			}
+			else if (event.button == KeyEvent.VK_LEFT)
+			{
+				cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f);
+				cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f);
+			}
+			else if (event.button == KeyEvent.VK_RIGHT)
+			{
+				cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f);
+				cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f);
+			}
 		}
 		
 		return false;
