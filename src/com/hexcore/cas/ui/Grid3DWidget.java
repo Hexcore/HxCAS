@@ -151,7 +151,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		return false;
 	}
 	
-	protected void render3DPolygon(GL gl, Colour colour, Vector2f[] polygon, float height)
+	protected void render3DPolygon(GL gl, Vector2f pos, Vector2f[] polygon, float height, Colour colour)
 	{
 		GL2 gl2 = gl.getGL2();
 		
@@ -165,7 +165,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		
 		gl2.glBegin(GL.GL_TRIANGLE_FAN);
 			gl2.glNormal3f(0.0f, 0.0f, 1.0f);
-			for (Vector2f v : polygon) gl2.glVertex3f(v.x, v.y, height);
+			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
 		gl2.glEnd();			
 		
 		for (int i = 0; i < polygon.length; i++)
@@ -174,10 +174,10 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
 			gl2.glBegin(GL.GL_TRIANGLE_STRIP);
 				gl2.glNormal3f(0.0f,-1.0f, 0.0f);
-				gl2.glVertex3f(f.x, f.y, 0.0f);
-				gl2.glVertex3f(f.x, f.y, height);
-				gl2.glVertex3f(s.x, s.y, 0.0f);
-				gl2.glVertex3f(s.x, s.y, height);
+				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, 0.0f);
+				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, height);
+				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, 0.0f);
+				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, height);
 			gl2.glEnd();
 		}
 		
@@ -190,14 +190,14 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			gl2.glDepthFunc(GL.GL_LEQUAL);
 			
 			gl2.glBegin(GL.GL_LINE_LOOP);
-			for (Vector2f v : polygon) gl2.glVertex3f(v.x, v.y, height);
+			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
 			gl2.glEnd();	
 			
 			gl2.glBegin(GL.GL_LINES);
 			for (Vector2f v : polygon)
 			{
-				gl2.glVertex3f(v.x, v.y, 0.0f);
-				gl2.glVertex3f(v.x, v.y, height);	
+				gl2.glVertex3f(pos.x+v.x, pos.y+v.y, 0.0f);
+				gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);	
 			}
 			gl2.glEnd();	
 			gl2.glDepthFunc(GL.GL_LESS);
