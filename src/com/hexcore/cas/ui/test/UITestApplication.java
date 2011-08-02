@@ -13,6 +13,7 @@ import com.hexcore.cas.ui.Container;
 import com.hexcore.cas.ui.DropDownBox;
 import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
+import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
@@ -73,7 +74,8 @@ public class UITestApplication implements WindowEventListener
 	public GameOfLife			triGameOfLife;
 	public TriangleGridWidget	triGridViewer;
 	
-	public RectangleGrid3DWidget	rectGrid3DViewer; 	
+	public RectangleGrid3DWidget	rectGrid3DViewer;
+	public HexagonGrid3DWidget		hexGrid3DViewer;
 	
 	public Button				nextIterationButton;
 	
@@ -245,6 +247,13 @@ public class UITestApplication implements WindowEventListener
 		rectGrid3DViewer.setHeightScale(16.0f);
 		tabbedView.add(rectGrid3DViewer, "3D Rectangle");
 		
+		// 3D Hexagon Grid
+		hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)gameOfLife.getGrid(), 24);
+		hexGrid3DViewer.setFlag(Widget.FILL);
+		hexGrid3DViewer.setColourRule(colourRule);
+		hexGrid3DViewer.setHeightScale(16.0f);
+		tabbedView.add(hexGrid3DViewer, "3D Hexagon");
+		
 		window.relayout();
 	}
 	
@@ -278,9 +287,11 @@ public class UITestApplication implements WindowEventListener
 			{
 				switch (tabbedView.getIndex())
 				{
+					case 4:
 					case 0:
 						gameOfLife.generateNextGeneration();
 						gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
+						hexGrid3DViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
 						break;
 					case 1:
 					case 3:
