@@ -124,6 +124,11 @@ public abstract class Widget
 	public void		setFlag(int flag) {flags |= flag;}
 	public void		setFlag(int flag, boolean state) {if (state) setFlag(flag); else clearFlag(flag);}
 	public boolean	isSet(int flag) {return (flags & flag) == flag;}
+	
+	public void update(Vector2i position, float delta)
+	{
+		
+	}
 
 	public void render(GL gl, Vector2i position)
 	{

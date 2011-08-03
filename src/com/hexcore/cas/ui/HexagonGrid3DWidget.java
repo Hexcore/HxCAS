@@ -1,7 +1,6 @@
 package com.hexcore.cas.ui;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;

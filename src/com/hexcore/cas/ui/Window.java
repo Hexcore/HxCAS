@@ -15,6 +15,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.media.opengl.*;
 import javax.media.opengl.awt.GLCanvas;
@@ -35,6 +37,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private Widget		focusedWidget = null;
 	
 	private ArrayList<WindowEventListener>	eventListeners;
+	
+	private boolean[]		keyState;
+	private Timer			keyRepeatTimer = new Timer("KeyRepeatFilter");
+	private KeyRepeatFilter	keyRepeatFilter = null;
 
 	private	boolean	updateComponents = true;	
 	private boolean	initDone = false;
@@ -48,10 +54,14 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		super(new Vector2i(width, height));
 				
+		keyState = new boolean[1024];
+		for (int i = 0; i < 1024; i++) keyState[i] = false;
+		
 		defaultMargin = new Vector2i(8, 8);
 		components = new ArrayList<Widget>();
 		eventListeners = new ArrayList<WindowEventListener>();
 		setWindow(this);
+		
 		
 		theme = new Theme(this);
 		
@@ -93,6 +103,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 						
 		animator = new FPSAnimator(canvas, 60);
 		animator.start();
+	}
+	
+	public void update(float delta)
+	{
+		update(new Vector2i(), delta);
+		for (Widget component : components) component.update(new Vector2i(), delta);
 	}
 	
 	public void exit() 
@@ -195,6 +211,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			requestFocus(widget);
 	}
 				
+	public boolean getKeyState(int keyCode)
+	{
+		if (keyCode > 1024) return false;
+		return keyState[keyCode];
+	}
+	
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
@@ -207,6 +229,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
                 
+        update(1.0f / 60.0f);
         render(drawable);
         drawable.swapBuffers();
 	}
@@ -554,7 +577,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		canvas.display();
 	}
-	
+		
 	private void render(GLAutoDrawable drawable)
 	{
 		if (updateComponents)
@@ -653,26 +676,79 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+		int	keyCode = e.getKeyCode();
+		if (keyCode < 1024) keyState[keyCode] = true;
+		
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = true;
-		event.button = e.getKeyCode();
+		event.button = keyCode;
+		
+		if ((keyRepeatFilter != null) && (keyRepeatFilter.event != null))
+		{
+			Event event2 = keyRepeatFilter.event;
+			
+			if (event2.button == keyCode) 
+				keyRepeatFilter.cancel();
+			else
+				keyReleased(event2);
+			
+			keyRepeatFilter = null;
+		}
+		
 		sendEvent(event);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e)
-	{
+	{		
+		int keyCode = e.getKeyCode();
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = false;
-		event.button = e.getKeyCode();
+		event.button = keyCode;
+		
+		keyRepeatFilter = new KeyRepeatFilter(event);
+		keyRepeatTimer.schedule(keyRepeatFilter, 10);
+	}
+	
+	public void keyReleased(Event event)
+	{
+		if (event.button < 1024) keyState[event.button] = false;
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
 		Event event = new Event(Event.Type.KEY_TYPED);
 		event.button = (int)e.getKeyChar();
 		sendEvent(event);
+	}
+	
+	class KeyRepeatFilter extends TimerTask
+	{
+		public Event 	event;
+		
+		KeyRepeatFilter(Event event)
+		{
+			this.event = event;
+		}
+		
+		@Override
+		public boolean cancel()
+		{
+			event = null;
+			return super.cancel();
+		}
+		
+		@Override
+		public void run()
+		{
+			if (event != null)
+			{
+				Event temp = event;
+				event = null;
+				keyReleased(temp);
+			}
+		}
 	}
 }

@@ -56,6 +56,17 @@ public class Container extends Widget
 	}
 	
 	@Override
+	public void update(Vector2i position, float delta)
+	{
+		if (!visible) return;
+		
+		super.update(position, delta);
+		
+		Vector2i pos = this.position.add(position);
+		if (contents != null) contents.update(pos, delta);
+	}
+	
+	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		if (!visible) return;
@@ -66,7 +77,7 @@ public class Container extends Widget
 		
 		//window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}
-	
+		
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{

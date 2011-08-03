@@ -58,6 +58,17 @@ public class Layout extends Widget
 	}
 	
 	@Override
+	public void update(Vector2i position, float delta)
+	{
+		if (!visible) return;
+		
+		super.update(position, delta);
+		
+		Vector2i pos = this.position.add(position);
+		for (Widget component : components) component.update(pos, delta);
+	}
+	
+	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		if (!visible) return;

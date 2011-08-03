@@ -54,6 +54,18 @@ public class View extends Widget
 	}
 	
 	@Override
+	public void update(Vector2i position, float delta)
+	{
+		if (!visible) return;
+		
+		super.update(position, delta);
+		
+		Vector2i pos = this.position.add(position);
+		Widget contents = getWidget();
+		if (contents != null) contents.update(pos, delta);
+	}
+	
+	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		if (!visible) return;
