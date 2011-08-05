@@ -174,8 +174,9 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		{
 			Vector2f f = polygon[i];
 			Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
+			Vector2f normal = (f.subtract(s)).getPerpendicular().getNormalised();
 			gl2.glBegin(GL.GL_TRIANGLE_STRIP);
-				gl2.glNormal3f(0.0f,-1.0f, 0.0f);
+				gl2.glNormal3f(normal.x, normal.y, 0.0f);
 				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, 0.0f);
 				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, height);
 				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, 0.0f);

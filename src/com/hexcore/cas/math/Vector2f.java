@@ -51,6 +51,23 @@ public class Vector2f
 		return "Vector2f<" + x + ", " + y + ">";
 	}
 	
+	public void normalise()
+	{
+		float l = 1.0f / (float)Math.sqrt(x*x + y*y);
+		x *= l; y *= l;
+	}
+	
+	public Vector2f getNormalised()
+	{
+		float l = 1.0f / (float)Math.sqrt(x*x + y*y);
+		return new Vector2f(x * l, y * l);
+	}
+	
+	public Vector2f getPerpendicular()
+	{
+		return new Vector2f(y, -x);
+	}
+
 	public void inc(Vector2f p)
 	{
 		x += p.x;
