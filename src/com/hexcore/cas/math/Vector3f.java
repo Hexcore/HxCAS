@@ -58,7 +58,7 @@ public class Vector3f
 		this.z = v.z;
 	}
 	
-	public float	get(int index) {return (index != 2) ? ((index == 0) ? x : y) : z;}
+	public float	get(int index) {return (index == 2) ? z : ((index == 0) ? x : y);}
 	
 	public boolean equals(Vector3f p)
 	{

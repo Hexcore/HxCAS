@@ -34,7 +34,7 @@ public class TestVector2f
 		assertEquals(3.3f, copy.x, epsilon);
 		assertEquals(4.4f, copy.y, epsilon);
 	}
-
+	
 	@Test
 	public void testGet()
 	{
@@ -75,6 +75,7 @@ public class TestVector2f
 		assertEquals(4.4f, a.y, epsilon);	
 	}
 	
+	@Test
 	public void testSetVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 2.2f);
