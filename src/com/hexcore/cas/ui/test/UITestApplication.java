@@ -126,8 +126,8 @@ public class UITestApplication implements WindowEventListener
 		colourRules.setColourRule(1, colourRule);	
 		
 		colourRule = new ColourRule();
-		colourRule.addRange(new ColourRule.Range(0.0, 5.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
-		colourRule.addRange(new ColourRule.Range(5.0, 10.1, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
+		colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
 		window = new Window("GUI Test", 800, 600);
