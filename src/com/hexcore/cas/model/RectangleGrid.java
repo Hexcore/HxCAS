@@ -8,19 +8,19 @@ public class RectangleGrid extends Grid
 	public RectangleGrid(Vector2i size) 
 	{
 		super(size);
-		this.setType('R');
+		gridType = 'R';
 	}//end constructor
 	
 	public RectangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		this.setType('R');
+		gridType = 'R';
 	}
 	
 	public RectangleGrid(Grid g)
 	{
 		super(g);
-		this.setType('R');
+		gridType = 'R';
 	}
 	
 	@Override

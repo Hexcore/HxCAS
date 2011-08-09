@@ -7,19 +7,19 @@ public class TriangleGrid extends Grid
 	public TriangleGrid(Vector2i size) 
 	{
 		super(size);
-		this.setType('T');
+		gridType = 'T';
 	}
 	
 	public TriangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		this.setType('T');
+		gridType = 'T';
 	}
 	
 	public TriangleGrid(Grid g)
 	{
 		super(g);
-		this.setType('T');
+		gridType = 'T';
 	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
