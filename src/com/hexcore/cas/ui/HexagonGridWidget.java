@@ -44,8 +44,8 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 				Vector2i	p = pos.add(x*r*2, y*(s+h));
 				if ((y & 1) == 1) p.inc(r, 0);
 				
-				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(colourProperty));
+				if (colourRules != null)
+					colour = colourRules.getColour(cell, colourProperty);
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					

@@ -44,8 +44,8 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 				Colour		colour = Colour.DARK_GREY;
 				Vector2i 	p = new Vector2i(x * r, y * h);
 				
-				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(colourProperty));
+				if (colourRules != null)
+					colour = colourRules.getColour(cell, colourProperty);
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 				
