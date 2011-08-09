@@ -2,6 +2,7 @@ package com.hexcore.cas.ui;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
+import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
 
 public abstract class GridWidget<T extends Grid> extends Widget
@@ -10,7 +11,7 @@ public abstract class GridWidget<T extends Grid> extends Widget
 	protected int	tileSize;
 	protected int	colourProperty = 0; //< The property that is used to determine the colour to use
 	
-	protected ColourRule	colourRule = null; // This is temporary
+	protected ColourRuleSet	colourRules;
 	
 	public GridWidget(Vector2i size, T grid, int tileSize)
 	{
@@ -35,12 +36,9 @@ public abstract class GridWidget<T extends Grid> extends Widget
 	{
 		this.grid = grid;
 	}
-	
-	/*
-	 * This is temporary
-	 */
-	public void setColourRule(ColourRule rule)
+
+	public void setColourRuleSet(ColourRuleSet ruleSet)
 	{
-		colourRule = rule;
+		colourRules = ruleSet;
 	}
 }
