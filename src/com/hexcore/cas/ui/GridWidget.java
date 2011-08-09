@@ -1,7 +1,6 @@
 package com.hexcore.cas.ui;
 
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
 

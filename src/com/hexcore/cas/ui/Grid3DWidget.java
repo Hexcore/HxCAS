@@ -1,6 +1,7 @@
 package com.hexcore.cas.ui;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -10,12 +11,34 @@ import javax.media.opengl.glu.GLU;
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
+import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 
 public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 {
-	protected int		heightProperty = 0; //< The property that is used to determine the height
-	protected float		heightScale = 1.0f;
+	public class Slice
+	{
+		public int		colourProperty;
+		public int		heightProperty;
+		public float	scale;
+		
+		public Slice(int heightProperty, float scale) 
+		{
+			this.colourProperty = -1;
+			this.heightProperty = heightProperty;
+			this.scale = scale;
+		}		
+		
+		public Slice(int colourProperty, int heightProperty, float scale) 
+		{
+			this.colourProperty = colourProperty;
+			this.heightProperty = heightProperty;
+			this.scale = scale;
+		}
+	}
+	
+	protected ArrayList<Slice>	slices;
+	
 	protected boolean	drawGrid = true;
 	
 	protected float		yaw = 0.0f, pitch = -30.0f;
@@ -33,6 +56,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		super(position, size, grid, tileSize);
 		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
+		slices = new ArrayList<Slice>();
 	}
 	
 	@Override
@@ -43,15 +67,20 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		drawGrid = state;
 	}
 	
-	public void setHeightProperty(int propertyIndex)
+	public void addSlice(int heightProperty, float scale)
 	{
-		heightProperty = propertyIndex;
+		slices.add(new Slice(heightProperty, scale));
+	}	
+	
+	public void addSlice(int colourProperty, int heightProperty, float scale)
+	{
+		slices.add(new Slice(colourProperty, heightProperty, scale));
 	}
 	
-	public void setHeightScale(float scale)
+	public void clearSlices()
 	{
-		heightScale = scale;
-	}	
+		slices.clear();
+	}
 	
 	@Override
 	public void update(Vector2i position, float delta)
@@ -153,12 +182,37 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		return false;
 	}
 	
-	protected void render3DPolygon(GL gl, Vector2f pos, Vector2f[] polygon, float height, Colour colour)
+	protected void renderColumn(GL gl, Vector2f position, Cell cell, Vector2f[] shape)
+	{
+		float		startHeight = 0.0f;
+		boolean		bottom = true;
+		
+		for (Slice slice : slices)
+		{
+			Colour		colour = Colour.DARK_GREY;
+			int			colProperty = (slice.colourProperty < 0) ? colourProperty : slice.colourProperty;
+			float		height = cell.getValue(slice.heightProperty) * slice.scale;
+			
+			if ((height <= 0.0f) && !bottom) continue;
+			bottom = false;
+			
+			if (colourRules != null)
+				colour = colourRules.getColour(cell, colProperty);
+			else if (cell.getValue(colourProperty) > 0) 
+				colour = Colour.LIGHT_GREY;
+											
+			render3DPolygon(gl, position, shape, startHeight, height, colour);
+			startHeight += height;
+		}
+	}
+	
+	protected void render3DPolygon(GL gl, Vector2f pos, Vector2f[] polygon, float startHeight, float height, Colour colour)
 	{
 		GL2 gl2 = gl.getGL2();
+		height += startHeight;
 		
 		window.applyColour(gl2, colour);
-		
+				
 		if (drawGrid)
 		{
 			gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
@@ -177,9 +231,9 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			Vector2f normal = (f.subtract(s)).getPerpendicular().getNormalised();
 			gl2.glBegin(GL.GL_TRIANGLE_STRIP);
 				gl2.glNormal3f(normal.x, normal.y, 0.0f);
-				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, 0.0f);
+				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, startHeight);
 				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, height);
-				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, 0.0f);
+				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, startHeight);
 				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, height);
 			gl2.glEnd();
 		}
@@ -189,21 +243,21 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			gl2.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
 
 			window.applyColour(gl2, Colour.BLACK);
-			
-			gl2.glDepthFunc(GL.GL_LEQUAL);
-			
+						
 			gl2.glBegin(GL.GL_LINE_LOOP);
 			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
 			gl2.glEnd();	
 			
-			gl2.glBegin(GL.GL_LINES);
-			for (Vector2f v : polygon)
+			if (height > startHeight)
 			{
-				gl2.glVertex3f(pos.x+v.x, pos.y+v.y, 0.0f);
-				gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);	
+				gl2.glBegin(GL.GL_LINES);
+				for (Vector2f v : polygon)
+				{
+					gl2.glVertex3f(pos.x+v.x, pos.y+v.y, startHeight);
+					gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);	
+				}
+				gl2.glEnd();
 			}
-			gl2.glEnd();	
-			gl2.glDepthFunc(GL.GL_LESS);
 		}
 	}
 }

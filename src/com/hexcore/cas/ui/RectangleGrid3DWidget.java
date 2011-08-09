@@ -29,17 +29,9 @@ public class RectangleGrid3DWidget extends Grid3DWidget<RectangleGrid>
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell 		cell = grid.getCell(x, grid.getHeight() - y - 1);
-				Colour		colour = Colour.DARK_GREY;
-				float		height = cell.getValue(heightProperty) * heightScale;
-				
-				if (colourRules != null)
-					colour = colourRules.getColour(cell, colourProperty);
-				else if (cell.getValue(colourProperty) > 0) 
-					colour = Colour.LIGHT_GREY;
-					
 				Vector2f	p = new Vector2f(x * tileSize, y * tileSize);
 				
-				render3DPolygon(gl, p, rect, height, colour);
+				renderColumn(gl, p, cell, rect);
 			}
 	}
 }

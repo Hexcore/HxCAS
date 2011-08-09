@@ -33,21 +33,13 @@ public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
-				Cell 		cell = grid.getCell(x, grid.getHeight() - y - 1);
-				Colour		colour = Colour.DARK_GREY;
-				float		height = cell.getValue(heightProperty) * heightScale;
-				
-				if (colourRules != null)
-					colour = colourRules.getColour(cell, colourProperty);
-				else if (cell.getValue(colourProperty) > 0) 
-					colour = Colour.LIGHT_GREY;
-					
+				Cell 		cell = grid.getCell(x, grid.getHeight() - y - 1);				
 				Vector2f 	p = new Vector2f(x * r, y * h);
 								
 				if ((x & 1) == (y & 1)) // Checker-board pattern
-					render3DPolygon(gl, p, downTriangle, height, colour);
+					renderColumn(gl, p, cell, downTriangle);
 				else
-					render3DPolygon(gl, p, upTriangle, height, colour);
+					renderColumn(gl, p, cell, upTriangle);
 			}
 	}
 }

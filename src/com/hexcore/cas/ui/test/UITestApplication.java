@@ -256,21 +256,21 @@ public class UITestApplication implements WindowEventListener
 		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGrid3DViewer.setFlag(Widget.FILL);
 		rectGrid3DViewer.setColourRuleSet(colourRules);
-		rectGrid3DViewer.setHeightScale(16.0f);
+		rectGrid3DViewer.addSlice(0, 16.0f);
 		tabbedView.add(rectGrid3DViewer, "3D Rectangle");
 		
 		// 3D Hexagon Grid
 		hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)gameOfLife.getGrid(), 24);
 		hexGrid3DViewer.setFlag(Widget.FILL);
 		hexGrid3DViewer.setColourRuleSet(colourRules);
-		hexGrid3DViewer.setHeightScale(16.0f);
+		hexGrid3DViewer.addSlice(0, 16.0f);
 		tabbedView.add(hexGrid3DViewer, "3D Hexagon");
 		
 		// 3D Triangle Grid
 		triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
 		triGrid3DViewer.setFlag(Widget.FILL);
 		triGrid3DViewer.setColourRuleSet(colourRules);
-		triGrid3DViewer.setHeightScale(16.0f);
+		triGrid3DViewer.addSlice(0, 16.0f);
 		tabbedView.add(triGrid3DViewer, "3D Triangle");
 		
 		window.relayout();
