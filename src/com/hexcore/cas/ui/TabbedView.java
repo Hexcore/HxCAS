@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.Theme.BorderShape;
 
 public class TabbedView extends View
 {
@@ -54,35 +55,39 @@ public class TabbedView extends View
 	{
 		if (!visible) return;
 		
-		Vector2i pos = this.position.add(position);
-
-		//window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
+		Vector2i	pos = this.position.add(position);
+		int			tabHeight = window.getTheme().getTabHeight();
 		
-		int	x = 0;
-		for (int i = 0; i < widgets.size(); i++)
-		{
-			String caption = captions.get(i);
-			Vector2i tabSize = window.getTheme().getTabSize(caption);
-			window.getTheme().renderTab(gl, pos.add(x, 0), caption, i == getIndex());
-			x += tabSize.x;
-		}
-		
+		// Render border and window
 		Vector2i innerSize = getInnerSize();
-		pos.inc(0, window.getTheme().getTabHeight());
-		
-		window.setClipping(gl, pos, innerSize);
-		
+		Vector2i innerPos = pos.add(0, window.getTheme().getTabHeight());
+				
 		if (background == null) 
-			window.getTheme().renderTabInside(gl, pos, innerSize);
+			window.getTheme().renderTabInside(gl, innerPos.subtract(0, tabHeight / 2), innerSize.add(0, tabHeight / 2));
 		else
-			window.renderRectangle(gl, pos, innerSize, 0, background);
+			window.renderRectangle(gl, innerPos.subtract(0, tabHeight / 2), innerSize.add(0, tabHeight / 2), 0, background);
 		
-		
+		window.setClipping(gl, innerPos, innerSize);
 		Widget contents = getWidget();
-		if (contents != null) contents.render(gl, pos);
+		if (contents != null) contents.render(gl, innerPos);
 		window.resetView(gl);
 		
-		//window.renderBorder(gl, pos, innerSize, new Colour(0.0f, 0.5f, 1.0f));
+		// Render tabs
+		int	tabsWidth = 0;
+		for (int i = 0; i < widgets.size(); i++) tabsWidth += window.getTheme().getTabSize(captions.get(i)).x;
+		
+		int	x = (getWidth() - tabsWidth) / 2;
+		for (int i = 0; i < widgets.size(); i++)
+		{
+			BorderShape sides = new BorderShape();
+			if (i == 0) sides.add(BorderShape.LEFT);
+			if (i == widgets.size() - 1) sides.add(BorderShape.RIGHT);
+			
+			String caption = captions.get(i);
+			Vector2i tabSize = window.getTheme().getTabSize(caption);
+			window.getTheme().renderTab(gl, pos.add(x, 0), caption, i == getIndex(), sides);
+			x += tabSize.x;
+		}
 	}
 
 	@Override
@@ -94,7 +99,10 @@ public class TabbedView extends View
 		{
 			if ((event.position.x >= position.x) && (event.position.y >= position.y) && (event.position.y <= position.y + window.getTheme().getTabHeight()))
 			{
-				int	x = position.x;
+				int	tabsWidth = 0;
+				for (int i = 0; i < widgets.size(); i++) tabsWidth += window.getTheme().getTabSize(captions.get(i)).x;
+				
+				int	x = position.x + (getWidth() - tabsWidth) / 2;
 				for (int i = 0; i < widgets.size(); i++)
 				{
 					Vector2i tabSize = window.getTheme().getTabSize(captions.get(i));

@@ -15,6 +15,56 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 
 public class Theme
 {
+	public static class BorderShape 
+	{		
+		public static final int NONE 	= 0;
+		public static final int LEFT 	= 1;
+		public static final int TOP 	= 2; 
+		public static final int RIGHT 	= 4; 
+		public static final int BOTTOM 	= 8; 
+		public static final int MIDDLE 	= 16;
+		
+		public static final int TOP_LEFT 	= 32;
+		public static final int TOP_RIGHT 	= 64; 
+		public static final int BOTTOM_LEFT = 128; 
+		public static final int BOTTOM_RIGHT= 256; 	
+		
+		public static final int ALL_SIDES	= LEFT & TOP & RIGHT & BOTTOM;
+		public static final int ALL_CORNERS	= TOP_LEFT & TOP_RIGHT & BOTTOM_LEFT & BOTTOM_RIGHT;
+		
+		public int	shape;
+		
+		public BorderShape()
+		{
+			this.shape = NONE;
+		}
+		
+		public BorderShape(int shape)
+		{
+			this.shape = shape;
+		}
+
+		public int getNumCorners()
+		{
+			int corners = 0;
+			if ((shape & TOP_LEFT) > 0) corners++;
+			if ((shape & TOP_RIGHT) > 0) corners++;
+			if ((shape & BOTTOM_LEFT) > 0) corners++;
+			if ((shape & BOTTOM_RIGHT) > 0) corners++;
+			return corners;
+		}
+		
+		public void add(int flag)
+		{
+			shape |= flag;
+		}
+		
+		public boolean has(int flag)
+		{
+			return (shape & flag) > 0;
+		}
+	};
+	
 	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE};
 	
 	public static class Property
@@ -419,16 +469,16 @@ public class Theme
 	public int getTabHeight()
 	{
 		Vector2i padding = getVector2i("Tab", "padding", new Vector2i(18, 6));
-		return calculateTextHeight(Text.Size.SMALL) + padding.y;
+		return calculateTextHeight(Text.Size.MEDIUM) + padding.y;
 	}
 	
 	public Vector2i	getTabSize(String caption)
 	{
 		Vector2i padding = getVector2i("Tab", "padding", new Vector2i(18, 6));
-		return calculateTextSize(caption, Text.Size.SMALL).add(padding);
+		return calculateTextSize(caption, Text.Size.MEDIUM).add(padding);
 	}
 	
-	public void renderTab(GL gl, Vector2i position, String caption, boolean selected)
+	public void renderTab(GL gl, Vector2i position, String caption, boolean selected, BorderShape sides)
 	{
 		String stateName = "normal";
 		if (selected) stateName = "selected";
@@ -436,14 +486,14 @@ public class Theme
 		Vector2i size = getTabSize(caption);
 		
 		Vector2i[] tabShape = new Vector2i[4];
-		tabShape[0] = new Vector2i(6, 			0);
-		tabShape[1] = new Vector2i(size.x - 6,	0);
-		tabShape[2] = new Vector2i(size.x, 		size.y);
-		tabShape[3] = new Vector2i(0, 			size.y);
+		tabShape[0] = new Vector2i(0, 		0);
+		tabShape[1] = new Vector2i(size.x,	0);
+		tabShape[2] = new Vector2i(size.x, 	size.y);
+		tabShape[3] = new Vector2i(0, 		size.y);
 		
 		window.renderPolygon(gl, position, tabShape, false, getFill("Tab", stateName, "background"));
 		window.renderPolygon(gl, position, tabShape, true, getFill("Tab", stateName, "border"));
-		renderText(gl, caption, position, size, getColour("Tab", stateName, "text-colour"), Text.Size.SMALL);
+		renderText(gl, caption, position, size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
 	}
 	
 	public void renderTabInside(GL gl, Vector2i position, Vector2i size)

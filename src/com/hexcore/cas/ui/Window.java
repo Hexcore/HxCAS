@@ -24,6 +24,7 @@ import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.Theme.BorderShape;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener
@@ -287,6 +288,36 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
 		
 		renderPolygon(gl, pos, points, false, colour);
+	}
+	
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill, BorderShape borderShape)
+	{
+		int	corners = borderShape.getNumCorners();
+		
+		Vector2i[]	points = new Vector2i[(radius + 1) * corners + (4 - corners)];
+		int	index = 0;
+		
+		if (borderShape.has(BorderShape.TOP_LEFT))
+			index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
+		else
+			points[index++] = new Vector2i(radius, radius);
+		
+		if (borderShape.has(BorderShape.BOTTOM_LEFT))
+			index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
+		else
+			points[index++] = new Vector2i(radius, size.y - radius);
+		
+		if (borderShape.has(BorderShape.BOTTOM_RIGHT))
+			index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
+		else
+			points[index++] = new Vector2i(size.x - radius, size.y - radius);
+		
+		if (borderShape.has(BorderShape.TOP_RIGHT))
+			index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		else
+			points[index++] = new Vector2i(size.x - radius, radius);
+		
+		renderPolygon(gl, pos, points, false, fill);
 	}
 	
 	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
