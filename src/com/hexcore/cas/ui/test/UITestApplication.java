@@ -45,6 +45,7 @@ public class UITestApplication implements WindowEventListener
 	public LinearLayout	innerLayout;
 	
 	public TextBox		nameTextBox;
+	public TextBox		nameTextBox2;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
 	public ImageWidget	headingImage;
@@ -208,6 +209,12 @@ public class UITestApplication implements WindowEventListener
 		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
 		nameTextBox.setText("Benny");
 		innerLayout.add(nameTextBox);
+		
+		
+		nameTextBox2 = new TextBox(new Vector2i(100, 20));
+		nameTextBox2.setFlag(Widget.FILL_HORIZONTAL);
+		nameTextBox2.setText("Benny2");
+		innerLayout.add(nameTextBox2);
 		
 		checkBox = new CheckBox(new Vector2i(100, 20), "Can fly");
 		checkBox.setFlag(Widget.FILL_HORIZONTAL);

@@ -1,5 +1,7 @@
 package com.hexcore.cas.ui.test;
 
+import java.awt.Color;
+
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
@@ -38,7 +40,45 @@ public class UIProtoApplication implements WindowEventListener
 {
 	public Window		window;
 	
-	public LinearLayout	windowLayout;
+	
+	public View masterView;
+	
+	
+	public TabbedView tabbedWorldView;
+	
+	public LinearLayout	mainMenuLayout;
+	public LinearLayout worldLayout;
+	
+	
+	//1st,2,3,4 ...tab
+	
+	
+	public Container propertiesContainer;
+		
+		public LinearLayout propertiesLayout;
+		public LinearLayout worldSizeLayout;
+	
+		public TextWidget worldSizeLabel;
+		public TextWidget worldSizeXLabel;
+		public TextWidget cellShapeLabel;
+		public TextWidget numCellPropertiesLabel;
+		
+		public TextBox	worldSizeXTextBox;
+		public TextBox	worldSizeYTextBox;
+		public TextBox	numCellPropertiesTextBox;
+		
+		public CheckBox wrapCheckBox;
+		public DropDownBox cellShapeDropDownBox;
+		
+		
+		
+	public Container colorRulesContainer;
+	public Container distributionContainer;
+	public Container worldPreviewContainer;
+	
+	
+	
+	
 	public LinearLayout	headerLayout;
 	public LinearLayout	mainLayout;
 	public LinearLayout	buttonBarLayout;
@@ -61,75 +101,12 @@ public class UIProtoApplication implements WindowEventListener
 	public Panel		mainPanel;
 	
 	public LinearLayout			gridViewLayout;
-	public TabbedView			tabbedView;
-	
-	public ColourRuleSet		colourRules;
-	
-	public ScrollableContainer	rectGridViewerContainer;
-	public GameOfLife			rectGameOfLife;
-	public RectangleGridWidget	rectGridViewer; 
-	
-	public ScrollableContainer	gridViewerContainer;
-	public GameOfLife			gameOfLife;
-	public HexagonGridWidget	gridViewer;
-	
-	public ScrollableContainer	triGridViewerContainer;
-	public GameOfLife			triGameOfLife;
-	public TriangleGridWidget	triGridViewer;
-	
-	public RectangleGrid3DWidget	rectGrid3DViewer;
-	public HexagonGrid3DWidget		hexGrid3DViewer;
-	public TriangleGrid3DWidget		triGrid3DViewer;
-	
-	public WaterFlow				waterFlow;
-	public RectangleGrid3DWidget	waterGrid3DViewer;
-	
+
+
 	public Button				nextIterationButton;
 	
 	UIProtoApplication()
 	{
-		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
-		grid.getCell(6, 5).setValue(0, 1);
-		grid.getCell(6, 6).setValue(0, 1);
-		grid.getCell(6, 7).setValue(0, 1);		
-		gameOfLife = new GameOfLife(grid);
-		
-		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(12, 12));
-		rectGrid.getCell(2, 4).setValue(0, 1);
-		rectGrid.getCell(3, 4).setValue(0, 1);
-		rectGrid.getCell(4, 4).setValue(0, 1);
-		rectGrid.getCell(4, 3).setValue(0, 1);
-		rectGrid.getCell(3, 2).setValue(0, 1);
-		rectGameOfLife = new GameOfLife(rectGrid);
-		
-		TriangleGrid triGrid = new TriangleGrid(new Vector2i(14, 14));
-		triGrid.getCell(7, 6).setValue(0, 1);
-		triGrid.getCell(7, 7).setValue(0, 1);
-		triGrid.getCell(7, 8).setValue(0, 1);
-		triGrid.getCell(6, 6).setValue(0, 1);
-		triGrid.getCell(6, 7).setValue(0, 1);
-		triGrid.getCell(6, 8).setValue(0, 1);
-		triGameOfLife = new GameOfLife(triGrid);		
-		
-		waterFlow = new WaterFlow();
-		
-		colourRules = new ColourRuleSet(3);
-		ColourRule	colourRule;
-		
-		colourRule = new ColourRule();
-		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
-		colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
-		colourRules.setColourRule(0, colourRule);
-		
-		colourRule = new ColourRule();
-		colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
-		colourRules.setColourRule(1, colourRule);	
-		
-		colourRule = new ColourRule();
-		colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
-		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
-		colourRules.setColourRule(2, colourRule);	
-		
 		window = new Window("Cellular Automata Simulator - v1.0", 800, 600);
 		window.addListener(this);
 		window.show();
@@ -139,16 +116,22 @@ public class UIProtoApplication implements WindowEventListener
 	{
 		window.loadTheme("data/default.thm");
 		
-		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		windowLayout.setFlag(Widget.FILL);
-		windowLayout.setMargin(new Vector2i(0, 0));
-		window.add(windowLayout);
+		
+		masterView = new View(new Vector2i(10, 10));
+		masterView.setMargin(new Vector2i(0, 0));
+		masterView.setFlag(Widget.FILL);
+		window.add(masterView);
+		
+		mainMenuLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		mainMenuLayout.setFlag(Widget.FILL);
+		mainMenuLayout.setMargin(new Vector2i(0, 0));
+		masterView.add(mainMenuLayout);
 		
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
 		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
-		windowLayout.add(headerLayout);
+		mainMenuLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");
 		headingImage.setFlag(Widget.CENTER);
@@ -164,7 +147,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		mainLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		mainLayout.setFlag(Widget.FILL);
-		windowLayout.add(mainLayout);
+		mainMenuLayout.add(mainLayout);
 		
 		buttonBarLayout = new LinearLayout(new Vector2i(250, 50), LinearLayout.Direction.VERTICAL);
 		buttonBarLayout.setMargin(new Vector2i(0, 0));
@@ -202,63 +185,101 @@ public class UIProtoApplication implements WindowEventListener
 		
 		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		innerLayout.setFlag(Widget.FILL);
-		mainView.add(innerLayout);
-		
-		//
-		
-		TextWidget xy = new TextWidget("Welcome to HexCoreCAS!", Text.Size.LARGE, Colour.WHITE);
-		xy.setFlag(Widget.CENTER);
-		innerLayout.add(xy);
-		
-		TextWidget xyz = new TextWidget("The following simulator is an evolution project on an existing Cellular Automata created by Team Core in 2009 for a Software Engineering Course at the University of Pretoria.", Text.Size.SMALL, Colour.WHITE);
-		innerLayout.add(xyz);
 		
 		
-		
-	
-		
-		//nameTextBox = new TextBox(new Vector2i(100, 20));
-		//nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
-		//nameTextBox.setText("Benny");
-		//innerLayout.add(nameTextBox);
-		
-		//checkBox = new CheckBox(new Vector2i(100, 20), "Can fly");
-		//checkBox.setFlag(Widget.FILL_HORIZONTAL);
-		//innerLayout.add(checkBox);
-		
-	//	dropDownBox = new DropDownBox(new Vector2i(200, 20));
-		//dropDownBox.addItem("Alpha");
-		//dropDownBox.addItem("Beta");
-		//dropDownBox.addItem("Delta");
-		//dropDownBox.addItem("Omega");
-		//dropDownBox.setSelected(1);
-		//innerLayout.add(dropDownBox);
-		
-		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		gridViewLayout.setFlag(Widget.FILL);
-		mainView.add(gridViewLayout);
+		/// Main WORLD BUILDER
 		
 		
+		worldLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		worldLayout.setFlag(Widget.FILL);
 		
-		// Add WORLD MENU EDITOR
+		masterView.add(worldLayout);
 		
-			LinearLayout worldMenuLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-			worldMenuLayout.setFlag(Widget.FILL);
-			mainView.add(worldMenuLayout);
-			
-			TextWidget t1 = new TextWidget("World Editor Menu", Text.Size.LARGE, Colour.DARK_GREY);
-			t1.setFlag(Widget.CENTER);
-			gridViewLayout.add(t1);
-			
-			
-			
-			TextWidget t2 = new TextWidget("TEST.", Text.Size.SMALL, Colour.WHITE);
-			gridViewLayout.add(t2);
-		///
 		
+		tabbedWorldView = new TabbedView(new Vector2i(30,30));
+		tabbedWorldView.setFlag(Widget.FILL);
+		tabbedWorldView.setBackground(new Fill(new Colour(0.9f, 0.88f, 0.82f)));
+		worldLayout.add(tabbedWorldView);
+		
+		// OUR WORLD EDITOR Containers
+		
+		propertiesContainer = new Container(new Vector2i(100, 100));
+		propertiesContainer.setFlag(Widget.FILL);
+		tabbedWorldView.add(propertiesContainer, "World Properties");
+		
+		
+		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		propertiesContainer.setContents(propertiesLayout);
+		
+		worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		propertiesLayout.add(worldSizeLayout);
+		
+		worldSizeLabel = new TextWidget("World Size:");
+		worldSizeLayout.add(worldSizeLabel);
+		
+		worldSizeXTextBox = new TextBox(new Vector2i(50,30));
+		worldSizeLayout.add(worldSizeXTextBox);
+		
+		worldSizeXLabel = new TextWidget("X");
+		worldSizeLayout.add(worldSizeXLabel);
+		
+		worldSizeYTextBox = new TextBox(new Vector2i(50,30));
+		worldSizeLayout.add(worldSizeYTextBox);
 		
 	
+		/*
 		
+		cellShapeLabel = new TextWidget("Cell Shape:");
+		propertiesLayout.add(cellShapeLabel);
+		
+		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,50));
+		cellShapeDropDownBox.addItem("Square");
+		cellShapeDropDownBox.addItem("Triangle");
+		cellShapeDropDownBox.addItem("Hexagon");
+		
+		propertiesLayout.add(cellShapeDropDownBox);
+				
+		
+		numCellPropertiesLabel = new TextWidget("Number of Cell Properties:");
+		propertiesLayout.add(numCellPropertiesLabel);
+		
+		numCellPropertiesTextBox = new TextBox(new Vector2i(100,50));
+		propertiesLayout.add(numCellPropertiesTextBox);
+		
+		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
+		
+		*/
+		
+		
+		
+		
+		
+		colorRulesContainer = new Container(new Vector2i(100, 100));
+		colorRulesContainer.setFlag(Widget.FILL);
+		
+		distributionContainer = new Container(new Vector2i(100, 100));
+		distributionContainer.setFlag(Widget.FILL);
+		
+		worldPreviewContainer = new Container(new Vector2i(100, 100));
+		worldPreviewContainer.setFlag(Widget.FILL);
+		
+		
+		tabbedWorldView.add(colorRulesContainer, "Color Range Rules");
+		tabbedWorldView.add(distributionContainer, "Distribution Settings");
+		tabbedWorldView.add(worldPreviewContainer, "World Preview");
+		
+		
+		
+		
+	 
+		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
+		headingLabel.setFlag(Widget.CENTER);
+		
+		
+		
+		
+		////
+			
 		window.relayout();
 	}
 	
@@ -274,19 +295,11 @@ public class UIProtoApplication implements WindowEventListener
 		{
 			if (event.target == createWorldButton)
 			{
-				//
 				
-					
-					buttonBarLayout.toggleVisibility();
-					mainPanel.setX(0);
-					mainPanel.setY(0);
-					mainPanel.setFlag(Widget.FILL);
-					
-					
-					
+				masterView.setIndex(1 - masterView.getIndex());
+				//buttonBarLayout.toggleVisibility();
+				window.relayout();
 				
-				
-				//
 				
 				mainView.setIndex(1 - mainView.getIndex());
 			}
@@ -304,31 +317,9 @@ public class UIProtoApplication implements WindowEventListener
 			}
 			else if (event.target == nextIterationButton)
 			{
-				switch (tabbedView.getIndex())
-				{
-					case 4:
-					case 0:
-						gameOfLife.generateNextGeneration();
-						gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
-						hexGrid3DViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
-						break;
-					case 1:
-					case 3:
-						rectGameOfLife.generateNextGeneration();
-						rectGridViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
-						rectGrid3DViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
-						break;
-					case 5:
-					case 2:
-						triGameOfLife.generateNextGeneration();
-						triGridViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
-						triGrid3DViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
-						break;		
-					case 6:
-						waterFlow.generateNextGeneration();
-						waterGrid3DViewer.setGrid(waterFlow.getGrid());
-						break;				
-				}
+				
+					
+			
 			}
 		}
 		else if (event.type == Event.Type.CHANGE)
