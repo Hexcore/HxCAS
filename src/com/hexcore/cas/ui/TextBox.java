@@ -47,40 +47,43 @@ public class TextBox extends Widget
 		{
 			window.requestFocus(this);
 		}
-		else if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
+		else if (focused)
 		{
-			if ((event.button == KeyEvent.VK_LEFT) && (cursorIndex > 0))
-				cursorIndex--;
-			else if ((event.button == KeyEvent.VK_RIGHT) && (cursorIndex < text.length()))
-				cursorIndex++;
-			else if (event.button == KeyEvent.VK_BACK_SPACE)
+			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
-				if ((text.length() > 0) && (cursorIndex > 0))
-				{
-					text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
+				if ((event.button == KeyEvent.VK_LEFT) && (cursorIndex > 0))
 					cursorIndex--;
+				else if ((event.button == KeyEvent.VK_RIGHT) && (cursorIndex < text.length()))
+					cursorIndex++;
+				else if (event.button == KeyEvent.VK_BACK_SPACE)
+				{
+					if ((text.length() > 0) && (cursorIndex > 0))
+					{
+						text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
+						cursorIndex--;
+					}
+				}
+				else if ((event.button == KeyEvent.VK_DELETE) && (cursorIndex < text.length()))
+				{
+					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
 				}
 			}
-			else if ((event.button == KeyEvent.VK_DELETE) && (cursorIndex < text.length()))
+			else if (event.type == Event.Type.KEY_TYPED)
 			{
-				text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
+				if ((event.button >= ' ') && (event.button != 127))
+				{
+					text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
+					cursorIndex++;
+				}
+				else if (event.button == '\n')
+				{
+					window.giveUpFocus(this);
+				}
+				
+				Event changeEvent = new Event(Event.Type.CHANGE);
+				changeEvent.target = this;
+				window.sendWindowEvent(changeEvent);
 			}
-		}
-		else if (event.type == Event.Type.KEY_TYPED)
-		{
-			if ((event.button >= ' ') && (event.button != 127))
-			{
-				text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
-				cursorIndex++;
-			}
-			else if (event.button == '\n')
-			{
-				window.giveUpFocus(this);
-			}
-			
-			Event changeEvent = new Event(Event.Type.CHANGE);
-			changeEvent.target = this;
-			window.sendWindowEvent(changeEvent);
 		}
 		
 		return handled;

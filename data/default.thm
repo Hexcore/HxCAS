@@ -4,7 +4,7 @@ Button
 	background: vertical rgb(1.0, 1.0, 1.0) rgb(0.9, 0.9, 0.9);
 	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
 	text-colour: rgb(0.0, 0.0, 0.0);
-	border-radius: 2;
+	border-radius: 8;
 }
 
 Button : hover
@@ -149,16 +149,16 @@ DropDownBoxItem
 
 Tab
 {
-	padding: 18 6;
+	padding: 18 10;
 	background: vertical rgb(1.0, 1.0, 1.0) rgb(0.9, 0.9, 0.9);
 	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
 	text-colour: rgb(0.0, 0.0, 0.0);
-	text-offset: 0 -1;
+	border-radius: 8;
 }
 
 Tab : selected
 {
-	padding: 18 6;
+	padding: 18 10;
 	background: vertical rgb(0.52, 0.52, 0.52) rgb(0.62, 0.62, 0.62);
 	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
 	text-colour: rgb(1.0, 1.0, 1.0);

@@ -22,7 +22,8 @@ import javax.media.opengl.*;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-import com.hexcore.cas.math.Recti;
+import com.hexcore.cas.math.Rectf;
+import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -45,6 +46,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 
 	private	boolean	updateComponents = true;	
 	private boolean	initDone = false;
+	private boolean	debugLayout = false;
 	
 	public Window(String title)
 	{
@@ -84,6 +86,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		frame.addWindowListener(new WindowListener());
 		frame.add(canvas);
 		frame.pack();
+	}
+	
+	public boolean isDebugLayout()
+	{
+		return debugLayout;
+	}
+	
+	public void setDebugLayout(boolean state)
+	{
+		debugLayout = state;
 	}
 	
 	public void show()
@@ -266,127 +278,112 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         relayout();
 	}
 	
-	private int addCornerToArray(int index, Vector2i[] array, Vector2i start, int radius, int quarter)
+	private int addCornerToArray(int index, Vector2f[] array, Vector2f start, int radius, int quarter, boolean isBorder)
 	{
 		for (int i = 0; i <= radius; i++)
 		{
 			double angle = ((double)i / radius) * Math.PI / 2.0 + (Math.PI / 2) * (quarter - 2);
-			Vector2i p = new Vector2i(start.x + (int)(Math.sin(angle) * radius), start.y + (int)(Math.cos(angle) * radius));
+			Vector2f p = new Vector2f(start.x + (float)(Math.sin(angle) * radius), start.y + (float)(Math.cos(angle) * radius));
+			
+			if (isBorder)
+				switch (quarter)
+				{
+					case 0: p.inc( 0.5f,  0.5f); break;
+					case 1: p.inc( 0.5f, -0.5f); break;
+					case 2: p.inc(-0.5f, -0.5f); break;
+					case 3: p.inc(-0.5f,  0.5f); break;
+				}
+			
 			array[index++] = p;
 		}
 		return index;
 	}
 		
-	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
-	{		
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+	private Vector2f[] createRoundedRectangle(Vector2i pos, Vector2i size, int radius, BorderShape borderShape, boolean isBorder)
+	{
+		int	corners = borderShape.getNumCorners();
+		
+		Vector2f[]	points = new Vector2f[(radius + 1) * corners + (4 - corners)];
 		int	index = 0;
 		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		if (borderShape.has(BorderShape.TOP_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, radius), radius, 0, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, 0.5f) : new Vector2f(0, 0);
 		
+		if (borderShape.has(BorderShape.BOTTOM_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, size.y - radius), radius, 1, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, size.y-0.5f) : new Vector2f(0, size.y);
+		
+		if (borderShape.has(BorderShape.BOTTOM_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, size.y -radius), radius, 2, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, size.y-0.5f) : new Vector2f(size.x, size.y);
+		
+		if (borderShape.has(BorderShape.TOP_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, radius), radius, 3, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, 0.5f) : new Vector2f(size.x, 0);
+		
+		return points;
+	}
+	
+	public void renderRoundedBorderedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill, Fill border)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), true);
+		renderPolygon(gl, pos, points, false, fill);
+		renderPolygon(gl, pos, points, true, border);
+	}	
+	
+	public void renderRoundedBorderedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill, Fill border)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, true);
+		renderPolygon(gl, pos, points, false, fill);
+		renderPolygon(gl, pos, points, true, border);
+	}	
+	
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), false);
 		renderPolygon(gl, pos, points, false, colour);
 	}
 	
 	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill)
 	{
-		int	corners = borderShape.getNumCorners();
-		
-		Vector2i[]	points = new Vector2i[(radius + 1) * corners + (4 - corners)];
-		int	index = 0;
-		
-		if (borderShape.has(BorderShape.TOP_LEFT))
-			index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		else
-			points[index++] = new Vector2i(0, 0);
-		
-		if (borderShape.has(BorderShape.BOTTOM_LEFT))
-			index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		else
-			points[index++] = new Vector2i(0, size.y);
-		
-		if (borderShape.has(BorderShape.BOTTOM_RIGHT))
-			index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		else
-			points[index++] = new Vector2i(size.x, size.y);
-		
-		if (borderShape.has(BorderShape.TOP_RIGHT))
-			index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		else
-			points[index++] = new Vector2i(size.x, 0);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, false);
 		renderPolygon(gl, pos, points, false, fill);
 	}
 	
 	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
 	{
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
-		int	index = 0;
-		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), false);
 		renderPolygon(gl, pos, points, false, fill);
 	}	
 	
 	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
 	{
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
-		int	index = 0;
-		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), true);
 		renderPolygon(gl, pos, points, true, colour);
 	}	
 	
 	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill)
 	{
-		int	corners = borderShape.getNumCorners();
-		
-		Vector2i[]	points = new Vector2i[(radius + 1) * corners + (4 - corners)];
-		int	index = 0;
-		
-		if (borderShape.has(BorderShape.TOP_LEFT))
-			index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		else
-			points[index++] = new Vector2i(0, 0);
-		
-		if (borderShape.has(BorderShape.BOTTOM_LEFT))
-			index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		else
-			points[index++] = new Vector2i(0, size.y);
-		
-		if (borderShape.has(BorderShape.BOTTOM_RIGHT))
-			index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		else
-			points[index++] = new Vector2i(size.x, size.y);
-		
-		if (borderShape.has(BorderShape.TOP_RIGHT))
-			index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		else
-			points[index++] = new Vector2i(size.x, 0);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, true);
 		renderPolygon(gl, pos, points, true, fill);
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Colour colour)
+	public void renderPolygon(GL gl, Vector2i pos, Vector2f[] vertices, boolean outline, Colour colour)
 	{
 		GL2 gl2 = gl.getGL2();
 		
 		applyColour(gl2, colour);
         gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
-        for (Vector2i vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
+        for (Vector2f vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
 		gl2.glEnd();
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Fill fill)
+	public void renderPolygon(GL gl, Vector2i pos, Vector2f[] vertices, boolean outline, Fill fill)
 	{
 		if (fill.getType() == Fill.Type.SOLID)
 		{
@@ -400,10 +397,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		GL2 gl2 = gl.getGL2();
 		
 		Colour	colour = fill.getColour(0);
-		Recti 	rect = Recti.getBoundingBox(vertices);
+		Rectf	rect = Rectf.getBoundingBox(vertices);
 		
         gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
-        	for (Vector2i vertex : vertices)
+        	for (Vector2f vertex : vertices)
         	{        		
         		if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
         			colour = fill.getColour(0).mix(fill.getColour(1), (float)(vertex.y - rect.position.y) / rect.size.y);
@@ -767,6 +764,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
+		if (e.getKeyChar() == '`') debugLayout = !debugLayout;
+		
 		Event event = new Event(Event.Type.KEY_TYPED);
 		event.button = (int)e.getKeyChar();
 		sendEvent(event);
