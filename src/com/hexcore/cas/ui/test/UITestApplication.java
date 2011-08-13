@@ -131,7 +131,7 @@ public class UITestApplication implements WindowEventListener
 		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
-		window = new Window("GUI Test", 800, 600);
+		window = new Window("GUI Test", 1024, 768);
 		window.addListener(this);
 		window.show();
 	}
@@ -148,7 +148,7 @@ public class UITestApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
+		headerLayout.setBackground(new Fill(new Colour(0.73f, 0.73f, 0.73f), new Colour(0.85f, 0.85f, 0.85f)));
 		windowLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");
@@ -159,7 +159,7 @@ public class UITestApplication implements WindowEventListener
 		headingContainer.setFlag(Widget.FILL);
 		headerLayout.add(headingContainer);
 		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
+		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.BLACK);
 		headingLabel.setFlag(Widget.CENTER);
 		headingContainer.setContents(headingLabel);
 		

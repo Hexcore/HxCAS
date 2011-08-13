@@ -491,9 +491,13 @@ public class Theme
 		tabShape[2] = new Vector2i(size.x, 	size.y);
 		tabShape[3] = new Vector2i(0, 		size.y);
 		
-		window.renderPolygon(gl, position, tabShape, false, getFill("Tab", stateName, "background"));
-		window.renderPolygon(gl, position, tabShape, true, getFill("Tab", stateName, "border"));
-		renderText(gl, caption, position, size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
+		BorderShape corners = new BorderShape();
+		if (sides.has(BorderShape.LEFT)) corners.add(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);
+		if (sides.has(BorderShape.RIGHT)) corners.add(BorderShape.TOP_RIGHT | BorderShape.BOTTOM_RIGHT);
+		window.renderRoundedRectangle(gl, position, size, 8, corners, getFill("Tab", stateName, "background"));
+		window.renderRoundedBorder(gl, position, size, 8, corners, getFill("Tab", stateName, "border"));
+		Vector2i textOffset = getVector2i("Tab", stateName, "text-offset", new Vector2i(0, 0));
+		renderText(gl, caption, position.add(textOffset), size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
 	}
 	
 	public void renderTabInside(GL gl, Vector2i position, Vector2i size)
