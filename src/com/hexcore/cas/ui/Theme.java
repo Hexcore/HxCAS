@@ -67,7 +67,7 @@ public class Theme
 		}
 	};
 	
-	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE};
+	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE, SELECTED};
 	
 	public static class Property
 	{
@@ -484,10 +484,26 @@ public class Theme
 		return calculateTextSize(caption, Text.Size.MEDIUM).add(padding);
 	}
 	
-	public void renderTab(GL gl, Vector2i position, String caption, boolean selected, BorderShape sides)
+	public void renderTab(GL gl, Vector2i position, String caption, ButtonState state, BorderShape sides)
 	{
-		String stateName = "normal";
-		if (selected) stateName = "selected";
+		String stateName;
+		
+		switch (state)
+		{
+			default:
+			case NORMAL:
+				stateName = "normal";
+				break;		
+			case HOVER:
+				stateName = "hover";
+				break;
+			case ACTIVE:
+				stateName = "active";
+				break;
+			case SELECTED:
+				stateName = "selected";
+				break;				
+		}
 		
 		Vector2i size = getTabSize(caption);
 				
