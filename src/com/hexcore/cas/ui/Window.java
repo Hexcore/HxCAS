@@ -15,13 +15,17 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.media.opengl.*;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-import com.hexcore.cas.math.Recti;
+import com.hexcore.cas.math.Rectf;
+import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.Theme.BorderShape;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener
@@ -35,9 +39,14 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private Widget		focusedWidget = null;
 	
 	private ArrayList<WindowEventListener>	eventListeners;
+	
+	private boolean[]		keyState;
+	private Timer			keyRepeatTimer = new Timer("KeyRepeatFilter");
+	private KeyRepeatFilter	keyRepeatFilter = null;
 
 	private	boolean	updateComponents = true;	
 	private boolean	initDone = false;
+	private boolean	debugLayout = false;
 	
 	public Window(String title)
 	{
@@ -48,10 +57,14 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		super(new Vector2i(width, height));
 				
+		keyState = new boolean[1024];
+		for (int i = 0; i < 1024; i++) keyState[i] = false;
+		
 		defaultMargin = new Vector2i(8, 8);
 		components = new ArrayList<Widget>();
 		eventListeners = new ArrayList<WindowEventListener>();
 		setWindow(this);
+		
 		
 		theme = new Theme(this);
 		
@@ -75,6 +88,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		frame.pack();
 	}
 	
+	public boolean isDebugLayout()
+	{
+		return debugLayout;
+	}
+	
+	public void setDebugLayout(boolean state)
+	{
+		debugLayout = state;
+	}
+	
 	public void show()
 	{
 		frame.setVisible(true);
@@ -93,6 +116,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 						
 		animator = new FPSAnimator(canvas, 60);
 		animator.start();
+	}
+	
+	public void update(float delta)
+	{
+		update(new Vector2i(), delta);
+		for (Widget component : components) component.update(new Vector2i(), delta);
 	}
 	
 	public void exit() 
@@ -195,6 +224,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			requestFocus(widget);
 	}
 				
+	public boolean getKeyState(int keyCode)
+	{
+		if (keyCode > 1024) return false;
+		return keyState[keyCode];
+	}
+	
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
@@ -207,6 +242,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
                 
+        update(1.0f / 60.0f);
         render(drawable);
         drawable.swapBuffers();
 	}
@@ -221,7 +257,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void init(GLAutoDrawable drawable)
 	{
 		GL2 gl = drawable.getGL().getGL2();
-        gl.glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
+        gl.glClearColor(0.93f, 0.93f, 0.93f, 1.0f);
         gl.glClearDepth(1.0f);   
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -242,80 +278,112 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         relayout();
 	}
 	
-	private int addCornerToArray(int index, Vector2i[] array, Vector2i start, int radius, int quarter)
+	private int addCornerToArray(int index, Vector2f[] array, Vector2f start, int radius, int quarter, boolean isBorder)
 	{
 		for (int i = 0; i <= radius; i++)
 		{
 			double angle = ((double)i / radius) * Math.PI / 2.0 + (Math.PI / 2) * (quarter - 2);
-			Vector2i p = new Vector2i(start.x + (int)(Math.sin(angle) * radius), start.y + (int)(Math.cos(angle) * radius));
+			Vector2f p = new Vector2f(start.x + (float)(Math.sin(angle) * radius), start.y + (float)(Math.cos(angle) * radius));
+			
+			if (isBorder)
+				switch (quarter)
+				{
+					case 0: p.inc( 0.5f,  0.5f); break;
+					case 1: p.inc( 0.5f, -0.5f); break;
+					case 2: p.inc(-0.5f, -0.5f); break;
+					case 3: p.inc(-0.5f,  0.5f); break;
+				}
+			
 			array[index++] = p;
 		}
 		return index;
 	}
 		
-	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
-	{		
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
+	private Vector2f[] createRoundedRectangle(Vector2i pos, Vector2i size, int radius, BorderShape borderShape, boolean isBorder)
+	{
+		int	corners = borderShape.getNumCorners();
+		
+		Vector2f[]	points = new Vector2f[(radius + 1) * corners + (4 - corners)];
 		int	index = 0;
 		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
+		if (borderShape.has(BorderShape.TOP_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, radius), radius, 0, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, 0.5f) : new Vector2f(0, 0);
 		
+		if (borderShape.has(BorderShape.BOTTOM_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, size.y - radius), radius, 1, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, size.y-0.5f) : new Vector2f(0, size.y);
+		
+		if (borderShape.has(BorderShape.BOTTOM_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, size.y -radius), radius, 2, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, size.y-0.5f) : new Vector2f(size.x, size.y);
+		
+		if (borderShape.has(BorderShape.TOP_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, radius), radius, 3, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, 0.5f) : new Vector2f(size.x, 0);
+		
+		return points;
+	}
+	
+	public void renderRoundedBorderedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill, Fill border)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), true);
+		renderPolygon(gl, pos, points, false, fill);
+		renderPolygon(gl, pos, points, true, border);
+	}	
+	
+	public void renderRoundedBorderedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill, Fill border)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, true);
+		renderPolygon(gl, pos, points, false, fill);
+		renderPolygon(gl, pos, points, true, border);
+	}	
+	
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
+	{		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), false);
 		renderPolygon(gl, pos, points, false, colour);
+	}
+	
+	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill)
+	{
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, false);
+		renderPolygon(gl, pos, points, false, fill);
 	}
 	
 	public void renderRoundedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
 	{
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
-		int	index = 0;
-		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), false);
 		renderPolygon(gl, pos, points, false, fill);
 	}	
 	
 	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, Colour colour)
 	{
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
-		int	index = 0;
-		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), true);
 		renderPolygon(gl, pos, points, true, colour);
 	}	
 	
-	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)
+	public void renderRoundedBorder(GL gl, Vector2i pos, Vector2i size, int radius, BorderShape borderShape, Fill fill)
 	{
-		Vector2i[]	points = new Vector2i[(radius + 1) * 4];
-		int	index = 0;
-		
-		index = addCornerToArray(index, points, new Vector2i(radius, radius), radius, 0);
-		index = addCornerToArray(index, points, new Vector2i(radius, size.y - radius), radius, 1);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, size.y -radius), radius, 2);
-		index = addCornerToArray(index, points, new Vector2i(size.x - radius, radius), radius, 3);
-		
+		Vector2f[]	points = createRoundedRectangle(pos, size, radius, borderShape, true);
 		renderPolygon(gl, pos, points, true, fill);
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Colour colour)
+	public void renderPolygon(GL gl, Vector2i pos, Vector2f[] vertices, boolean outline, Colour colour)
 	{
 		GL2 gl2 = gl.getGL2();
 		
 		applyColour(gl2, colour);
         gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
-        for (Vector2i vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
+        for (Vector2f vertex : vertices) gl2.glVertex2f(pos.x + vertex.x, pos.y + vertex.y);
 		gl2.glEnd();
 	}
 	
-	public void renderPolygon(GL gl, Vector2i pos, Vector2i[] vertices, boolean outline, Fill fill)
+	public void renderPolygon(GL gl, Vector2i pos, Vector2f[] vertices, boolean outline, Fill fill)
 	{
 		if (fill.getType() == Fill.Type.SOLID)
 		{
@@ -329,10 +397,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		GL2 gl2 = gl.getGL2();
 		
 		Colour	colour = fill.getColour(0);
-		Recti 	rect = Recti.getBoundingBox(vertices);
+		Rectf	rect = Rectf.getBoundingBox(vertices);
 		
         gl2.glBegin(outline ? GL.GL_LINE_LOOP : GL.GL_TRIANGLE_FAN);
-        	for (Vector2i vertex : vertices)
+        	for (Vector2f vertex : vertices)
         	{        		
         		if (fill.getType() == Fill.Type.VERTICAL_GRADIENT)
         			colour = fill.getColour(0).mix(fill.getColour(1), (float)(vertex.y - rect.position.y) / rect.size.y);
@@ -480,7 +548,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 				renderBorderLR(gl, pos, size, fill.getColour(0), fill.getColour(1));	
 		}
 		else
-			renderRoundedBorder(gl, pos, size, radius, fill);
+			renderRoundedBorder(gl, pos, size, radius, new BorderShape(BorderShape.ALL_CORNERS), fill);
 	}
 	
 	public void renderBorder(GL gl, Vector2i pos, Vector2i size, Colour colour)
@@ -554,7 +622,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		canvas.display();
 	}
-	
+		
 	private void render(GLAutoDrawable drawable)
 	{
 		if (updateComponents)
@@ -653,26 +721,81 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+		int	keyCode = e.getKeyCode();
+		if (keyCode < 1024) keyState[keyCode] = true;
+		
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = true;
-		event.button = e.getKeyCode();
+		event.button = keyCode;
+		
+		if ((keyRepeatFilter != null) && (keyRepeatFilter.event != null))
+		{
+			Event event2 = keyRepeatFilter.event;
+			
+			if (event2.button == keyCode) 
+				keyRepeatFilter.cancel();
+			else
+				keyReleased(event2);
+			
+			keyRepeatFilter = null;
+		}
+		
 		sendEvent(event);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e)
-	{
+	{		
+		int keyCode = e.getKeyCode();
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = false;
-		event.button = e.getKeyCode();
+		event.button = keyCode;
+		
+		keyRepeatFilter = new KeyRepeatFilter(event);
+		keyRepeatTimer.schedule(keyRepeatFilter, 10);
+	}
+	
+	public void keyReleased(Event event)
+	{
+		if (event.button < 1024) keyState[event.button] = false;
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
+		if (e.getKeyChar() == '`') debugLayout = !debugLayout;
+		
 		Event event = new Event(Event.Type.KEY_TYPED);
 		event.button = (int)e.getKeyChar();
 		sendEvent(event);
+	}
+	
+	class KeyRepeatFilter extends TimerTask
+	{
+		public Event 	event;
+		
+		KeyRepeatFilter(Event event)
+		{
+			this.event = event;
+		}
+		
+		@Override
+		public boolean cancel()
+		{
+			event = null;
+			return super.cancel();
+		}
+		
+		@Override
+		public void run()
+		{
+			if (event != null)
+			{
+				Event temp = event;
+				event = null;
+				keyReleased(temp);
+			}
+		}
 	}
 }

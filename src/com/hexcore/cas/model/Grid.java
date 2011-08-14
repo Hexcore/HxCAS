@@ -4,21 +4,37 @@ import com.hexcore.cas.math.Vector2i;
 
 public abstract class Grid
 {
-	private Cell[][] cells = null;
-	private char gridType = 'x';
-	private Vector2i size = null;
+	protected Cell[][] 		cells = null;
+	protected char 			gridType = 'x';
+	protected Vector2i 		size = null;
+	protected int			numProperties = 0;
 	
 	public Grid(Vector2i size)
 	{
+		this.numProperties = 1;
+		
 		this.size = new Vector2i(size);
 		this.cells = new Cell[size.y][size.x];
 		for(int y = 0; y < size.y; y++)
 			for(int x = 0; x < size.x; x++)
-				this.cells[y][x] = new Cell(1);
+				this.cells[y][x] = new Cell(numProperties);
 	}
+	
+	public Grid(Vector2i size, int numProperties)
+	{
+		this.numProperties = numProperties;
+		
+		this.size = new Vector2i(size);
+		this.cells = new Cell[size.y][size.x];
+		for(int y = 0; y < size.y; y++)
+			for(int x = 0; x < size.x; x++)
+				this.cells[y][x] = new Cell(numProperties);
+	}	
 	
 	public Grid(Vector2i size, Cell example)
 	{
+		this.numProperties = example.getValueCount();
+		
 		this.size = new Vector2i(size);
 		this.cells = new Cell[size.y][size.x];
 		for(int y = 0; y < size.y; y++)
@@ -32,6 +48,8 @@ public abstract class Grid
 	
 	public Grid(Grid grid)
 	{
+		this.numProperties = grid.numProperties;
+		
 		this.size = new Vector2i(grid.size);
 		this.cells = new Cell[grid.size.y][grid.size.x];
 		for(int y = 0; y < size.y; y++)
@@ -53,10 +71,25 @@ public abstract class Grid
 		return cells[pos.y][pos.x];
 	}
 	
-	public void setCells(Vector2i pos, int[] vals)
+	public void setCell(int x, int y, int[] vals)
+	{
+		cells[y][x] = new Cell(vals);
+	}	
+	
+	public void setCell(Vector2i pos, int[] vals)
 	{
 		cells[pos.y][pos.x] = new Cell(vals);
 	}
+	
+	public void setCell(int x, int y, Cell cell)
+	{
+		cells[y][x] = new Cell(cell);
+	}	
+	
+	public void setCell(Vector2i pos, Cell cell)
+	{
+		cells[pos.y][pos.x] = new Cell(cell);
+	}	
 	
 	public int getWidth()
 	{
@@ -72,14 +105,14 @@ public abstract class Grid
 	{
 		return size;
 	}
-	
-	public void setType(char t)
-	{
-		gridType = t;
-	}
-	
+		
 	public char getType()
 	{
 		return gridType;
+	}
+	
+	public int getNumProperties()
+	{
+		return numProperties;
 	}
 }

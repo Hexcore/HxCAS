@@ -29,8 +29,8 @@ public class RectangleGridWidget extends GridWidget<RectangleGrid>
 				Cell 		cell = grid.getCell(x, y);
 				Colour		colour = Colour.DARK_GREY;
 				
-				if (colourRule != null)
-					colour = colourRule.getColour(cell.getValue(colourProperty));
+				if (colourRules != null)
+					colour = colourRules.getColour(cell, colourProperty);
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					

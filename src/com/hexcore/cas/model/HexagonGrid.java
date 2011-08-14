@@ -8,19 +8,19 @@ public class HexagonGrid extends Grid
 	public HexagonGrid(Vector2i size) 
 	{
 		super(size);
-		this.setType('H');
+		gridType = 'H';
 	}
 	
 	public HexagonGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		this.setType('H');
+		gridType = 'H';
 	}
 	
 	public HexagonGrid(Grid g)
 	{
 		super(g);
-		this.setType('H');
+		gridType = 'H';
 	}
 	
 	@Override

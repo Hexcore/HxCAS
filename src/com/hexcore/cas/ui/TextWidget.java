@@ -4,12 +4,14 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 
-
 public class TextWidget extends Widget
 {
 	private String		caption;
 	private Text.Size	textSize;
 	private Colour		colour;
+	
+	private FlowedText	flowedText;
+	private boolean		flowed = false;
 	
 	public TextWidget(String caption)
 	{		
@@ -27,6 +29,7 @@ public class TextWidget extends Widget
 		this.caption = caption;
 		this.textSize = textSize;
 		this.colour = colour;
+		this.flowedText = null;
 	}	
 		
 	public TextWidget(Vector2i position, String caption)
@@ -34,7 +37,11 @@ public class TextWidget extends Widget
 		super(position, new Vector2i());
 		this.caption = caption;
 		this.textSize = Text.Size.SMALL;
+		this.flowedText = null;
 	}
+	
+	public void 	setFlowed(boolean state) {flowed = state;}
+	public boolean	isFlowed() {return flowed;}
 	
 	@Override
 	public void render(GL gl, Vector2i position)
@@ -42,17 +49,45 @@ public class TextWidget extends Widget
 		if (!visible) return;
 		
 		Vector2i pos = this.position.add(position);
-		window.getTheme().renderText(gl, caption, pos, colour, textSize);
 		
-		//window.renderBorder(gl, pos, size, Colour.WHITE);
+		if ((size.x > 0) && (flowedText != null))
+			window.getTheme().renderFlowedText(gl, pos, flowedText, colour);
+		else
+			window.getTheme().renderText(gl, caption, pos, colour, textSize);
 	}
 	
 	public String 	getCaption() {return caption;}
-	public void		setCaption(String caption) {this.caption = caption;}
+	public void		setCaption(String caption) {this.caption = caption; reflowText();}
+	
+	@Override
+	public void setSize(Vector2i v)
+	{
+		super.setSize(v);
+		reflowText();
+	}
 	
 	@Override
 	public void relayout()
 	{
-		if (window != null) setSize(window.getTheme().calculateTextSize(caption, textSize));
+		if (window != null) 
+		{
+			reflowText();
+			
+			if (flowedText != null)
+				super.setSize(flowedText.size);
+			else
+				super.setSize(new Vector2i(window.getTheme().calculateTextSize(caption, textSize)));
+		}
+	}
+	
+	public void reflowText()
+	{
+		if (window != null)
+		{
+			if (flowed)
+				flowedText = window.getTheme().flowText(caption, size.x, textSize);
+			else
+				flowedText = null;
+		}
 	}
 }

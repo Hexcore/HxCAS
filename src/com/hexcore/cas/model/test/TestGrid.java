@@ -1,5 +1,7 @@
 package com.hexcore.cas.model.test;
 
+import org.junit.Test;
+
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
@@ -14,6 +16,11 @@ public class TestGrid extends TestCase
 		{
 			super(grid);
 		}
+		
+		public DummyGrid(Vector2i size, int numProperties)
+		{
+			super(size, numProperties);
+		}		
 
 		public DummyGrid(Vector2i size, Cell example)
 		{
@@ -48,6 +55,38 @@ public class TestGrid extends TestCase
 		assertEquals(9, grid.getHeight());
 		assertEquals(7, grid.getWidth());
 		assertTrue(grid.getSize().equals(new Vector2i(7, 9)));
+	}
+	
+	public void testConstructorSizeInt()
+	{	
+		Vector2i	size = new Vector2i(7, 9);
+		DummyGrid	grid = new DummyGrid(size, 3);	
+		
+		assertEquals(9, grid.getHeight());
+		assertEquals(7, grid.getWidth());
+		assertTrue(grid.getSize().equals(size));
+		
+		// Assure a copy of the size was made
+		size.x = 1;
+		size.y = 2;
+		
+		assertEquals(9, grid.getHeight());
+		assertEquals(7, grid.getWidth());
+		assertTrue(grid.getSize().equals(new Vector2i(7, 9)));
+		
+		// Ensure size
+		assertEquals(3, grid.getCell(0, 0).getValueCount());
+		assertEquals(3, grid.getCell(3, 3).getValueCount());
+		assertEquals(3, grid.getCell(6, 8).getValueCount());
+
+		// Ensure values		
+		grid.setCell(0, 0, new int[]{3, 5, 7});
+		grid.setCell(2, 2, new int[]{2, 6, 8});
+		grid.setCell(6, 8, new int[]{1, 4, 9});
+		
+		assertEquals(3, grid.getCell(0, 0).getValue(0));
+		assertEquals(6, grid.getCell(2, 2).getValue(1));
+		assertEquals(9, grid.getCell(6, 8).getValue(2));
 	}
 	
 	public void testConstructorSizeCell()
@@ -109,7 +148,8 @@ public class TestGrid extends TestCase
 		assertEquals(9, grid2.getCell(6, 8).getValue(0));
 	}	
 	
-	public void testSetCells()
+	@Test
+	public void testGetCell()
 	{
 		Vector2i	size = new Vector2i(2, 2);
 		DummyGrid	grid = new DummyGrid(size);	
@@ -117,24 +157,49 @@ public class TestGrid extends TestCase
 		grid.getCell(1, 0).setValue(0, 10);
 		grid.getCell(0, 1).setValue(0, 11);
 		grid.getCell(1, 1).setValue(0, 5);
+				
+		assertEquals(9, grid.getCell(0, 0).getValue(0));
+		assertEquals(10, grid.getCell(1, 0).getValue(0));
+		assertEquals(5, grid.getCell(1, 1).getValue(0));
+		
+		Vector2i pos1 = new Vector2i(0, 1);
+		Vector2i pos2 = new Vector2i(1, 0);
+		assertEquals(11, grid.getCell(pos1).getValue(0));
+		assertEquals(10, grid.getCell(pos2).getValue(0));	
+	}
+	
+	@Test
+	public void testSetCellArray()
+	{
+		Vector2i	size = new Vector2i(2, 2);
+		DummyGrid	grid = new DummyGrid(size, 3);	
+		grid.getCell(0, 0).setValue(0, 9);
+		grid.getCell(1, 0).setValue(0, 10);
+		grid.getCell(0, 1).setValue(0, 11);
+		grid.getCell(1, 1).setValue(0, 5);
 		
 		int[] values = {1, 2, 3};
-		grid.setCells(new Vector2i(1, 1), values);
+		grid.setCell(new Vector2i(1, 1), values);
 		
 		assertEquals(1, grid.getCell(1, 1).getValue(0));
 		assertEquals(2, grid.getCell(1, 1).getValue(1));
-		assertEquals(3, grid.getCell(1, 1).getValue(2));
+		assertEquals(3, grid.getCell(1, 1).getValue(2));	
 	}
 	
-	public void testSetGetType()
-	{
-		Vector2i	size = new Vector2i(2, 2);
+	@Test
+	public void testSetCell()
+	{	
+		Vector2i	size = new Vector2i(5, 5);
 		DummyGrid	grid = new DummyGrid(size);	
 		
-		grid.setType('H');
-		assertEquals('H', grid.getType());
+		Vector2i	pos1 = new Vector2i(2, 4);
+		Vector2i	pos2 = new Vector2i(3, 3);		
+		Cell cell = new Cell(new int[] {1, 5, 9});
+		grid.setCell(pos1, cell);
+		grid.setCell(pos2, cell);
 		
-		grid.setType('j');
-		assertEquals('j', grid.getType());
+		assertEquals(1, grid.getCell(pos1).getValue(0));
+		assertEquals(5, grid.getCell(pos2).getValue(1));
+		assertEquals(9, grid.getCell(pos1).getValue(2));		
 	}
 }

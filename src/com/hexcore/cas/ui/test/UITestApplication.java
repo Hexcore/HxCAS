@@ -2,10 +2,12 @@ package com.hexcore.cas.ui.test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
+import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.test.GameOfLife;
+import com.hexcore.cas.test.WaterFlow;
 import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
 import com.hexcore.cas.ui.Colour;
@@ -13,6 +15,7 @@ import com.hexcore.cas.ui.Container;
 import com.hexcore.cas.ui.DropDownBox;
 import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
+import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
@@ -24,6 +27,7 @@ import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.TriangleGridWidget;
 import com.hexcore.cas.ui.View;
 import com.hexcore.cas.ui.Widget;
@@ -41,8 +45,10 @@ public class UITestApplication implements WindowEventListener
 	public LinearLayout	innerLayout;
 	
 	public TextBox		nameTextBox;
+	public TextBox		nameTextBox2;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
+	public TextWidget	paragraph;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
@@ -59,7 +65,7 @@ public class UITestApplication implements WindowEventListener
 	public LinearLayout			gridViewLayout;
 	public TabbedView			tabbedView;
 	
-	public ColourRule			colourRule;
+	public ColourRuleSet		colourRules;
 	
 	public ScrollableContainer	rectGridViewerContainer;
 	public GameOfLife			rectGameOfLife;
@@ -73,7 +79,12 @@ public class UITestApplication implements WindowEventListener
 	public GameOfLife			triGameOfLife;
 	public TriangleGridWidget	triGridViewer;
 	
-	public RectangleGrid3DWidget	rectGrid3DViewer; 	
+	public RectangleGrid3DWidget	rectGrid3DViewer;
+	public HexagonGrid3DWidget		hexGrid3DViewer;
+	public TriangleGrid3DWidget		triGrid3DViewer;
+	
+	public WaterFlow				waterFlow;
+	public RectangleGrid3DWidget	waterGrid3DViewer;
 	
 	public Button				nextIterationButton;
 	
@@ -102,11 +113,26 @@ public class UITestApplication implements WindowEventListener
 		triGrid.getCell(6, 8).setValue(0, 1);
 		triGameOfLife = new GameOfLife(triGrid);		
 		
+		waterFlow = new WaterFlow();
+		
+		colourRules = new ColourRuleSet(3);
+		ColourRule	colourRule;
+		
 		colourRule = new ColourRule();
 		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
 		colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
+		colourRules.setColourRule(0, colourRule);
 		
-		window = new Window("GUI Test", 800, 600);
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
+		colourRules.setColourRule(1, colourRule);	
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
+		colourRules.setColourRule(2, colourRule);	
+		
+		window = new Window("GUI Test", 1024, 768);
 		window.addListener(this);
 		window.show();
 	}
@@ -123,7 +149,7 @@ public class UITestApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
+		headerLayout.setBackground(new Fill(new Colour(0.73f, 0.73f, 0.73f), new Colour(0.85f, 0.85f, 0.85f)));
 		windowLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");
@@ -134,7 +160,7 @@ public class UITestApplication implements WindowEventListener
 		headingContainer.setFlag(Widget.FILL);
 		headerLayout.add(headingContainer);
 		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
+		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.BLACK);
 		headingLabel.setFlag(Widget.CENTER);
 		headingContainer.setContents(headingLabel);
 		
@@ -185,6 +211,12 @@ public class UITestApplication implements WindowEventListener
 		nameTextBox.setText("Benny");
 		innerLayout.add(nameTextBox);
 		
+		
+		nameTextBox2 = new TextBox(new Vector2i(100, 20));
+		nameTextBox2.setFlag(Widget.FILL_HORIZONTAL);
+		nameTextBox2.setText("Benny2");
+		innerLayout.add(nameTextBox2);
+		
 		checkBox = new CheckBox(new Vector2i(100, 20), "Can fly");
 		checkBox.setFlag(Widget.FILL_HORIZONTAL);
 		innerLayout.add(checkBox);
@@ -196,6 +228,11 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.addItem("Omega");
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
+		
+		paragraph = new TextWidget("This is a lot of text. It is going to fill the whole width of the screen and then start overflowing to the next line. If it hasn't already then this extra sentence should help force it over the edge.");
+		paragraph.setFlag(Widget.FILL_HORIZONTAL);
+		paragraph.setFlowed(true);
+		innerLayout.add(paragraph);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);
@@ -212,7 +249,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(gridViewerContainer, "Hexagon");
 		
 		gridViewer = new HexagonGridWidget((HexagonGrid)gameOfLife.getGrid(), 16);
-		gridViewer.setColourRule(colourRule);
+		gridViewer.setColourRuleSet(colourRules);
 		gridViewerContainer.setContents(gridViewer);
 		
 		// Rectangle Grid
@@ -222,7 +259,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(rectGridViewerContainer, "Rectangle");
 		
 		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
-		rectGridViewer.setColourRule(colourRule);
+		rectGridViewer.setColourRuleSet(colourRules);
 		rectGridViewerContainer.setContents(rectGridViewer);
 	
 		// Triangle Grid
@@ -232,7 +269,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(triGridViewerContainer, "Triangle");
 		
 		triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
-		triGridViewer.setColourRule(colourRule);
+		triGridViewer.setColourRuleSet(colourRules);
 		triGridViewerContainer.setContents(triGridViewer);	
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
@@ -241,9 +278,31 @@ public class UITestApplication implements WindowEventListener
 		// 3D Rectangle Grid
 		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGrid3DViewer.setFlag(Widget.FILL);
-		rectGrid3DViewer.setColourRule(colourRule);
-		rectGrid3DViewer.setHeightScale(16.0f);
-		tabbedView.add(rectGrid3DViewer, "3D Rectangle");
+		rectGrid3DViewer.setColourRuleSet(colourRules);
+		rectGrid3DViewer.addSlice(0, 16.0f);
+		tabbedView.add(rectGrid3DViewer, "3D Rect");
+		
+		// 3D Hexagon Grid
+		hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)gameOfLife.getGrid(), 24);
+		hexGrid3DViewer.setFlag(Widget.FILL);
+		hexGrid3DViewer.setColourRuleSet(colourRules);
+		hexGrid3DViewer.addSlice(0, 16.0f);
+		tabbedView.add(hexGrid3DViewer, "3D Hex");
+		
+		// 3D Triangle Grid
+		triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
+		triGrid3DViewer.setFlag(Widget.FILL);
+		triGrid3DViewer.setColourRuleSet(colourRules);
+		triGrid3DViewer.addSlice(0, 16.0f);
+		tabbedView.add(triGrid3DViewer, "3D Tri");
+		
+		// Water Flow
+		waterGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), waterFlow.getGrid(), 24);
+		waterGrid3DViewer.setFlag(Widget.FILL);
+		waterGrid3DViewer.setColourRuleSet(colourRules);
+		waterGrid3DViewer.addSlice(2, 2, 5.0f);
+		waterGrid3DViewer.addSlice(1, 1, 5.0f);
+		tabbedView.add(waterGrid3DViewer, "Water Flow");
 		
 		window.relayout();
 	}
@@ -278,9 +337,11 @@ public class UITestApplication implements WindowEventListener
 			{
 				switch (tabbedView.getIndex())
 				{
+					case 4:
 					case 0:
 						gameOfLife.generateNextGeneration();
 						gridViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
+						hexGrid3DViewer.setGrid((HexagonGrid)gameOfLife.getGrid());
 						break;
 					case 1:
 					case 3:
@@ -288,10 +349,16 @@ public class UITestApplication implements WindowEventListener
 						rectGridViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
 						rectGrid3DViewer.setGrid((RectangleGrid)rectGameOfLife.getGrid());
 						break;
+					case 5:
 					case 2:
 						triGameOfLife.generateNextGeneration();
 						triGridViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
-						break;							
+						triGrid3DViewer.setGrid((TriangleGrid)triGameOfLife.getGrid());
+						break;		
+					case 6:
+						waterFlow.generateNextGeneration();
+						waterGrid3DViewer.setGrid(waterFlow.getGrid());
+						break;				
 				}
 			}
 		}

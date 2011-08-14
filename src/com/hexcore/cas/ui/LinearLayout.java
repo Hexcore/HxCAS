@@ -32,6 +32,8 @@ public class LinearLayout extends Layout
 						
 		for (Widget component : components)
 		{
+			if (!component.isVisible()) continue;
+			
 			// Shift up component by margin
 			int marginDir = component.getMargin().get(dirIndex);
 			posDir += Math.max(lastMargin, marginDir);
