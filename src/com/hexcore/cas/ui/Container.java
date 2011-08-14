@@ -75,7 +75,8 @@ public class Container extends Widget
 		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		if (contents != null) contents.render(gl, pos);
 		
-		//window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
+		if (window.isDebugLayout())
+			window.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));
 	}
 		
 	@Override

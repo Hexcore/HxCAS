@@ -103,8 +103,12 @@ public class TabbedView extends View
 	{
 		boolean handled = false;
 		
+		if (event.type == Event.Type.MOUSE_OUT) hovered = -1;
+		
 		if ((event.type == Event.Type.MOUSE_MOTION) || (event.type == Event.Type.MOUSE_CLICK))
 		{
+			hovered = -1;
+			
 			if ((event.position.x >= position.x) && (event.position.y >= position.y) && (event.position.y <= position.y + window.getTheme().getTabHeight()))
 			{
 				int	tabsWidth = 0;
@@ -125,7 +129,7 @@ public class TabbedView extends View
 				handled = true;
 			}
 			
-			if (event.type == Event.Type.MOUSE_CLICK)
+			if ((event.type == Event.Type.MOUSE_CLICK) && (hovered >= 0))
 			{
 				boolean wasActive = active;
 				active = event.pressed;

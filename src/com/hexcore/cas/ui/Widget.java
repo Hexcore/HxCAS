@@ -159,6 +159,10 @@ public abstract class Widget
 		{
 			focused = false;
 		}
+		else if (event.type == Event.Type.MOUSE_OUT)
+		{
+			mouseover = false;
+		}
 		else if ((event.type == Event.Type.MOUSE_MOTION) || (event.type == Event.Type.MOUSE_CLICK) || (event.type == Event.Type.MOUSE_SCROLL))
 		{			
 			Vector2i start = pos;
@@ -167,8 +171,14 @@ public abstract class Widget
 			if ((event.position.x <= start.x) || (event.position.y <= start.y)
 					|| (event.position.x >= end.x) || (event.position.y >= end.y))
 			{
-				mouseover = false;
-				if (!event.isMouseRelease() && !focused) return false;
+				if (mouseover && (event.type == Event.Type.MOUSE_MOTION))
+				{
+					mouseover = false;
+					handleEvent(new Event(Event.Type.MOUSE_OUT), pos);
+					return false;
+				}
+				else if (!event.isMouseRelease() && !focused) 
+					return false;
 			}
 			else
 				mouseover = true;
