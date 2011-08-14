@@ -5,6 +5,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL;
@@ -520,7 +521,11 @@ public class Theme
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
-		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), -(int)textRenderer.getBounds(text).getMinY());
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		LineMetrics metrics = font.getLineMetrics(text, context);
+		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
 		
 	public void renderText(GL gl, String text, Vector2i position, Colour colour, Text.Size textSize)
@@ -543,6 +548,67 @@ public class Theme
 		textRenderer.end3DRendering();
 		
 		gl2.glPopMatrix();
+	}
+	
+	public FlowedText flowText(String text, int maxWidth, Text.Size textSize)
+	{
+		TextRenderer 		textRenderer = textRenderers.get(textSize);
+		FontRenderContext 	context = textRenderer.getFontRenderContext();
+		Font 				font = textRenderer.getFont();
+		
+		LineMetrics 	metrics = font.getLineMetrics(text, context);	
+		int 			lineHeight = (int)metrics.getHeight();
+		List<String>	lines = new LinkedList<String>();
+		String			line = "";
+		String			word = "";
+		
+		for (int c = 0; c <= text.length(); c++)
+		{
+			char 	character = (c == text.length()) ? ' ' : text.charAt(c);
+			
+			if (Character.isWhitespace(character))
+			{
+				int 	lineWidth = (int)textRenderer.getBounds(line + word).getMaxX();
+				word += character;
+				
+				if (lineWidth <= maxWidth)
+					line += word;
+				else
+				{
+					lines.add(line);
+					line = word;
+				}
+				
+				word = "";
+			}
+			else
+				word += character;
+		}
+		
+		if (line.length() > 0) lines.add(line);
+		
+		FlowedText flowedText = new FlowedText();
+		flowedText.lines = lines;
+		flowedText.size = new Vector2i(maxWidth, lines.size() * lineHeight);
+		flowedText.lineHeight = lineHeight;
+		flowedText.textSize = textSize;
+		return flowedText;
+		
+	}
+	
+	public void renderFlowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour)
+	{
+		Vector2i	pos = new Vector2i(position);
+		for (String line : flowedText.lines)
+		{
+			renderText(gl, line, pos, colour, flowedText.textSize);
+			pos.inc(0, flowedText.lineHeight);
+		}
+	}	
+	
+	public void renderFlowedText(GL gl, String text, Vector2i position, int maxWidth, Colour colour, Text.Size textSize)
+	{
+		renderFlowedText(gl, position, flowText(text, maxWidth, textSize), colour);
 	}
 	
 	public void renderText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Text.Size textSize)

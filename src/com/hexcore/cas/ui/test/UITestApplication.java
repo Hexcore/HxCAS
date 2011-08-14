@@ -48,6 +48,7 @@ public class UITestApplication implements WindowEventListener
 	public TextBox		nameTextBox2;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
+	public TextWidget	paragraph;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
@@ -227,6 +228,11 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.addItem("Omega");
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
+		
+		paragraph = new TextWidget("This is a lot of text. It is going to fill the whole width of the screen and then start overflowing to the next line. If it hasn't already then this extra sentence should help force it over the edge.");
+		paragraph.setFlag(Widget.FILL_HORIZONTAL);
+		paragraph.setFlowed(true);
+		innerLayout.add(paragraph);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);
