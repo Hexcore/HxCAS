@@ -80,13 +80,13 @@ public class Layout extends Widget
 		for (Widget component : components)
 			component.render(gl, pos);
 		
-		//if (mouseover)
+		if (window.isDebugLayout())
 		{
 			//window.renderRectangle(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f, 0.2f));
 			//window.renderBorder(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f));		
 	
 			//window.renderRectangle(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f, 0.2f));
-			//window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
+			window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
 		}
 	}
 	

@@ -2,8 +2,10 @@ package com.hexcore.cas.ui;
 
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL;
@@ -29,8 +31,8 @@ public class Theme
 		public static final int BOTTOM_LEFT = 128; 
 		public static final int BOTTOM_RIGHT= 256; 	
 		
-		public static final int ALL_SIDES	= LEFT & TOP & RIGHT & BOTTOM;
-		public static final int ALL_CORNERS	= TOP_LEFT & TOP_RIGHT & BOTTOM_LEFT & BOTTOM_RIGHT;
+		public static final int ALL_SIDES	= LEFT | TOP | RIGHT | BOTTOM;
+		public static final int ALL_CORNERS	= TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT | BOTTOM_RIGHT;
 		
 		public int	shape;
 		
@@ -65,7 +67,7 @@ public class Theme
 		}
 	};
 	
-	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE};
+	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE, SELECTED};
 	
 	public static class Property
 	{
@@ -124,7 +126,7 @@ public class Theme
 		
 		typeProperties = new HashMap<String, Type>();
 	}
-	
+		
 	public Property getProperty(String typeName, String propertyName)
 	{
 		return getProperty(typeName, "normal", propertyName);
@@ -263,10 +265,13 @@ public class Theme
 				stateName = "active";
 				break;
 		}
+	
+		int 		borderRadius = getInteger("Button", stateName, "border-radius", 8);
+		BorderShape corners = new BorderShape(BorderShape.ALL_CORNERS);
 		
-		int borderRadius = getInteger("Button", stateName, "border-radius", 0);
-		window.renderRectangle(gl, pos, size, borderRadius, getFill("Button", stateName, "background"));
-		window.renderBorder(gl, pos, size, borderRadius, getFill("Button", stateName, "border"));	 
+		window.renderRoundedBorderedRectangle(gl, pos, size, borderRadius, corners, 
+				getFill("Button", stateName, "background"),
+				getFill("Button", stateName, "border"));	 
 		
 		pos = pos.add(getVector2i("Button", stateName, "text-offset"));
 		
@@ -349,11 +354,11 @@ public class Theme
 		window.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
 		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
-		Vector2i 	textSize = window.getTheme().calculateTextSize(text, Text.Size.SMALL);
+		int			textHeight = calculateTextHeight(Text.Size.SMALL);
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
-		renderText(gl, text, position.add(padding.x, (size.y - textSize.y) / 2), textColour, Text.Size.SMALL);
+		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
@@ -406,9 +411,10 @@ public class Theme
 		Vector2i padding = getVector2i("DropDownBox", stateName, "padding", new Vector2i(3, 3));	
 		Vector2i boxSize = size.subtract(16, 0);
 		
-		int borderRadius = getInteger("DropDownBox", stateName, "border-radius", 0);
-		window.renderRectangle(gl, position, boxSize, borderRadius, getFill("DropDownBox", stateName, "background"));
-		window.renderBorder(gl, position, boxSize, borderRadius, getFill("DropDownBox", stateName, "border"));
+		int 		borderRadius = getInteger("DropDownBox", stateName, "border-radius", 0);
+		BorderShape	borderShape = new BorderShape(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);	
+		window.renderRoundedBorderedRectangle(gl, position, boxSize, borderRadius, borderShape,
+				getFill("DropDownBox", stateName, "background"), getFill("DropDownBox", stateName, "border"));
 		
 		Vector2i textSize = window.getTheme().calculateTextSize(selectedItem, Text.Size.SMALL);
 		Vector2i textPos = position.add(padding.x, (size.y - textSize.y) / 2);
@@ -478,22 +484,37 @@ public class Theme
 		return calculateTextSize(caption, Text.Size.MEDIUM).add(padding);
 	}
 	
-	public void renderTab(GL gl, Vector2i position, String caption, boolean selected, BorderShape sides)
+	public void renderTab(GL gl, Vector2i position, String caption, ButtonState state, BorderShape sides)
 	{
-		String stateName = "normal";
-		if (selected) stateName = "selected";
+		String stateName;
+		
+		switch (state)
+		{
+			default:
+			case NORMAL:
+				stateName = "normal";
+				break;		
+			case HOVER:
+				stateName = "hover";
+				break;
+			case ACTIVE:
+				stateName = "active";
+				break;
+			case SELECTED:
+				stateName = "selected";
+				break;				
+		}
 		
 		Vector2i size = getTabSize(caption);
-		
-		Vector2i[] tabShape = new Vector2i[4];
-		tabShape[0] = new Vector2i(0, 		0);
-		tabShape[1] = new Vector2i(size.x,	0);
-		tabShape[2] = new Vector2i(size.x, 	size.y);
-		tabShape[3] = new Vector2i(0, 		size.y);
-		
-		window.renderPolygon(gl, position, tabShape, false, getFill("Tab", stateName, "background"));
-		window.renderPolygon(gl, position, tabShape, true, getFill("Tab", stateName, "border"));
-		renderText(gl, caption, position, size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
+				
+		int			borderRadius = getInteger("Tab", stateName, "border-radius", 8);
+		BorderShape corners = new BorderShape();
+		if (sides.has(BorderShape.LEFT)) corners.add(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);
+		if (sides.has(BorderShape.RIGHT)) corners.add(BorderShape.TOP_RIGHT | BorderShape.BOTTOM_RIGHT);
+		window.renderRoundedBorderedRectangle(gl, position, size.add(1, 0), borderRadius, corners, 
+				getFill("Tab", stateName, "background"), getFill("Tab", stateName, "border"));
+		Vector2i textOffset = getVector2i("Tab", stateName, "text-offset", new Vector2i(0, 0));
+		renderText(gl, caption, position.add(textOffset), size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
 	}
 	
 	public void renderTabInside(GL gl, Vector2i position, Vector2i size)
@@ -508,26 +529,34 @@ public class Theme
 		TextRenderer textRenderer = textRenderers.get(textSize);
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
-		return (int)Math.ceil(font.getMaxCharBounds(context).getHeight());
+		
+		LineMetrics metrics = font.getLineMetrics("test", context);
+		return (int)(metrics.getAscent() + metrics.getDescent());
 	}
 	
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
-		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), calculateTextHeight(textSize));
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		LineMetrics metrics = font.getLineMetrics(text, context);
+		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
-	
+		
 	public void renderText(GL gl, String text, Vector2i position, Colour colour, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		LineMetrics metrics = font.getLineMetrics(text, context);
 		
 		textRenderer.setColor(colour.r, colour.g, colour.b, colour.a);
-		
-		Rectangle2D	bounds = textRenderer.getBounds(text);
-		
+				
 		GL2 gl2 = gl.getGL2();
 		gl2.glPushMatrix();
-		gl2.glTranslatef(position.x, position.y - (float)bounds.getMinY(), 0.0f);
+		gl2.glTranslatef(position.x, position.y + (int)metrics.getAscent(), 0.0f);
 		gl2.glScalef(1.0f, -1.0f, 1.0f);
 		
 		textRenderer.begin3DRendering();
@@ -537,19 +566,85 @@ public class Theme
 		gl2.glPopMatrix();
 	}
 	
+	public FlowedText flowText(String text, int maxWidth, Text.Size textSize)
+	{
+		TextRenderer 		textRenderer = textRenderers.get(textSize);
+		FontRenderContext 	context = textRenderer.getFontRenderContext();
+		Font 				font = textRenderer.getFont();
+		
+		LineMetrics 	metrics = font.getLineMetrics(text, context);	
+		int 			lineHeight = (int)metrics.getHeight();
+		List<String>	lines = new LinkedList<String>();
+		String			line = "";
+		String			word = "";
+		
+		for (int c = 0; c <= text.length(); c++)
+		{
+			char 	character = (c == text.length()) ? ' ' : text.charAt(c);
+			
+			if (Character.isWhitespace(character))
+			{
+				int 	lineWidth = (int)textRenderer.getBounds(line + word).getMaxX();
+				word += character;
+				
+				if (lineWidth <= maxWidth)
+					line += word;
+				else
+				{
+					lines.add(line);
+					line = word;
+				}
+				
+				word = "";
+			}
+			else
+				word += character;
+		}
+		
+		if (line.length() > 0) lines.add(line);
+		
+		FlowedText flowedText = new FlowedText();
+		flowedText.lines = lines;
+		flowedText.size = new Vector2i(maxWidth, lines.size() * lineHeight);
+		flowedText.lineHeight = lineHeight;
+		flowedText.textSize = textSize;
+		return flowedText;
+		
+	}
+	
+	public void renderFlowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour)
+	{
+		Vector2i	pos = new Vector2i(position);
+		for (String line : flowedText.lines)
+		{
+			renderText(gl, line, pos, colour, flowedText.textSize);
+			pos.inc(0, flowedText.lineHeight);
+		}
+	}	
+	
+	public void renderFlowedText(GL gl, String text, Vector2i position, int maxWidth, Colour colour, Text.Size textSize)
+	{
+		renderFlowedText(gl, position, flowText(text, maxWidth, textSize), colour);
+	}
+	
 	public void renderText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
 		
+		LineMetrics metrics = font.getLineMetrics(text, context);
+		int			textHeight = (int)(metrics.getAscent() + metrics.getDescent());
+	
 		textRenderer.setColor(colour.r, colour.g, colour.b, colour.a);
-		
+				
 		Rectangle2D	bounds = textRenderer.getBounds(text);
 		Vector2i textBounds = new Vector2i((int)bounds.getMaxX(), -(int)bounds.getMinY());
 		Vector2i pos = position.add(0, -(int)bounds.getMinY());
 		
 		GL2 gl2 = gl.getGL2();
 		gl2.glPushMatrix();
-		gl2.glTranslatef(pos.x + (int)((size.x - textBounds.x) * 0.5f), pos.y + (int)((size.y - textBounds.y) * 0.5f), 0.0f);
+		gl2.glTranslatef(pos.x + (int)((size.x - textBounds.x) * 0.5f), pos.y + (int)((size.y - textHeight) * 0.5f) + 1, 0.0f);
 		gl2.glScalef(1.0f, -1.0f, 1.0f);
 		
 		textRenderer.begin3DRendering();

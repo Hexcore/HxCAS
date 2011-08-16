@@ -48,6 +48,7 @@ public class UITestApplication implements WindowEventListener
 	public TextBox		nameTextBox2;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
+	public TextWidget	paragraph;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
@@ -131,7 +132,7 @@ public class UITestApplication implements WindowEventListener
 		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
-		window = new Window("GUI Test", 800, 600);
+		window = new Window("GUI Test", 1024, 768);
 		window.addListener(this);
 		window.show();
 	}
@@ -148,7 +149,7 @@ public class UITestApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
+		headerLayout.setBackground(new Fill(new Colour(0.73f, 0.73f, 0.73f), new Colour(0.85f, 0.85f, 0.85f)));
 		windowLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");
@@ -159,7 +160,7 @@ public class UITestApplication implements WindowEventListener
 		headingContainer.setFlag(Widget.FILL);
 		headerLayout.add(headingContainer);
 		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
+		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.BLACK);
 		headingLabel.setFlag(Widget.CENTER);
 		headingContainer.setContents(headingLabel);
 		
@@ -227,6 +228,11 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.addItem("Omega");
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
+		
+		paragraph = new TextWidget("This is a lot of text. It is going to fill the whole width of the screen and then start overflowing to the next line. If it hasn't already then this extra sentence should help force it over the edge.");
+		paragraph.setFlag(Widget.FILL_HORIZONTAL);
+		paragraph.setFlowed(true);
+		innerLayout.add(paragraph);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);

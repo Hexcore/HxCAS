@@ -6,10 +6,13 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
+import com.hexcore.cas.ui.Theme.ButtonState;
 
 public class TabbedView extends View
 {
 	protected TreeMap<Integer, String>	captions;
+	protected int						hovered = -1;
+	protected boolean active;
 	
 	public TabbedView(Vector2i size)
 	{
@@ -83,9 +86,14 @@ public class TabbedView extends View
 			if (i == 0) sides.add(BorderShape.LEFT);
 			if (i == widgets.size() - 1) sides.add(BorderShape.RIGHT);
 			
+			ButtonState state = ButtonState.NORMAL;
+			if (i == hovered) state = active ? ButtonState.ACTIVE : ButtonState.HOVER;
+			if (i == getIndex()) state = ButtonState.SELECTED;
+			
+			
 			String caption = captions.get(i);
 			Vector2i tabSize = window.getTheme().getTabSize(caption);
-			window.getTheme().renderTab(gl, pos.add(x, 0), caption, i == getIndex(), sides);
+			window.getTheme().renderTab(gl, pos.add(x, 0), caption, state, sides);
 			x += tabSize.x;
 		}
 	}
@@ -95,7 +103,7 @@ public class TabbedView extends View
 	{
 		boolean handled = false;
 		
-		if ((event.type == Event.Type.MOUSE_CLICK) && !event.pressed)
+		if ((event.type == Event.Type.MOUSE_MOTION) || (event.type == Event.Type.MOUSE_CLICK))
 		{
 			if ((event.position.x >= position.x) && (event.position.y >= position.y) && (event.position.y <= position.y + window.getTheme().getTabHeight()))
 			{
@@ -109,11 +117,20 @@ public class TabbedView extends View
 					x += tabSize.x;
 					if (event.position.x <= x)
 					{
-						setIndex(i);
+						hovered = i;
 						break;
 					}
 				}
+				
 				handled = true;
+			}
+			
+			if (event.type == Event.Type.MOUSE_CLICK)
+			{
+				boolean wasActive = active;
+				active = event.pressed;
+		
+				if (wasActive && !active && mouseover) setIndex(hovered);
 			}
 		}
 		

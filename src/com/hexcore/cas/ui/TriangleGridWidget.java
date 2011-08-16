@@ -2,6 +2,7 @@ package com.hexcore.cas.ui;
 
 import javax.media.opengl.GL;
 
+import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
@@ -27,15 +28,15 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 		int h = (int)(tileSize * Math.sqrt(2) * 0.5);
 		
 		Vector2i 	pos = this.position.add(position);
-		Vector2i[]	downTriangle = new Vector2i[3];
-		downTriangle[0] = new Vector2i(0, 	0);
-		downTriangle[1] = new Vector2i(r+r, 0);
-		downTriangle[2] = new Vector2i(r,	h);
+		Vector2f[]	downTriangle = new Vector2f[3];
+		downTriangle[0] = new Vector2f(0.0f, 	0.0f);
+		downTriangle[1] = new Vector2f(r+r, 	0.0f);
+		downTriangle[2] = new Vector2f(r,		h);
 		
-		Vector2i[]	upTriangle = new Vector2i[3];
-		upTriangle[0] = new Vector2i(r, 	0);
-		upTriangle[1] = new Vector2i(r+r, h);
-		upTriangle[2] = new Vector2i(0,	h);
+		Vector2f[]	upTriangle = new Vector2f[3];
+		upTriangle[0] = new Vector2f(r, 	0.0f);
+		upTriangle[1] = new Vector2f(r+r, 	h);
+		upTriangle[2] = new Vector2f(0.0f,	h);
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)

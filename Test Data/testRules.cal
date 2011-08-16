@@ -1,0 +1,33 @@
+ruleset Flood
+{
+	property land;
+	property water;
+
+	type Land : 0
+	{
+		if (self.water > 0)
+		{
+			var most = max(neighbours.water);
+			var least = min(neighbours.water);
+			
+			
+			if (most < self.water)
+			{
+				self.water--;
+			}
+			else if (most == least)
+			{
+				self.water = most;
+			}
+			else
+			{
+				self.water = most - 1;
+			}
+		}
+	}
+	
+	type WaterSource : 1
+	{
+		/*self.water = 100;*/
+	}
+}

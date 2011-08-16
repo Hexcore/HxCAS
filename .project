@@ -6,6 +6,12 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
+			<name>at.ssw.coco.eclipse.builder.CocoBuilder</name>
+			<triggers></triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
@@ -13,5 +19,6 @@
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>at.ssw.coco.eclipse.builder.CocoNature</nature>
 	</natures>
 </projectDescription>
