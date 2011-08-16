@@ -121,8 +121,8 @@ public class Theme
 		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Arial", Font.BOLD, 36), true, false));
 		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Arial", Font.BOLD, 24), true, false));
 		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(new Font("Arial", Font.PLAIN, 18), true, false));
-		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Serif", Font.PLAIN, 12), true, false));
-		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Serif", Font.PLAIN, 10), true, false));
+		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Calibri", Font.PLAIN, 14), true, false));
+		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Calibri", Font.PLAIN, 12), true, false));
 		
 		typeProperties = new HashMap<String, Type>();
 	}
@@ -352,13 +352,13 @@ public class Theme
 		
 		int borderRadius = getInteger("TextBox", stateName, "border-radius", 0);
 		window.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
-		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		int			textHeight = calculateTextHeight(Text.Size.SMALL);
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
 		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
+		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
