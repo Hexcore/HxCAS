@@ -134,7 +134,7 @@ public class TabbedView extends View
 				boolean wasActive = active;
 				active = event.pressed;
 		
-				if (wasActive && !active && mouseover) setIndex(hovered);
+				if (wasActive && !active && mouseover && (hovered != -1)) setIndex(hovered);
 			}
 		}
 		

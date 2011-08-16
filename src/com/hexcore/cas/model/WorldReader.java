@@ -13,14 +13,15 @@ import com.hexcore.cas.math.Vector2i;
 public class WorldReader
 {
 	private String worldFileName = null;
-	private Grid[] world = null; 
+	private Grid[] world = null;
+	private String rulesAndColours = null;
 	
 	public WorldReader(String name)
 	{
 		worldFileName = name;
 	}
 	
-	public Grid[] readWorld()
+	public World readWorld()
 		throws IOException
 	{
 		File f = new File(worldFileName);
@@ -35,11 +36,11 @@ public class WorldReader
 		{
 			if(!generationFiles.hasMoreElements())
 			{
-				System.out.println("Config file not found!");
+				System.out.println("Configuration file not found.");
 				return null;
 			}
 			ZipEntry config = (ZipEntry)generationFiles.nextElement();
-			if(config.getName().indexOf(".cawcon") != -1)
+			if(config.getName().indexOf(".cac") != -1)
 			{
 				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
 				String line;
@@ -60,10 +61,6 @@ public class WorldReader
 				type = line.charAt(0);
 				line = in.readLine();
 				n = Integer.parseInt(line);
-				for(int i = 0; i < n; i++)
-				{
-					System.out.println("Unable to handle ranges right now.");
-				}
 				break;
 			}
 		}
@@ -73,20 +70,20 @@ public class WorldReader
 		{
 			case 'r':
 			case 'R':
-				world = new RectangleGrid[zip.size()];
-				for(int i = 0; i < zip.size(); i++)
+				world = new RectangleGrid[zip.size() - 2];
+				for(int i = 0; i < zip.size() - 2; i++)
 					world[i] = new RectangleGrid(gridSize, cell);
 				break;
 			case 'h':
 			case 'H':
-				world = new HexagonGrid[zip.size()];
-				for(int i = 0; i < zip.size(); i++)
+				world = new HexagonGrid[zip.size() - 2];
+				for(int i = 0; i < zip.size() - 2; i++)
 					world[i] = new HexagonGrid(gridSize, cell);
 				break;
 			case 't':
 			case 'T':
-				world = new TriangleGrid[zip.size()];
-				for(int i = 0; i < zip.size(); i++)
+				world = new TriangleGrid[zip.size() - 2];
+				for(int i = 0; i < zip.size() - 2; i++)
 					world[i] = new TriangleGrid(gridSize, cell);
 				break;
 			default:
@@ -94,14 +91,39 @@ public class WorldReader
 				return null;
 		}
 		
-		int worldPos = 0;
+		generationFiles = zip.entries();
+		while(true)
+		{
+			if(!generationFiles.hasMoreElements())
+			{
+				System.out.println("Rules and colours file not found.");
+				return null;
+			}
+			ZipEntry config = (ZipEntry)generationFiles.nextElement();
+			if(config.getName().indexOf(".car") != -1)
+			{
+				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
+				String line = "";
+				char[] c = new char[1];
+				int tmp = in.read(c);
+				while(tmp != -1)
+				{
+					line += c[0];
+					tmp = in.read(c);
+				}
+				rulesAndColours = line;
+				break;
+			}
+		}
+		
+		int worldPos = -1;
 		generationFiles = zip.entries();
 		while(generationFiles.hasMoreElements())
 		{
 			ZipEntry file = (ZipEntry)generationFiles.nextElement();
 			String name = file.getName();
 			long size = file.getSize();
-			if(name.substring(name.length() - 4).equals(".caw"))
+			if(name.indexOf(".cag") != -1)
 			{
 				if(size > 0)
 				{
@@ -111,6 +133,7 @@ public class WorldReader
 					{
 						for(int cols = 0; cols < x; cols++)
 						{
+							worldPos = Integer.parseInt(name.substring(0, name.indexOf(".cag")));
 							line = in.readLine();
 							int[] vals = new int[n];
 							int prevIndex = -1;
@@ -127,7 +150,6 @@ public class WorldReader
 						}
 						line = in.readLine();
 					}
-					worldPos++;
 				}
 			}
 			else
@@ -135,7 +157,10 @@ public class WorldReader
 				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
-		return world;
+		World w = new World();
+		w.setRulesAndColours(rulesAndColours);
+		w.setWorld(world);
+		return w;
 	}
 	
 	public String getWorldName()

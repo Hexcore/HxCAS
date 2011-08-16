@@ -2,40 +2,51 @@ package com.hexcore.cas.model.test;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.model.WorldSaver;
 
-import junit.framework.TestCase;
-
 public class TestWorldSaver extends TestCase
 {
-	private final WorldReader reader = new WorldReader("Test Data/savedWorld.cawzip");
-	private final WorldSaver saver = new WorldSaver("Test Data/savedWorld.cawzip");
+	private final WorldReader reader = new WorldReader("Test Data/savedWorld.caw");
+	private final WorldSaver saver = new WorldSaver("Test Data/savedWorld.caw");
 	
 	public void test1GetName()
 	{
-		assertEquals("savedWorld.cawzip", saver.getWorldName());
+		assertEquals("savedWorld.caw", saver.getWorldName());
 	}
 	
-	public void test2SetName()
+	public void test2GetRulesAndColours()
 	{
-		saver.setWorldName("Test Data/bleg.cawzip");
-		assertEquals("bleg.cawzip", saver.getWorldName());
+		assertEquals(null, saver.getRulesAndColours());
 	}
 	
-	public void test3AddGeneration()
+	public void test3SetName()
 	{
-		WorldSaver s = new WorldSaver("Test Data/addGen.cawzip");
+		saver.setWorldName("Test Data/bleg.caw");
+		assertEquals("bleg.caw", saver.getWorldName());
+	}
+	
+	public void test4AddGeneration()
+	{
+		WorldSaver s = new WorldSaver("Test Data/addGen.caw");
 		TriangleGrid w = new TriangleGrid(new Vector2i(1, 1));
 		s.addGeneration(w);
 		assertEquals(1, s.getListWorldSize());
 	}
 	
-	public void test4SaveWorld()
+	public void test5SetRulesAndColours()
+	{
+		saver.setRulesAndColours("I am RULES!\r\nI R COLOURS!");
+		assertEquals("I am RULES!\r\nI R COLOURS!", saver.getRulesAndColours());
+	}
+	
+	public void test6SaveWorld()
 		throws IOException
 	{
 		HexagonGrid w1 = new HexagonGrid(new Vector2i(2, 3));
@@ -102,58 +113,62 @@ public class TestWorldSaver extends TestCase
 		w3.setCell(new Vector2i(1, 2), val);
 		saver.addGeneration(w3);
 		
-		saver.saveWorld();
-		Grid[] world = reader.readWorld();
+		saver.setRulesAndColours("No rules set.\r\nNo colours set.");
 		
+		saver.saveWorld();
+		World world = reader.readWorld();
+		
+		assertEquals("No rules set.\r\nNo colours set.", world.getRulesAndColours());
+
 		//Generation 1
-		assertEquals('H', world[0].getType());
-		assertEquals(2, world[0].getWidth());
-		assertEquals(3, world[0].getHeight());
-		assertEquals(0, world[0].getCell(0, 0).getValue(0));
-		assertEquals(1, world[0].getCell(0, 0).getValue(1));
-		assertEquals(2, world[0].getCell(1, 0).getValue(0));
-		assertEquals(3, world[0].getCell(1, 0).getValue(1));
-		assertEquals(4, world[0].getCell(0, 1).getValue(0));
-		assertEquals(5, world[0].getCell(0, 1).getValue(1));
-		assertEquals(6, world[0].getCell(1, 1).getValue(0));
-		assertEquals(7, world[0].getCell(1, 1).getValue(1));
-		assertEquals(8, world[0].getCell(0, 2).getValue(0));
-		assertEquals(9, world[0].getCell(0, 2).getValue(1));
-		assertEquals(10, world[0].getCell(1, 2).getValue(0));
-		assertEquals(11, world[0].getCell(1, 2).getValue(1));
+		assertEquals('H', world.getWorld()[0].getType());
+		assertEquals(2, world.getWorld()[0].getWidth());
+		assertEquals(3, world.getWorld()[0].getHeight());
+		assertEquals(0, world.getWorld()[0].getCell(0, 0).getValue(0));
+		assertEquals(1, world.getWorld()[0].getCell(0, 0).getValue(1));
+		assertEquals(2, world.getWorld()[0].getCell(1, 0).getValue(0));
+		assertEquals(3, world.getWorld()[0].getCell(1, 0).getValue(1));
+		assertEquals(4, world.getWorld()[0].getCell(0, 1).getValue(0));
+		assertEquals(5, world.getWorld()[0].getCell(0, 1).getValue(1));
+		assertEquals(6, world.getWorld()[0].getCell(1, 1).getValue(0));
+		assertEquals(7, world.getWorld()[0].getCell(1, 1).getValue(1));
+		assertEquals(8, world.getWorld()[0].getCell(0, 2).getValue(0));
+		assertEquals(9, world.getWorld()[0].getCell(0, 2).getValue(1));
+		assertEquals(10, world.getWorld()[0].getCell(1, 2).getValue(0));
+		assertEquals(11, world.getWorld()[0].getCell(1, 2).getValue(1));
 		
 		//Generation 2
-		assertEquals('H', world[1].getType());
-		assertEquals(2, world[1].getWidth());
-		assertEquals(3, world[1].getHeight());
-		assertEquals(1, world[1].getCell(0, 0).getValue(0));
-		assertEquals(2, world[1].getCell(0, 0).getValue(1));
-		assertEquals(3, world[1].getCell(1, 0).getValue(0));
-		assertEquals(4, world[1].getCell(1, 0).getValue(1));
-		assertEquals(5, world[1].getCell(0, 1).getValue(0));
-		assertEquals(6, world[1].getCell(0, 1).getValue(1));
-		assertEquals(7, world[1].getCell(1, 1).getValue(0));
-		assertEquals(8, world[1].getCell(1, 1).getValue(1));
-		assertEquals(9, world[1].getCell(0, 2).getValue(0));
-		assertEquals(10, world[1].getCell(0, 2).getValue(1));
-		assertEquals(11, world[1].getCell(1, 2).getValue(0));
-		assertEquals(12, world[1].getCell(1, 2).getValue(1));
+		assertEquals('H', world.getWorld()[1].getType());
+		assertEquals(2, world.getWorld()[1].getWidth());
+		assertEquals(3, world.getWorld()[1].getHeight());
+		assertEquals(1, world.getWorld()[1].getCell(0, 0).getValue(0));
+		assertEquals(2, world.getWorld()[1].getCell(0, 0).getValue(1));
+		assertEquals(3, world.getWorld()[1].getCell(1, 0).getValue(0));
+		assertEquals(4, world.getWorld()[1].getCell(1, 0).getValue(1));
+		assertEquals(5, world.getWorld()[1].getCell(0, 1).getValue(0));
+		assertEquals(6, world.getWorld()[1].getCell(0, 1).getValue(1));
+		assertEquals(7, world.getWorld()[1].getCell(1, 1).getValue(0));
+		assertEquals(8, world.getWorld()[1].getCell(1, 1).getValue(1));
+		assertEquals(9, world.getWorld()[1].getCell(0, 2).getValue(0));
+		assertEquals(10, world.getWorld()[1].getCell(0, 2).getValue(1));
+		assertEquals(11, world.getWorld()[1].getCell(1, 2).getValue(0));
+		assertEquals(12, world.getWorld()[1].getCell(1, 2).getValue(1));
 		
 		//Generation 3
-		assertEquals('H', world[2].getType());
-		assertEquals(2, world[2].getWidth());
-		assertEquals(3, world[2].getHeight());
-		assertEquals(2, world[2].getCell(0, 0).getValue(0));
-		assertEquals(3, world[2].getCell(0, 0).getValue(1));
-		assertEquals(4, world[2].getCell(1, 0).getValue(0));
-		assertEquals(5, world[2].getCell(1, 0).getValue(1));
-		assertEquals(6, world[2].getCell(0, 1).getValue(0));
-		assertEquals(7, world[2].getCell(0, 1).getValue(1));
-		assertEquals(8, world[2].getCell(1, 1).getValue(0));
-		assertEquals(9, world[2].getCell(1, 1).getValue(1));
-		assertEquals(10, world[2].getCell(0, 2).getValue(0));
-		assertEquals(11, world[2].getCell(0, 2).getValue(1));
-		assertEquals(12, world[2].getCell(1, 2).getValue(0));
-		assertEquals(13, world[2].getCell(1, 2).getValue(1));
+		assertEquals('H', world.getWorld()[2].getType());
+		assertEquals(2, world.getWorld()[2].getWidth());
+		assertEquals(3, world.getWorld()[2].getHeight());
+		assertEquals(2, world.getWorld()[2].getCell(0, 0).getValue(0));
+		assertEquals(3, world.getWorld()[2].getCell(0, 0).getValue(1));
+		assertEquals(4, world.getWorld()[2].getCell(1, 0).getValue(0));
+		assertEquals(5, world.getWorld()[2].getCell(1, 0).getValue(1));
+		assertEquals(6, world.getWorld()[2].getCell(0, 1).getValue(0));
+		assertEquals(7, world.getWorld()[2].getCell(0, 1).getValue(1));
+		assertEquals(8, world.getWorld()[2].getCell(1, 1).getValue(0));
+		assertEquals(9, world.getWorld()[2].getCell(1, 1).getValue(1));
+		assertEquals(10, world.getWorld()[2].getCell(0, 2).getValue(0));
+		assertEquals(11, world.getWorld()[2].getCell(0, 2).getValue(1));
+		assertEquals(12, world.getWorld()[2].getCell(1, 2).getValue(0));
+		assertEquals(13, world.getWorld()[2].getCell(1, 2).getValue(1));
 	}
 }

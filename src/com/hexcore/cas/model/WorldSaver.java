@@ -10,6 +10,7 @@ public class WorldSaver
 {
 	private String worldFileName = null;
 	private Grid[] world = null;
+	private String rulesAndColours = null;
 	private ArrayList<Grid> listWorld = new ArrayList<Grid>();
 	
 	public WorldSaver(String name)
@@ -48,7 +49,7 @@ public class WorldSaver
 		
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(worldFileName));
 		
-		ZipEntry config = new ZipEntry("config.cawcon");
+		ZipEntry config = new ZipEntry("config.cac");
 		out.putNextEntry(config);
 		String configStr = x + " " + y + "\r\n";
 		configStr += type + "\r\n";
@@ -56,13 +57,14 @@ public class WorldSaver
 		out.write(configStr.getBytes());
 		out.closeEntry();
 		
-		/*
-		 * Code to place a rule set entry
-		 */
+		ZipEntry RAC = new ZipEntry("rules.car");
+		out.putNextEntry(RAC);
+		out.write(rulesAndColours.getBytes());
+		out.closeEntry();
 		
 		for(int i = 0; i < listWorld.size(); i++)
 		{
-			ZipEntry caw = new ZipEntry(i + ".caw");
+			ZipEntry caw = new ZipEntry(i + ".cag");
 			out.putNextEntry(caw);
 			String str = "";
 			for(int rows = 0; rows < y; rows++)
@@ -95,6 +97,16 @@ public class WorldSaver
 	public void addGeneration(Grid w)
 	{
 		listWorld.add(w);
+	}
+	
+	public void setRulesAndColours(String RAC)
+	{
+		rulesAndColours = RAC;
+	}
+	
+	public String getRulesAndColours()
+	{
+		return rulesAndColours;
 	}
 	
 	//Used for test cases only.

@@ -3,7 +3,6 @@ package com.hexcore.cas.rulesystems;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Stack;
 
 import com.hexcore.cas.model.Cell;
@@ -45,19 +44,12 @@ public class HexcoreVM
 		end = false;
 	}
 	
-	public void loadRules(String filename)
+	public void loadRules(String fileName)
 	{
-		try
-		{
-			Scanner in = new Scanner(new File(filename));
-			
-			while(in.hasNext())
-				instructions.add(in.nextLine());
-			
-		} catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
+			Scanner.Init(fileName);
+			Errors.Init(fileName, "/", false);
+			Parser.Parse();
+			Errors.Summarize();
 	}
 	
 	public void run(Cell cell, Cell[] neighbours)

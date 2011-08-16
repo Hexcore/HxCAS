@@ -13,33 +13,42 @@ public class Parser {
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
 	static final int identifier_Sym = 2;
-	static final int quit_Sym = 3;
-	static final int equal_Sym = 4;
-	static final int semicolon_Sym = 5;
-	static final int print_Sym = 6;
-	static final int comma_Sym = 7;
-	static final int barbar_Sym = 8;
-	static final int andand_Sym = 9;
-	static final int plus_Sym = 10;
-	static final int minus_Sym = 11;
-	static final int bang_Sym = 12;
-	static final int true_Sym = 13;
-	static final int false_Sym = 14;
-	static final int lparen_Sym = 15;
-	static final int rparen_Sym = 16;
-	static final int star_Sym = 17;
-	static final int slash_Sym = 18;
-	static final int percent_Sym = 19;
-	static final int less_Sym = 20;
-	static final int lessequal_Sym = 21;
-	static final int greater_Sym = 22;
-	static final int greaterequal_Sym = 23;
-	static final int equalequal_Sym = 24;
-	static final int bangequal_Sym = 25;
-	static final int NOT_SYM = 26;
+	static final int ruleset_Sym = 3;
+	static final int lbrace_Sym = 4;
+	static final int rbrace_Sym = 5;
+	static final int property_Sym = 6;
+	static final int semicolon_Sym = 7;
+	static final int type_Sym = 8;
+	static final int colon_Sym = 9;
+	static final int equal_Sym = 10;
+	static final int lparen_Sym = 11;
+	static final int rparen_Sym = 12;
+	static final int point_Sym = 13;
+	static final int lbrack_Sym = 14;
+	static final int rbrack_Sym = 15;
+	static final int if_Sym = 16;
+	static final int else_Sym = 17;
+	static final int var_Sym = 18;
+	static final int comma_Sym = 19;
+	static final int plus_Sym = 20;
+	static final int minus_Sym = 21;
+	static final int equalequal_Sym = 22;
+	static final int bangequal_Sym = 23;
+	static final int greater_Sym = 24;
+	static final int less_Sym = 25;
+	static final int greaterequal_Sym = 26;
+	static final int lessequal_Sym = 27;
+	static final int barbar_Sym = 28;
+	static final int star_Sym = 29;
+	static final int slash_Sym = 30;
+	static final int percent_Sym = 31;
+	static final int andand_Sym = 32;
+	static final int plusplus_Sym = 33;
+	static final int minusminus_Sym = 34;
+	static final int NOT_SYM = 35;
 	// pragmas
 
-	static final int maxT = 26;
+	static final int maxT = 35;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -49,67 +58,7 @@ public class Parser {
 	public static Token la;       // lookahead token
 	static int errDist = minErrDist;
 
-	static Pair O;
-static Table symTable;
-static final int noType = 0, intType = 1, boolType = 2;
-
-static class Entity
-{
-	public String name;
-	public int value;
-	public int type;
 	
-	public Entity(String name, int value, int type)
-	{
-		this.name = name;
-		this.value = value;
-		this.type = type;
-	}
-}
-
-static class Table
-{
-	public ArrayList<Entity> symbols;
-	
-	
-	public Table()
-	{
-		symbols = new ArrayList<Entity>();
-	}
-	
-	public Entity getSymbol(String name)
-	{
-		for(int i = 0; i < symbols.size(); i++)
-			if(symbols.get(i).name.equals(name))
-				return symbols.get(i);
-		return null;
-	}
-	
-	public void addSymbol(Entity e)
-	{
-		symbols.add(e);
-	}
-}
-
-static class Pair
-{
-	public int value;
-	public int type;
-}
-
-
-
-static int toInt(boolean b) {
-// return 0 or 1 according as b is false or true
-  return b ? 1 : 0;
-}
-
-static boolean toBool(int i) {
-// return false or true according as i is 0 or 1
-  return i == 0 ? false : true;
-}
-
-
 
 	static void SynErr (int n) {
 		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
@@ -184,258 +133,253 @@ static boolean toBool(int i) {
 	}
 
 	static void CAL() {
-		symTable = new Table();
-		while (la.kind == identifier_Sym || la.kind == print_Sym) {
-			if (la.kind == print_Sym) {
-				Print();
-			} else {
-				Assignment();
-			}
-		}
-		Expect(quit_Sym);
+		RuleSet();
 	}
 
-	static void Print() {
-		Expect(print_Sym);
-		O = Expression();
-		if(O.type == boolType) IO.writeLine(toBool(O.value)); else  IO.writeLine(O.value);
-		while (WeakSeparator(comma_Sym, 1, 2)) {
-			O = Expression();
-			if(O.type == boolType) IO.writeLine(toBool(O.value)); else  IO.writeLine(O.value);
-		}
-		while (!(la.kind == EOF_SYM || la.kind == semicolon_Sym)) {SynErr(27); Get();}
-		Expect(semicolon_Sym);
-	}
-
-	static void Assignment() {
-		String Name = "";
-		Name = Variable();
-		Expect(equal_Sym);
-		O = Expression();
-		while (!(la.kind == EOF_SYM || la.kind == semicolon_Sym)) {SynErr(28); Get();}
-		Expect(semicolon_Sym);
-		if(symTable.getSymbol(Name) == null) symTable.addSymbol(new Entity(Name, O.value, O.type)); else symTable.getSymbol(Name).value = O.value;
-	}
-
-	static String Variable() {
-		String Name;
+	static void RuleSet() {
+		Expect(ruleset_Sym);
 		Expect(identifier_Sym);
-		Name = token.val;
-		return Name;
-	}
-
-	static Pair Expression() {
-		Pair O;
-		Pair ExpO;
-		O = AndExp();
-		while (la.kind == barbar_Sym) {
-			Get();
-			ExpO = AndExp();
-			if(ExpO.type != boolType || O.type != boolType) SemError("O.type Mismatch");
-			if(!((new Integer(O.value)).equals(0)) || !((new Integer(ExpO.value)).equals(0))) O.value = 1; else O.value = 0;
-			O.type = boolType;
-			
+		Expect(lbrace_Sym);
+		Property();
+		while (la.kind == property_Sym) {
+			Property();
 		}
-		return O;
-	}
-
-	static Pair AndExp() {
-		Pair O;
-		Pair ExpO;
-		O = EqlExp();
-		while (la.kind == andand_Sym) {
-			Get();
-			ExpO = EqlExp();
-			if(ExpO.type != boolType || O.type != boolType) SemError("O.type Mismatch");
-			if(!((new Integer(O.value)).equals(0)) && !((new Integer(ExpO.value)).equals(0))) O.value = 1; else O.value = 0;
-			O.type = boolType;
-			
+		TypeSpec();
+		while (la.kind == type_Sym) {
+			TypeSpec();
 		}
-		return O;
+		Expect(rbrace_Sym);
 	}
 
-	static Pair EqlExp() {
-		Pair O;
-		Pair ExpO;
-		O = RelExp();
-		char type = 0;
-		while (la.kind == equalequal_Sym || la.kind == bangequal_Sym) {
-			type = EqlOp();
-			ExpO = RelExp();
-			if(ExpO.type != O.type) SemError("O.type Mismatch");
-			switch(type)
-			{
-			case '=': if(O.value == ExpO.value) O.value = 1; else O.value = 0; break;
-			case '!': if(O.value != ExpO.value) O.value = 1; else O.value = 0; break;
-			};
-			O.type = boolType;
-			
+	static void Property() {
+		Expect(property_Sym);
+		Expect(identifier_Sym);
+		Expect(semicolon_Sym);
+	}
+
+	static void TypeSpec() {
+		Expect(type_Sym);
+		Expect(identifier_Sym);
+		Expect(colon_Sym);
+		Expect(number_Sym);
+		Expect(lbrace_Sym);
+		while (StartOf(1)) {
+			Statement();
 		}
-		return O;
+		Expect(rbrace_Sym);
 	}
 
-	static Pair RelExp() {
-		Pair O;
-		Pair ExpO;
-		O = AddExp();
-		int type = 0;
-		if (StartOf(3)) {
-			type = RelOp();
-			ExpO = AddExp();
-			if(ExpO.type != O.type) SemError("O.type Mismatch");
-			switch(type)
-			{	case 1: if(O.value < ExpO.value) O.value = 1; else O.value = 0; break;
-			case 2: if(O.value <= ExpO.value) O.value = 1; else O.value = 0; break;
-			case 3: if(O.value > ExpO.value) O.value = 1; else O.value = 0; break;
-			case 4: if(O.value >= ExpO.value) O.value = 1; else O.value = 0; break;
-			};
-			O.type = boolType;
-			
+	static void Statement() {
+		if (la.kind == lbrace_Sym) {
+			Block();
+		} else if (la.kind == identifier_Sym) {
+			AssignCall();
+		} else if (la.kind == if_Sym) {
+			IfStatement();
+		} else if (la.kind == var_Sym) {
+			VarDeclaration();
+		} else SynErr(36);
+	}
+
+	static void Block() {
+		Expect(lbrace_Sym);
+		while (StartOf(1)) {
+			Statement();
 		}
-		return O;
+		Expect(rbrace_Sym);
 	}
 
-	static char EqlOp() {
-		char type;
-		type = 0;
-		if (la.kind == equalequal_Sym) {
+	static void AssignCall() {
+		Designator();
+		if (la.kind == equal_Sym) {
 			Get();
-			type = '=';
-		} else if (la.kind == bangequal_Sym) {
-			Get();
-			type = '!';
-		} else SynErr(29);
-		return type;
-	}
-
-	static Pair AddExp() {
-		Pair O;
-		Pair ExpO;
-		O = MultExp();
-		char type = 0;
-		while (la.kind == plus_Sym || la.kind == minus_Sym) {
-			type = AddOp();
-			ExpO = MultExp();
-			if(ExpO.type != intType || O.type != intType) SemError("O.type Mismatch");
-			switch(type){case '+': O.value += ExpO.value; break; case '-': O.value -= ExpO.value; break;};
-			
-			
-		}
-		return O;
-	}
-
-	static int RelOp() {
-		int type;
-		type = 0;
-		if (la.kind == less_Sym) {
-			Get();
-			type = 1;
-		} else if (la.kind == lessequal_Sym) {
-			Get();
-			type = 2;
-		} else if (la.kind == greater_Sym) {
-			Get();
-			type = 3;
-		} else if (la.kind == greaterequal_Sym) {
-			Get();
-			type = 4;
-		} else SynErr(30);
-		return type;
-	}
-
-	static Pair MultExp() {
-		Pair O;
-		Pair ExpO;
-		O = UnaryExp();
-		char type = 0;
-		while (la.kind == star_Sym || la.kind == slash_Sym || la.kind == percent_Sym) {
-			type = MulOp();
-			ExpO = UnaryExp();
-			if(ExpO.type != intType || O.type != intType) SemError("O.type Mismatch");
-			switch(type){case '*': O.value *= ExpO.value; break; case '/': if(ExpO.value != 0) O.value /= ExpO.value; break; case '%': O.value %= ExpO.value; break;};
-			
-		}
-		return O;
-	}
-
-	static char AddOp() {
-		char type;
-		type = 0;
-		if (la.kind == plus_Sym) {
-			Get();
-			type = '+';
-		} else if (la.kind == minus_Sym) {
-			Get();
-			type = '-';
-		} else SynErr(31);
-		return type;
-	}
-
-	static Pair UnaryExp() {
-		Pair O;
-		O = new Pair();
-		if (StartOf(4)) {
-			O = Factor();
-		} else if (la.kind == plus_Sym) {
-			Get();
-			O = UnaryExp();
-			if(O.type != intType) SemError("O.typeMismatch");
-		} else if (la.kind == minus_Sym) {
-			Get();
-			O = UnaryExp();
-			if(O.type != intType) SemError("O.typeMismatch"); O.value = -O.value;
-		} else if (la.kind == bang_Sym) {
-			Get();
-			O = UnaryExp();
-			if(O.type != boolType) SemError("O.typeMismatch"); if((new Integer(O.value)).equals(0)) O.value = 1; else O.value = 0;
-		} else SynErr(32);
-		return O;
-	}
-
-	static char MulOp() {
-		char type;
-		type = 0;
-		if (la.kind == star_Sym) {
-			Get();
-			type = '*';
-		} else if (la.kind == slash_Sym) {
-			Get();
-			type = '/';
-		} else if (la.kind == percent_Sym) {
-			Get();
-			type = '%';
-		} else SynErr(33);
-		return type;
-	}
-
-	static Pair Factor() {
-		Pair O;
-		int Value = 0; String Name = ""; O = new Pair();
-		if (la.kind == identifier_Sym) {
-			Name = Variable();
-			O.value = symTable.getSymbol(Name).value; O.type = symTable.getSymbol(Name).type;
-		} else if (la.kind == number_Sym) {
-			Value = Number();
-			O.value = Value; O.type = intType;
-		} else if (la.kind == true_Sym) {
-			Get();
-			O.value = 1; O.type = boolType;
-		} else if (la.kind == false_Sym) {
-			Get();
-			O.value = 0; O.type = boolType;
+			Expression();
+		} else if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			PostOp();
 		} else if (la.kind == lparen_Sym) {
 			Get();
-			O = Expression();
+			Arguments();
 			Expect(rparen_Sym);
-		} else SynErr(34);
-		return O;
+		} else SynErr(37);
+		Expect(semicolon_Sym);
 	}
 
-	static int Number() {
-		int Value;
+	static void IfStatement() {
+		Expect(if_Sym);
+		Expect(lparen_Sym);
+		Expression();
+		Expect(rparen_Sym);
+		Statement();
+		if (la.kind == else_Sym) {
+			Get();
+			Statement();
+		}
+	}
+
+	static void VarDeclaration() {
+		Expect(var_Sym);
+		OneVar();
+		while (la.kind == comma_Sym) {
+			Get();
+			OneVar();
+		}
+		Expect(semicolon_Sym);
+	}
+
+	static void Designator() {
+		Expect(identifier_Sym);
+		if (la.kind == point_Sym || la.kind == lbrack_Sym) {
+			if (la.kind == point_Sym) {
+				Get();
+				Attribute();
+			} else {
+				Get();
+				Expression();
+				Expect(rbrack_Sym);
+			}
+		}
+	}
+
+	static void Expression() {
+		AddExp();
+		if (StartOf(2)) {
+			RelOp();
+			AddExp();
+		}
+	}
+
+	static void PostOp() {
+		if (la.kind == plusplus_Sym) {
+			Get();
+		} else if (la.kind == minusminus_Sym) {
+			Get();
+		} else SynErr(38);
+	}
+
+	static void Arguments() {
+		if (StartOf(3)) {
+			Expression();
+			while (la.kind == comma_Sym) {
+				Get();
+				Expression();
+			}
+		}
+	}
+
+	static void Attribute() {
+		Designator();
+	}
+
+	static void OneVar() {
+		Expect(identifier_Sym);
+		if (la.kind == equal_Sym) {
+			Get();
+			Expression();
+		}
+	}
+
+	static void AddExp() {
+		if (la.kind == plus_Sym || la.kind == minus_Sym) {
+			if (la.kind == plus_Sym) {
+				Get();
+			} else {
+				Get();
+			}
+		}
+		Term();
+		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
+			AddOp();
+			Term();
+		}
+	}
+
+	static void RelOp() {
+		switch (la.kind) {
+		case equalequal_Sym: {
+			Get();
+			break;
+		}
+		case bangequal_Sym: {
+			Get();
+			break;
+		}
+		case greater_Sym: {
+			Get();
+			break;
+		}
+		case less_Sym: {
+			Get();
+			break;
+		}
+		case greaterequal_Sym: {
+			Get();
+			break;
+		}
+		case lessequal_Sym: {
+			Get();
+			break;
+		}
+		default: SynErr(39); break;
+		}
+	}
+
+	static void Term() {
+		Factor();
+		while (StartOf(4)) {
+			MulOp();
+			Factor();
+		}
+	}
+
+	static void AddOp() {
+		if (la.kind == plus_Sym) {
+			Get();
+		} else if (la.kind == minus_Sym) {
+			Get();
+		} else if (la.kind == barbar_Sym) {
+			Get();
+		} else SynErr(40);
+	}
+
+	static void Factor() {
+		if (la.kind == identifier_Sym) {
+			Designator();
+			if (la.kind == lparen_Sym) {
+				Get();
+				Arguments();
+				Expect(rparen_Sym);
+			}
+		} else if (la.kind == number_Sym) {
+			Constant();
+		} else if (la.kind == lparen_Sym) {
+			Get();
+			Expression();
+			Expect(rparen_Sym);
+		} else SynErr(41);
+	}
+
+	static void MulOp() {
+		if (la.kind == star_Sym) {
+			Get();
+		} else if (la.kind == slash_Sym) {
+			Get();
+		} else if (la.kind == percent_Sym) {
+			Get();
+		} else if (la.kind == andand_Sym) {
+			Get();
+		} else SynErr(42);
+	}
+
+	static void Constant() {
+		DoubleConst();
+	}
+
+	static void DoubleConst() {
 		Expect(number_Sym);
-		Value = Integer.parseInt(token.val);
-		return Value;
+		if (la.kind == point_Sym) {
+			Get();
+			Expect(number_Sym);
+		}
 	}
 
 
@@ -450,11 +394,11 @@ static boolean toBool(int i) {
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,T,T,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x},
-		{x,T,T,x, x,x,x,x, x,x,x,x, x,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x},
+		{x,T,T,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x,x, x}
 
 	};
 
@@ -575,38 +519,46 @@ class Errors {
 			case 0: s = "EOF expected"; break;
 			case 1: s = "number expected"; break;
 			case 2: s = "identifier expected"; break;
-			case 3: s = "\"quit\" expected"; break;
-			case 4: s = "\"=\" expected"; break;
-			case 5: s = "\";\" expected"; break;
-			case 6: s = "\"print\" expected"; break;
-			case 7: s = "\",\" expected"; break;
-			case 8: s = "\"||\" expected"; break;
-			case 9: s = "\"&&\" expected"; break;
-			case 10: s = "\"+\" expected"; break;
-			case 11: s = "\"-\" expected"; break;
-			case 12: s = "\"!\" expected"; break;
-			case 13: s = "\"true\" expected"; break;
-			case 14: s = "\"false\" expected"; break;
-			case 15: s = "\"(\" expected"; break;
-			case 16: s = "\")\" expected"; break;
-			case 17: s = "\"*\" expected"; break;
-			case 18: s = "\"/\" expected"; break;
-			case 19: s = "\"%\" expected"; break;
-			case 20: s = "\"<\" expected"; break;
-			case 21: s = "\"<=\" expected"; break;
-			case 22: s = "\">\" expected"; break;
-			case 23: s = "\">=\" expected"; break;
-			case 24: s = "\"==\" expected"; break;
-			case 25: s = "\"!=\" expected"; break;
-			case 26: s = "??? expected"; break;
-			case 27: s = "this symbol not expected in Print"; break;
-			case 28: s = "this symbol not expected in Assignment"; break;
-			case 29: s = "invalid EqlOp"; break;
-			case 30: s = "invalid RelOp"; break;
-			case 31: s = "invalid AddOp"; break;
-			case 32: s = "invalid UnaryExp"; break;
-			case 33: s = "invalid MulOp"; break;
-			case 34: s = "invalid Factor"; break;
+			case 3: s = "\"ruleset\" expected"; break;
+			case 4: s = "\"{\" expected"; break;
+			case 5: s = "\"}\" expected"; break;
+			case 6: s = "\"property\" expected"; break;
+			case 7: s = "\";\" expected"; break;
+			case 8: s = "\"type\" expected"; break;
+			case 9: s = "\":\" expected"; break;
+			case 10: s = "\"=\" expected"; break;
+			case 11: s = "\"(\" expected"; break;
+			case 12: s = "\")\" expected"; break;
+			case 13: s = "\".\" expected"; break;
+			case 14: s = "\"[\" expected"; break;
+			case 15: s = "\"]\" expected"; break;
+			case 16: s = "\"if\" expected"; break;
+			case 17: s = "\"else\" expected"; break;
+			case 18: s = "\"var\" expected"; break;
+			case 19: s = "\",\" expected"; break;
+			case 20: s = "\"+\" expected"; break;
+			case 21: s = "\"-\" expected"; break;
+			case 22: s = "\"==\" expected"; break;
+			case 23: s = "\"!=\" expected"; break;
+			case 24: s = "\">\" expected"; break;
+			case 25: s = "\"<\" expected"; break;
+			case 26: s = "\">=\" expected"; break;
+			case 27: s = "\"<=\" expected"; break;
+			case 28: s = "\"||\" expected"; break;
+			case 29: s = "\"*\" expected"; break;
+			case 30: s = "\"/\" expected"; break;
+			case 31: s = "\"%\" expected"; break;
+			case 32: s = "\"&&\" expected"; break;
+			case 33: s = "\"++\" expected"; break;
+			case 34: s = "\"--\" expected"; break;
+			case 35: s = "??? expected"; break;
+			case 36: s = "invalid Statement"; break;
+			case 37: s = "invalid AssignCall"; break;
+			case 38: s = "invalid PostOp"; break;
+			case 39: s = "invalid RelOp"; break;
+			case 40: s = "invalid AddOp"; break;
+			case 41: s = "invalid Factor"; break;
+			case 42: s = "invalid MulOp"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

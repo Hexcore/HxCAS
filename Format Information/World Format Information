@@ -1,29 +1,21 @@
 =======================================================================================
 
 Extensions:
-.caw	-> Cellular Automaton World generation file.
-.cawzip -> CAW ZIPped/compressed file.
-.cawcon -> CAW CONfiguration file.
-.cawrul -> CAW RULe set file.
+.cag -> Cellular Automaton world generation file.
+.caw -> CA World zipped/compressed file.
+.cac -> CA Configuration file.
+.car -> CA Rule set file, which includes the colour sets.
 
-A single world will be stored in a .cawzip file.
+A single world will be stored in a .caw file.
 In this compressed file will be the following:
-1x .cawcon configuration file
-1x .cawrul rule set file
-Nx .caw generation files where N is the number of generations that a world was run for.
+1x .cac configuration file
+1x .car rule set file
+Nx .cag generation files where N is the number of generations that a world was run for.
 
-Inside each .cawcon file will be the following:
+Inside each .cac file will be the following:
 x y
 g
 n
-#	alpha - beta [fl1, fl2, fl3]
-...
-	xi - omega [fl1, fl2, fl3]	
-			:
-			:
-#	alpha - beta [fl1, fl2, fl3]
-...
-	xi - omega [fl1, fl2, fl3]
 	
 x is the common number of columns for each generation grid.
 y is the common number of rows for each generation grid.
@@ -32,18 +24,11 @@ g is the common type of grid for each generation grid and can be one of the foll
 	H|h -> hexagon type grid.
 	R|r -> rectangle type grid.
 n is the common number of value counts for each cell in every generation.
-There are n number of the following blocks:
-	#	alpha - beta [fl1, fl2, fl3]
-	...
-		xi - omega [fl1, fl2, fl3]
-which represents the ranges for each value of a cell, going from 1 to n.
-If a default range is wanted, the range can be represented by
-	# ?
 
-Inside each .cawrul file will be the following:
+Inside each .car file will be the following:
 <To be completed>
 
-Inside each .caw file will be the following:
+Inside each .cag file will be the following:
 v1 ... vn
 	:
 	:
@@ -72,19 +57,19 @@ v1 to vn are the values of the cells.
 Example World
 =======================================================================================
 
-world.cawzip
-->config.cawcon
-->rules.cawrul
-->a.caw
-->b.caw
-->c.caw
+world.caw
+->config.cac
+->rules.car
+->a.cag
+->b.cag
+->c.cag
 
-config.cawcon
+config.cac
 	2 3
 	r
 	2
 	
-a.caw
+a.cag
 	0 1
 	2 3
 	
@@ -94,7 +79,7 @@ a.caw
 	8 9
 	10 11
 	
-b.caw
+b.cag
 	1 2
 	3 4
 	
@@ -104,7 +89,7 @@ b.caw
 	9 10
 	11 12
 	
-c.caw
+c.cag
 	2 3
 	4 5
 	
