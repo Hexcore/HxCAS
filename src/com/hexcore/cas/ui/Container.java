@@ -72,8 +72,10 @@ public class Container extends Widget
 		if (!visible) return;
 		
 		Vector2i pos = this.position.add(position);
+		window.setClipping(gl, pos, size);
 		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		if (contents != null) contents.render(gl, pos);
+		window.resetView(gl);
 		
 		//window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}

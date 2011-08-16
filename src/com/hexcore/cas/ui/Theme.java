@@ -352,13 +352,13 @@ public class Theme
 		
 		int borderRadius = getInteger("TextBox", stateName, "border-radius", 0);
 		window.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
-		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		int			textHeight = calculateTextHeight(Text.Size.SMALL);
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
 		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
+		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
