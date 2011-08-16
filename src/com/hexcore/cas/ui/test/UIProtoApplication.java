@@ -50,6 +50,8 @@ public class UIProtoApplication implements WindowEventListener
 	public LinearLayout worldLayout;
 	
 	
+	public TextWidget worldEditorLabel;
+	
 	//1st,2,3,4 ...tab
 	
 	
@@ -61,18 +63,23 @@ public class UIProtoApplication implements WindowEventListener
 		public TextWidget worldSizeLabel;
 		public TextWidget worldSizeXLabel;
 		public TextWidget cellShapeLabel;
-		public TextWidget numCellPropertiesLabel;
+	
 		
 		public TextBox	worldSizeXTextBox;
 		public TextBox	worldSizeYTextBox;
-		public TextBox	numCellPropertiesTextBox;
+	
 		
 		public CheckBox wrapCheckBox;
 		public DropDownBox cellShapeDropDownBox;
 		
 		
 		
-	public Container colorRulesContainer;
+	public Container rulesContainer;
+		public LinearLayout rulesLayout;
+		
+
+	
+	
 	public Container distributionContainer;
 	public Container worldPreviewContainer;
 	
@@ -198,10 +205,18 @@ public class UIProtoApplication implements WindowEventListener
 		
 		tabbedWorldView = new TabbedView(new Vector2i(30,30));
 		tabbedWorldView.setFlag(Widget.FILL);
-		tabbedWorldView.setBackground(new Fill(new Colour(0.9f, 0.88f, 0.82f)));
+		
+		
+		worldEditorLabel = new TextWidget("World Editor Menu");
+		worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
+		worldLayout.add(worldEditorLabel);
 		worldLayout.add(tabbedWorldView);
 		
 		// OUR WORLD EDITOR Containers
+		
+		
+		
+		
 		
 		propertiesContainer = new Container(new Vector2i(100, 100));
 		propertiesContainer.setFlag(Widget.FILL);
@@ -209,21 +224,29 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		propertiesLayout.setFlag(Widget.FILL);
 		propertiesContainer.setContents(propertiesLayout);
 		
 		worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		worldSizeLayout.setHeight(50);
+		worldSizeLayout.setFlag(Widget.FILL_HORIZONTAL);
+		
 		propertiesLayout.add(worldSizeLayout);
 		
 		worldSizeLabel = new TextWidget("World Size:");
+		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
-		worldSizeXTextBox = new TextBox(new Vector2i(50,30));
+		worldSizeXTextBox = new TextBox(new Vector2i(30,20));
+		worldSizeXTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXTextBox);
 		
 		worldSizeXLabel = new TextWidget("X");
+		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
-		worldSizeYTextBox = new TextBox(new Vector2i(50,30));
+		worldSizeYTextBox = new TextBox(new Vector2i(30,20));
+		worldSizeYTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeYTextBox);
 		
 	
@@ -231,7 +254,7 @@ public class UIProtoApplication implements WindowEventListener
 		cellShapeLabel = new TextWidget("Cell Shape:");
 		propertiesLayout.add(cellShapeLabel);
 		
-		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,50));
+		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
@@ -239,22 +262,18 @@ public class UIProtoApplication implements WindowEventListener
 		propertiesLayout.add(cellShapeDropDownBox);
 				
 		
-		numCellPropertiesLabel = new TextWidget("Number of Cell Properties:");
-		propertiesLayout.add(numCellPropertiesLabel);
 		
-		numCellPropertiesTextBox = new TextBox(new Vector2i(100,50));
-		propertiesLayout.add(numCellPropertiesTextBox);
 		
 		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
+		propertiesLayout.add(wrapCheckBox);
 		
 		
 		
 		
 		
 		
-		
-		colorRulesContainer = new Container(new Vector2i(100, 100));
-		colorRulesContainer.setFlag(Widget.FILL);
+		rulesContainer = new Container(new Vector2i(100, 100));
+		rulesContainer.setFlag(Widget.FILL);
 		
 		distributionContainer = new Container(new Vector2i(100, 100));
 		distributionContainer.setFlag(Widget.FILL);
@@ -263,7 +282,7 @@ public class UIProtoApplication implements WindowEventListener
 		worldPreviewContainer.setFlag(Widget.FILL);
 		
 		
-		tabbedWorldView.add(colorRulesContainer, "Color Range Rules");
+		tabbedWorldView.add(rulesContainer, "CAL Rules");
 		tabbedWorldView.add(distributionContainer, "Distribution Settings");
 		tabbedWorldView.add(worldPreviewContainer, "World Preview");
 		

@@ -121,8 +121,8 @@ public class Theme
 		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Arial", Font.BOLD, 36), true, false));
 		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Arial", Font.BOLD, 24), true, false));
 		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(new Font("Arial", Font.PLAIN, 18), true, false));
-		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Serif", Font.PLAIN, 12), true, false));
-		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Serif", Font.PLAIN, 10), true, false));
+		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Calibri", Font.PLAIN, 14), true, false));
+		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Calibri", Font.PLAIN, 12), true, false));
 		
 		typeProperties = new HashMap<String, Type>();
 	}
