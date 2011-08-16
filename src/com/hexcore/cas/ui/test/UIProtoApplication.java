@@ -227,7 +227,6 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeLayout.add(worldSizeYTextBox);
 		
 	
-		/*
 		
 		cellShapeLabel = new TextWidget("Cell Shape:");
 		propertiesLayout.add(cellShapeLabel);
@@ -248,7 +247,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
 		
-		*/
+		
 		
 		
 		
