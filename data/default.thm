@@ -162,6 +162,7 @@ Tab : selected
 	background: vertical rgb(0.52, 0.52, 0.52) rgb(0.62, 0.62, 0.62);
 	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
 	text-colour: rgb(1.0, 1.0, 1.0);
+	text-offset: 1 1;
 }
 
 Tab : hover
