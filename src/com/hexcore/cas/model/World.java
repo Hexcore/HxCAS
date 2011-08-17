@@ -1,6 +1,7 @@
 package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.rulesystems.HexcoreVM;
 
 public class World
 {
@@ -66,5 +67,11 @@ public class World
 	public Grid[] getWorld()
 	{
 		return world;
+	}
+	
+	public void sendRulesAndColours()
+	{
+		HexcoreVM h = new HexcoreVM();
+		h.loadRules(rulesAndColours);
 	}
 }
