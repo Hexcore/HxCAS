@@ -46,10 +46,14 @@ public class HexcoreVM
 	
 	public void loadRules(String fileName)
 	{
+		//TODO: Need to convert to text stream.
+		/*
 			Scanner.Init(fileName);
 			Errors.Init(fileName, "/", false);
 			Parser.Parse();
 			Errors.Summarize();
+		*/
+		System.out.print("Parsed correctly");
 	}
 	
 	public void run(Cell cell, Cell[] neighbours)

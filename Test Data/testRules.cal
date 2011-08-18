@@ -5,7 +5,7 @@ ruleset Flood
 
 	type Land : 0
 	{
-		if (self.water > 0)
+		if (self.water  0)
 		{
 			var most = max(neighbours.water);
 			var least = min(neighbours.water);
