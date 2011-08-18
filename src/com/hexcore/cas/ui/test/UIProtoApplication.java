@@ -3,6 +3,7 @@ package com.hexcore.cas.ui.test;
 import java.awt.Color;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.RectangleGrid;
@@ -61,6 +62,8 @@ public class UIProtoApplication implements WindowEventListener
 		public LinearLayout masterPropertiesLayout;
 		public Container widgetPreviewContainer;
 		public LinearLayout widgetPreviewLayout;
+		public LinearLayout cellShapeLayout;
+		
 		public GameOfLife			rectGameOfLife;
 		public GameOfLife			triGameOfLife;
 		public GameOfLife			hexGameOfLife;
@@ -307,9 +310,19 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeLayout.add(worldSizeYTextBox);
 		
 	
+		cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
+		
+		propertiesLayout.add(cellShapeLayout);
 		
 		cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
-		propertiesLayout.add(cellShapeLabel);
+		cellShapeLayout.add(cellShapeLabel);
+		
+		
+		
+		
+		
+		
 		
 		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
 		cellShapeDropDownBox.addItem("Square");
@@ -319,7 +332,7 @@ public class UIProtoApplication implements WindowEventListener
 		widgetPreviewContainer.setContents(rectGrid3DViewer);
 		
 		
-		propertiesLayout.add(cellShapeDropDownBox);
+		cellShapeLayout.add(cellShapeDropDownBox);
 				
 		
 		

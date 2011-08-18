@@ -276,9 +276,10 @@ public class Theme
 		pos = pos.add(getVector2i("Button", stateName, "text-offset"));
 		
 		Colour textColour = getColour("Button", stateName, "text-colour");
+		Colour shadowColour = getColour("Button", stateName, "text-shadow-colour");
 		
 		if (description.isEmpty())
-			window.getTheme().renderText(gl, caption, pos, size, textColour, Text.Size.MEDIUM);
+			window.getTheme().renderShadowedText(gl, caption, pos, size, textColour, shadowColour, Text.Size.MEDIUM);
 		else
 		{
 			int			textGap = 4;
@@ -289,7 +290,7 @@ public class Theme
 			int		bigLeft = (size.x - bigTextSize.x) / 2;
 			int		smallLeft = (size.x - smallTextSize.x) / 2;
 			
-			window.getTheme().renderText(gl, caption, pos.add(bigLeft, top), textColour, Text.Size.MEDIUM);
+			window.getTheme().renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, Text.Size.MEDIUM);
 			window.getTheme().renderText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, Text.Size.SMALL);
 		}
 	}
@@ -543,7 +544,13 @@ public class Theme
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
-		
+
+	public void renderShadowedText(GL gl, String text, Vector2i position, Colour colour, Colour shadowColour, Text.Size textSize)
+	{
+		renderText(gl, text, position.add(0, 1), shadowColour, textSize);
+		renderText(gl, text, position, colour, textSize);
+	}
+	
 	public void renderText(GL gl, String text, Vector2i position, Colour colour, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
@@ -612,6 +619,16 @@ public class Theme
 		
 	}
 	
+	public void renderFlowedShadowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour, Colour shadowColour)
+	{
+		Vector2i	pos = new Vector2i(position);
+		for (String line : flowedText.lines)
+		{
+			renderShadowedText(gl, line, pos, colour, shadowColour, flowedText.textSize);
+			pos.inc(0, flowedText.lineHeight);
+		}
+	}	
+	
 	public void renderFlowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour)
 	{
 		Vector2i	pos = new Vector2i(position);
@@ -625,6 +642,12 @@ public class Theme
 	public void renderFlowedText(GL gl, String text, Vector2i position, int maxWidth, Colour colour, Text.Size textSize)
 	{
 		renderFlowedText(gl, position, flowText(text, maxWidth, textSize), colour);
+	}
+	
+	public void renderShadowedText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Colour shadowColour, Text.Size textSize)
+	{
+		renderText(gl, text, position.add(0, 1), size, shadowColour, textSize);
+		renderText(gl, text, position, size, colour, textSize);
 	}
 	
 	public void renderText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Text.Size textSize)
