@@ -145,16 +145,18 @@ public class TabbedView extends View
 				for (int i = 0; i < widgets.size(); i++) tabsWidth += window.getTheme().getTabSize(captions.get(i)).x;
 				
 				int	x = position.x + (getWidth() - tabsWidth) / 2;
-				for (int i = 0; i < widgets.size(); i++)
-				{
-					Vector2i tabSize = window.getTheme().getTabSize(captions.get(i));
-					x += tabSize.x;
-					if (event.position.x <= x)
+				
+				if (event.position.x >= x)
+					for (int i = 0; i < widgets.size(); i++)
 					{
-						hovered = i;
-						break;
+						Vector2i tabSize = window.getTheme().getTabSize(captions.get(i));
+						x += tabSize.x;
+						if (event.position.x <= x)
+						{
+							hovered = i;
+							break;
+						}
 					}
-				}
 				
 				handled = true;
 			}
