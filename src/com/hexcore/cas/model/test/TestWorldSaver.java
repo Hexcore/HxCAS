@@ -143,8 +143,8 @@ public class TestWorldSaver extends TestCase
 		System.out.println("Tested generation 1...");
 		//Generation 2
 		assertEquals('H', world.getWorld()[1].getType());
-		assertEquals(2.0, world.getWorld()[1].getWidth());
-		assertEquals(3.0, world.getWorld()[1].getHeight());
+		assertEquals(2, world.getWorld()[1].getWidth());
+		assertEquals(3, world.getWorld()[1].getHeight());
 		assertEquals(1.0, world.getWorld()[1].getCell(0, 0).getValue(0));
 		assertEquals(2.0, world.getWorld()[1].getCell(0, 0).getValue(1));
 		assertEquals(3.0, world.getWorld()[1].getCell(1, 0).getValue(0));
@@ -160,8 +160,8 @@ public class TestWorldSaver extends TestCase
 		System.out.println("Tested generation 2...");
 		//Generation 3
 		assertEquals('H', world.getWorld()[2].getType());
-		assertEquals(2.0, world.getWorld()[2].getWidth());
-		assertEquals(3.0, world.getWorld()[2].getHeight());
+		assertEquals(2, world.getWorld()[2].getWidth());
+		assertEquals(3, world.getWorld()[2].getHeight());
 		assertEquals(2.0, world.getWorld()[2].getCell(0, 0).getValue(0));
 		assertEquals(3.0, world.getWorld()[2].getCell(0, 0).getValue(1));
 		assertEquals(4.0, world.getWorld()[2].getCell(1, 0).getValue(0));

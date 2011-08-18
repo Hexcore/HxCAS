@@ -110,9 +110,9 @@ public class TestGrid extends TestCase
 		assertTrue(grid.getSize().equals(new Vector2i(7, 9)));
 		
 		// Ensure values
-		assertEquals(5, grid.getCell(0, 0).getValue(0));
-		assertEquals(5, grid.getCell(2, 2).getValue(0));
-		assertEquals(5, grid.getCell(6, 8).getValue(0));
+		assertEquals(5.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(5.0, grid.getCell(2, 2).getValue(0));
+		assertEquals(5.0, grid.getCell(6, 8).getValue(0));
 	}
 	
 	public void testConstructorGrid()
@@ -143,9 +143,9 @@ public class TestGrid extends TestCase
 		assertEquals(7, grid2.getWidth());
 		assertTrue(grid2.getSize().equals(new Vector2i(7, 9)));
 		
-		assertEquals(3, grid2.getCell(0, 0).getValue(0));
-		assertEquals(5, grid2.getCell(2, 2).getValue(0));
-		assertEquals(9, grid2.getCell(6, 8).getValue(0));
+		assertEquals(3.0, grid2.getCell(0, 0).getValue(0));
+		assertEquals(5.0, grid2.getCell(2, 2).getValue(0));
+		assertEquals(9.0, grid2.getCell(6, 8).getValue(0));
 	}	
 	
 	@Test
@@ -158,14 +158,14 @@ public class TestGrid extends TestCase
 		grid.getCell(0, 1).setValue(0, 11);
 		grid.getCell(1, 1).setValue(0, 5);
 				
-		assertEquals(9, grid.getCell(0, 0).getValue(0));
-		assertEquals(10, grid.getCell(1, 0).getValue(0));
-		assertEquals(5, grid.getCell(1, 1).getValue(0));
+		assertEquals(9.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(10.0, grid.getCell(1, 0).getValue(0));
+		assertEquals(5.0, grid.getCell(1, 1).getValue(0));
 		
 		Vector2i pos1 = new Vector2i(0, 1);
 		Vector2i pos2 = new Vector2i(1, 0);
-		assertEquals(11, grid.getCell(pos1).getValue(0));
-		assertEquals(10, grid.getCell(pos2).getValue(0));	
+		assertEquals(11.0, grid.getCell(pos1).getValue(0));
+		assertEquals(10.0, grid.getCell(pos2).getValue(0));	
 	}
 	
 	@Test
@@ -181,9 +181,9 @@ public class TestGrid extends TestCase
 		double[] values = {1, 2, 3};
 		grid.setCell(new Vector2i(1, 1), values);
 		
-		assertEquals(1, grid.getCell(1, 1).getValue(0));
-		assertEquals(2, grid.getCell(1, 1).getValue(1));
-		assertEquals(3, grid.getCell(1, 1).getValue(2));	
+		assertEquals(1.0, grid.getCell(1, 1).getValue(0));
+		assertEquals(2.0, grid.getCell(1, 1).getValue(1));
+		assertEquals(3.0, grid.getCell(1, 1).getValue(2));	
 	}
 	
 	@Test
@@ -198,8 +198,8 @@ public class TestGrid extends TestCase
 		grid.setCell(pos1, cell);
 		grid.setCell(pos2, cell);
 		
-		assertEquals(1, grid.getCell(pos1).getValue(0));
-		assertEquals(5, grid.getCell(pos2).getValue(1));
-		assertEquals(9, grid.getCell(pos1).getValue(2));		
+		assertEquals(1.0, grid.getCell(pos1).getValue(0));
+		assertEquals(5.0, grid.getCell(pos2).getValue(1));
+		assertEquals(9.0, grid.getCell(pos1).getValue(2));		
 	}
 }
