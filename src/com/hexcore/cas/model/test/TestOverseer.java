@@ -96,24 +96,95 @@ public class TestOverseer extends TestCase
 		assertEquals(1, o.getWorkable().getSize().y);
 	}
 	
-	public void test4Start()
+	public void test4StartMiddleGlider()
 	{
-		int size = 250;
+		int size = 5;
 		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
 		for(int y = 0; y < size; y++)
 			for(int x = 0; x < size; x++)
 				g.getCell(x, y).setValue(0, 0);
+		g.getCell(2, 1).setValue(0, 1);
+		g.getCell(3, 2).setValue(0, 1);
+		g.getCell(1, 3).setValue(0, 1);
+		g.getCell(2, 3).setValue(0, 1);
+		g.getCell(3, 3).setValue(0, 1);
+		
 		Overseer o = new Overseer(g, new Recti(new Vector2i(0, 0), new Vector2i(size, size)));
 		o.start();
 
 		assertEquals('R', g.getType());
 		assertEquals(size, g.getWidth());
 		assertEquals(size, g.getHeight());
-		for(int x = 0; x < size; x++)
-			for(int y = 0; y < size; y++)
-			{
-				String str = "y : " + y + "; x : " + x;
-				assertEquals(str, 1, g.getCell(x, y).getValue(0));
-			}
+		assertEquals(0, g.getCell(0, 0).getValue(0));
+		assertEquals(0, g.getCell(0, 1).getValue(0));
+		assertEquals(0, g.getCell(0, 2).getValue(0));
+		assertEquals(0, g.getCell(0, 3).getValue(0));
+		assertEquals(0, g.getCell(0, 4).getValue(0));
+		assertEquals(0, g.getCell(1, 0).getValue(0));
+		assertEquals(0, g.getCell(1, 1).getValue(0));
+		assertEquals(1, g.getCell(1, 2).getValue(0));
+		assertEquals(0, g.getCell(1, 3).getValue(0));
+		assertEquals(0, g.getCell(1, 4).getValue(0));
+		assertEquals(0, g.getCell(2, 0).getValue(0));
+		assertEquals(0, g.getCell(2, 1).getValue(0));
+		assertEquals(0, g.getCell(2, 2).getValue(0));
+		assertEquals(1, g.getCell(2, 3).getValue(0));
+		assertEquals(1, g.getCell(2, 4).getValue(0));
+		assertEquals(0, g.getCell(3, 0).getValue(0));
+		assertEquals(0, g.getCell(3, 1).getValue(0));
+		assertEquals(1, g.getCell(3, 2).getValue(0));
+		assertEquals(1, g.getCell(3, 3).getValue(0));
+		assertEquals(0, g.getCell(3, 4).getValue(0));
+		assertEquals(0, g.getCell(4, 0).getValue(0));
+		assertEquals(0, g.getCell(4, 1).getValue(0));
+		assertEquals(0, g.getCell(4, 2).getValue(0));
+		assertEquals(0, g.getCell(4, 3).getValue(0));
+		assertEquals(0, g.getCell(4, 4).getValue(0));
+	}
+	
+	public void test5StartCornerGlider()
+	{
+		int size = 5;
+		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
+		for(int y = 0; y < size; y++)
+			for(int x = 0; x < size; x++)
+				g.getCell(x, y).setValue(0, 0);
+		g.getCell(1, 0).setValue(0, 1);
+		g.getCell(4, 0).setValue(0, 1);
+		g.getCell(0, 1).setValue(0, 1);
+		g.getCell(1, 1).setValue(0, 1);
+		g.getCell(0, 2).setValue(0, 1);
+		
+		Overseer o = new Overseer(g, new Recti(new Vector2i(0, 0), new Vector2i(size, size)));
+		o.start();
+
+		assertEquals('R', g.getType());
+		assertEquals(size, g.getWidth());
+		assertEquals(size, g.getHeight());
+		assertEquals(0, g.getCell(0, 0).getValue(0));
+		assertEquals(0, g.getCell(0, 1).getValue(0));
+		assertEquals(1, g.getCell(0, 2).getValue(0));
+		assertEquals(0, g.getCell(0, 3).getValue(0));
+		assertEquals(0, g.getCell(0, 4).getValue(0));
+		assertEquals(1, g.getCell(1, 0).getValue(0));
+		assertEquals(1, g.getCell(1, 1).getValue(0));
+		assertEquals(1, g.getCell(1, 2).getValue(0));
+		assertEquals(0, g.getCell(1, 3).getValue(0));
+		assertEquals(0, g.getCell(1, 4).getValue(0));
+		assertEquals(0, g.getCell(2, 0).getValue(0));
+		assertEquals(0, g.getCell(2, 1).getValue(0));
+		assertEquals(0, g.getCell(2, 2).getValue(0));
+		assertEquals(0, g.getCell(2, 3).getValue(0));
+		assertEquals(0, g.getCell(2, 4).getValue(0));
+		assertEquals(0, g.getCell(3, 0).getValue(0));
+		assertEquals(0, g.getCell(3, 1).getValue(0));
+		assertEquals(0, g.getCell(3, 2).getValue(0));
+		assertEquals(0, g.getCell(3, 3).getValue(0));
+		assertEquals(0, g.getCell(3, 4).getValue(0));
+		assertEquals(0, g.getCell(4, 0).getValue(0));
+		assertEquals(1, g.getCell(4, 1).getValue(0));
+		assertEquals(0, g.getCell(4, 2).getValue(0));
+		assertEquals(0, g.getCell(4, 3).getValue(0));
+		assertEquals(0, g.getCell(4, 4).getValue(0));
 	}
 }

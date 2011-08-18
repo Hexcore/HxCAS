@@ -1,24 +1,27 @@
 package com.hexcore.cas.control.client;
 
+import java.util.Vector;
+
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.ThreadState;
 import com.hexcore.cas.model.TriangleGrid;
 
 public class Overseer 
 {
 	private Grid grid = null;
 	private Recti workable = null;
-	//private Object parent = null;
+	private Vector<ThreadState> threadWork = null;
 	
-	public Overseer(Grid g, Recti w)//, Object o)
+	public Overseer(Grid g, Recti w)
 	{
 		grid = g;
 		workable = w;
-		//parent = o;
+		threadWork = new Vector<ThreadState>();
 	}
 	
 	public void setGrid(Grid g)
@@ -110,18 +113,69 @@ public class Overseer
 		{
 			ex.printStackTrace();
 		}
-		//o.setOverseerWork(grid);
+		
+		for(int i = 0; i < threadWork.size(); i++)
+		{
+			int cnt = 0;
+			int x = threadWork.get(i).startingPosition.x;
+			for(int y = threadWork.get(i).startingPosition.y; y < grid.getHeight(); y++)
+			{
+				for(; ; x++)
+				{
+					if(x >= grid.getWidth())
+					{
+						x = 0;
+						break;
+					}
+					
+					for(int index = 0; index < grid.getCell(x, y).getValueCount(); index++)
+						grid.getCell(x, y).setValue(index, threadWork.get(i).work[cnt].getValue(index));
+					
+					cnt++;
+					if(cnt >= threadWork.get(i).num)
+						break;
+				}
+				if(cnt >= threadWork.get(i).num)
+					break;
+			}
+		}
 	}
 	
 	public class CoreThread extends Thread
 	{
 		private Vector2i workPos = null;
 		private int num = -1;
+		private Cell[] mywork = null;
+		private int myworkPos = -1;
 		
 		public CoreThread(Vector2i p, int n)
 		{
 			workPos = p;
 			num = n;
+			mywork = new Cell[num];
+			myworkPos = 0;
+		}
+		
+		private void gameOfLife(int x, int y)
+		{
+			Cell[] neigh = grid.getNeighbours(new Vector2i(x, y));
+			int cnt = 0;
+			for(int i = 0; i < neigh.length; i++)
+				if(neigh[i].getValue(0) == 1)
+					cnt++;
+			if(cnt < 2 || cnt > 3)
+			{
+				mywork[myworkPos] = new Cell(grid.getCell(x, y));
+				mywork[myworkPos].setValue(0, 0);
+			}
+			else if(cnt == 3 && grid.getCell(x, y).getValue(0) == 0)
+			{
+				mywork[myworkPos] = new Cell(grid.getCell(x, y)); 
+				mywork[myworkPos].setValue(0, 1);
+			}
+			else
+				mywork[myworkPos] = new Cell(grid.getCell(x, y));
+			myworkPos++;
 		}
 		
 		public void run()
@@ -137,11 +191,9 @@ public class Overseer
 						x = 0;
 						break;
 					}
-					for(int i = 0; i < grid.getCell(x, y).getValueCount(); i++)
-					{
-						int val = (grid.getCell(x, y).getValue(i) == 0) ? 1 : 0;
-						grid.getCell(x, y).setValue(i, val);
-					}
+					
+					gameOfLife(x, y);
+					
 					cnt++;
 					if(cnt >= num)
 						break;
@@ -149,6 +201,7 @@ public class Overseer
 				if(cnt >= num)
 					break;
 			}
+			threadWork.add(new ThreadState(mywork, workPos, num));
 		}
 	}
 }
