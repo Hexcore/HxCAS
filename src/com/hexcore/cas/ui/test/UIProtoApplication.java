@@ -27,6 +27,7 @@ import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
+import com.hexcore.cas.ui.Text.Size;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
 import com.hexcore.cas.ui.TriangleGrid3DWidget;
@@ -57,6 +58,12 @@ public class UIProtoApplication implements WindowEventListener
 	
 	public Container propertiesContainer;
 		
+		public LinearLayout masterPropertiesLayout;
+		public Container widgetPreviewContainer;
+		public LinearLayout widgetPreviewLayout;
+		public GameOfLife			rectGameOfLife;
+		public GameOfLife			triGameOfLife;
+		public GameOfLife			hexGameOfLife;
 		public LinearLayout propertiesLayout;
 		public LinearLayout worldSizeLayout;
 	
@@ -72,6 +79,9 @@ public class UIProtoApplication implements WindowEventListener
 		public CheckBox wrapCheckBox;
 		public DropDownBox cellShapeDropDownBox;
 		
+		public RectangleGrid3DWidget	rectGrid3DViewer;
+		public HexagonGrid3DWidget		hexGrid3DViewer;
+		public TriangleGrid3DWidget		triGrid3DViewer;
 		
 		
 	public Container rulesContainer;
@@ -114,6 +124,31 @@ public class UIProtoApplication implements WindowEventListener
 	
 	UIProtoApplication()
 	{
+		HexagonGrid grid = new HexagonGrid(new Vector2i(100, 100));
+		grid.getCell(6, 5).setValue(0, 1);
+		grid.getCell(6, 6).setValue(0, 1);
+		grid.getCell(6, 7).setValue(0, 1);		
+		hexGameOfLife = new GameOfLife(grid);
+		
+		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(12, 12));
+		rectGrid.getCell(2, 4).setValue(0, 1);
+		rectGrid.getCell(3, 4).setValue(0, 1);
+		rectGrid.getCell(4, 4).setValue(0, 1);
+		rectGrid.getCell(4, 3).setValue(0, 1);
+		rectGrid.getCell(3, 2).setValue(0, 1);
+		rectGameOfLife = new GameOfLife(rectGrid);
+		
+		TriangleGrid triGrid = new TriangleGrid(new Vector2i(12, 12));
+		triGrid.getCell(7, 6).setValue(0, 1);
+		triGrid.getCell(7, 7).setValue(0, 1);
+		triGrid.getCell(7, 8).setValue(0, 1);
+		triGrid.getCell(6, 6).setValue(0, 1);
+		triGrid.getCell(6, 7).setValue(0, 1);
+		triGrid.getCell(6, 8).setValue(0, 1);
+		triGameOfLife = new GameOfLife(triGrid);
+		
+		
+		
 		window = new Window("Cellular Automata Simulator - v1.0", 800, 600);
 		window.addListener(this);
 		window.show();
@@ -207,7 +242,7 @@ public class UIProtoApplication implements WindowEventListener
 		tabbedWorldView.setFlag(Widget.FILL);
 		
 		
-		worldEditorLabel = new TextWidget("World Editor Menu");
+		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
 		worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
 		worldLayout.add(worldEditorLabel);
 		worldLayout.add(tabbedWorldView);
@@ -222,10 +257,32 @@ public class UIProtoApplication implements WindowEventListener
 		propertiesContainer.setFlag(Widget.FILL);
 		tabbedWorldView.add(propertiesContainer, "World Properties");
 		
+		masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		masterPropertiesLayout.setFlag(Widget.FILL);
+		propertiesContainer.setContents(masterPropertiesLayout);
+		
+		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
+		rectGrid3DViewer.setFlag(Widget.FILL);
+		rectGrid3DViewer.addSlice(0, 16.0f);
+		
+		triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
+		triGrid3DViewer.setFlag(Widget.FILL);
+		triGrid3DViewer.addSlice(0, 16.0f);
+		
+		hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
+		hexGrid3DViewer.setFlag(Widget.FILL);
+	    hexGrid3DViewer.addSlice(0, 16.0f);
+		
+		
 		
 		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		propertiesLayout.setFlag(Widget.FILL);
-		propertiesContainer.setContents(propertiesLayout);
+		masterPropertiesLayout.add(propertiesLayout);
+		
+		
+		widgetPreviewContainer = new Container(new Vector2i (100,100));
+		widgetPreviewContainer.setFlag(Widget.FILL);
+		masterPropertiesLayout.add(widgetPreviewContainer);
 		
 		worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		worldSizeLayout.setHeight(50);
@@ -233,31 +290,34 @@ public class UIProtoApplication implements WindowEventListener
 		
 		propertiesLayout.add(worldSizeLayout);
 		
-		worldSizeLabel = new TextWidget("World Size:");
+		worldSizeLabel = new TextWidget("World Size:", Size.MEDIUM);
 		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
-		worldSizeXTextBox = new TextBox(new Vector2i(30,20));
+		worldSizeXTextBox = new TextBox(new Vector2i(35, 25));
 		worldSizeXTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXTextBox);
 		
-		worldSizeXLabel = new TextWidget("X");
+		worldSizeXLabel = new TextWidget("X", Size.LARGE);
 		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
-		worldSizeYTextBox = new TextBox(new Vector2i(30,20));
+		worldSizeYTextBox = new TextBox(new Vector2i(35,25));
 		worldSizeYTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeYTextBox);
 		
 	
 		
-		cellShapeLabel = new TextWidget("Cell Shape:");
+		cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
 		propertiesLayout.add(cellShapeLabel);
 		
 		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
+		cellShapeDropDownBox.setSelected(0);
+		widgetPreviewContainer.setContents(rectGrid3DViewer);
+		
 		
 		propertiesLayout.add(cellShapeDropDownBox);
 				
@@ -349,9 +409,30 @@ public class UIProtoApplication implements WindowEventListener
 				else
 					nameTextBox.setText("Ostrich");
 			}
-			else if (event.target == dropDownBox)
+			else if (event.target == cellShapeDropDownBox)
 			{
-				nameTextBox.setText(dropDownBox.getSelectedText());
+				String shape = cellShapeDropDownBox.getSelectedText();
+				
+				if (shape == "Square")
+				{
+					// 3D Rectangle Grid
+					
+					widgetPreviewContainer.setContents(rectGrid3DViewer);
+				}
+				else if (shape == "Triangle")
+				{
+					// 3D Triangle Grid
+					
+					widgetPreviewContainer.setContents(triGrid3DViewer);
+					
+				}
+				else
+				{
+					
+					widgetPreviewContainer.setContents(hexGrid3DViewer);
+				}
+				
+				
 			}
 		}
 	}
