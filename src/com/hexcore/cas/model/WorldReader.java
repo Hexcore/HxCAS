@@ -157,8 +157,10 @@ public class WorldReader
 				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
+		
 		World w = new World();
 		w.setRulesAndColours(rulesAndColours);
+		w.sendRulesAndColours();
 		w.setWorld(world);
 		return w;
 	}
