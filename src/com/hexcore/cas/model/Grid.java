@@ -71,12 +71,12 @@ public abstract class Grid
 		return cells[pos.y][pos.x];
 	}
 	
-	public void setCell(int x, int y, int[] vals)
+	public void setCell(int x, int y, double[] vals)
 	{
 		cells[y][x] = new Cell(vals);
 	}	
 	
-	public void setCell(Vector2i pos, int[] vals)
+	public void setCell(Vector2i pos, double[] vals)
 	{
 		cells[pos.y][pos.x] = new Cell(vals);
 	}

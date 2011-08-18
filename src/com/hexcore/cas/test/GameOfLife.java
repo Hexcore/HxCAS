@@ -131,7 +131,7 @@ public class GameOfLife
 		grid = temp;//return the updated grid.
 	}
 	
-	public int applyRulesRectangle(Cell[] neighbours, int value)
+	public double applyRulesRectangle(Cell[] neighbours, double value)
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)
@@ -150,7 +150,7 @@ public class GameOfLife
 			return value;
 	}
 	
-	public int applyRulesHexagon(Cell[] neighbours, int value)
+	public double applyRulesHexagon(Cell[] neighbours, double value)
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)
@@ -167,7 +167,7 @@ public class GameOfLife
 			return 0;
 	}
 	
-	public int applyRulesTriangle(Cell[] neighbours, int value)
+	public double applyRulesTriangle(Cell[] neighbours, double value)
 	{
 		int count = 0;
 		for(int i = 0; i < neighbours.length; i++)

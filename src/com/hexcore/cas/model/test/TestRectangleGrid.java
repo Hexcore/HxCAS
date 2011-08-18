@@ -53,7 +53,7 @@ public class TestRectangleGrid extends TestCase
 			for(int j = 0; j < y; j++)
 			{
 				Cell[] neighbours = grid.getNeighbours(new Vector2i(i,j));
-				int temp = 0;
+				double temp = 0.0;
 				
 				for(int k = 0; k < 8; k++)
 				{

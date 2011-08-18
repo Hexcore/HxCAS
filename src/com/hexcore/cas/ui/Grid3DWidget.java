@@ -191,7 +191,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		{
 			Colour		colour = Colour.DARK_GREY;
 			int			colProperty = (slice.colourProperty < 0) ? colourProperty : slice.colourProperty;
-			float		height = cell.getValue(slice.heightProperty) * slice.scale;
+			float		height = (float)cell.getValue(slice.heightProperty) * slice.scale;
 			
 			if ((height <= 0.0f) && !bottom) continue;
 			bottom = false;

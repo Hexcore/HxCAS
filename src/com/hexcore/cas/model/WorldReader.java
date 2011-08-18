@@ -24,6 +24,7 @@ public class WorldReader
 	public World readWorld()
 		throws IOException
 	{
+		System.out.println("Starting readWorldFunction");
 		File f = new File(worldFileName);
 		ZipFile zip = new ZipFile(f);
 		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
@@ -64,6 +65,7 @@ public class WorldReader
 				break;
 			}
 		}
+		System.out.println("First while loop");
 		Vector2i gridSize = new Vector2i(x, y);
 		Cell cell = new Cell(n);
 		switch(type)
@@ -115,7 +117,7 @@ public class WorldReader
 				break;
 			}
 		}
-		
+		System.out.println("Second while loop");
 		int worldPos = -1;
 		generationFiles = zip.entries();
 		while(generationFiles.hasMoreElements())
@@ -135,16 +137,16 @@ public class WorldReader
 						{
 							worldPos = Integer.parseInt(name.substring(0, name.indexOf(".cag")));
 							line = in.readLine();
-							int[] vals = new int[n];
+							double[] vals = new double[n];
 							int prevIndex = -1;
 							int currIndex = 0;
 							for(int i = 0; i < (n - 1); i++)
 							{
 								currIndex = line.indexOf(" ", prevIndex);
-								vals[i] = Integer.parseInt(line.substring(prevIndex + 1, currIndex));
+								vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
 								prevIndex = currIndex;
 							}
-							vals[n - 1] = Integer.parseInt(line.substring(prevIndex + 1));
+							vals[n - 1] = Double.parseDouble(line.substring(prevIndex + 1));
 							for(int i = 0; i < n; i++)
 								world[worldPos].getCell(cols, rows).setValue(i, vals[i]);
 						}
@@ -157,11 +159,17 @@ public class WorldReader
 				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
+		System.out.println("Third while loop");
 		
 		World w = new World();
 		w.setRulesAndColours(rulesAndColours);
+		System.out.println("Third while loop");
 		w.sendRulesAndColours();
+		System.out.println("Third while loop");
 		w.setWorld(world);
+		
+		System.out.println("Finished readWorldFunction");
+		
 		return w;
 	}
 	

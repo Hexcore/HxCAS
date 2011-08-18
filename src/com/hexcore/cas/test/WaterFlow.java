@@ -24,7 +24,7 @@ public class WaterFlow
 						Math.cos((x - y) / 4.5) * 1.5 +
 						Math.cos((x / 4.2 + y / 3.4 - x / 3.8)) * 4) + 7);
 		
-		grid.setCell(4, 4, new int[] {1, 10, 0});
+		grid.setCell(4, 4, new double[] {1, 10, 0});
 	}
 
 	public RectangleGrid getGrid()
@@ -44,21 +44,21 @@ public class WaterFlow
 				
 				if (self.getValue(0) == 0)
 				{
-					int maxWater = 0, minWater = 100;
+					double maxWater = 0, minWater = 100;
 					
 					for (Cell n : neighbours)
 					{
 						if (n.getValue(1) > 0)
 						{
-							int water = n.getValue(2) + n.getValue(1) - self.getValue(2);
+							double water = n.getValue(2) + n.getValue(1) - self.getValue(2);
 							if (water > maxWater) maxWater = water;
 							if (water < minWater) minWater = water;
 						}
 					}
 	
-					int ownHeight = self.getValue(1);
+					double ownHeight = self.getValue(1);
 					if (maxWater > ownHeight) 
-						self.setValue(1, self.getValue(1) + Math.max((maxWater - ownHeight) / 2, 1));
+						self.setValue(1, self.getValue(1) + Math.floor(Math.max((maxWater - ownHeight) / 2, 1)));
 					else if (maxWater < ownHeight)
 						self.setValue(1, self.getValue(1) - 1);
 				}

@@ -80,13 +80,13 @@ public class TestGrid extends TestCase
 		assertEquals(3, grid.getCell(6, 8).getValueCount());
 
 		// Ensure values		
-		grid.setCell(0, 0, new int[]{3, 5, 7});
-		grid.setCell(2, 2, new int[]{2, 6, 8});
-		grid.setCell(6, 8, new int[]{1, 4, 9});
+		grid.setCell(0, 0, new double[]{3.0, 5.0, 7.0});
+		grid.setCell(2, 2, new double[]{2.0, 6.0, 8.0});
+		grid.setCell(6, 8, new double[]{1.0, 4.0, 9.0});
 		
-		assertEquals(3, grid.getCell(0, 0).getValue(0));
-		assertEquals(6, grid.getCell(2, 2).getValue(1));
-		assertEquals(9, grid.getCell(6, 8).getValue(2));
+		assertEquals(3.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(6.0, grid.getCell(2, 2).getValue(1));
+		assertEquals(9.0, grid.getCell(6, 8).getValue(2));
 	}
 	
 	public void testConstructorSizeCell()
@@ -178,7 +178,7 @@ public class TestGrid extends TestCase
 		grid.getCell(0, 1).setValue(0, 11);
 		grid.getCell(1, 1).setValue(0, 5);
 		
-		int[] values = {1, 2, 3};
+		double[] values = {1, 2, 3};
 		grid.setCell(new Vector2i(1, 1), values);
 		
 		assertEquals(1, grid.getCell(1, 1).getValue(0));
@@ -194,7 +194,7 @@ public class TestGrid extends TestCase
 		
 		Vector2i	pos1 = new Vector2i(2, 4);
 		Vector2i	pos2 = new Vector2i(3, 3);		
-		Cell cell = new Cell(new int[] {1, 5, 9});
+		Cell cell = new Cell(new double[] {1, 5, 9});
 		grid.setCell(pos1, cell);
 		grid.setCell(pos2, cell);
 		

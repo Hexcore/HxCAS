@@ -72,6 +72,6 @@ public class World
 	public void sendRulesAndColours()
 	{
 		HexcoreVM h = new HexcoreVM();
-		h.loadRules(rulesAndColours);
+		//h.loadRules(rulesAndColours);
 	}
 }

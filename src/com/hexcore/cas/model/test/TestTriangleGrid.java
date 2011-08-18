@@ -30,7 +30,7 @@ public class TestTriangleGrid extends TestCase
 	
 	public void test4GetCell()
 	{
-		int[] vals = {0};
+		double[] vals = {0};
 		Cell c = new Cell(vals);
 		assertEquals(c.getValue(0), g.getCell(new Vector2i(0, 0)).getValue(0));
 	}
@@ -44,19 +44,19 @@ public class TestTriangleGrid extends TestCase
 			for(int x = 0; x < gridSize; x++)
 				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(0, 0);
-		int[] vals = new int[12];
-		vals[0] = 23;
-		vals[1] = 24;
-		vals[2] = 20;
-		vals[3] = 21;
-		vals[4] = 22;
-		vals[5] = 3;
-		vals[6] = 4;
-		vals[7] = 1;
-		vals[8] = 2;
-		vals[9] = 9;
-		vals[10] = 5;
-		vals[11] = 6;
+		double[] vals = new double[12];
+		vals[0] = 23.0;
+		vals[1] = 24.0;
+		vals[2] = 20.0;
+		vals[3] = 21.0;
+		vals[4] = 22.0;
+		vals[5] = 3.0;
+		vals[6] = 4.0;
+		vals[7] = 1.0;
+		vals[8] = 2.0;
+		vals[9] = 9.0;
+		vals[10] = 5.0;
+		vals[11] = 6.0;
 		cnt = 0;
 		for(int i = 0; i < 12; i++)
 			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
@@ -74,19 +74,19 @@ public class TestTriangleGrid extends TestCase
 				System.out.println("Cell[" + y + "][" + x + "] : " + (cnt - 1));
 			}
 		Vector2i pos = new Vector2i(1, 0);
-		int[] vals = new int[12];
-		vals[0] = 20;
-		vals[1] = 21;
-		vals[2] = 22;
-		vals[3] = 4;
-		vals[4] = 0;
-		vals[5] = 2;
-		vals[6] = 3;
-		vals[7] = 9;
-		vals[8] = 5;
-		vals[9] = 6;
-		vals[10] = 7;
-		vals[11] = 8;
+		double[] vals = new double[12];
+		vals[0] = 20.0;
+		vals[1] = 21.0;
+		vals[2] = 22.0;
+		vals[3] = 4.0;
+		vals[4] = 0.0;
+		vals[5] = 2.0;
+		vals[6] = 3.0;
+		vals[7] = 9.0;
+		vals[8] = 5.0;
+		vals[9] = 6.0;
+		vals[10] = 7.0;
+		vals[11] = 8.0;
 		cnt = 0;
 		for(int i = 0; i < 12; i++)
 			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
@@ -101,19 +101,19 @@ public class TestTriangleGrid extends TestCase
 			for(int x = 0; x < gridSize; x++)
 				t.getCell(new Vector2i(x, y)).setValue(0, cnt++);
 		Vector2i pos = new Vector2i(2, 2);
-		int[] vals = new int[12];
-		vals[0] = 5;
-		vals[1] = 6;
-		vals[2] = 7;
-		vals[3] = 8;
-		vals[4] = 9;
-		vals[5] = 10;
-		vals[6] = 11;
-		vals[7] = 13;
-		vals[8] = 14;
-		vals[9] = 16;
-		vals[10] = 17;
-		vals[11] = 18;
+		double[] vals = new double[12];
+		vals[0] = 5.0;
+		vals[1] = 6.0;
+		vals[2] = 7.0;
+		vals[3] = 8.0;
+		vals[4] = 9.0;
+		vals[5] = 10.0;
+		vals[6] = 11.0;
+		vals[7] = 13.0;
+		vals[8] = 14.0;
+		vals[9] = 16.0;
+		vals[10] = 17.0;
+		vals[11] = 18.0;
 		cnt = 0;
 		for(int i = 0; i < 12; i++)
 			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));

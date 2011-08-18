@@ -1,7 +1,5 @@
 package com.hexcore.cas.rulesystems;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -57,10 +55,10 @@ public class HexcoreVM
 		PC = 0;
 		end = false;
 		
-		int[] v;
-		int[][] n;
+		double[] v;
+		double[][] n;
 		v = cell.getValues();
-		n = new int[neighbours.length][v.length];
+		n = new double[neighbours.length][v.length];
 		
 		for(int i = 0; i < neighbours.length; i++)
 		{
