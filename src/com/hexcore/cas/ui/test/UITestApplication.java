@@ -139,7 +139,7 @@ public class UITestApplication implements WindowEventListener
 	
 	public void initialise()
 	{
-		window.loadTheme("data/default.thm");
+		window.loadTheme("data/light.thm");
 		
 		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		windowLayout.setFlag(Widget.FILL);

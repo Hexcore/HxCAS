@@ -1,0 +1,190 @@
+
+Button
+{
+	background: vertical rgb(1.0, 1.0, 1.0) rgb(0.9, 0.9, 0.9);
+	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
+	text-colour: rgb(0.0, 0.0, 0.0);
+	text-shadow-colour: rgb(1.0, 1.0, 1.0);
+	border-radius: 8;
+}
+
+Button : hover
+{
+	background: rgb(0.64, 0.76, 0.94) rgb(0.4, 0.63, 0.91);
+	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
+	text-colour: rgb(1.0, 1.0, 1.0);
+	text-shadow-colour: rgb(0.4, 0.6, 1.0);
+}
+
+Button : active
+{
+	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
+	border: rgb(0.45, 0.52, 0.7) rgb(0.72, 0.78, 0.87);
+	text-offset: 1 1;
+	text-colour: rgb(1.0, 1.0, 1.0);
+	text-shadow-colour: rgb(0.4, 0.6, 1.0);
+}
+
+Panel
+{
+	background: rgb(0.93, 0.93, 0.93);
+	border: rgb(0.5, 0.5, 0.5) rgb(0.6, 0.6, 0.6);
+}
+
+Scrollbar
+{
+	background: rgb(0.8, 0.8, 0.8);
+}
+
+Scrollbar : horizontal
+{
+	background: rgb(0.6, 0.6, 0.6) rgb(0.9, 0.9, 0.9);
+}
+
+Scrollbar : vertical
+{
+	background:  horizontal rgb(0.6, 0.6, 0.6) rgb(0.9, 0.9, 0.9);
+}
+
+ScrollbarHandle
+{
+	background: rgb(0.5, 0.5, 0.5) center image("data/scrollbar_vert.png");
+	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
+}
+
+ScrollbarHandle : horizontal
+{
+	background: rgb(0.5, 0.5, 0.5) center image("data/scrollbar_horz.png");
+	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
+}
+
+ScrollbarFill
+{
+	background: rgb(0.6, 0.6, 0.6);
+	border: rgb(0.7, 0.7, 0.7) rgb(0.5, 0.5, 0.5);
+}
+
+TextBox
+{
+	background: rgb(1.0, 1.0, 1.0);	
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	text-colour: rgb(0.0, 0.0, 0.0);
+}
+
+TextBox : focus
+{
+	background: rgb(0.9, 0.95, 1.0);	
+	border: rgb(0.5, 0.6, 0.7) rgb(0.7, 0.8, 0.9);
+}
+
+CheckBox
+{
+	background: rgb(1.0, 1.0, 1.0);	
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+}
+
+CheckBox : focus
+{
+	background: rgb(0.9, 0.95, 1.0);
+}
+
+CheckBox : checked
+{
+	background: rgb(1.0, 1.0, 1.0) image("data/tick.png");
+}
+
+CheckBox : checked : focus
+{
+	background: rgb(0.9, 0.95, 1.0) image("data/tick.png");
+}
+
+CheckBoxCaption
+{
+	text-colour: rgb(0.0, 0.0, 0.0);
+	padding: 5 5;
+	border-radius: 2;
+}
+
+CheckBoxCaption : focus
+{
+	background: rgba(0.9, 0.95, 1.0, 0.5);	
+	border: rgba(0.7, 0.8, 0.9, 0.8);
+}
+
+CheckBoxCaption : checked : focus
+{
+	background: rgba(0.9, 0.95, 1.0, 0.5);	
+	border: rgba(0.7, 0.8, 0.9, 0.8);
+}
+
+DropDownBox
+{
+	background: rgb(1.0, 1.0, 1.0);	
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	text-colour: rgb(0.0, 0.0, 0.0);
+}
+
+DropDownBox : focus
+{
+	background: rgb(0.9, 0.95, 1.0);	
+	border: rgb(0.5, 0.6, 0.7) rgb(0.7, 0.8, 0.9);
+}
+
+DropDownBoxArrow
+{
+	background: rgb(0.85, 0.85, 0.85) image("data/drop_arrow.png");
+	border: rgb(0.8, 0.8, 0.8) rgb(0.6, 0.6, 0.6);
+}
+
+DropDownBoxList
+{
+	background: rgb(1.0, 1.0, 1.0);	
+	border: rgb(0.6, 0.6, 0.6) rgb(0.8, 0.8, 0.8);
+	text-colour: rgb(0.0, 0.0, 0.0);
+}
+
+DropDownBoxItem 
+{
+	padding: 4 4;
+	background: rgba(0.8, 0.9, 1.0, 0.8);
+	text-colour: rgb(0.0, 0.0, 0.0);
+}
+
+Tab
+{
+	padding: 18 10;
+	background: vertical rgb(1.0, 1.0, 1.0) rgb(0.9, 0.9, 0.9);
+	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
+	text-colour: rgb(0.0, 0.0, 0.0);
+	border-radius: 8;
+}
+
+Tab : selected
+{
+	padding: 18 10;
+	background: vertical rgb(0.52, 0.52, 0.52) rgb(0.62, 0.62, 0.62);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	text-colour: rgb(1.0, 1.0, 1.0);
+	text-offset: 1 1;
+}
+
+Tab : hover
+{
+	background: rgb(0.64, 0.76, 0.94) rgb(0.4, 0.63, 0.91);
+	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
+	text-colour: rgb(1.0, 1.0, 1.0);
+}
+
+Tab : active
+{
+	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
+	border: rgb(0.45, 0.52, 0.7) rgb(0.72, 0.78, 0.87);
+	text-colour: rgb(1.0, 1.0, 1.0);
+	text-offset: 1 1;
+}
+
+TabInside
+{
+	border: rgb(0.6, 0.6, 0.6);
+	background: rgb(0.9, 0.9, 0.9);
+}
