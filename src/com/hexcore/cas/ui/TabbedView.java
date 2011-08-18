@@ -27,9 +27,39 @@ public class TabbedView extends View
 	}
 	
 	@Override
+	public int		getInnerWidth() 
+	{
+		return size.x;
+	}
+	
+	@Override
+	public int		getInnerHeight() 
+	{
+		return size.y - window.getTheme().getTabHeight();
+	}
+	
+	@Override
 	public Vector2i getInnerSize()
 	{
 		return super.getInnerSize().subtract(0, window.getTheme().getTabHeight());
+	}
+
+	@Override
+	public int		getInnerX() 
+	{
+		return 0;
+	}
+	
+	@Override
+	public int		getInnerY() 
+	{
+		return window.getTheme().getTabHeight();
+	}
+	
+	@Override
+	public Vector2i	getInnerOffset() 
+	{
+		return new Vector2i(0, window.getTheme().getTabHeight());
 	}
 	
 	@Override
@@ -63,7 +93,7 @@ public class TabbedView extends View
 		
 		// Render border and window
 		Vector2i innerSize = getInnerSize();
-		Vector2i innerPos = pos.add(0, window.getTheme().getTabHeight());
+		Vector2i innerPos = pos.add(getInnerOffset());
 				
 		if (background == null) 
 			window.getTheme().renderTabInside(gl, innerPos.subtract(0, tabHeight / 2), innerSize.add(0, tabHeight / 2));
@@ -97,7 +127,7 @@ public class TabbedView extends View
 			x += tabSize.x;
 		}
 	}
-
+	
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{
@@ -137,10 +167,12 @@ public class TabbedView extends View
 				if (wasActive && !active && mouseover && (hovered != -1)) setIndex(hovered);
 			}
 		}
-		
-		if (!handled && super.handleEvent(event, position)) 
-			handled = true;
-		
+				
+		Widget contents = getWidget();
+		if ((!handled) && (contents != null))
+			if (contents.receiveEvent(event, position.add(getInnerOffset()))) 
+				handled = true;
+
 		return handled;
 	}
 }

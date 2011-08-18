@@ -18,16 +18,20 @@ public class Layout extends Widget
 	protected Fill 				background = null;
 	protected ArrayList<Widget>	components;
 	
+	protected Vector2i			lastMouse;
+	
 	public Layout(Vector2i size)
 	{
 		super(size);
 		components = new ArrayList<Widget>();
+		lastMouse = new Vector2i();
 	}
 	
 	public Layout()
 	{
 		super(new Vector2i(0, 0));
 		components = new ArrayList<Widget>();
+		lastMouse = new Vector2i();
 	}
 		
 	@Override
@@ -87,12 +91,19 @@ public class Layout extends Widget
 	
 			//window.renderRectangle(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f, 0.2f));
 			window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
+
+			window.renderBorder(gl, lastMouse.subtract(5, 5), new Vector2i(10, 10), Colour.RED);
 		}
 	}
 	
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{	
+		if (event.type == Event.Type.MOUSE_MOTION)
+		{
+			lastMouse = event.position;
+		}
+		
 		for (Widget component : components)
 			component.receiveEvent(event, position);
 		

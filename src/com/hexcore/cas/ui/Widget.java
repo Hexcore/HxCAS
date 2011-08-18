@@ -110,6 +110,9 @@ public abstract class Widget
 	public int		getInnerWidth() {return size.x;}
 	public int		getInnerHeight() {return size.y;}
 	public Vector2i	getInnerSize() {return size;}
+	public int		getInnerX() {return 0;}
+	public int		getInnerY() {return 0;}
+	public Vector2i	getInnerOffset() {return new Vector2i(0, 0);}
 	public int		getX() {return position.x;}
 	public int		getY() {return position.y;}
 	public Vector2i	getPosition() {return position;}
