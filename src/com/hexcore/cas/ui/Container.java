@@ -102,5 +102,6 @@ public class Container extends Widget
 	{
 		this.contents = component;
 		component.setParent(this);
+		relayout();
 	}
 }
