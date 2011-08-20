@@ -100,23 +100,23 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		if (window.getKeyState(KeyEvent.VK_UP))
 		{
-			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_DOWN))
 		{
-			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_LEFT))
 		{
-			cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_RIGHT))
 		{
-			cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 	}
 	

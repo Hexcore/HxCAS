@@ -270,13 +270,16 @@ public class Theme
 				getFill("Button", stateName, "background"),
 				getFill("Button", stateName, "border"));	 
 		
-		pos = pos.add(getVector2i("Button", stateName, "text-offset"));
+		Colour 		textColour = getColour("Button", stateName, "text-colour");
+		Colour 		shadowColour = getColour("Button", stateName, "text-shadow-colour", Colour.TRANSPARENT);
 		
-		Colour textColour = getColour("Button", stateName, "text-colour");
-		Colour shadowColour = getColour("Button", stateName, "text-shadow-colour");
+		Vector2i	textOffset = getVector2i("Button", stateName, "text-offset");
+		Vector2i	shadowOffset = getVector2i("Button", stateName, "text-shadow-offset", new Vector2i(0, 1));
+
+		pos = pos.add(textOffset);
 		
 		if (description.isEmpty())
-			renderShadowedText(gl, caption, pos, size, textColour, shadowColour, Text.Size.MEDIUM);
+			renderShadowedText(gl, caption, pos, size, textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
 		else
 		{
 			int			textGap = 4;
@@ -287,8 +290,8 @@ public class Theme
 			int		bigLeft = (size.x - bigTextSize.x) / 2;
 			int		smallLeft = (size.x - smallTextSize.x) / 2;
 			
-			renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, Text.Size.MEDIUM);
-			renderText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, Text.Size.SMALL);
+			renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
+			renderShadowedText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, shadowColour, shadowOffset, Text.Size.SMALL);
 		}
 	}
 	
@@ -511,8 +514,14 @@ public class Theme
 		if (sides.has(BorderShape.RIGHT)) corners.add(BorderShape.TOP_RIGHT | BorderShape.BOTTOM_RIGHT);
 		Graphics.renderRoundedBorderedRectangle(gl, position, size.add(1, 0), borderRadius, corners, 
 				getFill("Tab", stateName, "background"), getFill("Tab", stateName, "border"));
+		
+		Colour	textColour = getColour("Tab", stateName, "text-colour");
+		Colour	textShadowColour = getColour("Tab", stateName, "text-shadow-colour", Colour.TRANSPARENT);
+		
 		Vector2i textOffset = getVector2i("Tab", stateName, "text-offset", new Vector2i(0, 0));
-		renderText(gl, caption, position.add(textOffset), size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
+		Vector2i shadowOffset = getVector2i("Tab", stateName, "text-shadow-offset", new Vector2i(0, 1));
+		
+		renderShadowedText(gl, caption, position.add(textOffset), size, textColour, textShadowColour, shadowOffset, Text.Size.MEDIUM);
 	}
 	
 	public void renderTabInside(GL gl, Vector2i position, Vector2i size)
@@ -542,9 +551,9 @@ public class Theme
 		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
 
-	public void renderShadowedText(GL gl, String text, Vector2i position, Colour colour, Colour shadowColour, Text.Size textSize)
+	public void renderShadowedText(GL gl, String text, Vector2i position, Colour colour, Colour shadowColour, Vector2i shadowOffset, Text.Size textSize)
 	{
-		renderText(gl, text, position.add(0, 1), shadowColour, textSize);
+		if (shadowColour.a > 0.0f) renderText(gl, text, position.add(shadowOffset), shadowColour, textSize);
 		renderText(gl, text, position, colour, textSize);
 	}
 	
@@ -616,12 +625,12 @@ public class Theme
 		
 	}
 	
-	public void renderFlowedShadowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour, Colour shadowColour)
+	public void renderFlowedShadowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour, Colour shadowColour, Vector2i shadowOffset)
 	{
 		Vector2i	pos = new Vector2i(position);
 		for (String line : flowedText.lines)
 		{
-			renderShadowedText(gl, line, pos, colour, shadowColour, flowedText.textSize);
+			renderShadowedText(gl, line, pos, colour, shadowColour, shadowOffset, flowedText.textSize);
 			pos.inc(0, flowedText.lineHeight);
 		}
 	}	
@@ -641,9 +650,9 @@ public class Theme
 		renderFlowedText(gl, position, flowText(text, maxWidth, textSize), colour);
 	}
 	
-	public void renderShadowedText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Colour shadowColour, Text.Size textSize)
+	public void renderShadowedText(GL gl, String text, Vector2i position, Vector2i size, Colour colour, Colour shadowColour, Vector2i shadowOffset, Text.Size textSize)
 	{
-		renderText(gl, text, position.add(0, 1), size, shadowColour, textSize);
+		if (shadowColour.a > 0.0f) renderText(gl, text, position.add(shadowOffset), size, shadowColour, textSize);
 		renderText(gl, text, position, size, colour, textSize);
 	}
 	

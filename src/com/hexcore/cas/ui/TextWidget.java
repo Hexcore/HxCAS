@@ -62,9 +62,9 @@ public class TextWidget extends Widget
 		if (textShadow)
 		{
 			if ((size.x > 0) && (flowedText != null))
-				window.getTheme().renderFlowedShadowedText(gl, pos, flowedText, colour, shadowColour);
+				window.getTheme().renderFlowedShadowedText(gl, pos, flowedText, colour, shadowColour, new Vector2i(0, 1));
 			else
-				window.getTheme().renderShadowedText(gl, caption, pos, colour, shadowColour, textSize);
+				window.getTheme().renderShadowedText(gl, caption, pos, colour, shadowColour, new Vector2i(0, 1), textSize);
 		}
 		else
 		{
