@@ -166,7 +166,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		GL2 gl2 = gl.getGL2();
 		
-		gl2.glViewport(position.x, this.size.y - (size.y + position.y), size.x, size.y);
+		int width = size.x > 0 ? size.x : 1;
+		int height = size.y > 0 ? size.y : 1;
+		gl2.glViewport(position.x, this.size.y - (height + position.y), width, height);
 	}
 	
 	public void setClipping(GL gl, Vector2i position, Vector2i size)
@@ -274,6 +276,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
 	{
+		if (width < 800) width = 800;
+		if (height < 600) height = 600;
+		
 		size = new Vector2i(width, height);
         relayout();
 	}

@@ -41,23 +41,23 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		}
 	}
 	
+	// Options
 	protected ArrayList<Slice>	slices;
 	
 	protected boolean	drawGrid = true;
 	
+	// Camera
 	protected float		yaw = 0.0f, pitch = -30.0f;
 	protected Vector3f	cameraPosition;
-	
 	protected boolean	cameraMoving = false;
 	protected Vector2i	cameraMoveStart = new Vector2i();
 	
+	// Buffer for 3D drawing
 	protected IntBuffer		buffers = null;
 	protected int			numVertices = 0;
 	protected FloatBuffer	vertexBufferData = null;
 	protected FloatBuffer	colourBufferData = null;
 	protected FloatBuffer	normalBufferData = null;
-	
-	protected int			test = 0;
 	
 	public Grid3DWidget(Vector2i size, T grid, int tileSize)
 	{
@@ -197,29 +197,41 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		return false;
 	}
 	
-	protected void setupVertexBuffer(GL gl)
+	protected int calculateBufferRequirement(int sides)
+	{
+		int	vertices = ((sides - 2) * 3 + sides * 6) * slices.size() * grid.getHeight() * grid.getWidth();
+		return vertices * 3;
+	}
+	
+	protected void setupVertexBuffer(GL gl, int sides)
 	{
 		gl.glGenBuffers(3, buffers);
 		
-		vertexBufferData = Buffers.newDirectFloatBuffer(50000000);
-		colourBufferData = Buffers.newDirectFloatBuffer(50000000);
-		normalBufferData = Buffers.newDirectFloatBuffer(50000000);
+		int	bufferSize = calculateBufferRequirement(sides);
+		vertexBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+		colourBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+		normalBufferData = Buffers.newDirectFloatBuffer(bufferSize);
 		
-		resetVertexBuffer(gl);
+		resetVertexBuffer(gl, sides);
 	}
 	
-	protected void resetVertexBuffer(GL gl)
+	protected void resetVertexBuffer(GL gl, int sides)
 	{
-		vertexBufferData.rewind();
-		colourBufferData.rewind();
-		normalBufferData.rewind();
-		numVertices = 0;
+		if (vertexBufferData == null || colourBufferData == null || normalBufferData == null)
+		{
+			setupVertexBuffer(gl, sides);
+		}
+		else
+		{
+			vertexBufferData.rewind();
+			colourBufferData.rewind();
+			normalBufferData.rewind();
+			numVertices = 0;
+		}
 	}
 	
 	protected void loadVertexBuffer(GL gl)
 	{
-		if (buffers == null) setupVertexBuffer(gl);
-
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, vertexBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
@@ -231,14 +243,10 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(2));
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, normalBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
-		
-		test = 0;
 	}
 	
 	protected void renderVertexBuffer(GL gl)
 	{		
-		if (vertexBufferData == null) setupVertexBuffer(gl);
-		
 		GL2 gl2 = gl.getGL2();
 		window.applyColour(gl2, Colour.RED);
 								
@@ -286,7 +294,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		Vector2f	start = polygon[0];
 		Vector3f	up = new Vector3f(0.0f, 0.0f, 1.0f);
 		
-		for (int i = 0; i < polygon.length - 1; i++) 
+		for (int i = 1; i < polygon.length - 1; i++) 
 		{
 			Vector2f	v1 = polygon[i];
 			Vector2f	v2 = polygon[i+1];

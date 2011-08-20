@@ -27,10 +27,7 @@ public class RectangleGrid3DWidget extends Grid3DWidget<RectangleGrid>
 		rect[2] = new Vector2f(s, s);
 		rect[3] = new Vector2f(0.0f, s);
 		
-		if (vertexBufferData == null)
-			setupVertexBuffer(gl);
-		else
-			resetVertexBuffer(gl);
+		resetVertexBuffer(gl, 4);
 
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
