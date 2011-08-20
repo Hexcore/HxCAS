@@ -14,6 +14,7 @@ import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Cell;
+import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
 import com.jogamp.common.nio.Buffers;
 
@@ -57,6 +58,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	protected FloatBuffer	vertexBufferData = null;
 	protected FloatBuffer	colourBufferData = null;
 	protected FloatBuffer	normalBufferData = null;
+	protected boolean		dirty = true;
 	
 	public Grid3DWidget(Vector2i size, T grid, int tileSize)
 	{
@@ -74,25 +76,50 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	
 	@Override
 	public boolean canGetFocus() {return true;}
+	
+	@Override
+	public void setColourProperty(int propertyIndex)
+	{
+		colourProperty = propertyIndex;
+		dirty = true;
+	}
+
+	@Override
+	public void setGrid(T grid)
+	{
+		this.grid = grid;
+		dirty = true;
+	}
+
+	@Override
+	public void setColourRuleSet(ColourRuleSet ruleSet)
+	{
+		colourRules = ruleSet;
+		dirty = true;
+	}
 
 	public void setDrawGrid(boolean state)
 	{
 		drawGrid = state;
+		dirty = true;
 	}
 	
 	public void addSlice(int heightProperty, float scale)
 	{
 		slices.add(new Slice(heightProperty, scale));
+		dirty = true;
 	}	
 	
 	public void addSlice(int colourProperty, int heightProperty, float scale)
 	{
 		slices.add(new Slice(colourProperty, heightProperty, scale));
+		dirty = true;
 	}
 	
 	public void clearSlices()
 	{
 		slices.clear();
+		dirty = true;
 	}
 	
 	@Override
@@ -148,16 +175,19 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
         gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, (new Vector3f(0.25f, 0.5f, 1.0f)).toFloatBuffer(0.0f));
         gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, Colour.WHITE.toFloatBuffer());
 
-        render3D(gl);
+		if (dirty) loadGeometry(gl);
+		dirty = false;
+		
+		renderVertexBuffer(gl);
 		
 		window.resetView(gl2);
 		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glDisable(GL.GL_DEPTH_TEST);
 	}
 	
-	protected void render3D(GL gl)
+	public void loadGeometry(GL gl)
 	{
-		
+	
 	}
 	
 	@Override

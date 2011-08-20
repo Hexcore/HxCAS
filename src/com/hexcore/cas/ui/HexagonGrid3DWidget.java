@@ -15,7 +15,7 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 	}
 
 	@Override
-	public void render3D(GL gl)
+	public void loadGeometry(GL gl)
 	{        
 		float	s = tileSize;
 		float	h = tileSize / 2;
@@ -29,6 +29,8 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 		hexagon[4] = new Vector2f(0.0f, h+s);
 		hexagon[5] = new Vector2f(0.0f, h);
 		
+		resetVertexBuffer(gl, 6);
+		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
@@ -37,7 +39,9 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 				
 				if ((y & 1) == 1) p.inc(r, 0);
 				
-				renderColumn(gl, p, cell, hexagon);
+				addColumn(p, cell, hexagon);
 			}
+		
+		loadVertexBuffer(gl);
 	}
 }

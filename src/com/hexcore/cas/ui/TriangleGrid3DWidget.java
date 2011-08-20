@@ -15,7 +15,7 @@ public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 	}
 
 	@Override
-	public void render3D(GL gl)
+	public void loadGeometry(GL gl)
 	{        
 		float 	r = tileSize / 2.0f;
 		float 	h = tileSize * (float)Math.sqrt(2) * 0.5f;
@@ -29,6 +29,8 @@ public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 		upTriangle[0] = new Vector2f(r, 	0.0f);
 		upTriangle[1] = new Vector2f(r+r,	h);
 		upTriangle[2] = new Vector2f(0.0f,	h);
+		
+		resetVertexBuffer(gl, 3);
 				
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
@@ -37,9 +39,11 @@ public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 				Vector2f 	p = new Vector2f(x * r, y * h);
 								
 				if ((x & 1) == (y & 1)) // Checker-board pattern
-					renderColumn(gl, p, cell, downTriangle);
+					addColumn(p, cell, downTriangle);
 				else
-					renderColumn(gl, p, cell, upTriangle);
+					addColumn(p, cell, upTriangle);
 			}
+		
+		loadVertexBuffer(gl);
 	}
 }
