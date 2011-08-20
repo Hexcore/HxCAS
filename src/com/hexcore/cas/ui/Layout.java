@@ -16,6 +16,7 @@ import com.hexcore.cas.math.Vector2i;
 public class Layout extends Widget
 {
 	protected Fill 				background = null;
+	protected Fill				border = null;
 	protected ArrayList<Widget>	components;
 	
 	protected Vector2i			lastMouse;
@@ -83,17 +84,10 @@ public class Layout extends Widget
 		
 		for (Widget component : components)
 			component.render(gl, pos);
+				
+		if (border != null) window.renderBorder(gl, pos, size, 0, border);	
 		
-		if (window.isDebugLayout())
-		{
-			//window.renderRectangle(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f, 0.2f));
-			//window.renderBorder(gl, pos.subtract(margin), size.add(margin).add(margin), new Colour(0.0f, 0.5f, 1.0f));		
-	
-			//window.renderRectangle(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f, 0.2f));
-			window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
-
-			window.renderBorder(gl, lastMouse.subtract(5, 5), new Vector2i(10, 10), Colour.RED);
-		}
+		if (window.isDebugLayout()) window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
 	}
 	
 	@Override
@@ -113,6 +107,11 @@ public class Layout extends Widget
 	public void setBackground(Fill fill)
 	{
 		background = fill;
+	}
+	
+	public void setBorder(Fill fill)
+	{
+		border = fill;
 	}
 	
 	public void add(Widget component) 

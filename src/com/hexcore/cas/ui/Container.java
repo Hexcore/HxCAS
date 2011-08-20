@@ -18,6 +18,7 @@ public class Container extends Widget
 {
 	protected Widget contents = null;
 	protected Fill background = null;
+	protected Fill border = null;
 	
 	public Container(Vector2i size)
 	{
@@ -75,6 +76,7 @@ public class Container extends Widget
 		window.setClipping(gl, pos, size);
 		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
 		if (contents != null) contents.render(gl, pos);
+		if (border != null) window.renderBorder(gl, pos, size, 0, border);
 		window.resetView(gl);
 		
 		if (window.isDebugLayout())
@@ -97,6 +99,11 @@ public class Container extends Widget
 	{
 		background = fill;
 	}
+	
+	public void setBorder(Fill fill)
+	{
+		border = fill;
+	}	
 	
 	public void setContents(Widget component) 
 	{
