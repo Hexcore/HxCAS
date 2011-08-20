@@ -15,16 +15,16 @@ public class WaterFlow
 		cell.setValue(1, 0); // Water
 		cell.setValue(2, 0); // Land
 		
-		grid = new RectangleGrid(new Vector2i(64, 64), cell);
+		grid = new RectangleGrid(new Vector2i(512, 512), cell);
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 				grid.getCell(x, y).setValue(2, (int)(
-						Math.cos((x + y) / 5.5) * 1.5 + 
-						Math.cos((x - y) / 4.5) * 1.5 +
-						Math.cos((x / 4.2 + y / 3.4 - x / 3.8)) * 4) + 7);
+						Math.cos((x + y) / 10.0) * 1.5 + 
+						Math.cos((x - y) / 9.0) * 1.5 +
+						Math.cos((x / 8.4 + y / 6.8 - x / 7.6)) * 4) + 7);
 		
-		grid.setCell(4, 4, new double[] {1, 10, 0});
+		grid.setCell(4, 4, new double[] {1, 15, 0});
 	}
 
 	public RectangleGrid getGrid()

@@ -1,10 +1,13 @@
 package com.hexcore.cas.ui;
 
 import java.awt.event.KeyEvent;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.media.opengl.glu.GLU;
 
@@ -13,6 +16,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
+import com.jogamp.common.nio.Buffers;
 
 public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 {
@@ -47,6 +51,14 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	protected boolean	cameraMoving = false;
 	protected Vector2i	cameraMoveStart = new Vector2i();
 	
+	protected IntBuffer		buffers = null;
+	protected int			numVertices = 0;
+	protected FloatBuffer	vertexBufferData = null;
+	protected FloatBuffer	colourBufferData = null;
+	protected FloatBuffer	normalBufferData = null;
+	
+	protected int			test = 0;
+	
 	public Grid3DWidget(Vector2i size, T grid, int tileSize)
 	{
 		this(new Vector2i(), size, grid, tileSize);
@@ -57,6 +69,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		super(position, size, grid, tileSize);
 		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
 		slices = new ArrayList<Slice>();
+		
+		buffers = IntBuffer.allocate(3);
 	}
 	
 	@Override
@@ -120,7 +134,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		
         gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl2.glLoadIdentity();
-        glu.gluPerspective(45.0f, (float)size.x / size.y, 2.0f, 4096.0f);
+        glu.gluPerspective(45.0f, (float)size.x / size.y, 16.0f, 10240.0f);
         gl2.glRotatef(pitch, 1.0f, 0.0f, 0.0f);
         gl2.glRotatef(yaw, 0.0f, 0.0f, 1.0f);
         gl2.glTranslatef(-cameraPosition.x, -cameraPosition.y, -cameraPosition.z);
@@ -132,6 +146,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
         gl2.glEnable(GL2.GL_COLOR_MATERIAL);
         gl2.glEnable(GL.GL_DEPTH_TEST);
         
+        gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, (new Vector3f(0.25f, 0.5f, 1.0f)).toFloatBuffer(0.0f));
         gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, Colour.WHITE.toFloatBuffer());
 
         render3D(gl);
@@ -182,7 +197,122 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		return false;
 	}
 	
-	protected void renderColumn(GL gl, Vector2f position, Cell cell, Vector2f[] shape)
+	protected void setupVertexBuffer(GL gl)
+	{
+		gl.glGenBuffers(3, buffers);
+		
+		vertexBufferData = Buffers.newDirectFloatBuffer(50000000);
+		colourBufferData = Buffers.newDirectFloatBuffer(50000000);
+		normalBufferData = Buffers.newDirectFloatBuffer(50000000);
+		
+		resetVertexBuffer(gl);
+	}
+	
+	protected void resetVertexBuffer(GL gl)
+	{
+		vertexBufferData.rewind();
+		colourBufferData.rewind();
+		normalBufferData.rewind();
+		numVertices = 0;
+	}
+	
+	protected void loadVertexBuffer(GL gl)
+	{
+		if (buffers == null) setupVertexBuffer(gl);
+
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, vertexBufferData.position(0), GL2.GL_STREAM_DRAW);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(1));
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, colourBufferData.position(0), GL2.GL_STREAM_DRAW);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
+				
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(2));
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, normalBufferData.position(0), GL2.GL_STREAM_DRAW);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
+		
+		test = 0;
+	}
+	
+	protected void renderVertexBuffer(GL gl)
+	{		
+		if (vertexBufferData == null) setupVertexBuffer(gl);
+		
+		GL2 gl2 = gl.getGL2();
+		window.applyColour(gl2, Colour.RED);
+								
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
+		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(1));
+		gl2.glColorPointer(3, GL.GL_FLOAT, 0, 0);
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(2));
+		gl2.glNormalPointer(GL.GL_FLOAT, 0, 0);
+		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);		
+		
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl2.glEnableClientState(GL2.GL_COLOR_ARRAY);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+		gl2.glDrawArrays(GL.GL_TRIANGLES, 0, numVertices);
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		gl2.glDisableClientState(GL2.GL_COLOR_ARRAY);
+		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+	}
+		
+	protected void addVertex(float x, float y, float z, Vector3f normal, Colour colour)
+	{
+		vertexBufferData.put(x);
+		vertexBufferData.put(y);
+		vertexBufferData.put(z);
+		
+		normalBufferData.put(normal.x);
+		normalBufferData.put(normal.y);
+		normalBufferData.put(normal.z);			
+		
+		colourBufferData.put(colour.r);
+		colourBufferData.put(colour.g);
+		colourBufferData.put(colour.b);		
+		numVertices++;
+	}
+		
+	protected void add3DPolygon(Vector2f pos, Vector2f[] polygon, float startHeight, float height, Colour colour)
+	{
+		if (polygon.length <= 0) return;
+
+		Vector2f	start = polygon[0];
+		Vector3f	up = new Vector3f(0.0f, 0.0f, 1.0f);
+		
+		for (int i = 0; i < polygon.length - 1; i++) 
+		{
+			Vector2f	v1 = polygon[i];
+			Vector2f	v2 = polygon[i+1];
+
+			addVertex(pos.x+start.x, pos.y+start.y, startHeight+height, up, colour);
+			addVertex(pos.x+v1.x, pos.y+v1.y, startHeight+height, up, colour);
+			addVertex(pos.x+v2.x, pos.y+v2.y, startHeight+height, up, colour);
+		}	
+
+		for (int i = 0; i < polygon.length; i++)
+		{
+			Vector2f f = polygon[i];
+			Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
+			Vector3f normal = new Vector3f((f.subtract(s)).getPerpendicular().getNormalised(), 0.0f);
+			
+			addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
+			addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
+			addVertex(pos.x+s.x, pos.y+s.y, startHeight+height, normal, colour);
+			
+			addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
+			addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
+			addVertex(pos.x+f.x, pos.y+f.y, startHeight, normal, colour);
+		}
+	}
+
+	protected void addColumn(Vector2f position, Cell cell, Vector2f[] shape)
 	{
 		float		startHeight = 0.0f;
 		boolean		bottom = true;
@@ -201,7 +331,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			else if (cell.getValue(colourProperty) > 0) 
 				colour = Colour.LIGHT_GREY;
 											
-			render3DPolygon(gl, position, shape, startHeight, height, colour);
+			add3DPolygon(position, shape, startHeight, height, colour);
 			startHeight += height;
 		}
 	}
@@ -258,6 +388,30 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 				}
 				gl2.glEnd();
 			}
+		}
+	}
+	
+	protected void renderColumn(GL gl, Vector2f position, Cell cell, Vector2f[] shape)
+	{
+		float		startHeight = 0.0f;
+		boolean		bottom = true;
+		
+		for (Slice slice : slices)
+		{
+			Colour		colour = Colour.DARK_GREY;
+			int			colProperty = (slice.colourProperty < 0) ? colourProperty : slice.colourProperty;
+			float		height = (float)cell.getValue(slice.heightProperty) * slice.scale;
+			
+			if ((height <= 0.0f) && !bottom) continue;
+			bottom = false;
+			
+			if (colourRules != null)
+				colour = colourRules.getColour(cell, colProperty);
+			else if (cell.getValue(colourProperty) > 0) 
+				colour = Colour.LIGHT_GREY;
+											
+			render3DPolygon(gl, position, shape, startHeight, height, colour);
+			startHeight += height;
 		}
 	}
 }

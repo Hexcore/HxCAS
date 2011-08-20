@@ -1,5 +1,7 @@
 package com.hexcore.cas.math;
 
+import java.nio.FloatBuffer;
+
 /*
  * A class that contains three floating point number, useful for storing sizes or positions.
  */
@@ -69,6 +71,25 @@ public class Vector3f
 	public String toString()
 	{
 		return "Vector3f<" + x + ", " + y + ", " + z + ">";
+	}
+	
+	public FloatBuffer toFloatBuffer()
+	{
+		FloatBuffer fb = FloatBuffer.allocate(3);
+		fb.put(0, x);
+		fb.put(1, y);
+		fb.put(2, z);
+		return fb;
+	}	
+	
+	public FloatBuffer toFloatBuffer(float w)
+	{
+		FloatBuffer fb = FloatBuffer.allocate(4);
+		fb.put(0, x);
+		fb.put(1, y);
+		fb.put(2, z);
+		fb.put(3, w);
+		return fb;
 	}
 	
 	public void inc(Vector3f p)
