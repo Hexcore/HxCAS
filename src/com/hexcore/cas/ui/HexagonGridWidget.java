@@ -24,11 +24,13 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 	@Override
 	public void render(GL gl, Vector2i position)
 	{
+		Vector2i pos = this.position.add(position);
+		Graphics.renderRectangle(gl, pos, size, backgroundColour);
+		
 		int s = tileSize;
 		int	h = tileSize / 2;
 		int r = (int)(tileSize * Math.cos(30.0 * Math.PI / 180.0));
 		
-		Vector2i 	pos = this.position.add(position);
 		Vector2f[]	hexagon = new Vector2f[6];
 		hexagon[0] = new Vector2f(r, 	0);
 		hexagon[1] = new Vector2f(r+r, 	h);

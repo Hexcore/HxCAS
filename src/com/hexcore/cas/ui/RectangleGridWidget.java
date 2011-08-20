@@ -22,6 +22,7 @@ public class RectangleGridWidget extends GridWidget<RectangleGrid>
 	public void render(GL gl, Vector2i position)
 	{
 		Vector2i pos = this.position.add(position);
+		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)

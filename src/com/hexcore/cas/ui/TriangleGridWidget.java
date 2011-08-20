@@ -24,10 +24,12 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 	@Override
 	public void render(GL gl, Vector2i position)
 	{
+		Vector2i pos = this.position.add(position);
+		Graphics.renderRectangle(gl, pos, size, backgroundColour);
+		
 		int r = tileSize / 2;
 		int h = (int)(tileSize * Math.sqrt(2) * 0.5);
 		
-		Vector2i 	pos = this.position.add(position);
 		Vector2f[]	downTriangle = new Vector2f[3];
 		downTriangle[0] = new Vector2f(0.0f, 	0.0f);
 		downTriangle[1] = new Vector2f(r+r, 	0.0f);
