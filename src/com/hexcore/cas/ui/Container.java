@@ -3,8 +3,6 @@ package com.hexcore.cas.ui;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.ui.LinearLayout.Direction;
-
 
 /*
  * Only contains one component, a decorator in design patterns.
@@ -82,13 +80,13 @@ public class Container extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		window.setClipping(gl, pos, size);
-		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
+		if (background != null) Graphics.renderRectangle(gl, pos, size, 0, background);
 		if (contents != null) contents.render(gl, pos);
-		if (border != null) window.renderBorder(gl, pos, size, 0, border);
+		if (border != null) Graphics.renderBorder(gl, pos, size, 0, border);
 		window.resetView(gl);
 		
 		if (window.isDebugLayout())
-			window.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));
+			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));
 	}
 		
 	@Override

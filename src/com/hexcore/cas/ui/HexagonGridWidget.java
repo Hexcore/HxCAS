@@ -50,8 +50,8 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
-				window.renderPolygon(gl, p, hexagon, false, colour);
-				window.renderPolygon(gl, p, hexagon, true, Colour.WHITE);
+				Graphics.renderPolygon(gl, p, hexagon, false, colour);
+				Graphics.renderPolygon(gl, p, hexagon, true, Colour.WHITE);
 			}
 	}	
 }

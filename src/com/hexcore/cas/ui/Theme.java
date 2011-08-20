@@ -269,7 +269,7 @@ public class Theme
 		int 		borderRadius = getInteger("Button", stateName, "border-radius", 8);
 		BorderShape corners = new BorderShape(BorderShape.ALL_CORNERS);
 		
-		window.renderRoundedBorderedRectangle(gl, pos, size, borderRadius, corners, 
+		Graphics.renderRoundedBorderedRectangle(gl, pos, size, borderRadius, corners, 
 				getFill("Button", stateName, "background"),
 				getFill("Button", stateName, "border"));	 
 		
@@ -279,27 +279,27 @@ public class Theme
 		Colour shadowColour = getColour("Button", stateName, "text-shadow-colour");
 		
 		if (description.isEmpty())
-			window.getTheme().renderShadowedText(gl, caption, pos, size, textColour, shadowColour, Text.Size.MEDIUM);
+			renderShadowedText(gl, caption, pos, size, textColour, shadowColour, Text.Size.MEDIUM);
 		else
 		{
 			int			textGap = 4;
-			Vector2i	bigTextSize = window.getTheme().calculateTextSize(caption, Text.Size.MEDIUM);
-			Vector2i	smallTextSize = window.getTheme().calculateTextSize(description, Text.Size.SMALL);
+			Vector2i	bigTextSize = calculateTextSize(caption, Text.Size.MEDIUM);
+			Vector2i	smallTextSize = calculateTextSize(description, Text.Size.SMALL);
 					
 			int		top = (size.y - bigTextSize.y - textGap - smallTextSize.y) / 2;
 			int		bigLeft = (size.x - bigTextSize.x) / 2;
 			int		smallLeft = (size.x - smallTextSize.x) / 2;
 			
-			window.getTheme().renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, Text.Size.MEDIUM);
-			window.getTheme().renderText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, Text.Size.SMALL);
+			renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, Text.Size.MEDIUM);
+			renderText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, Text.Size.SMALL);
 		}
 	}
 	
 	public void renderPanel(GL gl, Vector2i pos, Vector2i size)
 	{
 		int borderRadius = getInteger("Panel", "border-radius", 0);
-		window.renderRectangle(gl, pos, size, borderRadius, getFill("Panel", "background"));
-		window.renderBorder(gl, pos, size, borderRadius, getFill("Panel", "border"));
+		Graphics.renderRectangle(gl, pos, size, borderRadius, getFill("Panel", "background"));
+		Graphics.renderBorder(gl, pos, size, borderRadius, getFill("Panel", "border"));
 	}
 	
 	public int getScrollbarSize()
@@ -316,11 +316,11 @@ public class Theme
 		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
 		int borderRadius = getInteger("Scrollbar", "vertical", "border-radius", 0);
-		window.renderRectangle(gl, pos, new Vector2i(wh, viewable), borderRadius, getFill("Scrollbar", "vertical", "background"));
+		Graphics.renderRectangle(gl, pos, new Vector2i(wh, viewable), borderRadius, getFill("Scrollbar", "vertical", "background"));
 		
 		int handleBorderRadius = getInteger("ScrollbarHandle", "vertical", "border-radius", 0);
-		window.renderRectangle(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), handleBorderRadius, getFill("ScrollbarHandle", "vertical", "background"));
-		window.renderBorder(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), handleBorderRadius, getFill("ScrollbarHandle", "vertical", "border"));
+		Graphics.renderRectangle(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), handleBorderRadius, getFill("ScrollbarHandle", "vertical", "background"));
+		Graphics.renderBorder(gl, pos.add(0, scroll), new Vector2i(wh, scrollBlockSize), handleBorderRadius, getFill("ScrollbarHandle", "vertical", "border"));
 	}
 	
 	public void renderHorizontalScrollbar(GL gl, Vector2i position, Vector2i size, int value, int max, int viewable)
@@ -332,18 +332,18 @@ public class Theme
 		int	scroll = value * (viewable - scrollBlockSize) / (max - viewable);
 		
 		int borderRadius = getInteger("Scrollbar", "horizontal", "border-radius", 0);
-		window.renderRectangle(gl, pos, new Vector2i(viewable, wh), borderRadius, getFill("Scrollbar", "horizontal", "background"));
+		Graphics.renderRectangle(gl, pos, new Vector2i(viewable, wh), borderRadius, getFill("Scrollbar", "horizontal", "background"));
 		
 		int handleBorderRadius = getInteger("ScrollbarHandle", "horizontal", "border-radius", 0);
-		window.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "background"));
-		window.renderBorder(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "border"));
+		Graphics.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "background"));
+		Graphics.renderBorder(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "border"));
 	}
 	
 	public void renderScrollbarFill(GL gl, Vector2i position, Vector2i size)
 	{
 		int wh = getScrollbarSize();
-		window.renderRectangle(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "background"));
-		window.renderBorder(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "border"));
+		Graphics.renderRectangle(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "background"));
+		Graphics.renderBorder(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "border"));
 	}
 	
 	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus)
@@ -352,19 +352,19 @@ public class Theme
 		if (focus) stateName = "focus";
 		
 		int borderRadius = getInteger("TextBox", stateName, "border-radius", 0);
-		window.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
+		Graphics.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
 		
 		int			textHeight = calculateTextHeight(Text.Size.SMALL);
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
 		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
-		window.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
+		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && ((window.getTime() / 500) % 2 == 0))
 		{
-			int cursorPos = window.getTheme().calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
-			window.renderRectangle(gl, position.add(cursorPos + 1, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
+			int cursorPos = calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
+			Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
 		}
 	}
 	
@@ -384,20 +384,20 @@ public class Theme
 		Vector2i boxPos = position.add(0, (size.y - 16) / 2);
 		
 		int borderRadius = getInteger("CheckBox", stateName, "border-radius", 0);
-		window.renderRectangle(gl, boxPos, boxSize, borderRadius, getFill("CheckBox", stateName, "background"));
-		window.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("CheckBox", stateName, "border"));
+		Graphics.renderRectangle(gl, boxPos, boxSize, borderRadius, getFill("CheckBox", stateName, "background"));
+		Graphics.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("CheckBox", stateName, "border"));
 				
 		// Render text
 		Vector2i textPadding = getVector2i("CheckBoxCaption", stateName, "padding", new Vector2i(3, 3));		
-		Vector2i textSize = window.getTheme().calculateTextSize(text, Text.Size.SMALL);
+		Vector2i textSize = calculateTextSize(text, Text.Size.SMALL);
 		Vector2i textPos = position.add(padding.x + textPadding.x + boxSize.x, (size.y - textSize.y) / 2);
 		
 		Vector2i textBoxSize = textSize.add(textPadding).add(textPadding);	
 		Vector2i textBoxPos = textPos.subtract(textPadding);	
 			
 		borderRadius = getInteger("CheckBoxCaption", stateName, "border-radius", 0);
-		window.renderRectangle(gl, textBoxPos, textBoxSize, borderRadius, getFill("CheckBoxCaption", stateName, "background"));
-		window.renderBorder(gl, textBoxPos, textBoxSize, borderRadius, getFill("CheckBoxCaption", stateName, "border"));
+		Graphics.renderRectangle(gl, textBoxPos, textBoxSize, borderRadius, getFill("CheckBoxCaption", stateName, "background"));
+		Graphics.renderBorder(gl, textBoxPos, textBoxSize, borderRadius, getFill("CheckBoxCaption", stateName, "border"));
 		
 		Colour	textColour = getColour("CheckBoxCaption", stateName, "text-colour");
 		renderText(gl, text, textPos, textColour, Text.Size.SMALL);
@@ -414,10 +414,10 @@ public class Theme
 		
 		int 		borderRadius = getInteger("DropDownBox", stateName, "border-radius", 0);
 		BorderShape	borderShape = new BorderShape(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);	
-		window.renderRoundedBorderedRectangle(gl, position, boxSize, borderRadius, borderShape,
+		Graphics.renderRoundedBorderedRectangle(gl, position, boxSize, borderRadius, borderShape,
 				getFill("DropDownBox", stateName, "background"), getFill("DropDownBox", stateName, "border"));
 		
-		Vector2i textSize = window.getTheme().calculateTextSize(selectedItem, Text.Size.SMALL);
+		Vector2i textSize = calculateTextSize(selectedItem, Text.Size.SMALL);
 		Vector2i textPos = position.add(padding.x, (size.y - textSize.y) / 2);
 		
 		Colour	textColour = getColour("DropDownBox", stateName, "text-colour");
@@ -428,8 +428,8 @@ public class Theme
 		Vector2i arrowSize = new Vector2i(16, size.y);
 		
 		borderRadius = getInteger("DropDownBoxArrow", stateName, "border-radius", 0);
-		window.renderRectangle(gl, arrowPos, arrowSize, borderRadius, getFill("DropDownBoxArrow", stateName, "background"));
-		window.renderBorder(gl, arrowPos, arrowSize, borderRadius, getFill("DropDownBoxArrow", stateName, "border"));		
+		Graphics.renderRectangle(gl, arrowPos, arrowSize, borderRadius, getFill("DropDownBoxArrow", stateName, "background"));
+		Graphics.renderBorder(gl, arrowPos, arrowSize, borderRadius, getFill("DropDownBoxArrow", stateName, "border"));		
 	}
 	
 	public Recti getDropDownBoxItemRect(Vector2i position, Vector2i size, int selected)
@@ -454,8 +454,8 @@ public class Theme
 		Vector2i	boxSize = new Vector2i(size.x, (textHeight + itemPadding.y * 2) * items.size());
 		
 		int borderRadius = getInteger("DropDownBoxList", stateName, "border-radius", 0);
-		window.renderRectangle(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxList", stateName, "background"));
-		window.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxList", stateName, "border"));
+		Graphics.renderRectangle(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxList", stateName, "background"));
+		Graphics.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxList", stateName, "border"));
 		
 		Vector2i	itemPos = new Vector2i(boxPos);
 		for (int i = 0; i < items.size(); i++)
@@ -463,8 +463,8 @@ public class Theme
 			if (hovered == i)
 			{
 				borderRadius = getInteger("DropDownBoxItem", stateName, "border-radius", 0);
-				window.renderRectangle(gl, itemPos, new Vector2i(size.x, textHeight + itemPadding.y * 2), borderRadius, getFill("DropDownBoxItem", stateName, "background"));
-				window.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxItem", stateName, "border"));
+				Graphics.renderRectangle(gl, itemPos, new Vector2i(size.x, textHeight + itemPadding.y * 2), borderRadius, getFill("DropDownBoxItem", stateName, "background"));
+				Graphics.renderBorder(gl, boxPos, boxSize, borderRadius, getFill("DropDownBoxItem", stateName, "border"));
 			}
 			
 			itemPos = itemPos.add(0, itemPadding.y);
@@ -512,7 +512,7 @@ public class Theme
 		BorderShape corners = new BorderShape();
 		if (sides.has(BorderShape.LEFT)) corners.add(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);
 		if (sides.has(BorderShape.RIGHT)) corners.add(BorderShape.TOP_RIGHT | BorderShape.BOTTOM_RIGHT);
-		window.renderRoundedBorderedRectangle(gl, position, size.add(1, 0), borderRadius, corners, 
+		Graphics.renderRoundedBorderedRectangle(gl, position, size.add(1, 0), borderRadius, corners, 
 				getFill("Tab", stateName, "background"), getFill("Tab", stateName, "border"));
 		Vector2i textOffset = getVector2i("Tab", stateName, "text-offset", new Vector2i(0, 0));
 		renderText(gl, caption, position.add(textOffset), size, getColour("Tab", stateName, "text-colour"), Text.Size.MEDIUM);
@@ -521,8 +521,8 @@ public class Theme
 	public void renderTabInside(GL gl, Vector2i position, Vector2i size)
 	{
 		int borderRadius = getInteger("TabInside", "border-radius", 0);
-		window.renderRectangle(gl, position, size, borderRadius, getFill("TabInside", "background"));
-		window.renderBorder(gl, position, size, borderRadius, getFill("TabInside", "border"));
+		Graphics.renderRectangle(gl, position, size, borderRadius, getFill("TabInside", "background"));
+		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TabInside", "border"));
 	}
 	
 	public int calculateTextHeight(Text.Size textSize)

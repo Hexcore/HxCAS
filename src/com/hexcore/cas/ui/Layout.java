@@ -80,14 +80,14 @@ public class Layout extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		
-		if (background != null) window.renderRectangle(gl, pos, size, 0, background);
+		if (background != null) Graphics.renderRectangle(gl, pos, size, 0, background);
 		
 		for (Widget component : components)
 			component.render(gl, pos);
 				
-		if (border != null) window.renderBorder(gl, pos, size, 0, border);	
+		if (border != null) Graphics.renderBorder(gl, pos, size, 0, border);	
 		
-		if (window.isDebugLayout()) window.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
+		if (window.isDebugLayout()) Graphics.renderBorder(gl, pos, size, new Colour(1.0f, 0.5f, 0.0f));
 	}
 	
 	@Override

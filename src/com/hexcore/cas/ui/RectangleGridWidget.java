@@ -34,8 +34,8 @@ public class RectangleGridWidget extends GridWidget<RectangleGrid>
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
-				window.renderRectangle(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), colour);
-				window.renderBorder(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), Colour.WHITE);
+				Graphics.renderRectangle(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), colour);
+				Graphics.renderBorder(gl, pos.add(x * tileSize, y * tileSize), new Vector2i(tileSize, tileSize), Colour.WHITE);
 			}
 	}	
 }

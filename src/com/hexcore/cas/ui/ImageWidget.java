@@ -33,7 +33,6 @@ public class ImageWidget extends Widget
 	public void render(GL gl, Vector2i position)
 	{
 		Vector2i pos = this.position.add(position);
-		
-		window.renderRectangle(gl, pos, image);
+		Graphics.renderRectangle(gl, pos, image);
 	}
 }
