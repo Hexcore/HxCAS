@@ -32,7 +32,7 @@ public class TextBox extends Widget
 		Vector2i pos = this.position.add(position);
 		
 		window.setClipping(gl, pos, size);
-		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused);
+		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused, window.getTime());
 		window.resetView(gl);
 	}
 

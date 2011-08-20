@@ -62,8 +62,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		eventListeners = new ArrayList<WindowEventListener>();
 		setWindow(this);
 		
-		
-		theme = new Theme(this);
+		theme = new Theme();
 		
 		//////////////////
 		

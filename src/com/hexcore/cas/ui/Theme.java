@@ -111,12 +111,9 @@ public class Theme
 	
 	private HashMap<String, Type> 				typeProperties;
 	private HashMap<Text.Size, TextRenderer>	textRenderers;
-	private	Window								window;
 
-	public Theme(Window window)
+	public Theme()
 	{
-		this.window = window;
-		
 		textRenderers = new HashMap<Text.Size, TextRenderer>();
 		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Arial", Font.PLAIN, 36), true, false));
 		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Arial", Font.PLAIN, 24), true, false));
@@ -346,7 +343,7 @@ public class Theme
 		Graphics.renderBorder(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "border"));
 	}
 	
-	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus)
+	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus, long time)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -361,7 +358,7 @@ public class Theme
 		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
-		if (focus && ((window.getTime() / 500) % 2 == 0))
+		if (focus && ((time / 500) % 2 == 0))
 		{
 			int cursorPos = calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
 			Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
