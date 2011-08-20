@@ -152,7 +152,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		Vector2i pos = this.position.add(position);
 		
-		Graphics.renderRectangle(gl, pos, size, Colour.BLACK);
+		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		window.setViewport(gl, pos, size);
 		
 		GL2 	gl2 = gl.getGL2();

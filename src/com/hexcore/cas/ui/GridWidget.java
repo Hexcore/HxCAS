@@ -10,6 +10,8 @@ public abstract class GridWidget<T extends Grid> extends Widget
 	protected int	tileSize;
 	protected int	colourProperty = 0; //< The property that is used to determine the colour to use
 	
+	protected Colour	backgroundColour = Colour.BLACK;
+	
 	protected ColourRuleSet	colourRules;
 	
 	public GridWidget(Vector2i size, T grid, int tileSize)
@@ -26,6 +28,11 @@ public abstract class GridWidget<T extends Grid> extends Widget
 		this.tileSize = tileSize;
 	}
 
+	public void setBackgroundColour(Colour colour)
+	{
+		backgroundColour = colour;
+	}
+	
 	public void setColourProperty(int propertyIndex)
 	{
 		colourProperty = propertyIndex;
