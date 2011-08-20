@@ -52,11 +52,23 @@ public class ColourRule
 		}
 	}
 	
+	public boolean			useClosestRange;
 	public ArrayList<Range> ranges;
 	
 	public ColourRule()
 	{
+		useClosestRange = false;
 		ranges = new ArrayList<Range>();
+	}
+	
+	public boolean isUsingClosestRange()
+	{
+		return useClosestRange;
+	}
+	
+	public void useClosestRange(boolean state)
+	{
+		useClosestRange = state;
 	}
 	
 	public void addRange(Range range)
@@ -66,10 +78,26 @@ public class ColourRule
 	
 	public Colour getColour(double value)
 	{
+		Range	closestRange = null;
+		
 		for (Range range : ranges)
+		{
 			if ((value >= range.from) && (value < range.to)) 
 				return range.getColourAt(value);
+			else if (closestRange == null)
+				closestRange = range;
+			else 
+			{
+				double	dist = Math.min(Math.abs(closestRange.from - value), Math.abs(closestRange.to - value));
+				double	curDist = Math.min(Math.abs(range.from - value), Math.abs(range.to - value));
+				
+				if (curDist <= dist) closestRange = range;
+			}
+		}
 		
+		if (useClosestRange && (closestRange != null))
+			return closestRange.getColourAt(value);
+			
 		return Colour.BLACK;
 	}
 }
