@@ -3,6 +3,7 @@ package com.hexcore.cas.ui;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.LinearLayout.Direction;
 
 
 /*
@@ -34,6 +35,13 @@ public class Container extends Widget
 	public void relayout()
 	{
 		if (contents == null) return;
+		
+		if (isSet(Widget.WRAP))
+		{
+			if (contents.isSet(Widget.WRAP)) contents.relayout();
+			if (isSet(Widget.WRAP_HORIZONTAL)) setWidth(contents.getWidth() + margin.x * 2);
+			if (isSet(Widget.WRAP_VERTICAL)) setHeight(contents.getHeight() + margin.y * 2);
+		}
 
 		Vector2i cPos = contents.getPosition(), cSize = contents.getSize();
 		

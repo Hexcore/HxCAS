@@ -204,6 +204,7 @@ public class UITestApplication implements WindowEventListener
 		
 		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		innerLayout.setFlag(Widget.FILL);
+		innerLayout.setFlag(Widget.WRAP);
 		mainView.add(innerLayout);
 		
 		nameTextBox = new TextBox(new Vector2i(100, 20));
