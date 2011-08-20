@@ -21,6 +21,11 @@ public class TriangleGrid extends Grid
 		super(g);
 		gridType = 'T';
 	}
+	
+	public Grid clone()
+	{
+		return new TriangleGrid(this);
+	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{

@@ -4,7 +4,6 @@ import com.hexcore.cas.math.Vector2i;
 
 public class HexagonGrid extends Grid
 {
-
 	public HexagonGrid(Vector2i size) 
 	{
 		super(size);
@@ -21,6 +20,11 @@ public class HexagonGrid extends Grid
 	{
 		super(g);
 		gridType = 'H';
+	}
+	
+	public Grid clone()
+	{
+		return new HexagonGrid(this);
 	}
 	
 	@Override

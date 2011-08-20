@@ -91,19 +91,7 @@ public class GameOfLife
 	{
 		//make a new copy of the grid.
 		char c = grid.getType();
-		Grid temp = null;
-		switch(c)
-		{
-		case 'R':
-			temp = new RectangleGrid(grid);
-			break;
-		case 'T':
-			temp = new TriangleGrid(grid);
-			break;
-		case 'H':
-			temp = new HexagonGrid(grid);
-			break;
-		}
+		Grid temp = grid.clone();
 		
 		for(int y = 0; y < grid.getHeight(); y++)
 		{

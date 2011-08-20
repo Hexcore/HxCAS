@@ -31,6 +31,12 @@ public class TestGrid extends TestCase
 		{
 			super(size);
 		}
+		
+		@Override
+		public Grid clone()
+		{
+			return null;
+		}		
 
 		@Override
 		public Cell[] getNeighbours(Vector2i pos)

@@ -40,16 +40,7 @@ public class WaterFlow
 	
 	public void generateNextGeneration()
 	{
-		Grid temp = null;
-		
-		if (grid instanceof RectangleGrid)
-			temp = new RectangleGrid(grid);
-		else if (grid instanceof HexagonGrid)
-			temp = new HexagonGrid(grid);		
-		else if (grid instanceof TriangleGrid)
-			temp = new TriangleGrid(grid);		
-		else
-			return;
+		Grid temp = grid.clone();
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)

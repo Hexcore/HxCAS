@@ -23,6 +23,11 @@ public class RectangleGrid extends Grid
 		gridType = 'R';
 	}
 	
+	public Grid clone()
+	{
+		return new RectangleGrid(this);
+	}
+	
 	@Override
 	/**
 	 * Returns the possible neighbours of the a cell on a rectangular grid. Null if the neighbour is the target

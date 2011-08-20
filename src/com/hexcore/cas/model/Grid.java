@@ -59,7 +59,8 @@ public abstract class Grid
 			}
 	}
 	
-	public abstract Cell[] getNeighbours(Vector2i pos);
+	public abstract Grid 	clone();
+	public abstract Cell[] 	getNeighbours(Vector2i pos);
 	
 	public Cell getCell(int x, int y)
 	{
