@@ -47,7 +47,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	protected boolean	drawGrid = true;
 	
 	// Camera
-	protected float		yaw = 0.0f, pitch = -30.0f;
+	protected float		yaw = 0.0f, pitch = 30.0f;
 	protected Vector3f	cameraPosition;
 	protected boolean	cameraMoving = false;
 	protected Vector2i	cameraMoveStart = new Vector2i();
@@ -127,13 +127,13 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		if (window.getKeyState(KeyEvent.VK_UP))
 		{
-			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_DOWN))
 		{
-			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_LEFT))
 		{
@@ -161,6 +161,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
         gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl2.glLoadIdentity();
         glu.gluPerspective(45.0f, (float)size.x / size.y, 16.0f, 10240.0f);
+        gl2.glScaled(1.0f,-1.0f, 1.0f);
         gl2.glRotatef(pitch, 1.0f, 0.0f, 0.0f);
         gl2.glRotatef(yaw, 0.0f, 0.0f, 1.0f);
         gl2.glTranslatef(-cameraPosition.x, -cameraPosition.y, -cameraPosition.z);
@@ -210,10 +211,10 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		}
 		else if (cameraMoving && (event.type == Event.Type.MOUSE_MOTION))
 		{
-			yaw += event.position.x - cameraMoveStart.x;
+			yaw -= event.position.x - cameraMoveStart.x;
 			
-			pitch += event.position.y - cameraMoveStart.y;
-			pitch = Math.max(Math.min(pitch, 0.0f), -180.0f);
+			pitch -= event.position.y - cameraMoveStart.y;
+			pitch = Math.max(Math.min(pitch, 180.0f), 0.0f);
 			
 			cameraMoveStart.set(event.position);
 			return true;

@@ -34,7 +34,7 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
-				Cell 		cell = grid.getCell(x, grid.getHeight() - y - 1);
+				Cell 		cell = grid.getCell(x, y);
 				Vector2f	p = new Vector2f(x*r*2, y*(s+h));
 				
 				if ((y & 1) == 1) p.inc(r, 0);

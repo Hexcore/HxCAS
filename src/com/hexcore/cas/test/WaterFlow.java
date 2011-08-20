@@ -2,39 +2,54 @@ package com.hexcore.cas.test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
+import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.TriangleGrid;
 
 public class WaterFlow 
 {	
-	RectangleGrid	grid;
+	Grid	grid;
 		
-	public WaterFlow()
+	public WaterFlow(Grid grid)
 	{
+		this.grid = grid;
+		
 		Cell cell = new Cell(3);
 		cell.setValue(0, 0); // Type
 		cell.setValue(1, 0); // Water
 		cell.setValue(2, 0); // Land
-		
-		grid = new RectangleGrid(new Vector2i(512, 512), cell);
-		
+				
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
+			{
+				grid.setCell(x, y, cell);
 				grid.getCell(x, y).setValue(2, (int)(
 						Math.cos((x + y) / 10.0) * 1.5 + 
 						Math.cos((x - y) / 9.0) * 1.5 +
 						Math.cos((x / 8.4 + y / 6.8 - x / 7.6)) * 4) + 7);
+			}
 		
 		grid.setCell(4, 4, new double[] {1, 15, 0});
 	}
 
-	public RectangleGrid getGrid()
+	public Grid getGrid()
 	{
 		return grid;
 	}
 	
 	public void generateNextGeneration()
 	{
-		RectangleGrid temp = new RectangleGrid(grid);
+		Grid temp = null;
+		
+		if (grid instanceof RectangleGrid)
+			temp = new RectangleGrid(grid);
+		else if (grid instanceof HexagonGrid)
+			temp = new HexagonGrid(grid);		
+		else if (grid instanceof TriangleGrid)
+			temp = new TriangleGrid(grid);		
+		else
+			return;
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)

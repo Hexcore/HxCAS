@@ -83,13 +83,17 @@ public class UITestApplication implements WindowEventListener
 	public HexagonGrid3DWidget		hexGrid3DViewer;
 	public TriangleGrid3DWidget		triGrid3DViewer;
 	
+	public HexagonGrid				waterFlowGrid;
 	public WaterFlow				waterFlow;
-	public RectangleGrid3DWidget	waterGrid3DViewer;
+	public HexagonGrid3DWidget		waterGrid3DViewer;
 	
 	public Button				nextIterationButton;
 	
 	UITestApplication()
 	{
+		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlow = new WaterFlow(waterFlowGrid);
+		
 		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
@@ -113,7 +117,6 @@ public class UITestApplication implements WindowEventListener
 		triGrid.getCell(6, 8).setValue(0, 1);
 		triGameOfLife = new GameOfLife(triGrid);		
 		
-		waterFlow = new WaterFlow();
 		
 		colourRules = new ColourRuleSet(3);
 		ColourRule	colourRule;
@@ -298,7 +301,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(triGrid3DViewer, "3D Tri");
 		
 		// Water Flow
-		waterGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), waterFlow.getGrid(), 24);
+		waterGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)waterFlow.getGrid(), 24);
 		waterGrid3DViewer.setFlag(Widget.FILL);
 		waterGrid3DViewer.setColourRuleSet(colourRules);
 		waterGrid3DViewer.addSlice(2, 2, 5.0f);
@@ -358,7 +361,7 @@ public class UITestApplication implements WindowEventListener
 						break;		
 					case 6:
 						waterFlow.generateNextGeneration();
-						waterGrid3DViewer.setGrid(waterFlow.getGrid());
+						waterGrid3DViewer.setGrid((HexagonGrid)waterFlow.getGrid());
 						break;				
 				}
 			}

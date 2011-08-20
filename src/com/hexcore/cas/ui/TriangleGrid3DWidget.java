@@ -35,7 +35,7 @@ public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
-				Cell 		cell = grid.getCell(x, grid.getHeight() - y - 1);				
+				Cell 		cell = grid.getCell(x, y);				
 				Vector2f 	p = new Vector2f(x * r, y * h);
 								
 				if ((x & 1) == (y & 1)) // Checker-board pattern
