@@ -118,11 +118,11 @@ public class Theme
 		this.window = window;
 		
 		textRenderers = new HashMap<Text.Size, TextRenderer>();
-		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Arial", Font.PLAIN, 36), true, false));
-		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Arial", Font.PLAIN, 24), true, false));
-		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(new Font("Arial", Font.PLAIN, 18), true, false));
-		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Calibri", Font.PLAIN, 14), true, false));
-		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Calibri", Font.PLAIN, 12), true, false));
+		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Helvetica", Font.PLAIN, 36), true, false));
+		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Helvetica", Font.PLAIN, 24), true, false));
+		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(new Font("Helvetica", Font.PLAIN, 18), true, false));
+		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Helvetica", Font.PLAIN, 14), true, false));
+		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Helvetica", Font.PLAIN, 12), true, false));
 		
 		typeProperties = new HashMap<String, Type>();
 	}
