@@ -13,6 +13,7 @@ public class Colour
 	public final static Colour	GREEN = new Colour(0.0f, 1.0f, 0.0f);
 	public final static Colour	BLUE = new Colour(0.0f, 0.0f, 1.0f);
 	public final static Colour	YELLOW = new Colour(1.0f, 1.0f, 0.0f);
+	public final static Colour	TRANSPARENT = new Colour(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	public float r, g, b, a;
 	

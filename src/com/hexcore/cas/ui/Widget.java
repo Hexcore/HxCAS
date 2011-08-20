@@ -12,6 +12,9 @@ public abstract class Widget
 	public final static int CENTER_VERTICAL = 4;
 	public final static int CENTER_HORIZONTAL = 8;
 	public final static int CENTER = CENTER_VERTICAL | CENTER_HORIZONTAL;
+	public final static int WRAP_VERTICAL = 16;
+	public final static int WRAP_HORIZONTAL = 32;
+	public final static int WRAP = WRAP_VERTICAL | WRAP_HORIZONTAL;
 	
 	protected Vector2i	position;
 	protected Vector2i	size;

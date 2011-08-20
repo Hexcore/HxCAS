@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.media.opengl.glu.GLU;
 
@@ -101,23 +100,23 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		if (window.getKeyState(KeyEvent.VK_UP))
 		{
-			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_DOWN))
 		{
-			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_LEFT))
 		{
-			cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 		if (window.getKeyState(KeyEvent.VK_RIGHT))
 		{
-			cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f) * 50.0f * delta;
-			cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f) * 50.0f * delta;
+			cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
 		}
 	}
 	
@@ -126,7 +125,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	{
 		Vector2i pos = this.position.add(position);
 		
-		window.renderRectangle(gl, pos, size, Colour.BLACK);
+		Graphics.renderRectangle(gl, pos, size, Colour.BLACK);
 		window.setViewport(gl, pos, size);
 		
 		GL2 	gl2 = gl.getGL2();
@@ -271,7 +270,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		if (vertexBufferData == null) return;
 		
 		GL2 gl2 = gl.getGL2();
-		window.applyColour(gl2, Colour.RED);
+		Graphics.applyColour(gl2, Colour.RED);
 								
 		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
 		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
@@ -374,7 +373,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		GL2 gl2 = gl.getGL2();
 		height += startHeight;
 		
-		window.applyColour(gl2, colour);
+		Graphics.applyColour(gl2, colour);
 				
 		if (drawGrid)
 		{
@@ -405,7 +404,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		{
 			gl2.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
 
-			window.applyColour(gl2, Colour.BLACK);
+			Graphics.applyColour(gl2, Colour.BLACK);
 						
 			gl2.glBegin(GL.GL_LINE_LOOP);
 			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
@@ -421,6 +420,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 				}
 				gl2.glEnd();
 			}
+			
+			gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		}
 	}
 	

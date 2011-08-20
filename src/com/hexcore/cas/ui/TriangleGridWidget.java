@@ -52,13 +52,13 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 				
 				if ((x & 1) == (y & 1)) // Checker-board pattern
 				{
-					window.renderPolygon(gl, pos.add(p), downTriangle, false, colour);
-					window.renderPolygon(gl, pos.add(p), downTriangle, true, Colour.WHITE);
+					Graphics.renderPolygon(gl, pos.add(p), downTriangle, false, colour);
+					Graphics.renderPolygon(gl, pos.add(p), downTriangle, true, Colour.WHITE);
 				}
 				else
 				{
-					window.renderPolygon(gl, pos.add(p), upTriangle, false, colour);
-					window.renderPolygon(gl, pos.add(p), upTriangle, true, Colour.WHITE);
+					Graphics.renderPolygon(gl, pos.add(p), upTriangle, false, colour);
+					Graphics.renderPolygon(gl, pos.add(p), upTriangle, true, Colour.WHITE);
 				}
 		
 			}
