@@ -199,8 +199,10 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	
 	protected int calculateBufferRequirement(int sides)
 	{
-		int	vertices = ((sides - 2) * 3 + sides * 6) * slices.size() * grid.getHeight() * grid.getWidth();
-		return vertices * 3;
+		long	vertices = (long)((sides - 2) * 3 + sides * 6) * slices.size() * grid.getHeight() * grid.getWidth() * 3;
+		System.out.println("Allocating space for " + vertices + " vertices");
+		if (vertices < Integer.MAX_VALUE) return (int)vertices;
+		return -1;
 	}
 	
 	protected void setupVertexBuffer(GL gl, int sides)
@@ -208,11 +210,28 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		gl.glGenBuffers(3, buffers);
 		
 		int	bufferSize = calculateBufferRequirement(sides);
-		vertexBufferData = Buffers.newDirectFloatBuffer(bufferSize);
-		colourBufferData = Buffers.newDirectFloatBuffer(bufferSize);
-		normalBufferData = Buffers.newDirectFloatBuffer(bufferSize);
 		
-		resetVertexBuffer(gl, sides);
+		if (bufferSize > 0)
+		{
+			try
+			{
+				vertexBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+				colourBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+				normalBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+				
+				resetVertexBuffer(gl, sides);
+			}
+			catch (OutOfMemoryError oome)
+			{
+				vertexBufferData = null;
+				colourBufferData = null;
+				normalBufferData = null;
+				
+				System.err.println("Out of memory: Too many vertices, try drawing less...");
+			}
+		}
+		else
+			System.err.println("More vertices than an Integer can hold, try drawing less...");
 	}
 	
 	protected void resetVertexBuffer(GL gl, int sides)
@@ -232,6 +251,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	
 	protected void loadVertexBuffer(GL gl)
 	{
+		if (vertexBufferData == null) return;
+		
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, vertexBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
@@ -247,6 +268,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	
 	protected void renderVertexBuffer(GL gl)
 	{		
+		if (vertexBufferData == null) return;
+		
 		GL2 gl2 = gl.getGL2();
 		window.applyColour(gl2, Colour.RED);
 								
@@ -273,6 +296,8 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		
 	protected void addVertex(float x, float y, float z, Vector3f normal, Colour colour)
 	{
+		if (vertexBufferData == null) return;
+		
 		vertexBufferData.put(x);
 		vertexBufferData.put(y);
 		vertexBufferData.put(z);
