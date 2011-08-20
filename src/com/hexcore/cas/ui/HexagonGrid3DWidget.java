@@ -21,6 +21,7 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 		float	h = tileSize / 2;
 		float	r = tileSize * (float)Math.cos(30.0 * Math.PI / 180.0);
 		
+		/*		
 		Vector2f[]	hexagon = new Vector2f[6];
 		hexagon[0] = new Vector2f(r, 	0.0f);
 		hexagon[1] = new Vector2f(r+r, 	h);
@@ -38,6 +39,30 @@ public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 				Vector2f	p = new Vector2f(x*r*2, y*(s+h));
 				
 				if ((y & 1) == 1) p.inc(r, 0);
+				
+				addColumn(p, cell, hexagon);
+			}
+		
+		loadVertexBuffer(gl);
+		*/
+		
+		Vector2f[]	hexagon = new Vector2f[6];
+		hexagon[0] = new Vector2f(0.0f,	r);
+		hexagon[1] = new Vector2f(h,	r+r);
+		hexagon[2] = new Vector2f(h+s,	r+r);
+		hexagon[3] = new Vector2f(h+s+h,r);
+		hexagon[4] = new Vector2f(h+s,	0.0f);
+		hexagon[5] = new Vector2f(h,	0.0f);
+		
+		resetVertexBuffer(gl, 6);
+		
+		for (int y = 0; y < grid.getHeight(); y++)
+			for (int x = 0; x < grid.getWidth(); x++)
+			{
+				Cell 		cell = grid.getCell(x, y);
+				Vector2f	p = new Vector2f(x*(s+h)*2, y*r);
+				
+				if ((y & 1) == 1) p.inc(s+h, 0);
 				
 				addColumn(p, cell, hexagon);
 			}
