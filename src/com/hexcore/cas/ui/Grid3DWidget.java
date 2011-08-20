@@ -55,9 +55,11 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	// Buffer for 3D drawing
 	protected IntBuffer		buffers = null;
 	protected int			numVertices = 0;
+	protected int			numLinePoints = 0;
 	protected FloatBuffer	vertexBufferData = null;
 	protected FloatBuffer	colourBufferData = null;
 	protected FloatBuffer	normalBufferData = null;
+	protected FloatBuffer	lineBufferData = null;
 	protected boolean		dirty = true;
 	
 	public Grid3DWidget(Vector2i size, T grid, int tileSize)
@@ -71,7 +73,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
 		slices = new ArrayList<Slice>();
 		
-		buffers = IntBuffer.allocate(3);
+		buffers = IntBuffer.allocate(4);
 	}
 	
 	@Override
@@ -237,7 +239,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	
 	protected void setupVertexBuffer(GL gl, int sides)
 	{
-		gl.glGenBuffers(3, buffers);
+		gl.glGenBuffers(4, buffers);
 		
 		int	bufferSize = calculateBufferRequirement(sides);
 		
@@ -248,6 +250,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 				vertexBufferData = Buffers.newDirectFloatBuffer(bufferSize);
 				colourBufferData = Buffers.newDirectFloatBuffer(bufferSize);
 				normalBufferData = Buffers.newDirectFloatBuffer(bufferSize);
+				lineBufferData = Buffers.newDirectFloatBuffer(bufferSize);
 				
 				resetVertexBuffer(gl, sides);
 			}
@@ -256,6 +259,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 				vertexBufferData = null;
 				colourBufferData = null;
 				normalBufferData = null;
+				lineBufferData = null;
 				
 				System.err.println("Out of memory: Too many vertices, try drawing less...");
 			}
@@ -275,7 +279,9 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			vertexBufferData.rewind();
 			colourBufferData.rewind();
 			normalBufferData.rewind();
+			lineBufferData.rewind();
 			numVertices = 0;
+			numLinePoints = 0;
 		}
 	}
 	
@@ -294,6 +300,13 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(2));
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, normalBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
+		
+		if (drawGrid)
+		{
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(3));
+			gl.glBufferData(GL.GL_ARRAY_BUFFER, numLinePoints * 3 * Buffers.SIZEOF_FLOAT, lineBufferData.position(0), GL2.GL_STREAM_DRAW);
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);		
+		}
 	}
 	
 	protected void renderVertexBuffer(GL gl)
@@ -301,7 +314,16 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		if (vertexBufferData == null) return;
 		
 		GL2 gl2 = gl.getGL2();
-		Graphics.applyColour(gl2, Colour.RED);
+		
+		if (drawGrid)
+		{
+			gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+			gl2.glPolygonOffset(0.5f, 0.5f);
+		}
+				
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl2.glEnableClientState(GL2.GL_COLOR_ARRAY);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 								
 		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(0));
 		gl2.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
@@ -315,13 +337,26 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		gl2.glNormalPointer(GL.GL_FLOAT, 0, 0);
 		gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);		
 		
-		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-		gl2.glEnableClientState(GL2.GL_COLOR_ARRAY);
-		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 		gl2.glDrawArrays(GL.GL_TRIANGLES, 0, numVertices);
-		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 		gl2.glDisableClientState(GL2.GL_COLOR_ARRAY);
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+		
+		if (drawGrid)
+		{
+			gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+			
+			Graphics.applyColour(gl2, Colour.BLACK);
+			
+			gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(3));
+			gl2.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+			gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+			
+			gl2.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_LINE);
+			gl2.glDrawArrays(GL.GL_LINES, 0, numLinePoints);
+			gl2.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+		}
+		
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);	
 	}
 		
 	protected void addVertex(float x, float y, float z, Vector3f normal, Colour colour)
@@ -341,6 +376,16 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		colourBufferData.put(colour.b);		
 		numVertices++;
 	}
+	
+	protected void addLinePoint(float x, float y, float z)
+	{
+		if (lineBufferData == null) return;
+		
+		lineBufferData.put(x);
+		lineBufferData.put(y);
+		lineBufferData.put(z);
+		numLinePoints++;
+	}
 		
 	protected void add3DPolygon(Vector2f pos, Vector2f[] polygon, float startHeight, float height, Colour colour)
 	{
@@ -359,19 +404,41 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 			addVertex(pos.x+v2.x, pos.y+v2.y, startHeight+height, up, colour);
 		}	
 
-		for (int i = 0; i < polygon.length; i++)
+		if (height > 0.0f)
+			for (int i = 0; i < polygon.length; i++)
+			{
+				Vector2f f = polygon[i];
+				Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
+				Vector3f normal = new Vector3f((f.subtract(s)).getPerpendicular().getNormalised(), 0.0f);
+				
+				addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
+				addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
+				addVertex(pos.x+s.x, pos.y+s.y, startHeight+height, normal, colour);
+				
+				addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
+				addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
+				addVertex(pos.x+f.x, pos.y+f.y, startHeight, normal, colour);
+			}
+		
+		if (drawGrid)
 		{
-			Vector2f f = polygon[i];
-			Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
-			Vector3f normal = new Vector3f((f.subtract(s)).getPerpendicular().getNormalised(), 0.0f);
+			for (int i = 0; i < polygon.length; i++)	
+			{
+				Vector2f f = polygon[i];
+				Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
+				
+				addLinePoint(pos.x+f.x, pos.y+f.y, startHeight+height);
+				addLinePoint(pos.x+s.x, pos.y+s.y, startHeight+height);
+			}
 			
-			addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
-			addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
-			addVertex(pos.x+s.x, pos.y+s.y, startHeight+height, normal, colour);
-			
-			addVertex(pos.x+f.x, pos.y+f.y, startHeight+height, normal, colour);
-			addVertex(pos.x+s.x, pos.y+s.y, startHeight, normal, colour);
-			addVertex(pos.x+f.x, pos.y+f.y, startHeight, normal, colour);
+			if (height > 0.0f)
+			{
+				for (Vector2f v : polygon)
+				{
+					addLinePoint(pos.x+v.x, pos.y+v.y, startHeight+height);
+					addLinePoint(pos.x+v.x, pos.y+v.y, startHeight);
+				}
+			}	
 		}
 	}
 
