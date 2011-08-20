@@ -127,7 +127,7 @@ public class UIProtoApplication implements WindowEventListener
 	
 	UIProtoApplication()
 	{
-		HexagonGrid grid = new HexagonGrid(new Vector2i(100, 100));
+		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
 		grid.getCell(6, 7).setValue(0, 1);		
@@ -253,16 +253,33 @@ public class UIProtoApplication implements WindowEventListener
 		// OUR WORLD EDITOR Containers
 		
 		
-		
-		
-		
-		propertiesContainer = new Container(new Vector2i(100, 100));
+		propertiesContainer = new Container(new Vector2i(100, 100));	
 		propertiesContainer.setFlag(Widget.FILL);
 		tabbedWorldView.add(propertiesContainer, "World Properties");
 		
-		masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		masterPropertiesLayout.setFlag(Widget.FILL);
 		propertiesContainer.setContents(masterPropertiesLayout);
+		
+	
+		
+   	LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+   	instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
+
+   	instructionsLayout.setHeight(35);
+
+   	instructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+   	   	masterPropertiesLayout.add(instructionsLayout);
+   	
+	instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+	
+   
+	
+	TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
+	instructionsLayout.add(propertiesInstructions);
+		
+   	instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
+		
 		
 		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGrid3DViewer.setFlag(Widget.FILL);
@@ -280,6 +297,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		propertiesLayout.setFlag(Widget.FILL);
+		propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
 		masterPropertiesLayout.add(propertiesLayout);
 		
 		
@@ -312,10 +330,13 @@ public class UIProtoApplication implements WindowEventListener
 	
 		cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
+		cellShapeLayout.setHeight(65);
+
 		
 		propertiesLayout.add(cellShapeLayout);
 		
 		cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
+		cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeLayout.add(cellShapeLabel);
 		
 		
@@ -325,6 +346,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
+		cellShapeDropDownBox.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
