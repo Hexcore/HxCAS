@@ -8,9 +8,9 @@ import com.hexcore.cas.math.Vector2i;
 
 public class TextBox extends Widget
 {
-	protected String		text = "";
+	protected String	text = "";
 	protected Text.Size	textSize = Text.Size.SMALL;
-	protected int			cursorIndex = 0;
+	protected int		cursorIndex = 0;
 	
 	protected Vector2i	padding = new Vector2i(2, 2);
 	
@@ -84,18 +84,6 @@ public class TextBox extends Widget
 					cursorIndex--;
 				else if ((event.button == KeyEvent.VK_RIGHT) && (cursorIndex < text.length()))
 					cursorIndex++;
-				else if (event.button == KeyEvent.VK_BACK_SPACE)
-				{
-					if ((text.length() > 0) && (cursorIndex > 0))
-					{
-						text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
-						cursorIndex--;
-					}
-				}
-				else if ((event.button == KeyEvent.VK_DELETE) && (cursorIndex < text.length()))
-				{
-					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
-				}
 				else
 					handled = false;
 			}
@@ -106,9 +94,21 @@ public class TextBox extends Widget
 					text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
 					cursorIndex++;
 				}
-				else if (event.button == '\n')
+				else if (event.button == '\n') // Enter
 				{
 					window.giveUpFocus(this);
+				}
+				else if (event.button == '\b') // Backspace
+				{
+					if ((text.length() > 0) && (cursorIndex > 0))
+					{
+						text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
+						cursorIndex--;
+					}
+				}
+				else if ((event.button == 127) && (cursorIndex < text.length())) // Delete
+				{
+					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
 				}
 				else
 					handled = false;
