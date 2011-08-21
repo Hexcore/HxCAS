@@ -58,6 +58,20 @@ public class DropDownBox extends Widget
 		
 		if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
 		{
+			window.toggleFocus(this);
+			handled = true;
+		}
+		
+		return handled;
+	}
+	
+	@Override
+	public boolean handleEventExtras(Event event, Vector2i position)
+	{
+		boolean handled = super.handleEvent(event, position);
+		
+		if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
+		{
 			if (focused && (mouseoverItem >= 0))
 			{
 				selected = mouseoverItem;

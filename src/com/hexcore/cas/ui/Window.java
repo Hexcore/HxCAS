@@ -309,10 +309,11 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			
 	private void sendEvent(Event event)
 	{
-		for (Widget component : components)
-			component.receiveEvent(event, new Vector2i(0, 0));
+		if (focusedWidget != null)
+			focusedWidget.receiveEventExtras(event, focusedWidget.getRealPosition());
 		
-		canvas.display();
+		for (Widget component : components)
+			component.receiveEvent(event);
 	}
 		
 	////

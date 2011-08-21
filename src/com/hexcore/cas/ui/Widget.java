@@ -145,7 +145,7 @@ public abstract class Widget
 	{
 		
 	}
-			
+				
 	final public boolean receiveEvent(Event event)
 	{
 		return receiveEvent(event, new Vector2i());
@@ -170,12 +170,12 @@ public abstract class Widget
 			mouseover = false;
 		}
 		else if ((event.type == Event.Type.MOUSE_MOTION) || (event.type == Event.Type.MOUSE_CLICK) || (event.type == Event.Type.MOUSE_SCROLL))
-		{			
+		{
 			Vector2i start = pos;
 			Vector2i end = pos.add(size);
-			
-			if ((event.position.x <= start.x) || (event.position.y <= start.y)
-					|| (event.position.x >= end.x) || (event.position.y >= end.y))
+
+			if (((event.position.x <= start.x) || (event.position.y <= start.y)
+					|| (event.position.x >= end.x) || (event.position.y >= end.y)) && !focused)
 			{
 				if (mouseover && (event.type == Event.Type.MOUSE_MOTION))
 				{
@@ -183,7 +183,7 @@ public abstract class Widget
 					handleEvent(new Event(Event.Type.MOUSE_OUT), pos);
 					return false;
 				}
-				else if (!event.isMouseRelease() && !focused) 
+				else if (!event.isMouseRelease()) 
 					return false;
 			}
 			else
@@ -197,6 +197,16 @@ public abstract class Widget
 	{
 		return false;
 	}
+	
+	public boolean receiveEventExtras(Event event, Vector2i position)
+	{
+		return handleEventExtras(event, position);
+	}	
+	
+	public boolean handleEventExtras(Event event, Vector2i position)
+	{
+		return false;
+	}	
 	
 	protected void setWindow(Window window) 
 	{
