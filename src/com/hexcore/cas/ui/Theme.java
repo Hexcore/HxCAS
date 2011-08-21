@@ -358,13 +358,13 @@ public class Theme
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
-		renderText(gl, text, position.add(padding.x, (size.y - textHeight) / 2), textColour, Text.Size.SMALL);
+		renderText(gl, text, position.add(padding), textColour, Text.Size.SMALL);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && ((time / 500) % 2 == 0))
 		{
 			int cursorPos = calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
-			Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, size.y - padding.y * 2), textColour);
+			Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, textHeight), textColour);
 		}
 	}
 	
@@ -600,12 +600,18 @@ public class Theme
 				int 	lineWidth = (int)textRenderer.getBounds(line + word).getMaxX();
 				word += character;
 				
-				if (lineWidth <= maxWidth)
-					line += word;
-				else
+				if (lineWidth > maxWidth)
 				{
 					lines.add(line);
 					line = word;
+				}
+			 	else
+					line += word;
+				
+				if ((character == '\n') && !line.isEmpty())
+				{
+					lines.add(line);
+					line = "";
 				}
 				
 				word = "";

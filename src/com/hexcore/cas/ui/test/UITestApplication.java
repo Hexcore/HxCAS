@@ -25,6 +25,7 @@ import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
+import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
 import com.hexcore.cas.ui.TriangleGrid3DWidget;
@@ -49,6 +50,7 @@ public class UITestApplication implements WindowEventListener
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
 	public TextWidget	paragraph;
+	public TextArea		description;
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
@@ -233,10 +235,14 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
 		
-		paragraph = new TextWidget("This is a lot of text. It is going to fill the whole width of the screen and then start overflowing to the next line. If it hasn't already then this extra sentence should help force it over the edge.");
+		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
 		paragraph.setFlag(Widget.FILL_HORIZONTAL);
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
+		
+		description = new TextArea(new Vector2i(10, 100));
+		description.setFlag(Widget.FILL_HORIZONTAL);
+		innerLayout.add(description);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);
