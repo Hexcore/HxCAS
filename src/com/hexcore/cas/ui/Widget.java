@@ -84,7 +84,7 @@ public abstract class Widget
 	
 	public Vector2i	getRealPosition()
 	{
-		if (parent != null) return parent.getRealPosition().add(position);
+		if (parent != null) return parent.getRealPosition().add(position).add(getInnerOffset());
 		return position;
 	}
 	
