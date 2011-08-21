@@ -368,6 +368,28 @@ public class Theme
 		}
 	}
 	
+	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, long time)
+	{
+		String stateName = "normal";
+		if (focus) stateName = "focus";
+		
+		int borderRadius = getInteger("TextBox", stateName, "border-radius", 0);
+		Graphics.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
+		
+		int			textHeight = calculateTextHeight(Text.Size.SMALL);
+		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
+		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
+		
+		renderFlowedText(gl, position.add(padding), text, textColour);
+		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
+		
+		if (focus && ((time / 500) % 2 == 0))
+		{
+			Vector2i cursorPos = text.getCursorPosition(this, cursorIndex);
+			Graphics.renderRectangle(gl, position.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);
+		}
+	}
+	
 	public void renderCheckBox(GL gl, Vector2i position, Vector2i size, String text, boolean focus, boolean checked)
 	{
 		String stateName = "normal";
@@ -600,7 +622,7 @@ public class Theme
 				int 	lineWidth = (int)textRenderer.getBounds(line + word).getMaxX();
 				word += character;
 				
-				if (lineWidth > maxWidth)
+				if ((lineWidth > maxWidth) && (maxWidth >= 0))
 				{
 					lines.add(line);
 					line = word;

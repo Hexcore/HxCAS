@@ -212,13 +212,13 @@ public class UITestApplication implements WindowEventListener
 		innerLayout.setFlag(Widget.WRAP);
 		mainView.add(innerLayout);
 		
-		nameTextBox = new TextBox(new Vector2i(100, 20));
+		nameTextBox = new TextBox(100);
 		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
 		nameTextBox.setText("Benny");
 		innerLayout.add(nameTextBox);
 		
 		
-		nameTextBox2 = new TextBox(new Vector2i(100, 20));
+		nameTextBox2 = new TextBox(100);
 		nameTextBox2.setFlag(Widget.FILL_HORIZONTAL);
 		nameTextBox2.setText("Benny2");
 		innerLayout.add(nameTextBox2);
@@ -240,7 +240,7 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
 		
-		description = new TextArea(new Vector2i(10, 100));
+		description = new TextArea(100, 5);
 		description.setFlag(Widget.FILL_HORIZONTAL);
 		innerLayout.add(description);
 		

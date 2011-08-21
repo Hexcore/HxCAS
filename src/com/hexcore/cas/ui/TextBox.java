@@ -8,17 +8,31 @@ import com.hexcore.cas.math.Vector2i;
 
 public class TextBox extends Widget
 {
-	private String	text = "";
-	private int		cursorIndex = 0;
+	protected String		text = "";
+	protected Text.Size	textSize = Text.Size.SMALL;
+	protected int			cursorIndex = 0;
 	
+	protected Vector2i	padding = new Vector2i(2, 2);
+	
+	@Deprecated
 	public TextBox(Vector2i size)
 	{
 		super(size);
+	}
+	
+	public TextBox(int width)
+	{
+		super(new Vector2i(width, 10));
 	}
 
 	public TextBox(Vector2i position, Vector2i size)
 	{
 		super(position, size);
+	}
+	
+	public TextBox(Vector2i position, int width)
+	{
+		super(position, new Vector2i(width, 10));
 	}
 
 	public boolean	canGetFocus() {return true;}
@@ -35,6 +49,16 @@ public class TextBox extends Widget
 		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused, window.getTime());
 		window.resetView(gl);
 	}
+	
+	@Override
+	public void relayout()
+	{
+		if (window != null) 
+		{
+			int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize);
+			super.setHeight(boxHeight);
+		}
+	}
 
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
@@ -43,14 +67,17 @@ public class TextBox extends Widget
 		
 		if (event.type == Event.Type.GAINED_FOCUS)
 		{
+			handled = true;
 			cursorIndex = text.length();
 		}
 		else if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
 		{
+			handled = true;
 			window.requestFocus(this);
 		}
 		else if (focused)
 		{
+			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
 				if ((event.button == KeyEvent.VK_LEFT) && (cursorIndex > 0))
@@ -69,6 +96,8 @@ public class TextBox extends Widget
 				{
 					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
 				}
+				else
+					handled = false;
 			}
 			else if (event.type == Event.Type.KEY_TYPED)
 			{
@@ -81,11 +110,15 @@ public class TextBox extends Widget
 				{
 					window.giveUpFocus(this);
 				}
+				else
+					handled = false;
 				
 				Event changeEvent = new Event(Event.Type.CHANGE);
 				changeEvent.target = this;
 				window.sendWindowEvent(changeEvent);
 			}
+			else
+				handled = false;
 		}
 		
 		return handled;
