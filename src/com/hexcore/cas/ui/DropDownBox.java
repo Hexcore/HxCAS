@@ -79,10 +79,10 @@ public class DropDownBox extends Widget
 				Event changeEvent = new Event(Event.Type.CHANGE);
 				changeEvent.target = this;
 				window.sendWindowEvent(changeEvent);
+
+				window.giveUpFocus(this);
+				handled = true;
 			}
-			
-			window.toggleFocus(this);
-			handled = true;
 		}
 		else if (event.type == Event.Type.MOUSE_MOTION)
 		{
