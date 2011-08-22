@@ -11,6 +11,7 @@ public class TextBox extends Widget
 	protected String	text = "";
 	protected Text.Size	textSize = Text.Size.SMALL;
 	protected int		cursorIndex = 0;
+	protected float		cursorFlash = 0.0f;
 	
 	protected Vector2i	padding = new Vector2i(2, 2);
 	
@@ -41,12 +42,19 @@ public class TextBox extends Widget
 	public void		setText(String text) {this.text = text;}
 
 	@Override
+	public void update(Vector2i position, float delta)
+	{
+		cursorFlash += delta;
+		while (cursorFlash > 100.0f) cursorFlash -= 100.0f;
+	}	
+	
+	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		Vector2i pos = this.position.add(position);
 		
 		window.setClipping(gl, pos, size);
-		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused, window.getTime());
+		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -121,6 +129,7 @@ public class TextBox extends Widget
 				handled = false;
 		}
 		
+		if (handled) cursorFlash = 0.0f;
 		return handled;
 	}
 }

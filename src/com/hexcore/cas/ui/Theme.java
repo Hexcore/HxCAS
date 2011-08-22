@@ -357,7 +357,7 @@ public class Theme
 		Graphics.renderBorder(gl, position.add(size).subtract(wh, wh), new Vector2i(wh, wh), 0, getFill("ScrollbarFill", "border"));
 	}
 	
-	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus, long time)
+	public void renderTextBox(GL gl, Vector2i position, Vector2i size, String text, int cursorIndex, boolean focus, float time)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -372,14 +372,14 @@ public class Theme
 		renderText(gl, text, position.add(padding), textColour, Text.Size.SMALL);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
-		if (focus && ((time / 500) % 2 == 0))
+		if (focus && (time % 2.0f < 1.0f))
 		{
 			int cursorPos = calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
 			Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, textHeight), textColour);
 		}
 	}
 	
-	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, long time)
+	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, float time)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -394,7 +394,7 @@ public class Theme
 		renderFlowedText(gl, position.add(padding), text, textColour);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
-		if (focus && ((time / 500) % 2 == 0))
+		if (focus && (time % 2.0f < 1.0f))
 		{
 			Vector2i cursorPos = text.getCursorPosition(this, cursorIndex);
 			Graphics.renderRectangle(gl, position.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);

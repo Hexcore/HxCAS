@@ -65,7 +65,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, window.getTime());
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, cursorFlash);
 		window.resetView(gl);
 	}
 	

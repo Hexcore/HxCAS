@@ -93,6 +93,11 @@ public class FlowedText
 			height += lineHeight;
 		}
 		
-		return new Vector2i(0, 0);
+		int width = 0;
+		
+		if (!lines.isEmpty()) 
+			width = theme.calculateTextSize(lines.get(lines.size()-1), textSize).x;
+		
+		return new Vector2i(width, lineHeight * (lines.size() - 1));
 	}
 }
