@@ -74,11 +74,23 @@ public class TextArea extends TextBox
 	{
 		boolean handled = false;
 		
-		if (focused && (event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
+		if (focused)
 		{
-			text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
-			cursorIndex++;
-			handled = true;
+			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
+			{
+				if ((event.button == KeyEvent.VK_UP) && (cursorIndex > 0))
+					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
+				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
+					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
+				else
+					handled = false;
+			}
+			else if ((event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
+			{
+				text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
+				cursorIndex++;
+				handled = true;
+			}
 		}
 	
 		if (!handled) handled = super.handleEvent(event, position);
