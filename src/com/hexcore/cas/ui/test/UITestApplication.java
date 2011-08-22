@@ -92,7 +92,7 @@ public class UITestApplication implements WindowEventListener
 	
 	public Button	nextIterationButton;
 	
-	public String	currentThemeName = "default";
+	public String	currentThemeName = "light";
 	public String	themeName = currentThemeName;
 	
 	UITestApplication()

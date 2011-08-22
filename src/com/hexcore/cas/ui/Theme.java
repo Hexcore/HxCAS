@@ -153,6 +153,11 @@ public class Theme
 		return getColour(typeName, "normal", propertyName);
 	}
 	
+	public Colour getColour(String typeName, String propertyName, Colour fallback)
+	{
+		return getColour(typeName, "normal", propertyName, fallback);
+	}	
+	
 	public Colour getColour(String typeName, String state, String propertyName)
 	{
 		Property property = getProperty(typeName, state, propertyName);

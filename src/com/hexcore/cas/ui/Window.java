@@ -232,7 +232,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
+		Colour	backgroundColour = theme.getColour("Window", "background", new Colour(0.93f, 0.93f, 0.93f));
+		
         final GL2 gl = drawable.getGL().getGL2();
+        gl.glClearColor(backgroundColour.r, backgroundColour.g, backgroundColour.b, 1.0f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         
         gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
@@ -264,7 +267,6 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void init(GLAutoDrawable drawable)
 	{
 		GL2 gl = drawable.getGL().getGL2();
-        gl.glClearColor(0.93f, 0.93f, 0.93f, 1.0f);
         gl.glClearDepth(1.0f);   
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
