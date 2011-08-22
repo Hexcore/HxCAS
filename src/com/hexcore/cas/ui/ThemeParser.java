@@ -15,9 +15,11 @@ public class ThemeParser
 	private ConfigScanner				scanner;
 	private HashMap<String, Theme.Type>	types;
 	
-	private Set<String>		validStates;
-	private Set<String>		validTypes;
-	private Set<String>		validProperties;
+	private int	errors = 0;
+	
+	private Set<String>	validStates;
+	private Set<String>	validTypes;
+	private Set<String>	validProperties;
 	
 	ThemeParser(String filename)
 	{
@@ -67,7 +69,7 @@ public class ThemeParser
 			
 			String typeName = symbol.text;
 			
-			System.out.println("Type: " + typeName);
+			//System.out.println("Type: " + typeName);
 						
 			if (validTypes.contains(typeName))
 				readObject(typeName);
@@ -77,6 +79,13 @@ public class ThemeParser
 				fastForward("}");
 			}
 		}
+		
+		if (errors == 0)
+			System.out.println("Loaded theme: " + filename);
+		else if (errors == 1)
+			System.out.println("Found a error in theme file: " + filename);
+		else
+			System.out.println("Found " + errors + " in the theme file: " + filename);
 	}
 	
 	public HashMap<String, Theme.Type> getTypes()
@@ -164,14 +173,14 @@ public class ThemeParser
 			if (fill == null) 
 			{
 				fastForward(";", "}");
-				System.out.println(type.name + "(" + type.state + ") : " + name + " = invalid property");
+				//System.out.println(type.name + "(" + type.state + ") : " + name + " = invalid property");
 				return;
 			}
 
 			property.type = Property.Type.FILL;
 			property.fill = fill;
 			
-			System.out.println(type.name + "(" + type.state + ") : " + name + " = " + property.fill);
+			//System.out.println(type.name + "(" + type.state + ") : " + name + " = " + property.fill);
 		}
 		else
 		{
@@ -191,17 +200,17 @@ public class ThemeParser
 					
 					scanner.getSymbol();
 					
-					System.out.println(type.name + "(" + type.state + ") : " + name + " = <" + property.x + ", " + property.y + ">");
+					//System.out.println(type.name + "(" + type.state + ") : " + name + " = <" + property.x + ", " + property.y + ">");
 				}
-				else
-					System.out.println(type.name + "(" + type.state + ") : " + name + " = " + property.x);
+				//else
+				//	System.out.println(type.name + "(" + type.state + ") : " + name + " = " + property.x);
 			}
 			else
 			{
 				property.value = symbol.text;
 				property.type = Theme.Property.Type.STRING;
 				
-				System.out.println(type.name + "(" + type.state + ") : " + name + " = '" + symbol.text + "'");
+				//System.out.println(type.name + "(" + type.state + ") : " + name + " = '" + symbol.text + "'");
 			}
 		}
 		
@@ -377,5 +386,6 @@ public class ThemeParser
 	private void error(String msg)
 	{
 		System.out.println("Error (Line " + scanner.getLineNumber() + "): " + msg);
+		errors++;
 	}
 }

@@ -114,7 +114,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		animator.start();
 	}
 	
-	public void update(float delta)
+	public void updateWidgets(float delta)
 	{
 		update(new Vector2i(), delta);
 		for (Widget component : components) component.update(new Vector2i(), delta);
@@ -133,6 +133,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void loadTheme(String filename)
 	{
+		theme = new Theme();
 		theme.loadFromFile(filename);
 	}
 	
@@ -227,7 +228,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		if (keyCode > 1024) return false;
 		return keyState[keyCode];
 	}
-	
+		
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
@@ -240,8 +241,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
                 
-        update(1.0f / 60.0f);
-        render(drawable);
+        for (WindowEventListener listener : eventListeners)
+			listener.update(1.0f / 60.0f);
+        		
+        updateWidgets(1.0f / 60.0f);
+        
+        renderWidgets(drawable);
+        
+        for (WindowEventListener listener : eventListeners)
+			listener.render();
+        		
         drawable.swapBuffers();
 	}
 	
@@ -294,7 +303,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		canvas.display();
 	}
 		
-	private void render(GLAutoDrawable drawable)
+	private void renderWidgets(GLAutoDrawable drawable)
 	{
 		if (updateComponents)
 		{

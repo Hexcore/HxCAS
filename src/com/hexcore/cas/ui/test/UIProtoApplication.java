@@ -400,6 +400,18 @@ public class UIProtoApplication implements WindowEventListener
 	{
 		new UIProtoApplication();
 	}
+	
+	@Override
+	public void update(float delta)
+	{
+		
+	}
+	
+	@Override
+	public void render()
+	{
+
+	}
 
 	@Override
 	public void handleWindowEvent(Event event)

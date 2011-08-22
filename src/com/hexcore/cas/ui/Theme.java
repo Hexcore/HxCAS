@@ -123,6 +123,12 @@ public class Theme
 		
 		typeProperties = new HashMap<String, Type>();
 	}
+	
+	public Theme(String filename)
+	{
+		this();
+		loadFromFile(filename);
+	}
 		
 	public Property getProperty(String typeName, String propertyName)
 	{
@@ -263,7 +269,7 @@ public class Theme
 				break;
 		}
 	
-		int 		borderRadius = getInteger("Button", stateName, "border-radius", 8);
+		int 		borderRadius = getInteger("Button", stateName, "border-radius", 0);
 		BorderShape corners = new BorderShape(BorderShape.ALL_CORNERS);
 		
 		Graphics.renderRoundedBorderedRectangle(gl, pos, size, borderRadius, corners, 
