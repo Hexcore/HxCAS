@@ -15,6 +15,7 @@ import com.hexcore.cas.math.Vector2i;
  */
 public class Container extends Widget
 {
+	protected String themeClass = "";
 	protected Widget contents = null;
 	protected Fill background = null;
 	protected Fill border = null;
@@ -80,9 +81,19 @@ public class Container extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		window.setClipping(gl, pos, size);
-		if (background != null) Graphics.renderRectangle(gl, pos, size, 0, background);
+		
+		if (background != null) 
+			Graphics.renderRectangle(gl, pos, size, 0, background);
+		else if ((window != null) && !themeClass.isEmpty())
+			Graphics.renderRectangle(gl, pos, size, 0, window.getTheme().getFill(themeClass, "background", Fill.NONE));
+
 		if (contents != null) contents.render(gl, pos);
-		if (border != null) Graphics.renderBorder(gl, pos, size, 0, border);
+		
+		if (border != null)
+			Graphics.renderBorder(gl, pos, size, 0, border);	
+		else if ((window != null) && !themeClass.isEmpty())
+			Graphics.renderBorder(gl, pos, size, 0, window.getTheme().getFill(themeClass, "border", Fill.NONE));
+		
 		window.resetView(gl);
 		
 		if (window.isDebugLayout())
@@ -99,6 +110,16 @@ public class Container extends Widget
 		if (contents.receiveEvent(event, position)) handled = true;
 		
 		return handled;
+	}
+	
+	public void setThemeClass(String className)
+	{
+		this.themeClass = "." + className;
+	}
+	
+	public void clearThemeClass()
+	{
+		this.themeClass = "";
 	}
 	
 	public void setBackground(Fill fill)

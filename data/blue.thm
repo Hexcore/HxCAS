@@ -1,4 +1,14 @@
 
+.Header
+{
+	background: rgba(1.0, 1.0, 1.0, 1.0) rgba(1.0, 1.0, 1.0, 0.0);
+}
+
+Window
+{
+	background: rgb(0.1, 0.2, 0.4);
+}
+
 Button
 {
 	background: rgb(0.85, 0.85, 0.85) rgb(0.7, 0.7, 0.7);

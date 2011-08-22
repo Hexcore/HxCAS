@@ -158,7 +158,7 @@ public class UITestApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(new Colour(0.73f, 0.73f, 0.73f), new Colour(0.85f, 0.85f, 0.85f)));
+		headerLayout.setThemeClass("Header");
 		windowLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");

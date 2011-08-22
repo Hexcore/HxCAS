@@ -72,7 +72,7 @@ public class ThemeParser
 			
 			//System.out.println("Type: " + typeName);
 						
-			if (validTypes.contains(typeName))
+			if (validTypes.contains(typeName) || (typeName.charAt(0) == '.'))
 				readObject(typeName);
 			else
 			{
