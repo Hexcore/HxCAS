@@ -82,6 +82,10 @@ public class TextArea extends TextBox
 					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
+				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
+					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
+				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
+					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
 				else
 					handled = false;
 			}

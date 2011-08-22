@@ -11,6 +11,32 @@ public class FlowedText
 	public int			lineHeight;
 	public Text.Size	textSize;
 	
+	public int getLineBeginningCursorPosition(int cursor)
+	{
+		int	newCursor = 0;
+		
+		for (String line : lines)
+		{
+			if (line.length() + newCursor > cursor) break;
+			newCursor += line.length();
+		}
+
+		return newCursor;
+	}
+	
+	public int getLineEndCursorPosition(int cursor)
+	{
+		int	newCursor = 0;
+		
+		for (String line : lines)
+		{
+			if (newCursor > cursor) break;
+			newCursor += line.length();
+		}
+
+		return newCursor - 1;
+	}
+	
 	public int getPreviousLineCursorPosition(int cursor)
 	{
 		Vector2i cursorLocation = getCursorLocation(cursor);
