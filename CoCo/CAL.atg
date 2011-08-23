@@ -13,7 +13,8 @@ CHARACTERS
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
 
 TOKENS
-  number     = digit { digit } .		
+  number	= digit { digit } .
+  double	= digit {digit}"."{digit} .
   
   identifier = letter { letter | digit } .
   
@@ -72,10 +73,12 @@ PRODUCTIONS
   	";"
   	.
   	
-  	Colour
+  	Colour									(. double value = 0.0;	.)
   	=
   	"rgb("
-  	DoubleConst "," DoubleConst "," DoubleConst
+  	DoubleConst< out value >
+  	 "," DoubleConst< out value >
+  	 "," DoubleConst< out value >
   	")"
   	.
   
@@ -183,29 +186,36 @@ PRODUCTIONS
   	
   	
   	
-  	Term
+  	Term									(. double val1, val2; .)
   	=
-  	Factor							(. MulOpE T = MulOpE.UN; .)
-  	{MulOp< out T >
-  	Factor}
+  	Factor< out val1 >						(. MulOpE T = MulOpE.UN; .)
+  	{
+  	MulOp< out T >
+  	Factor< out val2 >
+  	}
   	.
   	
   	
   	
-  	Factor
+  	Factor<. out double value .>			(. value = 0;	.)
   	=
   	Designator
   	["(" Arguments ")"]
   	|
-  	Constant
+  	Constant< out value >
   	| "(" Expression ")"
   	.
   	
   	
   	
-  	Constant
+  	Constant<. out double value .>		(. 	
+  											value = 0;
+  											int iValue = 0;
+  											double dValue = 0;
+  										.)
   	=
-  	DoubleConst
+  	DoubleConst< out dValue >			(.	value = dValue; .)
+	| IntConst< out iValue >			(.	value = iValue; .)
   	.
   	
   	
@@ -269,12 +279,14 @@ PRODUCTIONS
   	
   	
   	
-  	DoubleConst
+  	DoubleConst<. out double value .>		
   	=
-  	number
-  	[
-  	"." number
-  	]
+	double									(. value = Double.parseDouble(token.val); .)
+  	.
+  	
+  	IntConst<. out int value .>
+  	=
+  	number									(. value = Integer.parseInt(token.val); .)
   	.
   	
   
