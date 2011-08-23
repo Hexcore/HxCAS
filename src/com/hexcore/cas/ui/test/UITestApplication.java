@@ -49,6 +49,7 @@ public class UITestApplication implements WindowEventListener
 	public TextBox		nameTextBox2;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
+	public TextWidget	themeLabel;
 	public TextWidget	paragraph;
 	public TextArea		description;
 	public ImageWidget	headingImage;
@@ -89,7 +90,10 @@ public class UITestApplication implements WindowEventListener
 	public WaterFlow				waterFlow;
 	public HexagonGrid3DWidget		waterGrid3DViewer;
 	
-	public Button				nextIterationButton;
+	public Button	nextIterationButton;
+	
+	public String	currentThemeName = "light";
+	public String	themeName = currentThemeName;
 	
 	UITestApplication()
 	{
@@ -144,7 +148,7 @@ public class UITestApplication implements WindowEventListener
 	
 	public void initialise()
 	{
-		window.loadTheme("data/light.thm");
+		window.loadTheme("data/"+themeName+".thm");
 		
 		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		windowLayout.setFlag(Widget.FILL);
@@ -154,7 +158,7 @@ public class UITestApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(new Colour(0.73f, 0.73f, 0.73f), new Colour(0.85f, 0.85f, 0.85f)));
+		headerLayout.setThemeClass("Header");
 		windowLayout.add(headerLayout);
 						
 		headingImage = new ImageWidget("data/logo.png");
@@ -227,11 +231,14 @@ public class UITestApplication implements WindowEventListener
 		checkBox.setFlag(Widget.FILL_HORIZONTAL);
 		innerLayout.add(checkBox);
 		
+		themeLabel = new TextWidget("Choose a theme:");
+		themeLabel.setFlag(Widget.FILL_HORIZONTAL);
+		innerLayout.add(themeLabel);	
+		
 		dropDownBox = new DropDownBox(new Vector2i(200, 20));
-		dropDownBox.addItem("Alpha");
-		dropDownBox.addItem("Beta");
-		dropDownBox.addItem("Delta");
-		dropDownBox.addItem("Omega");
+		dropDownBox.addItem("light");
+		dropDownBox.addItem("default");
+		dropDownBox.addItem("blue");
 		dropDownBox.setSelected(1);
 		innerLayout.add(dropDownBox);
 		
@@ -325,6 +332,26 @@ public class UITestApplication implements WindowEventListener
 	{
 		new UITestApplication();
 	}
+	
+	@Override
+	public void update(float delta)
+	{
+		if (!themeName.equals(currentThemeName))
+		{
+			System.out.println("Changing theme to "+themeName);
+			
+			window.loadTheme("data/"+themeName+".thm");
+			currentThemeName = themeName;
+			
+			window.relayout();
+		}	
+	}
+	
+	@Override
+	public void render()
+	{
+
+	}
 
 	@Override
 	public void handleWindowEvent(Event event)
@@ -387,6 +414,7 @@ public class UITestApplication implements WindowEventListener
 			}
 			else if (event.target == dropDownBox)
 			{
+				themeName = dropDownBox.getSelectedText();
 				nameTextBox.setText(dropDownBox.getSelectedText());
 			}
 		}

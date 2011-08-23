@@ -1,41 +1,40 @@
 
 .Header
 {
-	background: none;
+	background: rgba(1.0, 1.0, 1.0, 1.0) rgba(1.0, 1.0, 1.0, 0.0);
+}
+
+Window
+{
+	background: rgb(0.1, 0.2, 0.4);
 }
 
 Button
 {
-	background: vertical rgb(0.95, 0.95, 0.95) rgb(0.85, 0.85, 0.85);
-	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
+	background: rgb(0.85, 0.85, 0.85) rgb(0.7, 0.7, 0.7);
+	border: rgb(1.0, 1.0, 1.0) rgb(0.5, 0.5, 0.5);
 	text-colour: rgb(0.0, 0.0, 0.0);
-	text-shadow-colour: rgb(1.0, 1.0, 1.0);
-	border-radius: 8;
 }
 
 Button : hover
 {
-	background: rgb(0.64, 0.76, 0.94) rgb(0.4, 0.63, 0.91);
-	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
+	background: rgb(0.5, 0.65, 0.8) rgb(0.4, 0.45, 0.65);
+	border: rgb(0.6, 0.75, 0.95) rgb(0.25, 0.35, 0.45);
 	text-colour: rgb(1.0, 1.0, 1.0);
-	text-shadow-colour: rgb(0.3, 0.5, 0.9);
-	text-shadow-offset: 0 -1;
 }
 
 Button : active
 {
-	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
-	border: rgb(0.45, 0.52, 0.7) rgb(0.72, 0.78, 0.87);
-	text-offset: 1 1;
+	background: rgb(0.4, 0.45, 0.65) rgb(0.5, 0.65, 0.8);
+	border: rgb(0.25, 0.35, 0.45) rgb(0.6, 0.75, 0.95);
 	text-colour: rgb(1.0, 1.0, 1.0);
-	text-shadow-colour: rgb(0.3, 0.5, 0.9);
-	text-shadow-offset: 0 -1;
+	text-offset: 1 1;
 }
 
 Panel
 {
-	background: rgb(0.93, 0.93, 0.93);
-	border: rgb(0.5, 0.5, 0.5) rgb(0.6, 0.6, 0.6);
+	background: rgb(0.9, 0.88, 0.82) rgb(0.9, 0.9, 0.85);
+	border: rgb(0.5, 0.5, 0.5) rgb(0.4, 0.4, 0.4);
 }
 
 Scrollbar
@@ -74,7 +73,7 @@ ScrollbarFill
 TextBox
 {
 	background: rgb(1.0, 1.0, 1.0);	
-	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.8, 0.8, 0.8);
 	text-colour: rgb(0.0, 0.0, 0.0);
 }
 
@@ -87,7 +86,7 @@ TextBox : focus
 CheckBox
 {
 	background: rgb(1.0, 1.0, 1.0);	
-	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.8, 0.8, 0.8);
 }
 
 CheckBox : focus
@@ -108,8 +107,7 @@ CheckBox : checked : focus
 CheckBoxCaption
 {
 	text-colour: rgb(0.0, 0.0, 0.0);
-	padding: 5 5;
-	border-radius: 2;
+	padding: 3 3;
 }
 
 CheckBoxCaption : focus
@@ -127,7 +125,7 @@ CheckBoxCaption : checked : focus
 DropDownBox
 {
 	background: rgb(1.0, 1.0, 1.0);	
-	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.8, 0.8, 0.8);
 	text-colour: rgb(0.0, 0.0, 0.0);
 }
 
@@ -159,52 +157,17 @@ DropDownBoxItem
 
 Tab
 {
-	padding: 18 10;
-	
-	background: vertical rgb(0.95, 0.95, 0.95) rgb(0.85, 0.85, 0.85);
-	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
-	text-colour: rgb(0.0, 0.0, 0.0);
-	text-shadow-colour: rgb(1.0, 1.0, 1.0);
-
-	border-radius: 8;
+	padding: 18 6;
+	background: vertical rgb(0.7, 0.68, 0.62) rgb(0.9, 0.88, 0.82);
 }
 
 Tab : selected
 {
-	padding: 18 10;
-	
-	background: vertical rgb(0.52, 0.52, 0.52) rgb(0.62, 0.62, 0.62);
-	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
-	text-colour: rgb(1.0, 1.0, 1.0);	
-	text-offset: 1 1;
-	
-	text-shadow-colour: rgb(0.3, 0.3, 0.3);
-	text-shadow-offset: 0 -1;
-}
-
-Tab : hover
-{
-	background: rgb(0.64, 0.76, 0.94) rgb(0.4, 0.63, 0.91);
-	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
-	text-colour: rgb(1.0, 1.0, 1.0);
-	
-	text-shadow-colour: rgb(0.3, 0.5, 0.9);
-	text-shadow-offset: 0 -1;
-}
-
-Tab : active
-{
-	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
-	border: rgb(0.45, 0.52, 0.7) rgb(0.72, 0.78, 0.87);
-	text-colour: rgb(1.0, 1.0, 1.0);
-	text-offset: 1 1;
-	
-	text-shadow-colour: rgb(0.3, 0.5, 0.9);
-	text-shadow-offset: 0 -1;
+	padding: 18 6;
+	background: vertical rgb(0.62, 0.68, 0.7) rgb(0.82, 0.88, 0.9);
 }
 
 TabInside
 {
-	border: rgb(0.6, 0.6, 0.6);
-	background: rgb(0.9, 0.9, 0.9);
+	border: vertical rgb(0.62, 0.68, 0.7) rgb(0.7, 0.68, 0.62);
 }

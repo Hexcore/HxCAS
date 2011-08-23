@@ -114,7 +114,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		animator.start();
 	}
 	
-	public void update(float delta)
+	public void updateWidgets(float delta)
 	{
 		update(new Vector2i(), delta);
 		for (Widget component : components) component.update(new Vector2i(), delta);
@@ -133,6 +133,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void loadTheme(String filename)
 	{
+		theme = new Theme();
 		theme.loadFromFile(filename);
 	}
 	
@@ -227,11 +228,14 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		if (keyCode > 1024) return false;
 		return keyState[keyCode];
 	}
-	
+		
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
+		Colour	backgroundColour = theme.getColour("Window", "background", new Colour(0.93f, 0.93f, 0.93f));
+		
         final GL2 gl = drawable.getGL().getGL2();
+        gl.glClearColor(backgroundColour.r, backgroundColour.g, backgroundColour.b, 1.0f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         
         gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
@@ -240,8 +244,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl.glLoadIdentity();
                 
-        update(1.0f / 60.0f);
-        render(drawable);
+        for (WindowEventListener listener : eventListeners)
+			listener.update(1.0f / 60.0f);
+        		
+        updateWidgets(1.0f / 60.0f);
+        
+        renderWidgets(drawable);
+        
+        for (WindowEventListener listener : eventListeners)
+			listener.render();
+        		
         drawable.swapBuffers();
 	}
 	
@@ -255,7 +267,6 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void init(GLAutoDrawable drawable)
 	{
 		GL2 gl = drawable.getGL().getGL2();
-        gl.glClearColor(0.93f, 0.93f, 0.93f, 1.0f);
         gl.glClearDepth(1.0f);   
         gl.glEnable(GL.GL_BLEND);
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -294,7 +305,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		canvas.display();
 	}
 		
-	private void render(GLAutoDrawable drawable)
+	private void renderWidgets(GLAutoDrawable drawable)
 	{
 		if (updateComponents)
 		{
