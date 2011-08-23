@@ -8,10 +8,12 @@ public abstract class Grid
 	protected char 			gridType = 'x';
 	protected Vector2i 		size = null;
 	protected int			numProperties = 0;
+	protected boolean		wrap;
 	
 	public Grid(Vector2i size)
 	{
 		this.numProperties = 1;
+		this.wrap = true;
 		
 		this.size = new Vector2i(size);
 		this.cells = new Cell[size.y][size.x];
@@ -115,5 +117,15 @@ public abstract class Grid
 	public int getNumProperties()
 	{
 		return numProperties;
+	}
+	
+	public boolean getWrappable()
+	{
+		return wrap;
+	}
+	
+	public void setWrappable(boolean wrappable)
+	{
+		wrap = wrappable;
 	}
 }
