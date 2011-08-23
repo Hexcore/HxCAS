@@ -16,39 +16,42 @@ public class Parser {
 	static final int ruleset_Sym = 3;
 	static final int lbrace_Sym = 4;
 	static final int rbrace_Sym = 5;
-	static final int property_Sym = 6;
-	static final int semicolon_Sym = 7;
-	static final int type_Sym = 8;
-	static final int colon_Sym = 9;
-	static final int equal_Sym = 10;
-	static final int lparen_Sym = 11;
-	static final int rparen_Sym = 12;
-	static final int point_Sym = 13;
-	static final int lbrack_Sym = 14;
-	static final int rbrack_Sym = 15;
-	static final int if_Sym = 16;
-	static final int else_Sym = 17;
-	static final int var_Sym = 18;
-	static final int comma_Sym = 19;
-	static final int plus_Sym = 20;
-	static final int minus_Sym = 21;
-	static final int equalequal_Sym = 22;
-	static final int bangequal_Sym = 23;
-	static final int greater_Sym = 24;
-	static final int less_Sym = 25;
-	static final int greaterequal_Sym = 26;
-	static final int lessequal_Sym = 27;
-	static final int barbar_Sym = 28;
-	static final int star_Sym = 29;
-	static final int slash_Sym = 30;
-	static final int percent_Sym = 31;
-	static final int andand_Sym = 32;
-	static final int plusplus_Sym = 33;
-	static final int minusminus_Sym = 34;
-	static final int NOT_SYM = 35;
+	static final int colourset_Sym = 6;
+	static final int property_Sym = 7;
+	static final int semicolon_Sym = 8;
+	static final int pointpoint_Sym = 9;
+	static final int colon_Sym = 10;
+	static final int rgblparen_Sym = 11;
+	static final int comma_Sym = 12;
+	static final int rparen_Sym = 13;
+	static final int type_Sym = 14;
+	static final int equal_Sym = 15;
+	static final int lparen_Sym = 16;
+	static final int point_Sym = 17;
+	static final int lbrack_Sym = 18;
+	static final int rbrack_Sym = 19;
+	static final int if_Sym = 20;
+	static final int else_Sym = 21;
+	static final int var_Sym = 22;
+	static final int plus_Sym = 23;
+	static final int minus_Sym = 24;
+	static final int equalequal_Sym = 25;
+	static final int bangequal_Sym = 26;
+	static final int greater_Sym = 27;
+	static final int less_Sym = 28;
+	static final int greaterequal_Sym = 29;
+	static final int lessequal_Sym = 30;
+	static final int barbar_Sym = 31;
+	static final int star_Sym = 32;
+	static final int slash_Sym = 33;
+	static final int percent_Sym = 34;
+	static final int andand_Sym = 35;
+	static final int plusplus_Sym = 36;
+	static final int minusminus_Sym = 37;
+	static final int NOT_SYM = 38;
 	// pragmas
 
-	static final int maxT = 35;
+	static final int maxT = 38;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -58,7 +61,12 @@ public class Parser {
 	public static Token la;       // lookahead token
 	static int errDist = minErrDist;
 
-	
+	static enum RelOpE{LT, GT, LE, GE, EQ, NE, UN};
+static enum AddOpE{ADD, SUB, OR, UN};
+static enum MulOpE{MUL, DIV, MOD, AND, UN};
+static enum PostOpE{INC, DEC, UN};
+
+
 
 	static void SynErr (int n) {
 		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
@@ -134,6 +142,9 @@ public class Parser {
 
 	static void CAL() {
 		RuleSet();
+		if (la.kind == colourset_Sym) {
+			ColourSet();
+		}
 	}
 
 	static void RuleSet() {
@@ -147,6 +158,16 @@ public class Parser {
 		TypeSpec();
 		while (la.kind == type_Sym) {
 			TypeSpec();
+		}
+		Expect(rbrace_Sym);
+	}
+
+	static void ColourSet() {
+		Expect(colourset_Sym);
+		Expect(identifier_Sym);
+		Expect(lbrace_Sym);
+		while (la.kind == property_Sym) {
+			PropertySpec();
 		}
 		Expect(rbrace_Sym);
 	}
@@ -169,6 +190,44 @@ public class Parser {
 		Expect(rbrace_Sym);
 	}
 
+	static void PropertySpec() {
+		Expect(property_Sym);
+		Expect(identifier_Sym);
+		Expect(lbrace_Sym);
+		RangeSet();
+		while (la.kind == number_Sym) {
+			RangeSet();
+		}
+		Expect(rbrace_Sym);
+	}
+
+	static void RangeSet() {
+		Expect(number_Sym);
+		Expect(pointpoint_Sym);
+		Expect(number_Sym);
+		Expect(colon_Sym);
+		Colour();
+		Expect(semicolon_Sym);
+	}
+
+	static void Colour() {
+		Expect(rgblparen_Sym);
+		DoubleConst();
+		Expect(comma_Sym);
+		DoubleConst();
+		Expect(comma_Sym);
+		DoubleConst();
+		Expect(rparen_Sym);
+	}
+
+	static void DoubleConst() {
+		Expect(number_Sym);
+		if (la.kind == point_Sym) {
+			Get();
+			Expect(number_Sym);
+		}
+	}
+
 	static void Statement() {
 		if (la.kind == lbrace_Sym) {
 			Block();
@@ -178,7 +237,7 @@ public class Parser {
 			IfStatement();
 		} else if (la.kind == var_Sym) {
 			VarDeclaration();
-		} else SynErr(36);
+		} else SynErr(39);
 	}
 
 	static void Block() {
@@ -191,16 +250,17 @@ public class Parser {
 
 	static void AssignCall() {
 		Designator();
+		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
 			Get();
 			Expression();
 		} else if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
-			PostOp();
+			T  = PostOp();
 		} else if (la.kind == lparen_Sym) {
 			Get();
 			Arguments();
 			Expect(rparen_Sym);
-		} else SynErr(37);
+		} else SynErr(40);
 		Expect(semicolon_Sym);
 	}
 
@@ -242,18 +302,24 @@ public class Parser {
 
 	static void Expression() {
 		AddExp();
+		RelOpE T = RelOpE.UN;
 		if (StartOf(2)) {
-			RelOp();
+			T  = RelOp();
 			AddExp();
 		}
 	}
 
-	static void PostOp() {
+	static PostOpE PostOp() {
+		PostOpE type;
+		type = PostOpE.UN;	
 		if (la.kind == plusplus_Sym) {
 			Get();
+			type = PostOpE.INC;	
 		} else if (la.kind == minusminus_Sym) {
 			Get();
-		} else SynErr(38);
+			type = PostOpE.DEC;	
+		} else SynErr(41);
+		return type;
 	}
 
 	static void Arguments() {
@@ -287,58 +353,75 @@ public class Parser {
 			}
 		}
 		Term();
+		AddOpE T = AddOpE.UN;
 		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
-			AddOp();
+			T  = AddOp();
 			Term();
 		}
 	}
 
-	static void RelOp() {
+	static RelOpE RelOp() {
+		RelOpE type;
+		type = RelOpE.UN;	
 		switch (la.kind) {
 		case equalequal_Sym: {
 			Get();
+			type = RelOpE.EQ;	
 			break;
 		}
 		case bangequal_Sym: {
 			Get();
+			type = RelOpE.NE;	
 			break;
 		}
 		case greater_Sym: {
 			Get();
+			type = RelOpE.GT;	
 			break;
 		}
 		case less_Sym: {
 			Get();
+			type = RelOpE.LT;	
 			break;
 		}
 		case greaterequal_Sym: {
 			Get();
+			type = RelOpE.GE;	
 			break;
 		}
 		case lessequal_Sym: {
 			Get();
+			type = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(39); break;
+		default: SynErr(42); break;
 		}
+		return type;
 	}
 
 	static void Term() {
 		Factor();
+		MulOpE T = MulOpE.UN;
 		while (StartOf(4)) {
-			MulOp();
+			T  = MulOp();
 			Factor();
 		}
 	}
 
-	static void AddOp() {
+	static AddOpE AddOp() {
+		AddOpE type;
+		type = AddOpE.UN;	
 		if (la.kind == plus_Sym) {
 			Get();
+			type = AddOpE.ADD;	
 		} else if (la.kind == minus_Sym) {
 			Get();
+			type = AddOpE.SUB;	
 		} else if (la.kind == barbar_Sym) {
 			Get();
-		} else SynErr(40);
+			type = AddOpE.OR;	
+		} else SynErr(43);
+		return type;
 	}
 
 	static void Factor() {
@@ -355,31 +438,30 @@ public class Parser {
 			Get();
 			Expression();
 			Expect(rparen_Sym);
-		} else SynErr(41);
+		} else SynErr(44);
 	}
 
-	static void MulOp() {
+	static MulOpE MulOp() {
+		MulOpE type;
+		type = MulOpE.UN;	
 		if (la.kind == star_Sym) {
 			Get();
+			type = MulOpE.MUL;	
 		} else if (la.kind == slash_Sym) {
 			Get();
+			type = MulOpE.DIV;	
 		} else if (la.kind == percent_Sym) {
 			Get();
+			type = MulOpE.MOD;	
 		} else if (la.kind == andand_Sym) {
 			Get();
-		} else SynErr(42);
+			type = MulOpE.AND;	
+		} else SynErr(45);
+		return type;
 	}
 
 	static void Constant() {
 		DoubleConst();
-	}
-
-	static void DoubleConst() {
-		Expect(number_Sym);
-		if (la.kind == point_Sym) {
-			Get();
-			Expect(number_Sym);
-		}
 	}
 
 
@@ -394,11 +476,11 @@ public class Parser {
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x},
-		{x,T,T,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x,x, x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x},
+		{x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x}
 
 	};
 
@@ -522,43 +604,46 @@ class Errors {
 			case 3: s = "\"ruleset\" expected"; break;
 			case 4: s = "\"{\" expected"; break;
 			case 5: s = "\"}\" expected"; break;
-			case 6: s = "\"property\" expected"; break;
-			case 7: s = "\";\" expected"; break;
-			case 8: s = "\"type\" expected"; break;
-			case 9: s = "\":\" expected"; break;
-			case 10: s = "\"=\" expected"; break;
-			case 11: s = "\"(\" expected"; break;
-			case 12: s = "\")\" expected"; break;
-			case 13: s = "\".\" expected"; break;
-			case 14: s = "\"[\" expected"; break;
-			case 15: s = "\"]\" expected"; break;
-			case 16: s = "\"if\" expected"; break;
-			case 17: s = "\"else\" expected"; break;
-			case 18: s = "\"var\" expected"; break;
-			case 19: s = "\",\" expected"; break;
-			case 20: s = "\"+\" expected"; break;
-			case 21: s = "\"-\" expected"; break;
-			case 22: s = "\"==\" expected"; break;
-			case 23: s = "\"!=\" expected"; break;
-			case 24: s = "\">\" expected"; break;
-			case 25: s = "\"<\" expected"; break;
-			case 26: s = "\">=\" expected"; break;
-			case 27: s = "\"<=\" expected"; break;
-			case 28: s = "\"||\" expected"; break;
-			case 29: s = "\"*\" expected"; break;
-			case 30: s = "\"/\" expected"; break;
-			case 31: s = "\"%\" expected"; break;
-			case 32: s = "\"&&\" expected"; break;
-			case 33: s = "\"++\" expected"; break;
-			case 34: s = "\"--\" expected"; break;
-			case 35: s = "??? expected"; break;
-			case 36: s = "invalid Statement"; break;
-			case 37: s = "invalid AssignCall"; break;
-			case 38: s = "invalid PostOp"; break;
-			case 39: s = "invalid RelOp"; break;
-			case 40: s = "invalid AddOp"; break;
-			case 41: s = "invalid Factor"; break;
-			case 42: s = "invalid MulOp"; break;
+			case 6: s = "\"colourset\" expected"; break;
+			case 7: s = "\"property\" expected"; break;
+			case 8: s = "\";\" expected"; break;
+			case 9: s = "\"..\" expected"; break;
+			case 10: s = "\":\" expected"; break;
+			case 11: s = "\"rgb(\" expected"; break;
+			case 12: s = "\",\" expected"; break;
+			case 13: s = "\")\" expected"; break;
+			case 14: s = "\"type\" expected"; break;
+			case 15: s = "\"=\" expected"; break;
+			case 16: s = "\"(\" expected"; break;
+			case 17: s = "\".\" expected"; break;
+			case 18: s = "\"[\" expected"; break;
+			case 19: s = "\"]\" expected"; break;
+			case 20: s = "\"if\" expected"; break;
+			case 21: s = "\"else\" expected"; break;
+			case 22: s = "\"var\" expected"; break;
+			case 23: s = "\"+\" expected"; break;
+			case 24: s = "\"-\" expected"; break;
+			case 25: s = "\"==\" expected"; break;
+			case 26: s = "\"!=\" expected"; break;
+			case 27: s = "\">\" expected"; break;
+			case 28: s = "\"<\" expected"; break;
+			case 29: s = "\">=\" expected"; break;
+			case 30: s = "\"<=\" expected"; break;
+			case 31: s = "\"||\" expected"; break;
+			case 32: s = "\"*\" expected"; break;
+			case 33: s = "\"/\" expected"; break;
+			case 34: s = "\"%\" expected"; break;
+			case 35: s = "\"&&\" expected"; break;
+			case 36: s = "\"++\" expected"; break;
+			case 37: s = "\"--\" expected"; break;
+			case 38: s = "??? expected"; break;
+			case 39: s = "invalid Statement"; break;
+			case 40: s = "invalid AssignCall"; break;
+			case 41: s = "invalid PostOp"; break;
+			case 42: s = "invalid RelOp"; break;
+			case 43: s = "invalid AddOp"; break;
+			case 44: s = "invalid Factor"; break;
+			case 45: s = "invalid MulOp"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

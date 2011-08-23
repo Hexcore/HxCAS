@@ -67,8 +67,8 @@ public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
-	static final int maxT = 35;
-	static final int noSym = 35;
+	static final int maxT = 38;
+	static final int noSym = 38;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
@@ -76,47 +76,50 @@ public class Scanner {
 	static final int ruleset_Sym = 3;
 	static final int lbrace_Sym = 4;
 	static final int rbrace_Sym = 5;
-	static final int property_Sym = 6;
-	static final int semicolon_Sym = 7;
-	static final int type_Sym = 8;
-	static final int colon_Sym = 9;
-	static final int equal_Sym = 10;
-	static final int lparen_Sym = 11;
-	static final int rparen_Sym = 12;
-	static final int point_Sym = 13;
-	static final int lbrack_Sym = 14;
-	static final int rbrack_Sym = 15;
-	static final int if_Sym = 16;
-	static final int else_Sym = 17;
-	static final int var_Sym = 18;
-	static final int comma_Sym = 19;
-	static final int plus_Sym = 20;
-	static final int minus_Sym = 21;
-	static final int equalequal_Sym = 22;
-	static final int bangequal_Sym = 23;
-	static final int greater_Sym = 24;
-	static final int less_Sym = 25;
-	static final int greaterequal_Sym = 26;
-	static final int lessequal_Sym = 27;
-	static final int barbar_Sym = 28;
-	static final int star_Sym = 29;
-	static final int slash_Sym = 30;
-	static final int percent_Sym = 31;
-	static final int andand_Sym = 32;
-	static final int plusplus_Sym = 33;
-	static final int minusminus_Sym = 34;
-	static final int NOT_SYM = 35;
+	static final int colourset_Sym = 6;
+	static final int property_Sym = 7;
+	static final int semicolon_Sym = 8;
+	static final int pointpoint_Sym = 9;
+	static final int colon_Sym = 10;
+	static final int rgblparen_Sym = 11;
+	static final int comma_Sym = 12;
+	static final int rparen_Sym = 13;
+	static final int type_Sym = 14;
+	static final int equal_Sym = 15;
+	static final int lparen_Sym = 16;
+	static final int point_Sym = 17;
+	static final int lbrack_Sym = 18;
+	static final int rbrack_Sym = 19;
+	static final int if_Sym = 20;
+	static final int else_Sym = 21;
+	static final int var_Sym = 22;
+	static final int plus_Sym = 23;
+	static final int minus_Sym = 24;
+	static final int equalequal_Sym = 25;
+	static final int bangequal_Sym = 26;
+	static final int greater_Sym = 27;
+	static final int less_Sym = 28;
+	static final int greaterequal_Sym = 29;
+	static final int lessequal_Sym = 30;
+	static final int barbar_Sym = 31;
+	static final int star_Sym = 32;
+	static final int slash_Sym = 33;
+	static final int percent_Sym = 34;
+	static final int andand_Sym = 35;
+	static final int plusplus_Sym = 36;
+	static final int minusminus_Sym = 37;
+	static final int NOT_SYM = 38;
 	// pragmas
 
 	static short[] start = {
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	  0, 14,  0,  0,  0, 22, 23,  0,  7,  8, 20, 28, 12, 29,  9, 21,
-	  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  6,  5, 31, 27, 30,  0,
+	  0, 15,  0,  0,  0, 23, 24,  0, 11, 10, 21, 31,  9, 32, 28, 22,
+	  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  7,  5, 34, 30, 33,  0,
 	  0,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
-	  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2, 10,  0, 11,  0,  0,
+	  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2, 12,  0, 13,  0,  0,
 	  0,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,
-	  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  3, 18,  4,  0,  0,
+	  2,  2, 29,  2,  2,  2,  2,  2,  2,  2,  2,  3, 19,  4,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -228,6 +231,7 @@ public class Scanner {
 	static void CheckLiteral() {
 		String lit = t.val;
 		if (lit.compareTo("ruleset") == 0) t.kind = ruleset_Sym;
+		else if (lit.compareTo("colourset") == 0) t.kind = colourset_Sym;
 		else if (lit.compareTo("property") == 0) t.kind = property_Sym;
 		else if (lit.compareTo("type") == 0) t.kind = type_Sym;
 		else if (lit.compareTo("if") == 0) t.kind = if_Sym;
@@ -264,65 +268,90 @@ public class Scanner {
 				case 5:
 					{ t.kind = semicolon_Sym; done = true; break; }
 				case 6:
-					{ t.kind = colon_Sym; done = true; break; }
+					{ t.kind = pointpoint_Sym; done = true; break; }
 				case 7:
-					{ t.kind = lparen_Sym; done = true; break; }
+					{ t.kind = colon_Sym; done = true; break; }
 				case 8:
-					{ t.kind = rparen_Sym; done = true; break; }
+					{ t.kind = rgblparen_Sym; done = true; break; }
 				case 9:
-					{ t.kind = point_Sym; done = true; break; }
-				case 10:
-					{ t.kind = lbrack_Sym; done = true; break; }
-				case 11:
-					{ t.kind = rbrack_Sym; done = true; break; }
-				case 12:
 					{ t.kind = comma_Sym; done = true; break; }
+				case 10:
+					{ t.kind = rparen_Sym; done = true; break; }
+				case 11:
+					{ t.kind = lparen_Sym; done = true; break; }
+				case 12:
+					{ t.kind = lbrack_Sym; done = true; break; }
 				case 13:
-					{ t.kind = equalequal_Sym; done = true; break; }
+					{ t.kind = rbrack_Sym; done = true; break; }
 				case 14:
-					if (ch == '=') { buf.append(ch); NextCh(); state = 15; break;}
-					else { t.kind = noSym; done = true; break; }
+					{ t.kind = equalequal_Sym; done = true; break; }
 				case 15:
-					{ t.kind = bangequal_Sym; done = true; break; }
-				case 16:
-					{ t.kind = greaterequal_Sym; done = true; break; }
-				case 17:
-					{ t.kind = lessequal_Sym; done = true; break; }
-				case 18:
-					if (ch == '|') { buf.append(ch); NextCh(); state = 19; break;}
-					else { t.kind = noSym; done = true; break; }
-				case 19:
-					{ t.kind = barbar_Sym; done = true; break; }
-				case 20:
-					{ t.kind = star_Sym; done = true; break; }
-				case 21:
-					{ t.kind = slash_Sym; done = true; break; }
-				case 22:
-					{ t.kind = percent_Sym; done = true; break; }
-				case 23:
-					if (ch == '&') { buf.append(ch); NextCh(); state = 24; break;}
-					else { t.kind = noSym; done = true; break; }
-				case 24:
-					{ t.kind = andand_Sym; done = true; break; }
-				case 25:
-					{ t.kind = plusplus_Sym; done = true; break; }
-				case 26:
-					{ t.kind = minusminus_Sym; done = true; break; }
-				case 27:
-					if (ch == '=') { buf.append(ch); NextCh(); state = 13; break;}
-					else { t.kind = equal_Sym; done = true; break; }
-				case 28:
-					if (ch == '+') { buf.append(ch); NextCh(); state = 25; break;}
-					else { t.kind = plus_Sym; done = true; break; }
-				case 29:
-					if (ch == '-') { buf.append(ch); NextCh(); state = 26; break;}
-					else { t.kind = minus_Sym; done = true; break; }
-				case 30:
 					if (ch == '=') { buf.append(ch); NextCh(); state = 16; break;}
-					else { t.kind = greater_Sym; done = true; break; }
+					else { t.kind = noSym; done = true; break; }
+				case 16:
+					{ t.kind = bangequal_Sym; done = true; break; }
+				case 17:
+					{ t.kind = greaterequal_Sym; done = true; break; }
+				case 18:
+					{ t.kind = lessequal_Sym; done = true; break; }
+				case 19:
+					if (ch == '|') { buf.append(ch); NextCh(); state = 20; break;}
+					else { t.kind = noSym; done = true; break; }
+				case 20:
+					{ t.kind = barbar_Sym; done = true; break; }
+				case 21:
+					{ t.kind = star_Sym; done = true; break; }
+				case 22:
+					{ t.kind = slash_Sym; done = true; break; }
+				case 23:
+					{ t.kind = percent_Sym; done = true; break; }
+				case 24:
+					if (ch == '&') { buf.append(ch); NextCh(); state = 25; break;}
+					else { t.kind = noSym; done = true; break; }
+				case 25:
+					{ t.kind = andand_Sym; done = true; break; }
+				case 26:
+					{ t.kind = plusplus_Sym; done = true; break; }
+				case 27:
+					{ t.kind = minusminus_Sym; done = true; break; }
+				case 28:
+					if (ch == '.') { buf.append(ch); NextCh(); state = 6; break;}
+					else { t.kind = point_Sym; done = true; break; }
+				case 29:
+					if ((ch >= '0' && ch <= '9'
+					  || ch >= 'A' && ch <= 'Z'
+					  || ch >= 'a' && ch <= 'f'
+					  || ch >= 'h' && ch <= 'z')) { buf.append(ch); NextCh(); state = 2; break;}
+					else if (ch == 'g') { buf.append(ch); NextCh(); state = 35; break;}
+					else { t.kind = identifier_Sym; t.val = buf.toString(); CheckLiteral(); return t; }
+				case 30:
+					if (ch == '=') { buf.append(ch); NextCh(); state = 14; break;}
+					else { t.kind = equal_Sym; done = true; break; }
 				case 31:
+					if (ch == '+') { buf.append(ch); NextCh(); state = 26; break;}
+					else { t.kind = plus_Sym; done = true; break; }
+				case 32:
+					if (ch == '-') { buf.append(ch); NextCh(); state = 27; break;}
+					else { t.kind = minus_Sym; done = true; break; }
+				case 33:
 					if (ch == '=') { buf.append(ch); NextCh(); state = 17; break;}
+					else { t.kind = greater_Sym; done = true; break; }
+				case 34:
+					if (ch == '=') { buf.append(ch); NextCh(); state = 18; break;}
 					else { t.kind = less_Sym; done = true; break; }
+				case 35:
+					if ((ch >= '0' && ch <= '9'
+					  || ch >= 'A' && ch <= 'Z'
+					  || ch == 'a'
+					  || ch >= 'c' && ch <= 'z')) { buf.append(ch); NextCh(); state = 2; break;}
+					else if (ch == 'b') { buf.append(ch); NextCh(); state = 36; break;}
+					else { t.kind = identifier_Sym; t.val = buf.toString(); CheckLiteral(); return t; }
+				case 36:
+					if ((ch >= '0' && ch <= '9'
+					  || ch >= 'A' && ch <= 'Z'
+					  || ch >= 'a' && ch <= 'z')) { buf.append(ch); NextCh(); state = 2; break;}
+					else if (ch == '(') { buf.append(ch); NextCh(); state = 8; break;}
+					else { t.kind = identifier_Sym; t.val = buf.toString(); CheckLiteral(); return t; }
 
 			}
 		}
