@@ -315,7 +315,7 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
-		worldSizeXTextBox = new TextBox(new Vector2i(35, 25));
+		worldSizeXTextBox = new TextBox(35);
 		worldSizeXTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXTextBox);
 		
@@ -323,7 +323,7 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
-		worldSizeYTextBox = new TextBox(new Vector2i(35,25));
+		worldSizeYTextBox = new TextBox(35);
 		worldSizeYTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeYTextBox);
 		
