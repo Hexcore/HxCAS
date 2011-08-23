@@ -43,6 +43,7 @@ public class UITestApplication implements WindowEventListener
 	public LinearLayout	headerLayout;
 	public LinearLayout	mainLayout;
 	public LinearLayout	buttonBarLayout;
+	public LinearLayout	outerLayout;
 	public LinearLayout	innerLayout;
 	
 	public TextBox		nameTextBox;
@@ -211,10 +212,15 @@ public class UITestApplication implements WindowEventListener
 		mainView.setFlag(Widget.FILL);
 		mainPanel.setContents(mainView);
 		
+		outerLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		outerLayout.setFlag(Widget.FILL);
+		outerLayout.setFlag(Widget.WRAP);
+		mainView.add(outerLayout);
+		
 		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		innerLayout.setFlag(Widget.FILL);
 		innerLayout.setFlag(Widget.WRAP);
-		mainView.add(innerLayout);
+		outerLayout.add(innerLayout);
 		
 		nameTextBox = new TextBox(100);
 		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
@@ -247,9 +253,9 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
 		
-		description = new TextArea(100, 5);
-		description.setFlag(Widget.FILL_HORIZONTAL);
-		innerLayout.add(description);
+		description = new TextArea(100, 20);
+		description.setFlag(Widget.FILL);
+		outerLayout.add(description);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);

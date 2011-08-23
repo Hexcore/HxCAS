@@ -379,7 +379,7 @@ public class Theme
 		}
 	}
 	
-	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, float time)
+	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, boolean lineNumbers, float time)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -391,12 +391,31 @@ public class Theme
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
-		renderFlowedText(gl, position.add(padding), text, textColour);
+		int			sideMargin = 0;
+		if (lineNumbers)
+		{
+			sideMargin = calculateTextWidth("1"+text.getNumLines(), Text.Size.SMALL) + padding.x;
+			
+			Fill	sideMarginBackground = getFill("TextBoxLineNumbers", stateName, "background");
+			Colour	sideMarginBorder = getColour("TextBoxLineNumbers", stateName, "border");
+			Colour	sideMarginText = getColour("TextBoxLineNumbers", stateName, "text-colour");
+			
+			Graphics.renderRectangle(gl, position, new Vector2i(sideMargin, size.y), 0, sideMarginBackground);
+			Graphics.renderLine(gl, position.add(sideMargin, 0), position.add(sideMargin, size.y), sideMarginBorder);
+			
+			for (int i = 1; i <= text.getNumLines(); i++)
+			{
+				Vector2i linePos = position.add(0, (i-1) * text.lineHeight).add(padding);
+				renderText(gl, ""+i, linePos, sideMarginText, Text.Size.SMALL);
+			}
+		}
+		
+		renderFlowedText(gl, position.add(padding).add(sideMargin, 0), text, textColour);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && (time % 2.0f < 1.0f))
 		{
-			Vector2i cursorPos = text.getCursorPosition(this, cursorIndex);
+			Vector2i cursorPos = text.getCursorPosition(this, cursorIndex).add(sideMargin, 0);
 			Graphics.renderRectangle(gl, position.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);
 		}
 	}
@@ -573,6 +592,12 @@ public class Theme
 		LineMetrics metrics = font.getLineMetrics("test", context);
 		return (int)(metrics.getAscent() + metrics.getDescent());
 	}
+	
+	public int calculateTextWidth(String text, Text.Size textSize)
+	{
+		TextRenderer textRenderer = textRenderers.get(textSize);		
+		return (int)textRenderer.getBounds(text).getMaxX();
+	}	
 	
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
 	{
