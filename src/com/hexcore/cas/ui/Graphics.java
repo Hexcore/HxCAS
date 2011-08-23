@@ -9,56 +9,21 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
 
 public class Graphics
-{
-	private static int addCornerToArray(int index, Vector2f[] array, Vector2f start, int radius, int quarter, boolean isBorder)
+{	
+	public static void renderLine(GL gl, Vector2i from, Vector2i to, Colour colour)
 	{
-		for (int i = 0; i <= radius; i++)
-		{
-			double angle = ((double)i / radius) * Math.PI / 2.0 + (Math.PI / 2) * (quarter - 2);
-			Vector2f p = new Vector2f(start.x + (float)(Math.sin(angle) * radius), start.y + (float)(Math.cos(angle) * radius));
-			
-			if (isBorder)
-				switch (quarter)
-				{
-					case 0: p.inc( 0.5f,  0.5f); break;
-					case 1: p.inc( 0.5f, -0.5f); break;
-					case 2: p.inc(-0.5f, -0.5f); break;
-					case 3: p.inc(-0.5f,  0.5f); break;
-				}
-			
-			array[index++] = p;
-		}
-		return index;
-	}
+		GL2 gl2 = gl.getGL2();
 		
-	private static Vector2f[] createRoundedRectangle(Vector2i pos, Vector2i size, int radius, BorderShape borderShape, boolean isBorder)
-	{
-		int	corners = borderShape.getNumCorners();
-		
-		Vector2f[]	points = new Vector2f[(radius + 1) * corners + (4 - corners)];
-		int	index = 0;
-		
-		if (borderShape.has(BorderShape.TOP_LEFT) && (radius > 0))
-			index = addCornerToArray(index, points, new Vector2f(radius, radius), radius, 0, isBorder);
-		else
-			points[index++] = isBorder ? new Vector2f(0.5f, 0.5f) : new Vector2f(0, 0);
-		
-		if (borderShape.has(BorderShape.BOTTOM_LEFT) && (radius > 0))
-			index = addCornerToArray(index, points, new Vector2f(radius, size.y - radius), radius, 1, isBorder);
-		else
-			points[index++] = isBorder ? new Vector2f(0.5f, size.y-0.5f) : new Vector2f(0, size.y);
-		
-		if (borderShape.has(BorderShape.BOTTOM_RIGHT) && (radius > 0))
-			index = addCornerToArray(index, points, new Vector2f(size.x - radius, size.y -radius), radius, 2, isBorder);
-		else
-			points[index++] = isBorder ? new Vector2f(size.x-0.5f, size.y-0.5f) : new Vector2f(size.x, size.y);
-		
-		if (borderShape.has(BorderShape.TOP_RIGHT) && (radius > 0))
-			index = addCornerToArray(index, points, new Vector2f(size.x - radius, radius), radius, 3, isBorder);
-		else
-			points[index++] = isBorder ? new Vector2f(size.x-0.5f, 0.5f) : new Vector2f(size.x, 0);
-		
-		return points;
+		applyColour(gl2, colour);
+        gl2.glBegin(GL.GL_LINES);
+	    	gl2.glVertex2f(from.x+0.5f,	from.y+0.5f);
+	    	gl2.glVertex2f(from.x+0.5f,	to.y+0.5f);
+	    	gl2.glVertex2f(to.x+0.5f,	from.y+0.5f);
+	    	gl2.glVertex2f(to.x+0.5f,	to.y+0.5f);
+		gl2.glEnd();
+        gl2.glBegin(GL.GL_POINTS);
+	    	gl2.glVertex2f(to.x+0.5f,	to.y+0.5f);
+		gl2.glEnd();		
 	}
 	
 	public static void renderRoundedBorderedRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill, Fill border)
@@ -336,5 +301,56 @@ public class Graphics
 			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
 		else
 			gl.glColor4f(colour.r, colour.g, colour.b, colour.a);			
+	}
+	
+	private static int addCornerToArray(int index, Vector2f[] array, Vector2f start, int radius, int quarter, boolean isBorder)
+	{
+		for (int i = 0; i <= radius; i++)
+		{
+			double angle = ((double)i / radius) * Math.PI / 2.0 + (Math.PI / 2) * (quarter - 2);
+			Vector2f p = new Vector2f(start.x + (float)(Math.sin(angle) * radius), start.y + (float)(Math.cos(angle) * radius));
+			
+			if (isBorder)
+				switch (quarter)
+				{
+					case 0: p.inc( 0.5f,  0.5f); break;
+					case 1: p.inc( 0.5f, -0.5f); break;
+					case 2: p.inc(-0.5f, -0.5f); break;
+					case 3: p.inc(-0.5f,  0.5f); break;
+				}
+			
+			array[index++] = p;
+		}
+		return index;
+	}
+		
+	private static Vector2f[] createRoundedRectangle(Vector2i pos, Vector2i size, int radius, BorderShape borderShape, boolean isBorder)
+	{
+		int	corners = borderShape.getNumCorners();
+		
+		Vector2f[]	points = new Vector2f[(radius + 1) * corners + (4 - corners)];
+		int	index = 0;
+		
+		if (borderShape.has(BorderShape.TOP_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, radius), radius, 0, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, 0.5f) : new Vector2f(0, 0);
+		
+		if (borderShape.has(BorderShape.BOTTOM_LEFT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(radius, size.y - radius), radius, 1, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(0.5f, size.y-0.5f) : new Vector2f(0, size.y);
+		
+		if (borderShape.has(BorderShape.BOTTOM_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, size.y -radius), radius, 2, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, size.y-0.5f) : new Vector2f(size.x, size.y);
+		
+		if (borderShape.has(BorderShape.TOP_RIGHT) && (radius > 0))
+			index = addCornerToArray(index, points, new Vector2f(size.x - radius, radius), radius, 3, isBorder);
+		else
+			points[index++] = isBorder ? new Vector2f(size.x-0.5f, 0.5f) : new Vector2f(size.x, 0);
+		
+		return points;
 	}
 }

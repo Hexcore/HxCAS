@@ -40,6 +40,7 @@ public class ThemeParser
 		validTypes.add("ScrollbarHandle");
 		validTypes.add("ScrollbarFill");
 		validTypes.add("TextBox");
+		validTypes.add("TextBoxLineNumbers");
 		validTypes.add("CheckBox");
 		validTypes.add("CheckBoxCaption");
 		validTypes.add("DropDownBox");

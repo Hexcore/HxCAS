@@ -8,7 +8,8 @@ import com.hexcore.cas.math.Vector2i;
 
 public class TextArea extends TextBox
 {	
-	private	int	rows;
+	private	int		rows;
+	private boolean lineNumbers;
 	
 	private FlowedText	flowedText;
 	
@@ -36,6 +37,11 @@ public class TextArea extends TextBox
 		this.rows = rows;
 	}
 	
+	public void setLineNumbers(boolean state)
+	{
+		lineNumbers = state;
+	}
+	
 	@Override
 	public void	setText(String text) {this.text = text; relayout();}
 	
@@ -53,8 +59,11 @@ public class TextArea extends TextBox
 		{
 			reflowText();
 			
-			int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
-			super.setHeight(boxHeight);
+			if (!isSet(Widget.FILL_VERTICAL))
+			{
+				int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
+				super.setHeight(boxHeight);
+			}
 		}
 	}
 	
@@ -65,7 +74,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, true, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -76,13 +85,17 @@ public class TextArea extends TextBox
 		
 		if (focused)
 		{
+			handled = true;
+			
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
+				cursorFlash = 0.0f;
+				
 				if ((event.button == KeyEvent.VK_UP) && (cursorIndex > 0))
 					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
-				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
+				else if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
 					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
@@ -93,8 +106,9 @@ public class TextArea extends TextBox
 			{
 				text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
 				cursorIndex++;
-				handled = true;
 			}
+			else
+				handled = false;
 		}
 	
 		if (!handled) handled = super.handleEvent(event, position);
@@ -104,6 +118,7 @@ public class TextArea extends TextBox
 	
 	public void reflowText()
 	{
-		if (window != null) flowedText = window.getTheme().flowText(text, -1, textSize);
+		if (window != null) 
+			flowedText = window.getTheme().flowText(text, -1, textSize);
 	}
 }

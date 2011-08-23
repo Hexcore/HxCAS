@@ -11,6 +11,11 @@ public class FlowedText
 	public int			lineHeight;
 	public Text.Size	textSize;
 	
+	public int getNumLines()
+	{
+		return lines.size();
+	}
+	
 	public int getLineBeginningCursorPosition(int cursor)
 	{
 		int	newCursor = 0;
