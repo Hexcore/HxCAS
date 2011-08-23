@@ -31,3 +31,33 @@ ruleset Flood
 		/*self.water = 100;*/
 	}
 }
+
+colourset colours1
+{
+	property bla
+	{
+		0..5 : rgb(0.5, 0.1, 0.2);
+		5..10 : rgb(0.3, 0.1, 0.2);
+	}
+	
+	property another
+	{
+		0..5 : rgb(0.5, 0.1, 0.2);
+		5..10 : rgb(0.3, 0.1, 0.2);
+	}
+}
+
+colourset colours2
+{
+	property bla
+	{
+		0..5 : rgb(0.5, 0.1, 0.2);
+		5..10 : rgb(0.3, 0.1, 0.2);
+	}
+	
+	property another
+	{
+		0..5 : rgb(0.5, 0.1, 0.2);
+		5..10 : rgb(0.3, 0.1, 0.2);
+	}
+}

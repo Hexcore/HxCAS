@@ -3,12 +3,19 @@ import java.util.ArrayList;
 
 COMPILER CAL $NC
 
+static enum RelOpE{LT, GT, LE, GE, EQ, NE, UN};
+static enum AddOpE{ADD, SUB, OR, UN};
+static enum MulOpE{MUL, DIV, MOD, AND, UN};
+static enum PostOpE{INC, DEC, UN};
+
 CHARACTERS
   digit      = "0123456789" .
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
 
 TOKENS
-  number     = digit { digit } .
+  number	= digit { digit } .
+  double	= digit {digit}"."{digit} .
+  
   identifier = letter { letter | digit } .
   
 COMMENTS FROM "/*" TO "*/"
@@ -19,7 +26,8 @@ IGNORE CHR(0) .. CHR(31)
 PRODUCTIONS
 	CAL
   	=
-  	RuleSet  
+  	RuleSet
+  	[ColourSet]
   	.
   	
   	
@@ -33,12 +41,48 @@ PRODUCTIONS
   	"}"
   	.
   	
+  	ColourSet
+  	=
+  	"colourset" identifier
+  	"{"
+  		{PropertySpec}
+  	"}"
+  	.
+  	
   	
   	
   	Property
   	=
   	"property" identifier ";"
   	.
+  	
+  
+  	PropertySpec
+  	=
+  	"property" identifier
+  	"{"
+  		RangeSet {RangeSet}
+  	"}"
+  	.
+  	
+  	RangeSet
+  	=
+  	number ".." number
+  	":"
+  	Colour
+  	";"
+  	.
+  	
+  	Colour									(. double value = 0.0;	.)
+  	=
+  	"rgb("
+  	DoubleConst< out value >
+  	 "," DoubleConst< out value >
+  	 "," DoubleConst< out value >
+  	")"
+  	.
+  
+  	
   	
   	TypeSpec
   	=
@@ -71,10 +115,10 @@ PRODUCTIONS
   	
   	AssignCall
   	=
-  	Designator
+  	Designator						(. PostOpE T = PostOpE.UN; .)
   	(
   		"=" Expression
-  		| PostOp
+  		| PostOp< out T >
   		| "(" Arguments ")"
   	)
   	";"
@@ -125,8 +169,9 @@ PRODUCTIONS
   	
   	Expression
   	=
-  	AddExp
-  	[RelOp AddExp]
+  	AddExp							(. RelOpE T = RelOpE.UN; .) 
+  	[RelOp< out T >
+  	 AddExp]
   	.
   	
   	
@@ -134,34 +179,43 @@ PRODUCTIONS
   	AddExp
   	=
   	["+" | "-"]
-  	Term
-  	{AddOp Term}
+  	Term							(. AddOpE T = AddOpE.UN; .)
+  	{AddOp< out T > 
+  	Term}
   	.
   	
   	
   	
-  	Term
+  	Term									(. double val1, val2; .)
   	=
-  	Factor
-  	{MulOp Factor}
+  	Factor< out val1 >						(. MulOpE T = MulOpE.UN; .)
+  	{
+  	MulOp< out T >
+  	Factor< out val2 >
+  	}
   	.
   	
   	
   	
-  	Factor
+  	Factor<. out double value .>			(. value = 0;	.)
   	=
   	Designator
   	["(" Arguments ")"]
   	|
-  	Constant
+  	Constant< out value >
   	| "(" Expression ")"
   	.
   	
   	
   	
-  	Constant
+  	Constant<. out double value .>		(. 	
+  											value = 0;
+  											int iValue = 0;
+  											double dValue = 0;
+  										.)
   	=
-  	DoubleConst
+  	DoubleConst< out dValue >			(.	value = dValue; .)
+	| IntConst< out iValue >			(.	value = iValue; .)
   	.
   	
   	
@@ -176,41 +230,41 @@ PRODUCTIONS
   	
   	
   	
-  	RelOp
+  	RelOp<. out RelOpE type .>		(. type = RelOpE.UN;	.)
   	=
-  	"=="
-  	| "!="
-  	| ">"
-  	| "<"
-  	| ">="
-  	| "<="
+  	"=="							(. type = RelOpE.EQ;	.)
+  	| "!="							(. type = RelOpE.NE;	.)
+  	| ">"							(. type = RelOpE.GT;	.)
+  	| "<"							(. type = RelOpE.LT;	.)
+  	| ">="							(. type = RelOpE.GE;	.)
+  	| "<="							(. type = RelOpE.LE;	.)
   	.
   	
   	
   	
-  	AddOp
+  	AddOp<. out AddOpE type .>		(. type = AddOpE.UN;	.)
   	=
-  	"+"
-  	| "-"
-  	| "||"
+  	"+"								(. type = AddOpE.ADD;	.)
+  	| "-"							(. type = AddOpE.SUB;	.)
+  	| "||"							(. type = AddOpE.OR;	.)
   	.
   	
   	
   	
-  	MulOp
+  	MulOp<. out MulOpE type .>		(. type = MulOpE.UN;	.)
   	=
-  	"*"
-  	| "/"
-  	| "%"
-  	| "&&"
+  	"*"								(. type = MulOpE.MUL;	.)
+  	| "/"							(. type = MulOpE.DIV;	.)
+  	| "%"							(. type = MulOpE.MOD;	.)
+  	| "&&"							(. type = MulOpE.AND;	.)
   	.
   	
   	
   	
-  	PostOp
+  	PostOp<. out PostOpE type .>	(. type = PostOpE.UN;	.)
   	=
-  	"++"
-  	| "--"
+  	"++"							(. type = PostOpE.INC;	.)
+  	| "--"							(. type = PostOpE.DEC;	.)
   	.
   	
   	
@@ -225,13 +279,19 @@ PRODUCTIONS
   	
   	
   	
-  	DoubleConst
+  	DoubleConst<. out double value .>		
   	=
-  	number
-  	[
-  	"." number
-  	]
+	double									(. value = Double.parseDouble(token.val); .)
   	.
+  	
+  	IntConst<. out int value .>
+  	=
+  	number									(. value = Integer.parseInt(token.val); .)
+  	.
+  	
+  
+  	
+  
   	
 
 END CAL.
