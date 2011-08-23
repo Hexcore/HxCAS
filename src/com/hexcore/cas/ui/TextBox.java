@@ -79,9 +79,9 @@ public class TextBox extends Widget
 			cursorIndex = text.length();
 		}
 		else if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
-		{
+		{			
 			handled = true;
-			window.requestFocus(this);
+			window.requestFocus(this);			
 		}
 		else if (focused)
 		{
@@ -97,11 +97,11 @@ public class TextBox extends Widget
 			}
 			else if (event.type == Event.Type.KEY_TYPED)
 			{
-				if ((event.button >= ' ') && (event.button != 127))
+				if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
 				{
 					text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
 					cursorIndex++;
-				}
+				}		
 				else if (event.button == '\n') // Enter
 				{
 					window.giveUpFocus(this);
