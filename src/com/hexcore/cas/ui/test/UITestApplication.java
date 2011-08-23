@@ -213,6 +213,7 @@ public class UITestApplication implements WindowEventListener
 		mainPanel.setContents(mainView);
 		
 		outerLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		outerLayout.setMargin(new Vector2i(0, 0));
 		outerLayout.setFlag(Widget.FILL);
 		outerLayout.setFlag(Widget.WRAP);
 		mainView.add(outerLayout);
