@@ -410,13 +410,12 @@ public class Theme
 			}
 		}
 		
-		if (selectIndex != cursorIndex) System.out.println(selectIndex + "  " + cursorIndex);
-		
+		Colour		selectedColour = getColour("TextBox", stateName, "selected-colour", Colour.YELLOW);
 		Vector2i	cursorLocation = text.getCursorLocation(cursorIndex);
 		Vector2i	selectLocation = text.getCursorLocation(selectIndex);
 		
 		if (cursorLocation.y == selectLocation.y)
-		{			
+		{
 			int y = cursorLocation.y;
 			int start = Math.min(cursorLocation.x, selectLocation.x);
 			int end = Math.max(cursorLocation.x, selectLocation.x);
@@ -424,7 +423,46 @@ public class Theme
 			Vector2i startPos = text.getCursorPosition(this, new Vector2i(start, y)).add(sideMargin, 0);
 			Vector2i endPos = text.getCursorPosition(this, new Vector2i(end, y)).add(sideMargin, 0);
 			
-			Graphics.renderRectangle(gl, position.add(padding).add(startPos), endPos.subtract(startPos).add(0, text.lineHeight), Colour.YELLOW);
+			Graphics.renderRectangle(gl, position.add(padding).add(startPos), endPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
+		}
+		else
+		{
+			int start, end;
+			
+			if (cursorLocation.y < selectLocation.y)
+			{
+				start = cursorIndex;
+				end = selectIndex;
+			}
+			else
+			{
+				start = selectIndex;	
+				end = cursorIndex;
+			}
+			
+			Vector2i	startPos = text.getCursorPosition(this, start);
+			Vector2i	startFinPos = text.getCursorPosition(this, text.getLineEndCursorPosition(start));
+			
+			Graphics.renderRectangle(gl, position.add(padding).add(startPos).add(sideMargin, 0), 
+					startFinPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
+			
+			int sy = Math.min(cursorLocation.y, selectLocation.y);
+			int ey = Math.max(cursorLocation.y, selectLocation.y);
+			
+			for (int i = sy + 1; i < ey; i++)
+			{
+				Vector2i	bPos = text.getCursorPosition(this, text.getLineBeginningCursorPositionFromLine(i));
+				Vector2i	ePos = text.getCursorPosition(this, text.getLineEndCursorPositionFromLine(i));
+				
+				Graphics.renderRectangle(gl, position.add(padding).add(bPos).add(sideMargin, 0), 
+						ePos.subtract(bPos).add(0, text.lineHeight), selectedColour);		
+			}
+			
+			Vector2i	endFinPos = text.getCursorPosition(this, end);
+			Vector2i	endPos = text.getCursorPosition(this, text.getLineBeginningCursorPosition(end));
+			
+			Graphics.renderRectangle(gl, position.add(padding).add(endPos).add(sideMargin, 0), 
+					endFinPos.subtract(endPos).add(0, text.lineHeight), selectedColour);			
 		}
 		
 		renderFlowedText(gl, position.add(padding).add(sideMargin, 0), text, textColour);

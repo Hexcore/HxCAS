@@ -16,6 +16,13 @@ public class FlowedText
 		return lines.size();
 	}
 	
+	public int getLineBeginningCursorPositionFromLine(int line)
+	{
+		int	cursor = 0;
+		for (int i = 0; i < line; i++) cursor += lines.get(i).length();
+		return cursor;
+	}
+	
 	public int getLineBeginningCursorPosition(int cursor)
 	{
 		int	newCursor = 0;
@@ -27,6 +34,13 @@ public class FlowedText
 		}
 
 		return newCursor;
+	}
+	
+	public int getLineEndCursorPositionFromLine(int line)
+	{
+		int	cursor = 0;
+		for (int i = 0; i <= line; i++) cursor += lines.get(i).length();
+		return cursor - 1;
 	}
 	
 	public int getLineEndCursorPosition(int cursor)
