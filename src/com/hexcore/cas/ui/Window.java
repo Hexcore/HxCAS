@@ -74,6 +74,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		canvas = new GLCanvas(capabilites);
 		canvas.setPreferredSize(new Dimension(width, height));
 		canvas.setAutoSwapBufferMode(false);
+		canvas.setFocusTraversalKeysEnabled(false);
 
 		frame = new Frame(title);
 			
@@ -196,6 +197,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void giveUpFocus(Widget widget)
 	{
+		if (widget != focusedWidget) return;
+		
 		if (focusedWidget != null)
 		{
 			Event event = new Event(Event.Type.LOST_FOCUS);
@@ -207,6 +210,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void requestFocus(Widget widget)
 	{
 		if ((widget == null) || !widget.canGetFocus()) return;
+		if (widget == focusedWidget) return;
 		
 		giveUpFocus(focusedWidget);
 		focusedWidget = widget;

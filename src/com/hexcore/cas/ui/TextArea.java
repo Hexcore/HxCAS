@@ -74,7 +74,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, true, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, lineNumbers, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -87,7 +87,20 @@ public class TextArea extends TextBox
 		{
 			handled = true;
 			
-			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
+			if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
+			{
+				int sideMargin = window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
+				
+				Vector2i textPos = event.position.subtract(position).subtract(padding).subtract(sideMargin + padding.x, 0);
+				
+				int index = flowedText.getCursorIndex(window.getTheme(), textPos);
+				System.out.println(index);
+				if (index > -1) cursorIndex = index;
+				
+				handled = true;
+				window.requestFocus(this);			
+			}
+			else if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
 				cursorFlash = 0.0f;
 				

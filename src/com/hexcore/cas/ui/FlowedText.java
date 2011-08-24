@@ -70,6 +70,28 @@ public class FlowedText
 		return newCursor;
 	}
 	
+	public int getCursorIndex(Theme theme, Vector2i position)
+	{
+		System.out.println(position);
+		
+		int	lineNum = position.y / lineHeight;
+		if (lineNum < 0 || lineNum >= lines.size()) return -1;
+		
+		int offsetIndex = 0;
+		for (int i = 0; i < lineNum; i++) offsetIndex += lines.get(i).length();
+		
+		String line = lines.get(lineNum);
+		int	lastLength = 0;
+		for (int i = 0; i < line.length() - 1; i++)
+		{
+			int length = theme.calculateTextSize(line.substring(0, i+1), textSize).x;
+			if (position.x <= (length + lastLength) / 2 + 1) return offsetIndex + i;
+			lastLength = length;
+		}
+		
+		return offsetIndex + line.length() - 1;
+	}
+	
 	public Vector2i getCursorLocation(int cursor)
 	{
 		int	height = 0;

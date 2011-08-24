@@ -595,8 +595,11 @@ public class Theme
 	
 	public int calculateTextWidth(String text, Text.Size textSize)
 	{
-		TextRenderer textRenderer = textRenderers.get(textSize);		
-		return (int)textRenderer.getBounds(text).getMaxX();
+		TextRenderer textRenderer = textRenderers.get(textSize);	
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		return (int)font.getStringBounds(text, context).getWidth();
 	}	
 	
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
@@ -606,7 +609,7 @@ public class Theme
 		Font font = textRenderer.getFont();
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
-		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
+		return new Vector2i((int)font.getStringBounds(text, context).getWidth(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
 
 	public void renderShadowedText(GL gl, String text, Vector2i position, Colour colour, Colour shadowColour, Vector2i shadowOffset, Text.Size textSize)
