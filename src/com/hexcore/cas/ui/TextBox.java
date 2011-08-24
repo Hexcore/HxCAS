@@ -82,7 +82,7 @@ public class TextBox extends Widget
 		Vector2i pos = this.position.add(position);
 		
 		window.setClipping(gl, pos, size);
-		window.getTheme().renderTextBox(gl, pos, size, text, cursorIndex, focused, cursorFlash);
+		window.getTheme().renderTextBox(gl, pos, size, text, selectIndex, cursorIndex, focused, cursorFlash);
 		window.resetView(gl);
 	}
 	
