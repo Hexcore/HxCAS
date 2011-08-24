@@ -11,8 +11,6 @@ public class TextArea extends TextBox
 	private	int		rows;
 	private boolean lineNumbers;
 	
-	private FlowedText	flowedText;
-	
 	@Deprecated
 	public TextArea(Vector2i size)
 	{
@@ -42,6 +40,29 @@ public class TextArea extends TextBox
 		lineNumbers = state;
 	}
 	
+	@Override
+	public int getInnerX() 
+	{
+		int sideMargin = 0;
+		
+		if (window != null && lineNumbers) 
+			sideMargin = padding.x + window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
+		
+		return sideMargin + padding.x;
+	}
+	
+	@Override
+	public int getInnerY() 
+	{
+		return padding.y;
+	}
+	
+	@Override
+	public Vector2i	getInnerOffset() 
+	{
+		return new Vector2i(getInnerX(), getInnerY());
+	}
+		
 	@Override
 	public void	setText(String text) {this.text = text; relayout();}
 	
@@ -87,20 +108,7 @@ public class TextArea extends TextBox
 		{
 			handled = true;
 			
-			if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
-			{
-				int sideMargin = window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
-				
-				Vector2i textPos = event.position.subtract(position).subtract(padding).subtract(sideMargin + padding.x, 0);
-				
-				int index = flowedText.getCursorIndex(window.getTheme(), textPos);
-				System.out.println(index);
-				if (index > -1) cursorIndex = index;
-				
-				handled = true;
-				window.requestFocus(this);			
-			}
-			else if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
+			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
 				cursorFlash = 0.0f;
 				
@@ -108,10 +116,6 @@ public class TextArea extends TextBox
 					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
-				else if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
-					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
-				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
-					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
 				else
 					handled = false;
 			}
@@ -124,14 +128,8 @@ public class TextArea extends TextBox
 				handled = false;
 		}
 	
-		if (!handled) handled = super.handleEvent(event, position);
 		if (handled) relayout();
+		if (!handled) handled = super.handleEvent(event, position);
 		return handled;
-	}
-	
-	public void reflowText()
-	{
-		if (window != null) 
-			flowedText = window.getTheme().flowText(text, -1, textSize);
 	}
 }

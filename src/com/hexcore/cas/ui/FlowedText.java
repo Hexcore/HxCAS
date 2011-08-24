@@ -72,8 +72,6 @@ public class FlowedText
 	
 	public int getCursorIndex(Theme theme, Vector2i position)
 	{
-		System.out.println(position);
-		
 		int	lineNum = position.y / lineHeight;
 		if (lineNum < 0 || lineNum >= lines.size()) return -1;
 		
