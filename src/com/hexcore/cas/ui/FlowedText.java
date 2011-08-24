@@ -99,30 +99,29 @@ public class FlowedText
 			cursor -= line.length();
 			height++;
 		}
+
+		if (lines.isEmpty() || lines.get(lines.size() - 1).isEmpty())
+			return new Vector2i(0, height);
+		else
+			return new Vector2i(lines.get(lines.size() - 1).length(), height);
+	}	
+	
+	public Vector2i getCursorPosition(Theme theme, Vector2i cursorLocation)
+	{
+		if (lines.isEmpty()) return new Vector2i(0, 0);
 		
-		return new Vector2i(0, 0);
+		int	ly = Math.max(Math.min(cursorLocation.y, lines.size() - 1), 0);
+		
+		String	line = lines.get(ly);
+		
+		int lx = Math.max(Math.min(cursorLocation.x, line.length() - 1), 0);
+		
+		int		x = theme.calculateTextSize(line.substring(0, lx), textSize).x;
+		return new Vector2i(x, lineHeight * ly);
 	}	
 	
 	public Vector2i getCursorPosition(Theme theme, int cursor)
 	{
-		int	height = 0;
-		for (String line : lines)
-		{
-			if (cursor < line.length())
-			{
-				int x = theme.calculateTextSize(line.substring(0, cursor), textSize).x;
-				return new Vector2i(x, height);
-			}
-			
-			cursor -= line.length();
-			height += lineHeight;
-		}
-		
-		int width = 0;
-		
-		if (!lines.isEmpty()) 
-			width = theme.calculateTextSize(lines.get(lines.size()-1), textSize).x;
-		
-		return new Vector2i(width, lineHeight * (lines.size() - 1));
+		return getCursorPosition(theme, getCursorLocation(cursor));
 	}
 }

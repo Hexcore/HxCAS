@@ -95,7 +95,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, lineNumbers, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -130,6 +130,7 @@ public class TextArea extends TextBox
 	
 		if (handled) relayout();
 		if (!handled) handled = super.handleEvent(event, position);
+				
 		return handled;
 	}
 }

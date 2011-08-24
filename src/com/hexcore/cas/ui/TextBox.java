@@ -143,6 +143,9 @@ public class TextBox extends Widget
 		}
 		else if (focused)
 		{
+			int startIndex = Math.min(cursorIndex, selectIndex);
+			int endIndex = Math.max(cursorIndex, selectIndex);
+			
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
@@ -161,8 +164,12 @@ public class TextBox extends Widget
 			{
 				if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
 				{
-					text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
-					cursorIndex++;
+					text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+					
+					if (startIndex != endIndex)
+						cursorIndex = startIndex + 1;
+					else
+						cursorIndex++;
 				}		
 				else if (event.button == '\n') // Enter
 				{
@@ -170,15 +177,29 @@ public class TextBox extends Widget
 				}
 				else if (event.button == '\b') // Backspace
 				{
-					if ((text.length() > 0) && (cursorIndex > 0))
+					if (text.length() > 0)
 					{
-						text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
-						cursorIndex--;
+						if (startIndex != endIndex)
+						{
+							text = text.substring(0, startIndex) + text.substring(endIndex);
+							cursorIndex = startIndex;
+						}
+						else if (startIndex > 0)
+						{
+							text = text.substring(0, startIndex - 1) + text.substring(endIndex);
+							cursorIndex--;
+						}
 					}
 				}
-				else if ((event.button == 127) && (cursorIndex < text.length())) // Delete
+				else if (event.button == 127) // Delete
 				{
-					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
+					if (startIndex != endIndex)
+					{
+						text = text.substring(0, startIndex) + text.substring(endIndex);
+						cursorIndex = startIndex;
+					}
+					else if (cursorIndex < text.length())
+						text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
 				}
 				else
 					handled = false;
@@ -189,6 +210,8 @@ public class TextBox extends Widget
 			}
 			else
 				handled = false;
+			
+			if (handled) selectIndex = cursorIndex;
 		}
 		
 		if (handled) cursorFlash = 0.0f;
