@@ -149,7 +149,38 @@ public class TextBox extends Widget
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
-				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
+				if (event.hasModifier(Event.CTRL))
+				{
+					if (event.button == KeyEvent.VK_V)
+					{
+						String clipboard = window.getClipboardText();
+	
+						text = text.substring(0, startIndex) + clipboard + text.substring(endIndex);
+						
+						if (startIndex < endIndex)
+							cursorIndex = startIndex + clipboard.length();
+						else
+							cursorIndex += clipboard.length();
+					}
+					else if (event.button == KeyEvent.VK_C)
+					{
+						if (startIndex < endIndex)
+						{
+							window.setClipboardText(text.substring(startIndex, endIndex));
+							cursorIndex = startIndex;
+						}
+					}	
+					else if (event.button == KeyEvent.VK_X)
+					{
+						if (startIndex < endIndex)
+						{
+							window.setClipboardText(text.substring(startIndex, endIndex));
+							text = text.substring(0, startIndex) + text.substring(endIndex);
+							cursorIndex = startIndex;
+						}	
+					}	
+				}
+				else if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
 					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
@@ -160,7 +191,7 @@ public class TextBox extends Widget
 				else
 					handled = false;
 			}
-			else if (event.type == Event.Type.KEY_TYPED)
+			else if (event.type == Event.Type.KEY_TYPED && !event.hasModifier(Event.CTRL))
 			{
 				if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
 				{

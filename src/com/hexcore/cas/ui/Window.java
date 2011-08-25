@@ -2,30 +2,41 @@ package com.hexcore.cas.ui;
 
 import java.awt.Dimension;
 import java.awt.FileDialog;
-
 import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseListener;
-
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.media.opengl.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener
+public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ClipboardOwner
 {	
 	private Frame 		frame;
 	private GLCanvas	canvas;
@@ -294,6 +305,34 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         relayout();
 	}
 	
+	public String getClipboardText()
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		
+		String contents = "" ;
+		Transferable transferable = clipboard.getContents(null);
+		if ((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+		{
+			try
+			{
+				contents = (String)transferable.getTransferData(DataFlavor.stringFlavor);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return contents;
+	}
+	
+	public void setClipboardText(String text)
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection selection = new StringSelection(text);
+	    clipboard.setContents(selection, this);
+	}
+	
 	///////////
 	
 	public void addListener(WindowEventListener wel)
@@ -339,12 +378,18 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	}
 	
 	////
+	
+	@Override
+	public void lostOwnership(Clipboard arg0, Transferable arg1)
+	{
+	}
 
 	@Override
 	public void mouseDragged(MouseEvent e)
 	{
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 
@@ -353,6 +398,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 
@@ -367,6 +413,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 
@@ -383,6 +430,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.button = e.getButton();
 		event.pressed = true;
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 
@@ -393,6 +441,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.button = e.getButton();
 		event.pressed = false;
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 
@@ -414,6 +463,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = true;
 		event.button = keyCode;
+		event.setModifiers(e);
 		
 		if ((keyRepeatFilter != null) && (keyRepeatFilter.event != null))
 		{
@@ -437,6 +487,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = false;
 		event.button = keyCode;
+		event.setModifiers(e);
 		
 		keyRepeatFilter = new KeyRepeatFilter(event);
 		keyRepeatTimer.schedule(keyRepeatFilter, 10);
@@ -455,6 +506,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		Event event = new Event(Event.Type.KEY_TYPED);
 		event.button = (int)e.getKeyChar();
+		event.setModifiers(e);
 		sendEvent(event);
 	}
 	
