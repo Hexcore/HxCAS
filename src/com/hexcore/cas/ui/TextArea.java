@@ -122,7 +122,7 @@ public class TextArea extends TextBox
 				else
 					handled = false;
 			}
-			else if ((event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
+			else if ((event.type == Event.Type.KEY_TYPED) && event.button == '\n' && event.hasModifier(Event.CTRL))
 			{
 				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
 				
