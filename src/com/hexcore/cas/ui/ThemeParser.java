@@ -59,6 +59,7 @@ public class ThemeParser
 		validProperties.add("text-offset");
 		validProperties.add("text-shadow-colour");
 		validProperties.add("text-shadow-offset");
+		validProperties.add("selected-colour");
 		validProperties.add("padding");
 		
 		types = new HashMap<String, Theme.Type>();

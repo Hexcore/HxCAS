@@ -106,6 +106,9 @@ public class TextArea extends TextBox
 		
 		if (focused)
 		{
+			int startIndex = Math.min(cursorIndex, selectIndex);
+			int endIndex = Math.max(cursorIndex, selectIndex);
+			
 			handled = true;
 			
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
@@ -119,13 +122,19 @@ public class TextArea extends TextBox
 				else
 					handled = false;
 			}
-			else if ((event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
+			else if ((event.type == Event.Type.KEY_TYPED) && event.button == '\n' && event.hasModifier(Event.CTRL))
 			{
-				text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
-				cursorIndex++;
+				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+				
+				if (startIndex != endIndex)
+					cursorIndex = startIndex + 1;
+				else
+					cursorIndex++;
 			}
 			else
 				handled = false;
+			
+			if (handled) selectIndex = cursorIndex;
 		}
 	
 		if (handled) relayout();
