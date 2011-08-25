@@ -1,175 +1,64 @@
 package com.hexcore.cas.control.protocol;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.hexcore.cas.control.client.Overseer;
-
-public abstract class CAPInformationProcessor
+public abstract class CAPInformationProcessor extends Thread
 {
-	protected byte[] currInBytes = null;
-	protected DictNode header = null;
-	protected DictNode body = null;
+	private volatile boolean running = false;
+	protected CAPMessageProtocol protocol = null;
+		
+	protected abstract void interpretInput(Message message);
 	
-	protected int index = 0;
-	
-	public CAPInformationProcessor()
-		throws IOException
+	private DictNode makeHeader(String type)
 	{
-		header = new DictNode();
-		body = new DictNode();
+		DictNode header = new DictNode();
+		header.addToDict("TYPE", new ByteNode(type));
+		header.addToDict("VERSION", new IntNode(1));
+		return header;	
 	}
 	
-	protected ByteNode byteString()
+	public void sendState(int is)
 	{
-		int num = 0;
-		while(currInBytes[index] != ':')
-		{
-			num = num * 10 + currInBytes[index];
-			index++;
-		}
-		index++;
-		ArrayList<Byte> list = new ArrayList<Byte>();
-		int cnt = 0;
-		while(cnt++ < num)
-		{
-			list.add(new Byte(currInBytes[index]));
-			index++;
-		}
-		int s = list.size();
-		byte[] b = new byte[s];
-		for(int i = 0; i < s; i++)
-			b[i] = list.get(i).byteValue();
-		return new ByteNode(b);
+		DictNode body = new DictNode();
+		body.addToDict("STATE", new IntNode(is));
+		
+		Message msg = new Message(makeHeader("STATUS"), body);
+		protocol.sendMessage(msg);
 	}
 	
-	protected DictNode dictionary()
+	public void sendState(int is, String mess)
 	{
-		ArrayList<String> keys = new ArrayList<String>();
-		ArrayList<Node> values = new ArrayList<Node>();
-		while(currInBytes[index] != 'e')
-		{
-			//Keys
-			switch(currInBytes[index++])
-			{
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					keys.add(byteString().toString());
-					break;
-				default:
-					System.out.println("Key for dictionary not a valid choice.");
-					return null;
-			}
-			//Values
-			switch(currInBytes[index++])
-			{
-				case 'l':
-					values.add(list());
-					break;
-				case 'i':
-					values.add(intValue());
-					break;
-				case 'd':
-					values.add(dictionary());
-					break;
-				case 'f':
-					values.add(doubleValue());
-					break;
-				default:
-					System.out.println("Value for dictionary not a valid choice.");
-					return null;
-			}
-		}
-		DictNode d = new DictNode();
-		for(int i = 0; i < keys.size(); i++)
-			d.addToDict(keys.get(i).toUpperCase(), values.get(i));
-		index++;
-		return d;
+		DictNode body = new DictNode();
+		body.addToDict("STATE", new IntNode(is));
+		body.addToDict("MSG", new ByteNode(mess));
+		
+		Message msg = new Message(makeHeader("STATUS"), body);
+		protocol.sendMessage(msg);
 	}
 	
-	protected DoubleNode doubleValue()
+	public void sendResult(byte[] bytes)
 	{
-		ByteBuffer buff = ByteBuffer.allocate(8);
-		buff.put(currInBytes, index, 8);
-		index += 9;
-		return new DoubleNode(buff.getDouble());
+		DictNode body = new DictNode();
+		body.addToDict("DATA", new ByteNode(bytes));
+		
+		Message msg = new Message(makeHeader("RESULT"), body);
+		protocol.sendMessage(msg);
+	}
+
+	public void disconnect()
+	{
+		running = false;
 	}
 	
-	protected IntNode intValue()
+	@Override
+	public void run()
 	{
-		int value = 0;
-		while(currInBytes[index] != 'e')
+		running = true;
+		
+		protocol.start();
+		
+		while (running)
 		{
-			value = value * 10 + currInBytes[index];
-			index++;
-		}
-		index++;
-		return new IntNode(value);
-	}
-	
-	protected ListNode list()
-	{
-		ListNode list = new ListNode();
-		while(currInBytes[index] != 'e')
-		{
-			switch(currInBytes[index++])
-			{
-				case 'l':
-					list.addToList(list());
-					break;
-				case 'i':
-					list.addToList(intValue());
-					break;
-				case 'd':
-					list.addToList(dictionary());
-					break;
-				case 'f':
-					list.addToList(doubleValue());
-					break;
-				default:
-					System.out.println("Value for list not a valid choice.");
-					return null;
-			}
-		}
-		index++;
-		return list;
-	}
-	
-	protected int processInput()
-	{
-		header = dictionary();
-		index++;
-		if(currInBytes[index] == ';') // No body;
-			return 0;
-		else
-		{
-			body = dictionary();
-			index++;
-		}
-		if(index >= currInBytes.length)
-			return 0; // Every byte is accounted for.
-		else
-		{
-			System.out.println("There was a problem with interpreting the message.");
-			return 2;
+			Message message = protocol.waitForMessage();
+			if (message != null) interpretInput(message);
 		}
 	}
-	
-	protected abstract void interpretInput();
-	
-	public abstract void setCurrentInformation(byte[] in);
-	
-	public abstract void start()
-		throws IOException;
 }

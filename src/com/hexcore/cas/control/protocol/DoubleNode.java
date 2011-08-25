@@ -1,5 +1,9 @@
 package com.hexcore.cas.control.protocol;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+
 public class DoubleNode extends Node
 {
 	private double value;
@@ -17,5 +21,16 @@ public class DoubleNode extends Node
 	public double getDoubleValue()
 	{
 		return value;
+	}
+	
+	@Override
+	public void write(OutputStream out) throws IOException
+	{
+		ByteBuffer buf = ByteBuffer.allocate(Double.SIZE);
+		buf.putDouble(value);
+		
+		out.write('f');
+		out.write(buf.array());
+		out.write('e');
 	}
 }
