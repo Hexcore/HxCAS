@@ -97,7 +97,8 @@ public class HexagonGrid extends Grid
 	 * @param x - x position of target cell.
 	 * @param y - y position of target cell.
 	 * @param neighbours - array to be altered.
-	 * @param temp - Vector2i where the neighbour should be found.
+	 * @param xdim - x dimension of the grid
+	 * @param ydim - y dimension of the grid.
 	 * @param i - number of neighbour.
 	 * @return - the updated neighbours array.
 	 * @author Apurva Kumar
