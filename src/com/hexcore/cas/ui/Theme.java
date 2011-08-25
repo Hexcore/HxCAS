@@ -379,7 +379,7 @@ public class Theme
 		}
 	}
 	
-	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int cursorIndex, boolean focus, float time)
+	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int selectIndex, int cursorIndex, boolean focus, boolean lineNumbers, float time)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -391,12 +391,86 @@ public class Theme
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
-		renderFlowedText(gl, position.add(padding), text, textColour);
+		int			sideMargin = 0;
+		if (lineNumbers)
+		{
+			sideMargin = calculateTextWidth("1"+text.getNumLines(), Text.Size.SMALL) + padding.x;
+			
+			Fill	sideMarginBackground = getFill("TextBoxLineNumbers", stateName, "background");
+			Colour	sideMarginBorder = getColour("TextBoxLineNumbers", stateName, "border");
+			Colour	sideMarginText = getColour("TextBoxLineNumbers", stateName, "text-colour");
+			
+			Graphics.renderRectangle(gl, position, new Vector2i(sideMargin, size.y), 0, sideMarginBackground);
+			Graphics.renderLine(gl, position.add(sideMargin, 0), position.add(sideMargin, size.y), sideMarginBorder);
+			
+			for (int i = 1; i <= text.getNumLines(); i++)
+			{
+				Vector2i linePos = position.add(0, (i-1) * text.lineHeight).add(padding);
+				renderText(gl, ""+i, linePos, sideMarginText, Text.Size.SMALL);
+			}
+		}
+		
+		Colour		selectedColour = getColour("TextBox", stateName, "selected-colour", Colour.YELLOW);
+		Vector2i	cursorLocation = text.getCursorLocation(cursorIndex);
+		Vector2i	selectLocation = text.getCursorLocation(selectIndex);
+		
+		if (cursorLocation.y == selectLocation.y)
+		{
+			int y = cursorLocation.y;
+			int start = Math.min(cursorLocation.x, selectLocation.x);
+			int end = Math.max(cursorLocation.x, selectLocation.x);
+						
+			Vector2i startPos = text.getCursorPosition(this, new Vector2i(start, y)).add(sideMargin, 0);
+			Vector2i endPos = text.getCursorPosition(this, new Vector2i(end, y)).add(sideMargin, 0);
+			
+			Graphics.renderRectangle(gl, position.add(padding).add(startPos), endPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
+		}
+		else
+		{
+			int start, end;
+			
+			if (cursorLocation.y < selectLocation.y)
+			{
+				start = cursorIndex;
+				end = selectIndex;
+			}
+			else
+			{
+				start = selectIndex;	
+				end = cursorIndex;
+			}
+			
+			Vector2i	startPos = text.getCursorPosition(this, start);
+			Vector2i	startFinPos = text.getCursorPosition(this, text.getLineEndCursorPosition(start));
+			
+			Graphics.renderRectangle(gl, position.add(padding).add(startPos).add(sideMargin, 0), 
+					startFinPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
+			
+			int sy = Math.min(cursorLocation.y, selectLocation.y);
+			int ey = Math.max(cursorLocation.y, selectLocation.y);
+			
+			for (int i = sy + 1; i < ey; i++)
+			{
+				Vector2i	bPos = text.getCursorPosition(this, text.getLineBeginningCursorPositionFromLine(i));
+				Vector2i	ePos = text.getCursorPosition(this, text.getLineEndCursorPositionFromLine(i));
+				
+				Graphics.renderRectangle(gl, position.add(padding).add(bPos).add(sideMargin, 0), 
+						ePos.subtract(bPos).add(0, text.lineHeight), selectedColour);		
+			}
+			
+			Vector2i	endFinPos = text.getCursorPosition(this, end);
+			Vector2i	endPos = text.getCursorPosition(this, text.getLineBeginningCursorPosition(end));
+			
+			Graphics.renderRectangle(gl, position.add(padding).add(endPos).add(sideMargin, 0), 
+					endFinPos.subtract(endPos).add(0, text.lineHeight), selectedColour);			
+		}
+		
+		renderFlowedText(gl, position.add(padding).add(sideMargin, 0), text, textColour);
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 		
 		if (focus && (time % 2.0f < 1.0f))
 		{
-			Vector2i cursorPos = text.getCursorPosition(this, cursorIndex);
+			Vector2i cursorPos = text.getCursorPosition(this, cursorLocation).add(sideMargin, 0);
 			Graphics.renderRectangle(gl, position.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);
 		}
 	}
@@ -574,6 +648,15 @@ public class Theme
 		return (int)(metrics.getAscent() + metrics.getDescent());
 	}
 	
+	public int calculateTextWidth(String text, Text.Size textSize)
+	{
+		TextRenderer textRenderer = textRenderers.get(textSize);	
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		return (int)font.getStringBounds(text, context).getWidth();
+	}	
+	
 	public Vector2i calculateTextSize(String text, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);
@@ -581,7 +664,7 @@ public class Theme
 		Font font = textRenderer.getFont();
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
-		return new Vector2i((int)textRenderer.getBounds(text).getMaxX(), (int)(metrics.getAscent() + metrics.getDescent()));
+		return new Vector2i((int)font.getStringBounds(text, context).getWidth(), (int)(metrics.getAscent() + metrics.getDescent()));
 	}
 
 	public void renderShadowedText(GL gl, String text, Vector2i position, Colour colour, Colour shadowColour, Vector2i shadowOffset, Text.Size textSize)

@@ -30,15 +30,14 @@ public class LinearLayout extends Layout
 		
 		int	fillComponents = 0;
 		
+		for (Widget component : components) component.relayout();
+		
 		if (isSet(Widget.WRAP))
 		{
 			int	maxWidth = -1, maxHeight = -1;
 			for (Widget component : components)
 			{
 				if (!component.isVisible()) continue;
-				
-				if (component.isSet(Widget.WRAP)) component.relayout();
-				
 				if (!component.isSet(Widget.FILL))
 				{
 					if (component.getWidth() > maxWidth) maxWidth = component.getWidth();

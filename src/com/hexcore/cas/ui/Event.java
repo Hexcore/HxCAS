@@ -16,6 +16,7 @@ public class Event
 	public Vector2i		position;
 	public int			amount;
 	public int			button;
+	public char			character;
 	public boolean		pressed;
 	public Widget		target;
 	

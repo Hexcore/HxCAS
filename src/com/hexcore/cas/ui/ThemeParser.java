@@ -40,6 +40,7 @@ public class ThemeParser
 		validTypes.add("ScrollbarHandle");
 		validTypes.add("ScrollbarFill");
 		validTypes.add("TextBox");
+		validTypes.add("TextBoxLineNumbers");
 		validTypes.add("CheckBox");
 		validTypes.add("CheckBoxCaption");
 		validTypes.add("DropDownBox");
@@ -58,6 +59,7 @@ public class ThemeParser
 		validProperties.add("text-offset");
 		validProperties.add("text-shadow-colour");
 		validProperties.add("text-shadow-offset");
+		validProperties.add("selected-colour");
 		validProperties.add("padding");
 		
 		types = new HashMap<String, Theme.Type>();

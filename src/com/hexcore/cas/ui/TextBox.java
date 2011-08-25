@@ -7,10 +7,14 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 
 public class TextBox extends Widget
-{
-	protected String	text = "";
-	protected Text.Size	textSize = Text.Size.SMALL;
+{    
+	protected String		text = "";
+	protected FlowedText	flowedText;
+	protected Text.Size		textSize = Text.Size.SMALL;
+	
 	protected int		cursorIndex = 0;
+	protected int		selectIndex = 0;
+	protected boolean	selecting = false;
 	protected float		cursorFlash = 0.0f;
 	
 	protected Vector2i	padding = new Vector2i(2, 2);
@@ -39,8 +43,32 @@ public class TextBox extends Widget
 	public boolean	canGetFocus() {return true;}
 	
 	public String	getText() {return text;}
-	public void		setText(String text) {this.text = text;}
-
+	public void		setText(String text) {this.text = text; reflowText();}
+	
+	public void reflowText()
+	{
+		if (window != null) 
+			flowedText = window.getTheme().flowText(text, -1, textSize);
+	}
+	
+	@Override
+	public int getInnerX() 
+	{
+		return padding.x;
+	}
+	
+	@Override
+	public int getInnerY() 
+	{
+		return padding.y;
+	}
+	
+	@Override
+	public Vector2i	getInnerOffset() 
+	{
+		return padding;
+	}
+	
 	@Override
 	public void update(Vector2i position, float delta)
 	{
@@ -60,9 +88,11 @@ public class TextBox extends Widget
 	
 	@Override
 	public void relayout()
-	{
+	{		
 		if (window != null) 
 		{
+			reflowText();
+			
 			int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize);
 			super.setHeight(boxHeight);
 		}
@@ -73,22 +103,57 @@ public class TextBox extends Widget
 	{
 		boolean handled = super.handleEvent(event, position);
 		
-		if (event.type == Event.Type.GAINED_FOCUS)
+		if (event.type == Event.Type.LOST_FOCUS)
 		{
-			handled = true;
-			cursorIndex = text.length();
+			selecting = false;
 		}
-		else if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
-		{
-			handled = true;
-			window.requestFocus(this);
+		else if (event.type == Event.Type.MOUSE_MOTION)
+		{	
+			if (selecting)
+			{
+				Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset());
+				int index = flowedText.getCursorIndex(window.getTheme(), textPos);
+				
+				if (index > -1) cursorIndex = index;
+				
+				handled = true;	
+			}
+		}		
+		else if (event.type == Event.Type.MOUSE_CLICK)
+		{	
+			selecting = event.pressed;
+			
+			Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset());
+			int index = flowedText.getCursorIndex(window.getTheme(), textPos);
+			
+			if (event.pressed)
+			{
+				if (index > -1)
+				{
+					selectIndex = index;
+					cursorIndex = index;
+				}
+				
+				window.requestFocus(this);
+			}
+			else if (index > -1)
+				cursorIndex = index;
+			
+			handled = true;		
 		}
 		else if (focused)
 		{
+			int startIndex = Math.min(cursorIndex, selectIndex);
+			int endIndex = Math.max(cursorIndex, selectIndex);
+			
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
-				if ((event.button == KeyEvent.VK_LEFT) && (cursorIndex > 0))
+				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
+					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
+				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
+					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
+				else if ((event.button == KeyEvent.VK_LEFT) && (cursorIndex > 0))
 					cursorIndex--;
 				else if ((event.button == KeyEvent.VK_RIGHT) && (cursorIndex < text.length()))
 					cursorIndex++;
@@ -97,26 +162,44 @@ public class TextBox extends Widget
 			}
 			else if (event.type == Event.Type.KEY_TYPED)
 			{
-				if ((event.button >= ' ') && (event.button != 127))
+				if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
 				{
-					text = text.substring(0, cursorIndex) + (char)event.button + text.substring(cursorIndex);
-					cursorIndex++;
-				}
+					text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+					
+					if (startIndex != endIndex)
+						cursorIndex = startIndex + 1;
+					else
+						cursorIndex++;
+				}		
 				else if (event.button == '\n') // Enter
 				{
 					window.giveUpFocus(this);
 				}
 				else if (event.button == '\b') // Backspace
 				{
-					if ((text.length() > 0) && (cursorIndex > 0))
+					if (text.length() > 0)
 					{
-						text = text.substring(0, cursorIndex - 1) + text.substring(cursorIndex);
-						cursorIndex--;
+						if (startIndex != endIndex)
+						{
+							text = text.substring(0, startIndex) + text.substring(endIndex);
+							cursorIndex = startIndex;
+						}
+						else if (startIndex > 0)
+						{
+							text = text.substring(0, startIndex - 1) + text.substring(endIndex);
+							cursorIndex--;
+						}
 					}
 				}
-				else if ((event.button == 127) && (cursorIndex < text.length())) // Delete
+				else if (event.button == 127) // Delete
 				{
-					text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
+					if (startIndex != endIndex)
+					{
+						text = text.substring(0, startIndex) + text.substring(endIndex);
+						cursorIndex = startIndex;
+					}
+					else if (cursorIndex < text.length())
+						text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
 				}
 				else
 					handled = false;
@@ -127,9 +210,12 @@ public class TextBox extends Widget
 			}
 			else
 				handled = false;
+			
+			if (handled) selectIndex = cursorIndex;
 		}
 		
 		if (handled) cursorFlash = 0.0f;
+		if (handled) relayout();
 		return handled;
 	}
 }

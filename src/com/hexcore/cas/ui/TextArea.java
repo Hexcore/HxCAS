@@ -8,9 +8,8 @@ import com.hexcore.cas.math.Vector2i;
 
 public class TextArea extends TextBox
 {	
-	private	int	rows;
-	
-	private FlowedText	flowedText;
+	private	int		rows;
+	private boolean lineNumbers;
 	
 	@Deprecated
 	public TextArea(Vector2i size)
@@ -36,6 +35,34 @@ public class TextArea extends TextBox
 		this.rows = rows;
 	}
 	
+	public void setLineNumbers(boolean state)
+	{
+		lineNumbers = state;
+	}
+	
+	@Override
+	public int getInnerX() 
+	{
+		int sideMargin = 0;
+		
+		if (window != null && lineNumbers) 
+			sideMargin = padding.x + window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
+		
+		return sideMargin + padding.x;
+	}
+	
+	@Override
+	public int getInnerY() 
+	{
+		return padding.y;
+	}
+	
+	@Override
+	public Vector2i	getInnerOffset() 
+	{
+		return new Vector2i(getInnerX(), getInnerY());
+	}
+		
 	@Override
 	public void	setText(String text) {this.text = text; relayout();}
 	
@@ -53,8 +80,11 @@ public class TextArea extends TextBox
 		{
 			reflowText();
 			
-			int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
-			super.setHeight(boxHeight);
+			if (!isSet(Widget.FILL_VERTICAL))
+			{
+				int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
+				super.setHeight(boxHeight);
+			}
 		}
 	}
 	
@@ -65,7 +95,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -76,34 +106,40 @@ public class TextArea extends TextBox
 		
 		if (focused)
 		{
+			int startIndex = Math.min(cursorIndex, selectIndex);
+			int endIndex = Math.max(cursorIndex, selectIndex);
+			
+			handled = true;
+			
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
 			{
+				cursorFlash = 0.0f;
+				
 				if ((event.button == KeyEvent.VK_UP) && (cursorIndex > 0))
 					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
-				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
-					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
-				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
-					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
 				else
 					handled = false;
 			}
 			else if ((event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
 			{
-				text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
-				cursorIndex++;
-				handled = true;
+				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+				
+				if (startIndex != endIndex)
+					cursorIndex = startIndex + 1;
+				else
+					cursorIndex++;
 			}
+			else
+				handled = false;
+			
+			if (handled) selectIndex = cursorIndex;
 		}
 	
-		if (!handled) handled = super.handleEvent(event, position);
 		if (handled) relayout();
+		if (!handled) handled = super.handleEvent(event, position);
+				
 		return handled;
-	}
-	
-	public void reflowText()
-	{
-		if (window != null) flowedText = window.getTheme().flowText(text, -1, textSize);
 	}
 }
