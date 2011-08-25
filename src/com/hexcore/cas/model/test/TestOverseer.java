@@ -1,5 +1,7 @@
 package com.hexcore.cas.model.test;
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
 
 import com.hexcore.cas.control.client.Overseer;
@@ -12,6 +14,7 @@ import com.hexcore.cas.model.RectangleGrid;
 public class TestOverseer extends TestCase
 {
 	public void test1Constructor()
+		throws IOException
 	{
 		RectangleGrid g = new RectangleGrid(new Vector2i(4, 4), new Cell(1));
 		for(int y = 0; y < 4; y++)
@@ -48,6 +51,7 @@ public class TestOverseer extends TestCase
 	}
 
 	public void test2SetGrid()
+		throws IOException
 	{
 		RectangleGrid g = new RectangleGrid(new Vector2i(4, 4), new Cell(1));
 		for(int y = 0; y < 4; y++)
@@ -82,6 +86,7 @@ public class TestOverseer extends TestCase
 	}
 	
 	public void test3SetWorkable()
+		throws IOException
 	{
 		RectangleGrid g = new RectangleGrid(new Vector2i(4, 4), new Cell(1));
 		for(int y = 0; y < 4; y++)
@@ -97,6 +102,7 @@ public class TestOverseer extends TestCase
 	}
 	
 	public void test4StartMiddleGlider()
+		throws IOException
 	{
 		int size = 5;
 		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
@@ -143,6 +149,7 @@ public class TestOverseer extends TestCase
 	}
 	
 	public void test5StartCornerGlider()
+		throws IOException
 	{
 		int size = 5;
 		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
