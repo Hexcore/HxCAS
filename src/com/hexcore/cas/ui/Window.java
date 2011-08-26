@@ -45,6 +45,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			
 	private Vector2i	defaultMargin;
 	private Widget		focusedWidget = null;
+	private Dialog		modalDialog = null;
 	
 	private ArrayList<WindowEventListener>	eventListeners;
 	
@@ -206,6 +207,17 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
         gl2.glLoadIdentity();
 	}
 	
+	public void showModalDialog(Dialog dialog)
+	{
+		giveUpFocus(focusedWidget);
+		modalDialog = dialog;
+	}
+	
+	public void closeModalDialog()
+	{
+		modalDialog = null;
+	}
+	
 	public void giveUpFocus(Widget widget)
 	{
 		if (widget != focusedWidget) return;
@@ -242,6 +254,34 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		if (keyCode > 1024) return false;
 		return keyState[keyCode];
+	}
+	
+	public String getClipboardText()
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		
+		String contents = "" ;
+		Transferable transferable = clipboard.getContents(null);
+		if ((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+		{
+			try
+			{
+				contents = (String)transferable.getTransferData(DataFlavor.stringFlavor);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return contents;
+	}
+	
+	public void setClipboardText(String text)
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection selection = new StringSelection(text);
+	    clipboard.setContents(selection, this);
 	}
 		
 	@Override
@@ -304,35 +344,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		size = new Vector2i(width, height);
         relayout();
 	}
-	
-	public String getClipboardText()
-	{
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		
-		String contents = "" ;
-		Transferable transferable = clipboard.getContents(null);
-		if ((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
-		{
-			try
-			{
-				contents = (String)transferable.getTransferData(DataFlavor.stringFlavor);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		return contents;
-	}
-	
-	public void setClipboardText(String text)
-	{
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection selection = new StringSelection(text);
-	    clipboard.setContents(selection, this);
-	}
-	
 	///////////
 	
 	public void addListener(WindowEventListener wel)
@@ -358,11 +370,25 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		GL gl = drawable.getGL();
 		render(gl, new Vector2i(0, 0));
-		if (focusedWidget != null) focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
+		
+		if (modalDialog != null)
+		{
+			theme.renderDialogFade(gl, size);
+			
+			modalDialog.render(gl, new Vector2i(0, 0));
+		}
+		else if (focusedWidget != null) 
+			focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
 	}
 			
 	private void sendEvent(Event event)
 	{
+		if (modalDialog != null)
+		{
+			modalDialog.receiveEvent(event, new Vector2i(0, 0));
+			return;
+		}
+		
 		if (focusedWidget != null)
 			focusedWidget.receiveEventExtras(event, focusedWidget.getRealPosition());
 		

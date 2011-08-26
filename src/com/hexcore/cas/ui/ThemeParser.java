@@ -49,6 +49,8 @@ public class ThemeParser
 		validTypes.add("DropDownBoxItem");
 		validTypes.add("Tab");
 		validTypes.add("TabInside");
+		validTypes.add("Dialog");
+		validTypes.add("DialogFade");
 		validTypes.add("Window");
 		
 		validProperties = new HashSet<String>();

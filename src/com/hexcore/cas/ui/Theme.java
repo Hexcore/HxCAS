@@ -252,7 +252,7 @@ public class Theme
 		ThemeParser themeParser = new ThemeParser(file);
 		typeProperties = themeParser.getTypes();		
 	}
-	
+		
 	public void renderButton(GL gl, Vector2i pos, Vector2i size, ButtonState state, String caption, String description)
 	{
 		String stateName;
@@ -311,6 +311,19 @@ public class Theme
 		int borderRadius = getInteger("Panel", "border-radius", 0);
 		Graphics.renderRectangle(gl, pos, size, borderRadius, getFill("Panel", "background"));
 		Graphics.renderBorder(gl, pos, size, borderRadius, getFill("Panel", "border"));
+	}
+	
+	public void renderDialogFade(GL gl, Vector2i size)
+	{
+		Fill fill = getFill("DialogFade", "background", new Fill(new Colour(0.0f, 0.0f, 0.0f, 0.65f)));
+		Graphics.renderRectangle(gl, new Vector2i(0, 0), size, 0, fill);
+	}
+	
+	public void renderDialog(GL gl, Vector2i pos, Vector2i size)
+	{
+		int borderRadius = getInteger("Dialog", "border-radius", 0);
+		Graphics.renderRectangle(gl, pos, size, borderRadius, getFill("Dialog", "background"));
+		Graphics.renderBorder(gl, pos, size, borderRadius, getFill("Dialog", "border"));
 	}
 	
 	public int getScrollbarSize()
