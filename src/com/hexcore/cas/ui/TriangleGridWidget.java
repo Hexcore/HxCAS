@@ -40,6 +40,9 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 		upTriangle[1] = new Vector2f(r+r, 	h);
 		upTriangle[2] = new Vector2f(0.0f,	h);
 		
+		for (Vector2f v : downTriangle) v.inc(0.5f, 0.5f);
+		for (Vector2f v : upTriangle) v.inc(0.5f, 0.5f);
+		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
