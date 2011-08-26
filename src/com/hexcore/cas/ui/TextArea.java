@@ -11,8 +11,6 @@ public class TextArea extends TextBox
 	private	int		rows;
 	private boolean lineNumbers;
 	
-	private FlowedText	flowedText;
-	
 	@Deprecated
 	public TextArea(Vector2i size)
 	{
@@ -42,6 +40,29 @@ public class TextArea extends TextBox
 		lineNumbers = state;
 	}
 	
+	@Override
+	public int getInnerX() 
+	{
+		int sideMargin = 0;
+		
+		if (window != null && lineNumbers) 
+			sideMargin = padding.x + window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
+		
+		return sideMargin + padding.x;
+	}
+	
+	@Override
+	public int getInnerY() 
+	{
+		return padding.y;
+	}
+	
+	@Override
+	public Vector2i	getInnerOffset() 
+	{
+		return new Vector2i(getInnerX(), getInnerY());
+	}
+		
 	@Override
 	public void	setText(String text) {this.text = text; relayout();}
 	
@@ -74,7 +95,7 @@ public class TextArea extends TextBox
 		
 		window.setClipping(gl, pos, size);
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, cursorIndex, focused, true, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash);
 		window.resetView(gl);
 	}
 	
@@ -85,6 +106,9 @@ public class TextArea extends TextBox
 		
 		if (focused)
 		{
+			int startIndex = Math.min(cursorIndex, selectIndex);
+			int endIndex = Math.max(cursorIndex, selectIndex);
+			
 			handled = true;
 			
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
@@ -95,30 +119,27 @@ public class TextArea extends TextBox
 					cursorIndex = flowedText.getPreviousLineCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_DOWN) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
-				else if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
-					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
-				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
-					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
 				else
 					handled = false;
 			}
-			else if ((event.type == Event.Type.KEY_TYPED) && (event.button == '\n'))
+			else if ((event.type == Event.Type.KEY_TYPED) && event.button == '\n' && event.hasModifier(Event.CTRL))
 			{
-				text = text.substring(0, cursorIndex) + '\n' + text.substring(cursorIndex);
-				cursorIndex++;
+				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+				
+				if (startIndex != endIndex)
+					cursorIndex = startIndex + 1;
+				else
+					cursorIndex++;
 			}
 			else
 				handled = false;
+			
+			if (handled) selectIndex = cursorIndex;
 		}
 	
-		if (!handled) handled = super.handleEvent(event, position);
 		if (handled) relayout();
+		if (!handled) handled = super.handleEvent(event, position);
+				
 		return handled;
-	}
-	
-	public void reflowText()
-	{
-		if (window != null) 
-			flowedText = window.getTheme().flowText(text, -1, textSize);
 	}
 }

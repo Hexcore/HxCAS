@@ -12,6 +12,7 @@ import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
 import com.hexcore.cas.ui.Colour;
 import com.hexcore.cas.ui.Container;
+import com.hexcore.cas.ui.Dialog;
 import com.hexcore.cas.ui.DropDownBox;
 import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
@@ -92,6 +93,12 @@ public class UITestApplication implements WindowEventListener
 	public HexagonGrid3DWidget		waterGrid3DViewer;
 	
 	public Button	nextIterationButton;
+
+	public Dialog		dialog;
+	public LinearLayout	dialogLayout;
+	public TextWidget	dialogTitle;
+	public TextWidget	dialogMessage;
+	public Button		dialogOKButton;
 	
 	public String	currentThemeName = "light";
 	public String	themeName = currentThemeName;
@@ -256,6 +263,7 @@ public class UITestApplication implements WindowEventListener
 		
 		description = new TextArea(100, 20);
 		description.setFlag(Widget.FILL);
+		description.setLineNumbers(true);
 		outerLayout.add(description);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -333,6 +341,27 @@ public class UITestApplication implements WindowEventListener
 		tabbedView.add(waterGrid3DViewer, "Water Flow");
 		
 		window.relayout();
+		
+		// Dialog
+		dialog = new Dialog(window, new Vector2i(400, 200));
+		
+		dialogLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		dialogLayout.setFlag(Widget.FILL);
+		dialog.setContents(dialogLayout);
+		
+		dialogTitle = new TextWidget("Message Title", Text.Size.LARGE);
+		dialogTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogLayout.add(dialogTitle);
+		
+		dialogMessage = new TextWidget("The message itself is much more interesting to read, but most people skip it.");
+		dialogMessage.setFlag(Widget.FILL_HORIZONTAL);
+		dialogMessage.setFlag(Widget.FILL_VERTICAL); // This pushes the OK button down because it fills the space in between
+		dialogMessage.setFlowed(true);
+		dialogLayout.add(dialogMessage);
+		
+		dialogOKButton = new Button(new Vector2i(120, 30), "OK");
+		dialogOKButton.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogLayout.add(dialogOKButton);
 	}
 	
 	static public void main(String args[])
@@ -372,6 +401,14 @@ public class UITestApplication implements WindowEventListener
 			else if (event.target == loadWorldButton)
 			{
 				System.out.println(window.askUserForFile("Load a world"));
+			}
+			else if (event.target == optionsButton)
+			{
+				window.showModalDialog(dialog);
+			}
+			else if (event.target == dialogOKButton)
+			{
+				window.closeModalDialog();
 			}
 			else if (event.target == helpButton)
 			{

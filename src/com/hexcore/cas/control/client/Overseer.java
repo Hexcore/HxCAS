@@ -1,7 +1,9 @@
 package com.hexcore.cas.control.client;
 
+import java.io.IOException;
 import java.util.Vector;
 
+import com.hexcore.cas.control.protocol.CAPIPClient;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -10,18 +12,23 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.ThreadState;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.rulesystems.HexcoreVM;
 
 public class Overseer 
 {
 	private Grid grid = null;
 	private Recti workable = null;
 	private Vector<ThreadState> threadWork = null;
+	private CAPIPClient capIP = null;
+	private HexcoreVM vm = null;
 	
 	public Overseer(Grid g, Recti w)
+		throws IOException
 	{
 		grid = g;
 		workable = w;
 		threadWork = new Vector<ThreadState>();
+		capIP = new CAPIPClient(this);
 	}
 	
 	public void setGrid(Grid g)
@@ -54,6 +61,11 @@ public class Overseer
 	public void setWorkable(Recti r)
 	{
 		workable = r;
+	}
+	
+	public void setRules(byte[] b)
+	{
+		//vm.loadRules(b);
 	}
 	
 	//Used for testing purposes only
@@ -156,7 +168,7 @@ public class Overseer
 			myworkPos = 0;
 		}
 		
-		private void gameOfLife(int x, int y)
+		/*private void gameOfLife(int x, int y)
 		{
 			Cell[] neigh = grid.getNeighbours(new Vector2i(x, y));
 			int cnt = 0;
@@ -176,7 +188,7 @@ public class Overseer
 			else
 				mywork[myworkPos] = new Cell(grid.getCell(x, y));
 			myworkPos++;
-		}
+		}*/
 		
 		public void run()
 		{
@@ -192,7 +204,12 @@ public class Overseer
 						break;
 					}
 					
-					gameOfLife(x, y);
+					//gameOfLife(x, y);
+					/*
+					 * Cell c = mywork[myworkPos++];
+					 * mywork[myworkPos++] = new Cell(vm.run(c, c.getNeighbours()));
+					 * 
+					 */
 					
 					cnt++;
 					if(cnt >= num)

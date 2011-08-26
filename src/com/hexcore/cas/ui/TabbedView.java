@@ -45,13 +45,13 @@ public class TabbedView extends View
 	}
 
 	@Override
-	public int		getInnerX() 
+	public int getInnerX() 
 	{
 		return 0;
 	}
 	
 	@Override
-	public int		getInnerY() 
+	public int getInnerY() 
 	{
 		return window.getTheme().getTabHeight();
 	}
