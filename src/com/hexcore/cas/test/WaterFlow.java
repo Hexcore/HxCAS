@@ -54,6 +54,8 @@ public class WaterFlow
 					
 					for (Cell n : neighbours)
 					{
+						if (n == null) continue;
+						
 						if (n.getValue(1) > 0)
 						{
 							double water = n.getValue(2) + n.getValue(1) - self.getValue(2);

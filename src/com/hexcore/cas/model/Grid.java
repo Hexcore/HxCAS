@@ -50,6 +50,7 @@ public abstract class Grid
 	public Grid(Grid grid)
 	{
 		this.numProperties = grid.numProperties;
+		this.wrap = grid.wrap;
 		
 		this.size = new Vector2i(grid.size);
 		this.cells = new Cell[grid.size.y][grid.size.x];

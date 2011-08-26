@@ -109,11 +109,11 @@ public class HexagonGrid extends Grid
 	 */
 	private Cell[] setNeighbours(Cell [] neighbours, int x, int y, int xdim, int ydim, int i)
 	{
-		if((x < 0) || (x > xdim))
+		if((x < 0) || (x >= xdim))
 		{
 			neighbours[i] = null;
 		}
-		else if((y < 0) || (y > ydim))
+		else if((y < 0) || (y >= ydim))
 		{
 			neighbours[i] = null;
 		}
