@@ -13,13 +13,19 @@ public class TestHexagonGrid extends TestCase
 		HexagonGrid grid;
 		
 		//test a square grid (equal number of hexagons in each direction)
-		grid = addNeighbours(3,3);
+		grid = addNeighbours(3,3, true);
+		//wrap-around
+		//assertEquals();
+		
+		//not wrap-around
+		grid = addNeighbours(3,3, false);
+		
 		
 		//test an unequal number of hexagons
-		grid = addNeighbours(2,3);
+		//grid = addNeighbours(2,3);
 	}
 
-	private static HexagonGrid addNeighbours(int x, int y)
+	private static HexagonGrid addNeighbours(int x, int y, boolean w)
 	{
 		HexagonGrid grid = new HexagonGrid(new Vector2i(x,y));
 		int count = 0;

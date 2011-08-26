@@ -11,7 +11,6 @@ public class TestRectangleGrid extends TestCase
 {
 	public void testGetNeighboursFunction()
 	{
-		//test 1 x 1 grid (no neighbours)
 		RectangleGrid grid;
 		
 		//Test square grid (2 x 2 grid)
