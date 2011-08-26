@@ -106,6 +106,7 @@ public class UITestApplication implements WindowEventListener
 	UITestApplication()
 	{
 		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlowGrid.setWrappable(false);
 		waterFlow = new WaterFlow(waterFlowGrid);
 		
 		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
