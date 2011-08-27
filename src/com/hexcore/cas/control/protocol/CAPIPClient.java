@@ -52,6 +52,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 	}
 
+	@Override
 	protected void interpretInput(Message message)
 	{
 		DictNode header = message.getHeader();
