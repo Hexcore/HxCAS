@@ -16,7 +16,7 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private ServerSocket sock = new ServerSocket(3119);
+	private ServerSocket sock = null;
 	private CAPMessageProtocol inter = null;
 	private Overseer parent = null;
 	
@@ -25,6 +25,16 @@ public class CAPIPClient extends CAPInformationProcessor
 	{
 		super();
 		parent = o;
+		try
+		{
+			sock = new ServerSocket(3119);
+			System.out.println("Sock listening on " + sock.getLocalPort());
+		}
+		catch(IOException ex)
+		{
+			System.out.println("Error connecting sock to port 3119");
+			ex.printStackTrace();
+		}
 	}
 
 	protected void interpretInput(Message message)

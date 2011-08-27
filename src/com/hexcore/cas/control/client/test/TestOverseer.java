@@ -154,8 +154,10 @@ public class TestOverseer extends TestCase
 	}
 	
 	public void test5StartCornerGlider()
-		throws IOException
+		throws IOException, InterruptedException
 	{
+		Thread.sleep(2000);
+		System.out.println("-- TEST 5 --");
 		int size = 5;
 		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
 		for(int y = 0; y < size; y++)
@@ -168,6 +170,7 @@ public class TestOverseer extends TestCase
 		g.getCell(0, 2).setValue(0, 1);
 		
 		Overseer o = new Overseer(g, new Recti(new Vector2i(0, 0), new Vector2i(size, size)));
+		Thread.sleep(1000);
 		o.start();
 
 		assertEquals('R', g.getType());

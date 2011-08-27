@@ -7,6 +7,10 @@ public abstract class CAPInformationProcessor extends Thread
 		
 	protected abstract void interpretInput(Message message);
 	
+	public CAPInformationProcessor()
+	{
+	}
+	
 	private DictNode makeHeader(String type)
 	{
 		DictNode header = new DictNode();
