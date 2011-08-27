@@ -21,10 +21,20 @@ public class WorldReader
 		worldFileName = name;
 	}
 	
+	public String getWorldName()
+	{
+		return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
+	}
+	
 	public World readWorld()
 		throws IOException
 	{
-		System.out.println("Starting readWorldFunction");
+		/*
+		 * Takes the name of the world zip file and reads in.
+		 * It will specifically look for the configuration file first,
+		 * then the rules set and then all the generation files.
+		 */
+		//System.out.println("Starting readWorld Function");
 		File f = new File(worldFileName);
 		ZipFile zip = new ZipFile(f);
 		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
@@ -65,7 +75,7 @@ public class WorldReader
 				break;
 			}
 		}
-		System.out.println("First while loop");
+		//System.out.println("First while loop");
 		Vector2i gridSize = new Vector2i(x, y);
 		Cell cell = new Cell(n);
 		switch(type)
@@ -117,7 +127,7 @@ public class WorldReader
 				break;
 			}
 		}
-		System.out.println("Second while loop");
+		//System.out.println("Second while loop");
 		int worldPos = -1;
 		generationFiles = zip.entries();
 		while(generationFiles.hasMoreElements())
@@ -159,23 +169,18 @@ public class WorldReader
 				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
-		System.out.println("Third while loop");
+		//System.out.println("Third while loop");
 		
 		World w = new World();
 		w.setRulesAndColours(rulesAndColours);
-		System.out.println("Third while loop");
+		//System.out.println("Third while loop");
 		w.sendRulesAndColours();
-		System.out.println("Third while loop");
+		//System.out.println("Third while loop");
 		w.setWorld(world);
 		
-		System.out.println("Finished readWorldFunction");
+		//System.out.println("Finished readWorld Function");
 		
 		return w;
-	}
-	
-	public String getWorldName()
-	{
-		return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
 	}
 	
 	public void setWorldName(String name)

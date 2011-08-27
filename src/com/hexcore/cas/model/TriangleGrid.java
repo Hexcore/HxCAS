@@ -26,6 +26,29 @@ public class TriangleGrid extends Grid
 	{
 		return new TriangleGrid(this);
 	}
+	
+	@Override
+	public Cell[] getNeighbours(Vector2i pos)
+	{
+		int x = pos.x;
+		int y = pos.y;
+		if((y % 2) == 0)
+		{
+			//First triangle is upside down.
+			if((x % 2) == 0)
+				return getNeighbours(false, pos);
+			else
+				return getNeighbours(true, pos);
+		}
+		else
+		{
+			//First triangle is the right way up.
+			if((x % 2) == 0)
+				return getNeighbours(true, pos);
+			else
+				return getNeighbours(false, pos);
+		}
+	}
 
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{
@@ -123,28 +146,4 @@ public class TriangleGrid extends Grid
 		}
 		return n;
 	}
-	
-	@Override
-	public Cell[] getNeighbours(Vector2i pos)
-	{
-		int x = pos.x;
-		int y = pos.y;
-		if((y % 2) == 0)
-		{
-			//Upside-down first triangle
-			if((x % 2) == 0)
-				return getNeighbours(false, pos);
-			else
-				return getNeighbours(true, pos);
-		}
-		else
-		{
-			//Right-side up first triangle
-			if((x % 2) == 0)
-				return getNeighbours(true, pos);
-			else
-				return getNeighbours(false, pos);
-		}
-	}
-
 }
