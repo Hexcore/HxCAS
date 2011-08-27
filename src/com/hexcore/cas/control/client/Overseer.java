@@ -80,8 +80,14 @@ public class Overseer
 		return workable;
 	}
 	
+	public void disconnect()
+	{
+		capIP.disconnect();
+	}
+	
 	public void start()
 	{
+		capIP.start();
 		int coreNum = Runtime.getRuntime().availableProcessors();
 		CoreThread[] cores = new CoreThread[coreNum];
 		int totalCellNum = grid.getHeight() * grid.getWidth();
@@ -168,7 +174,7 @@ public class Overseer
 			myworkPos = 0;
 		}
 		
-		/*private void gameOfLife(int x, int y)
+		private void gameOfLife(int x, int y)
 		{
 			Cell[] neigh = grid.getNeighbours(new Vector2i(x, y));
 			int cnt = 0;
@@ -188,7 +194,7 @@ public class Overseer
 			else
 				mywork[myworkPos] = new Cell(grid.getCell(x, y));
 			myworkPos++;
-		}*/
+		}
 		
 		public void run()
 		{
@@ -204,7 +210,7 @@ public class Overseer
 						break;
 					}
 					
-					//gameOfLife(x, y);
+					gameOfLife(x, y);
 					/*
 					 * Cell c = mywork[myworkPos++];
 					 * mywork[myworkPos++] = new Cell(vm.run(c, c.getNeighbours()));

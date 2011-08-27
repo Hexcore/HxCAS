@@ -1,6 +1,7 @@
-package com.hexcore.cas.model.test;
+package com.hexcore.cas.control.client.test;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import junit.framework.TestCase;
 
@@ -48,6 +49,7 @@ public class TestOverseer extends TestCase
 		assertEquals(0, o.getWorkable().getPosition().y);
 		assertEquals(4, o.getWorkable().getSize().x);
 		assertEquals(4, o.getWorkable().getSize().y);
+		o.disconnect();
 	}
 
 	public void test2SetGrid()
@@ -83,6 +85,7 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, h.getCell(3, 1).getValue(0));
 		assertEquals(0.0, h.getCell(3, 2).getValue(0));
 		assertEquals(0.0, h.getCell(3, 3).getValue(0));
+		o.disconnect();
 	}
 	
 	public void test3SetWorkable()
@@ -99,6 +102,7 @@ public class TestOverseer extends TestCase
 		assertEquals(1, o.getWorkable().getPosition().y);
 		assertEquals(1, o.getWorkable().getSize().x);
 		assertEquals(1, o.getWorkable().getSize().y);
+		o.disconnect();
 	}
 	
 	public void test4StartMiddleGlider()
@@ -146,6 +150,7 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, g.getCell(4, 2).getValue(0));
 		assertEquals(0.0, g.getCell(4, 3).getValue(0));
 		assertEquals(0.0, g.getCell(4, 4).getValue(0));
+		o.disconnect();
 	}
 	
 	public void test5StartCornerGlider()
@@ -193,5 +198,6 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, g.getCell(4, 2).getValue(0));
 		assertEquals(0.0, g.getCell(4, 3).getValue(0));
 		assertEquals(0.0, g.getCell(4, 4).getValue(0));
+		o.disconnect();
 	}
 }

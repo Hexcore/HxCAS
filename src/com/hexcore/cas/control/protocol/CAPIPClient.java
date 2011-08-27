@@ -24,11 +24,9 @@ public class CAPIPClient extends CAPInformationProcessor
 		throws IOException
 	{
 		super();
-		inter = new CAPMessageProtocol(sock.accept());
 		parent = o;
 	}
 
-	@Override
 	protected void interpretInput(Message message)
 	{
 		DictNode header = message.getHeader();
@@ -169,5 +167,33 @@ public class CAPIPClient extends CAPInformationProcessor
 			sendState(2, "MESSAGE TYPE NOT FOUND");
 			return;
 		}
+	}
+	
+	public void disconnect()
+	{
+		super.disconnect();
+		try
+		{
+			sock.close();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error closing ServerSocket");
+			e.printStackTrace();
+		}
+	}
+	
+	public void run()
+	{
+		try
+		{
+			inter = new CAPMessageProtocol(sock.accept());
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error making inter");
+			e.printStackTrace();
+		}
+		super.run();
 	}
 }

@@ -75,7 +75,6 @@ public class CAPMessageProtocol extends Thread
 		running = false;
 	}
 	
-	@Override
 	public void run()
 	{
 		running = true;

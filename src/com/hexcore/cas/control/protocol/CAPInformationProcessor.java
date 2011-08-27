@@ -48,7 +48,6 @@ public abstract class CAPInformationProcessor extends Thread
 		running = false;
 	}
 	
-	@Override
 	public void run()
 	{
 		running = true;
@@ -58,7 +57,10 @@ public abstract class CAPInformationProcessor extends Thread
 		while (running)
 		{
 			Message message = protocol.waitForMessage();
-			if (message != null) interpretInput(message);
+			if (message != null)
+				interpretInput(message);
 		}
+		
+		protocol.disconnect();
 	}
 }
