@@ -28,6 +28,7 @@ import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
+import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.Text.Size;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
@@ -212,9 +213,17 @@ public class UIProtoApplication implements WindowEventListener
 		headingContainer.setFlag(Widget.FILL);
 		headerLayout.add(headingContainer);
 		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
-		headingLabel.setFlag(Widget.CENTER);
-		headingContainer.setContents(headingLabel);
+		ImageWidget minimizeImage = new ImageWidget("data/minimize_button.png");
+		minimizeImage.setFlag(Widget.CENTER);
+		headerLayout.add(minimizeImage);	
+		
+		ImageWidget fullscreenImage = new ImageWidget("data/fullscreen_button.png");
+		fullscreenImage.setFlag(Widget.CENTER);
+		headerLayout.add(fullscreenImage);	
+		
+		ImageWidget quitImage = new ImageWidget("data/quit_button.png");
+		quitImage.setFlag(Widget.CENTER);
+		headerLayout.add(quitImage);	
 		
 		mainLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		mainLayout.setFlag(Widget.FILL);
@@ -271,22 +280,35 @@ public class UIProtoApplication implements WindowEventListener
 		tabbedWorldView.setFlag(Widget.FILL);
 		
 		
-		LinearLayout gutterLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		gutterLayout.setHeight(55);
-		gutterLayout.setFlag(Widget.FILL_HORIZONTAL);
-		gutterLayout.setBackground(new Fill(new Colour(0.5f,0.5f,0.4f)));
 		
-		worldLayout.add(gutterLayout);
+		LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(100, 30), LinearLayout.Direction.HORIZONTAL);
+		worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
+		worldLayout.add(worldHeaderLayout);
+		
+		
+		
+		headingImage = new ImageWidget("data/logo3.png");
+		
+		headingImage.setFlag(Widget.CENTER_HORIZONTAL);
+	worldHeaderLayout.add(headingImage);
+
+		
+		
+	
+	//	worldHeaderLayout.add(minimizeImage);
+	//	worldHeaderLayout.add(fullscreenImage);
+	//	worldHeaderLayout.add(quitImage);
+		
 		
 		
 	
 		
 		
-		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
+//		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
 		
 		
-		worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
-		worldLayout.add(worldEditorLabel);
+	//	worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
+		//worldLayout.add(worldEditorLabel);
 		worldLayout.add(tabbedWorldView);
 		
 		// OUR WORLD EDITOR Containers
@@ -303,7 +325,7 @@ public class UIProtoApplication implements WindowEventListener
 	
 		
    	LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-   	instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
+   	//instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
 
    	instructionsLayout.setHeight(35);
 
@@ -401,13 +423,45 @@ public class UIProtoApplication implements WindowEventListener
 		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
 		propertiesLayout.add(wrapCheckBox);
 		
-		
+
+		LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(525, 50), LinearLayout.Direction.HORIZONTAL);
+		buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		worldLayout.add(buttonHeaderLayout);
+			
+			Button backButton = new Button(new Vector2i(100, 50), "Back to Main Menu");
+			backButton.setWidth(165);
+			backButton.setHeight(35);
+			buttonHeaderLayout.add(backButton);
+			
+			Button saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
+			saveWorldButton.setWidth(165);
+			saveWorldButton.setHeight(35);
+			buttonHeaderLayout.add(saveWorldButton);
+			
+			Button simulateButton = new Button(new Vector2i(100, 50), "Simluate");
+			simulateButton.setWidth(165);
+			simulateButton.setHeight(35);
+			buttonHeaderLayout.add(simulateButton);
+			
 		
 		
 		
 		
 		rulesContainer = new Container(new Vector2i(100, 100));
+		tabbedWorldView.add(rulesContainer, "CAL Rules");
 		rulesContainer.setFlag(Widget.FILL);
+		
+		LinearLayout masterRulesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		masterRulesLayout.setFlag(Widget.FILL);
+		rulesContainer.setContents(masterRulesLayout);
+		
+		TextArea description = new TextArea(100, 20);
+		description.setFlag(Widget.FILL);
+		description.setLineNumbers(true);
+		masterRulesLayout.add(description);
+		
+		
 		
 		distributionContainer = new Container(new Vector2i(100, 100));
 		distributionContainer.setFlag(Widget.FILL);
@@ -416,9 +470,12 @@ public class UIProtoApplication implements WindowEventListener
 		worldPreviewContainer.setFlag(Widget.FILL);
 		
 		
-		tabbedWorldView.add(rulesContainer, "CAL Rules");
+
 		tabbedWorldView.add(distributionContainer, "Distribution Settings");
 		tabbedWorldView.add(worldPreviewContainer, "World Preview");
+		
+		
+		
 		
 		
 		
@@ -426,6 +483,7 @@ public class UIProtoApplication implements WindowEventListener
 	 
 		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
 		headingLabel.setFlag(Widget.CENTER);
+		
 		
 		
 		
