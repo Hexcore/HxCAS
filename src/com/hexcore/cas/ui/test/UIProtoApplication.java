@@ -439,7 +439,7 @@ public class UIProtoApplication implements WindowEventListener
 			saveWorldButton.setHeight(35);
 			buttonHeaderLayout.add(saveWorldButton);
 			
-			Button simulateButton = new Button(new Vector2i(100, 50), "Simluate");
+			Button simulateButton = new Button(new Vector2i(100, 50), "Simulate");
 			simulateButton.setWidth(165);
 			simulateButton.setHeight(35);
 			buttonHeaderLayout.add(simulateButton);
