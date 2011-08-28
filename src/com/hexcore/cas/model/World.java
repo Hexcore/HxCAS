@@ -17,6 +17,22 @@ public class World
 		rulesAndColours = RAC;
 	}
 	
+	public String getRulesAndColours()
+	{
+		return rulesAndColours;
+	}
+	
+	public Grid[] getWorld()
+	{
+		return world;
+	}
+	
+	public void sendRulesAndColours()
+	{
+		HexcoreVM h = new HexcoreVM();
+		//h.loadRules(rulesAndColours);
+	}
+	
 	public void setWorld(Grid[] w)
 	{
 		char type = w[0].getType();
@@ -57,21 +73,5 @@ public class World
 				}
 			}
 		}
-	}
-	
-	public String getRulesAndColours()
-	{
-		return rulesAndColours;
-	}
-	
-	public Grid[] getWorld()
-	{
-		return world;
-	}
-	
-	public void sendRulesAndColours()
-	{
-		HexcoreVM h = new HexcoreVM();
-		//h.loadRules(rulesAndColours);
 	}
 }

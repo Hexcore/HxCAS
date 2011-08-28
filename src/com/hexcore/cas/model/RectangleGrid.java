@@ -48,24 +48,44 @@ public class RectangleGrid extends Grid
 		int x = pos.x;//get target cell's location stored.
 		int y = pos.y;
 		
-		//TOP LEFT: y-1, x-1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim), i++);
-		//TOP CENTRE: y-1, x
-		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+ydim-1)%ydim), i++);
-		//TOP RIGHT: y-1, x+1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+ydim-1)%ydim), i++);
-		//LEFT: y, x-1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, y), i++);
-		//RIGHT: y, x+1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, y), i++);
-		//BOTTOM LEFT: y+1, x-1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+xdim-1)%xdim, (y+1)%ydim), i++);
-		//BOTTOM CENTRE: y+1, x
-		neighbours = setNeighbours( pos, neighbours, new Vector2i(x, (y+1)%ydim), i++);
-		//BOTTOM RIGHT: y+1, x+1
-		neighbours = setNeighbours( pos, neighbours, new Vector2i((x+1)%xdim, (y+1)%ydim), i++);
-		
-		//System.out.println("After : " + getCell(pos).getValue(0));
+		if(wrap)
+		{
+			//TOP LEFT: y-1, x-1
+			neighbours[0] = this.getCell(new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim));
+			//TOP CENTRE: y-1, x
+			neighbours[1] = this.getCell(new Vector2i(x, (y+ydim-1)%ydim));
+			//TOP RIGHT: y-1, x+1
+			neighbours[2] = this.getCell(new Vector2i((x+1)%xdim, (y+ydim-1)%ydim));
+			//LEFT: y, x-1
+			neighbours[3] = this.getCell(new Vector2i((x+xdim-1)%xdim, y));
+			//RIGHT: y, x+1
+			neighbours[4] = this.getCell(new Vector2i((x+1)%xdim, y));
+			//BOTTOM LEFT: y+1, x-1
+			neighbours[5] = this.getCell(new Vector2i((x+xdim-1)%xdim, (y+1)%ydim));
+			//BOTTOM CENTRE: y+1, x
+			neighbours[6] = this.getCell(new Vector2i(x, (y+1)%ydim));
+			//BOTTOM RIGHT: y+1, x+1
+			neighbours[7] = this.getCell(new Vector2i((x+1)%xdim, (y+1)%ydim));
+		}
+		else
+		{
+			//TOP LEFT: y-1, x-1
+			neighbours = setNeighbours(neighbours, x-1, y-1, 	xdim, ydim, i++);
+			//TOP CENTRE: y-1, x
+			neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
+			//TOP RIGHT: y-1, x+1
+			neighbours = setNeighbours(neighbours, x+1, y-1, 	xdim, ydim, i++);
+			//LEFT: y, x-1
+			neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
+			//RIGHT: y, x+1
+			neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
+			//BOTTOM LEFT: y+1, x-1
+			neighbours = setNeighbours(neighbours, x-1, y+1, 	xdim, ydim, i++);
+			//BOTTOM CENTRE: y+1, x
+			neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
+			//BOTTOM RIGHT: y+1, x+1
+			neighbours = setNeighbours(neighbours, x+1, y+1, 	xdim, ydim, i++);
+		}
 		return neighbours;
 	}//end method getNeighbours
 	
@@ -74,19 +94,25 @@ public class RectangleGrid extends Grid
 	 * @param x - x position of target cell.
 	 * @param y - y position of target cell.
 	 * @param neighbours - array to be altered.
-	 * @param temp - Vector2i where the neighbour should be found.
+	 * @param xdim - x dimension of the grid
+	 * @param ydim - y dimension of the grid.
 	 * @param i - number of neighbour.
 	 * @return - the updated neighbours array.
 	 * @author Apurva Kumar
 	 */
-	private Cell[] setNeighbours(Vector2i pos, Cell[] neighbours, Vector2i temp, int i)
+	private Cell[] setNeighbours(Cell [] neighbours, int x, int y, int xdim, int ydim, int i)
 	{
-		//System.out.print( temp.x + " " + temp.y + " = ");
-		if(pos.equals(temp))//if the neighbour is the same as the target cell
-			neighbours[i] = null;//set neighbour to null
+		if((x < 0) || (x > xdim))
+		{
+			neighbours[i] = null;
+		}
+		else if((y < 0) || (y > ydim))
+		{
+			neighbours[i] = null;
+		}
 		else
-			neighbours[i] = new Cell(getCell(temp));//else, get Cell.
-		//System.out.println(getCell(temp).getValue(0));
+			neighbours[i] = getCell( x, y);
+		
 		return neighbours;
 	}//end method setNeighbours
 

@@ -30,7 +30,7 @@ public class WaterFlow
 						Math.cos((x / 8.4 + y / 6.8 - x / 7.6)) * 4) + 7);
 			}
 		
-		grid.setCell(4, 4, new double[] {1, 15, 0});
+		grid.setCell(6, 24, new double[] {1, 8, 0});
 	}
 
 	public Grid getGrid()
@@ -54,6 +54,8 @@ public class WaterFlow
 					
 					for (Cell n : neighbours)
 					{
+						if (n == null) continue;
+						
 						if (n.getValue(1) > 0)
 						{
 							double water = n.getValue(2) + n.getValue(1) - self.getValue(2);

@@ -1,6 +1,7 @@
-package com.hexcore.cas.model.test;
+package com.hexcore.cas.control.client.test;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import junit.framework.TestCase;
 
@@ -48,6 +49,7 @@ public class TestOverseer extends TestCase
 		assertEquals(0, o.getWorkable().getPosition().y);
 		assertEquals(4, o.getWorkable().getSize().x);
 		assertEquals(4, o.getWorkable().getSize().y);
+		o.disconnect();
 	}
 
 	public void test2SetGrid()
@@ -83,6 +85,7 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, h.getCell(3, 1).getValue(0));
 		assertEquals(0.0, h.getCell(3, 2).getValue(0));
 		assertEquals(0.0, h.getCell(3, 3).getValue(0));
+		o.disconnect();
 	}
 	
 	public void test3SetWorkable()
@@ -99,6 +102,7 @@ public class TestOverseer extends TestCase
 		assertEquals(1, o.getWorkable().getPosition().y);
 		assertEquals(1, o.getWorkable().getSize().x);
 		assertEquals(1, o.getWorkable().getSize().y);
+		o.disconnect();
 	}
 	
 	public void test4StartMiddleGlider()
@@ -146,11 +150,14 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, g.getCell(4, 2).getValue(0));
 		assertEquals(0.0, g.getCell(4, 3).getValue(0));
 		assertEquals(0.0, g.getCell(4, 4).getValue(0));
+		o.disconnect();
 	}
 	
 	public void test5StartCornerGlider()
-		throws IOException
+		throws IOException, InterruptedException
 	{
+		Thread.sleep(2000);
+		System.out.println("-- TEST 5 --");
 		int size = 5;
 		RectangleGrid g = new RectangleGrid(new Vector2i(size, size), new Cell(1));
 		for(int y = 0; y < size; y++)
@@ -163,6 +170,7 @@ public class TestOverseer extends TestCase
 		g.getCell(0, 2).setValue(0, 1);
 		
 		Overseer o = new Overseer(g, new Recti(new Vector2i(0, 0), new Vector2i(size, size)));
+		Thread.sleep(1000);
 		o.start();
 
 		assertEquals('R', g.getType());
@@ -193,5 +201,6 @@ public class TestOverseer extends TestCase
 		assertEquals(0.0, g.getCell(4, 2).getValue(0));
 		assertEquals(0.0, g.getCell(4, 3).getValue(0));
 		assertEquals(0.0, g.getCell(4, 4).getValue(0));
+		o.disconnect();
 	}
 }

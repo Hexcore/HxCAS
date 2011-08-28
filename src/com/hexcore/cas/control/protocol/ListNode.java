@@ -1,5 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class ListNode extends Node
@@ -19,5 +21,14 @@ public class ListNode extends Node
 	public ArrayList<Node> getListValues()
 	{
 		return values;
+	}
+	
+	@Override
+	public void write(OutputStream out)
+		throws IOException
+	{
+		out.write('l');
+		for (Node node : values) node.write(out);
+		out.write('e');
 	}
 }

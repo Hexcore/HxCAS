@@ -18,6 +18,27 @@ public class WorldSaver
 		worldFileName = name;
 	}
 	
+	public void addGeneration(Grid w)
+	{
+		listWorld.add(w);
+	}
+	
+	//Used for test cases only.
+	public int getListWorldSize()
+	{
+		return listWorld.size();
+	}
+	
+	public String getRulesAndColours()
+	{
+		return rulesAndColours;
+	}
+	
+	public String getWorldName()
+	{
+		return worldFileName.substring(worldFileName.indexOf('/') + 1);
+	}
+	
 	public void saveWorld()
 		throws IOException
 	{
@@ -47,6 +68,10 @@ public class WorldSaver
 		int x = world[0].getWidth();
 		int n = world[0].getCell(0, 0).getValueCount();
 		
+		/*
+		 * Creates a ZIP file to persist the world, it's configuration,
+		 * it's rule set and it's generations. 
+		 */
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(worldFileName));
 		
 		ZipEntry config = new ZipEntry("config.cac");
@@ -84,34 +109,13 @@ public class WorldSaver
 		out.close();
 	}
 	
-	public String getWorldName()
-	{
-		return worldFileName.substring(worldFileName.indexOf('/') + 1);
-	}
-	
-	public void setWorldName(String name)
-	{
-		worldFileName = name;
-	}
-	
-	public void addGeneration(Grid w)
-	{
-		listWorld.add(w);
-	}
-	
 	public void setRulesAndColours(String RAC)
 	{
 		rulesAndColours = RAC;
 	}
 	
-	public String getRulesAndColours()
+	public void setWorldName(String name)
 	{
-		return rulesAndColours;
-	}
-	
-	//Used for test cases only.
-	public int getListWorldSize()
-	{
-		return listWorld.size();
+		worldFileName = name;
 	}
 }

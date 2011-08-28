@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import com.hexcore.cas.control.client.Overseer;
 import com.hexcore.cas.math.Recti;
@@ -17,22 +16,48 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private ServerSocket sock = new ServerSocket(3119);
-	private CAPInterface inter = null;
+	private CAPMessageProtocol inter = null;
 	private Overseer parent = null;
-	private LinkedBlockingQueue<ArrayList<Byte>> queue = null;
+	private ServerSocket sock = null;
 	
 	public CAPIPClient(Overseer o)
 		throws IOException
 	{
 		super();
-		inter = new CAPInterface(this, sock.accept());
 		parent = o;
-		queue = new LinkedBlockingQueue<ArrayList<Byte>>();
+		try
+		{
+			sock = new ServerSocket(3119);
+			System.out.println("Sock listening on " + sock.getLocalPort());
+		}
+		catch(IOException ex)
+		{
+			System.out.println("Error connecting sock to port 3119");
+			ex.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void disconnect()
+	{
+		super.disconnect();
+		try
+		{
+			sock.close();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error closing ServerSocket");
+			e.printStackTrace();
+		}
 	}
 
-	protected void interpretInput()
+	@Override
+	protected void interpretInput(Message message)
 	{
+		DictNode header = message.getHeader();
+		DictNode body = (DictNode)message.getBody();
+		
 		HashMap<String, Node> map = header.getDictValues();
 		if(map.containsKey("TYPE"))
 		{
@@ -41,12 +66,12 @@ public class CAPIPClient extends CAPInformationProcessor
 				HashMap<String, Node> codeInfo = body.getDictValues();
 				if(codeInfo.containsKey("DATA"))
 				{
-					parent.setRules(codeInfo.get("DATA").getByteValues());
+					parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
 					System.out.println("-- not sure how to handle code yet --");
 				}
 				else
 				{
-					inter.sendState(2, "DATA MISSING FOR CODE MESSAGE TYPE");
+					sendState(2, "DATA MISSING FOR CODE MESSAGE TYPE");
 					return;
 				}
 			}
@@ -66,44 +91,49 @@ public class CAPIPClient extends CAPInformationProcessor
 				int n = -1;
 				char type = 'X';
 				Grid grid = null;
+				
 				if(gi.containsKey("SIZE"))
 				{
-					ArrayList<Node> sizeList = gi.get("SIZE").getListValues();
-					size = new Vector2i(sizeList.get(0).getIntValue(), sizeList.get(1).getIntValue());
+					ArrayList<Node> sizeList = ((ListNode)gi.get("SIZE")).getListValues();
+					size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
 				}
 				else
 				{
-					inter.sendState(2, "GRID MISSING A SIZE");
+					sendState(2, "GRID MISSING A SIZE");
 					return;
 				}
+				
 				if(gi.containsKey("AREA"))
 				{
-					ArrayList<Node> sizeList = gi.get("AREA").getListValues();
-					area = new Recti(new Vector2i(sizeList.get(2).getIntValue(), sizeList.get(3).getIntValue()), size);
+					ArrayList<Node> sizeList = ((ListNode)gi.get("AREA")).getListValues();
+					area = new Recti(new Vector2i(((IntNode)sizeList.get(2)).getIntValue(), ((IntNode)sizeList.get(3)).getIntValue()), size);
 				}
 				else
 				{
-					inter.sendState(2, "GRID MISSING AN AREA");
+					sendState(2, "GRID MISSING AN AREA");
 					return;
 				}
+				
 				if(gi.containsKey("PROPERTIES"))
 				{
-					n = gi.get("PROPERTIES").getIntValue();
+					n = ((IntNode)gi.get("PROPERTIES")).getIntValue();
 				}
 				else
 				{
-					inter.sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
+					sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
 					return;
 				}
+				
 				if(gi.containsKey("GRIDTYPE"))
 				{
 					type = gi.get("GRIDTYPE").toString().charAt(0);
 				}
 				else
 				{
-					inter.sendState(2, "GRID MISSING THE GRID TYPE");
+					sendState(2, "GRID MISSING THE GRID TYPE");
 					return;
 				}
+				
 				switch(type)
 				{
 					case 'h':
@@ -119,9 +149,10 @@ public class CAPIPClient extends CAPInformationProcessor
 						grid = new RectangleGrid(size, new Cell(n));
 						break;
 					default:
-						inter.sendState(2, "GRID TYPE INVALID");
+						sendState(2, "GRID TYPE INVALID");
 						return;
 				}
+				
 				if(gi.containsKey("DATA"))
 				{
 					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
@@ -130,17 +161,17 @@ public class CAPIPClient extends CAPInformationProcessor
 						ArrayList<Node> currRow = ((ListNode)rows.get(y)).getListValues(); 
 						for(int x = 0; x < currRow.size(); x++)
 						{
-							ArrayList<Node> currCell = ((DoubleNode)currRow.get(x)).getListValues();
+							ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
 							for(int i = 0; i < currCell.size(); i++)
 							{
-								grid.getCell(x, y).setValue(i, currCell.get(i).getDoubleValue());
+								grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
 							}
 						}
 					}
 				}
 				else
 				{
-					inter.sendState(2, "GRID DATA MISSING");
+					sendState(2, "GRID DATA MISSING");
 					return;
 				}
 				
@@ -149,65 +180,33 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("QUERY") == 0)
 			{
-				if(currInBytes == null)
-					inter.sendState(0);
-				else
-					inter.sendState(1);
+				sendState(parent.checkState());
 			}
 			else
 			{
-				inter.sendState(2, "MESSAGE TYPE NOT RECOGNSED");
+				sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 				return;
 			}
 		}
 		else
 		{
-			inter.sendState(2, "MESSAGE TYPE NOT FOUND");
+			sendState(2, "MESSAGE TYPE NOT FOUND");
 			return;
 		}
 	}
 	
-	public void setCurrentInformation(byte[] in)
+	@Override
+	public void run()
 	{
-		if(currInBytes == null)
+		try
 		{
-			currInBytes = in;
-			int result = processInput();
-			if(result == 2)
-			{
-				System.out.println("Error processing input.");
-				inter.sendState(2, "INPUT PROCESSING ERROR");
-			}
-			else
-			{
-				interpretInput();
-				parent.start();
-				currInBytes = null;
-				if(queue.size() == 0)
-					inter.sendState(0);
-			}
+			inter = new CAPMessageProtocol(sock.accept());
 		}
-		else
+		catch(IOException e)
 		{
-			inter.sendState(1);
-			ArrayList<Byte> b = new ArrayList<Byte>();
-			for(int i = 0; i < in.length; i++)
-				b.add(new Byte(in[i]));
-			queue.add(b);
+			System.out.println("Error making inter");
+			e.printStackTrace();
 		}
-		if(queue.size() != 0)
-		{
-			ArrayList<Byte> b = queue.remove();
-			byte[] bin = new byte[b.size()];
-			for(int i = 0; i < bin.length; i++)
-				bin[i] = b.get(i).byteValue();
-			setCurrentInformation(bin);
-		}
-	}
-
-	public void start()
-		throws IOException
-	{
-		inter.start();
+		super.run();
 	}
 }

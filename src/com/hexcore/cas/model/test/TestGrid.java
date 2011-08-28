@@ -125,6 +125,7 @@ public class TestGrid extends TestCase
 	{
 		Vector2i	size = new Vector2i(7, 9);
 		DummyGrid	grid = new DummyGrid(size);
+		grid.setWrappable(false);
 		grid.getCell(0, 0).setValue(0, 3);
 		grid.getCell(1, 0).setValue(0, 10);
 		grid.getCell(0, 1).setValue(0, 11);
@@ -152,6 +153,8 @@ public class TestGrid extends TestCase
 		assertEquals(3.0, grid2.getCell(0, 0).getValue(0));
 		assertEquals(5.0, grid2.getCell(2, 2).getValue(0));
 		assertEquals(9.0, grid2.getCell(6, 8).getValue(0));
+		
+		assertEquals(false, grid2.getWrappable());
 	}	
 	
 	@Test

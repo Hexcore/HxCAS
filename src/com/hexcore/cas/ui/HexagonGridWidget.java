@@ -32,20 +32,23 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 		int r = (int)(tileSize * Math.cos(30.0 * Math.PI / 180.0));
 		
 		Vector2f[]	hexagon = new Vector2f[6];
-		hexagon[0] = new Vector2f(r, 	0);
-		hexagon[1] = new Vector2f(r+r, 	h);
-		hexagon[2] = new Vector2f(r+r,	h+s);
-		hexagon[3] = new Vector2f(r,	h+s+h);
-		hexagon[4] = new Vector2f(0, 	h+s);
-		hexagon[5] = new Vector2f(0, 	h);
+		hexagon[0] = new Vector2f(0.0f,	r);
+		hexagon[1] = new Vector2f(h,	r+r);
+		hexagon[2] = new Vector2f(h+s,	r+r);
+		hexagon[3] = new Vector2f(h+s+h,r);
+		hexagon[4] = new Vector2f(h+s,	0.0f);
+		hexagon[5] = new Vector2f(h,	0.0f);
+		
+		for (Vector2f v : hexagon) v.inc(0.5f, 0.5f);
 		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell 		cell = grid.getCell(x, y);
 				Colour		colour = Colour.DARK_GREY;
-				Vector2i	p = pos.add(x*r*2, y*(s+h));
-				if ((y & 1) == 1) p.inc(r, 0);
+				Vector2i	p = pos.add(x*(s+h), y*r*2);
+				
+				if ((x & 1) == 1) p.inc(0, r);
 				
 				if (colourRules != null)
 					colour = colourRules.getColour(cell, colourProperty);

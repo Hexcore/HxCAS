@@ -5,8 +5,8 @@ import com.hexcore.cas.math.Vector2i;
 public class ThreadState
 {
 	public Cell[] work = null;
-	public Vector2i startingPosition = null;
 	public int num = -1;
+	public Vector2i startingPosition = null;
 	
 	public ThreadState(Cell[] w, Vector2i v, int n)
 	{

@@ -16,19 +16,45 @@ import com.hexcore.cas.rulesystems.HexcoreVM;
 
 public class Overseer 
 {
+	private CAPIPClient capIP = null;
+	private HexcoreVM vm = null;
 	private Grid grid = null;
 	private Recti workable = null;
 	private Vector<ThreadState> threadWork = null;
-	private CAPIPClient capIP = null;
-	private HexcoreVM vm = null;
 	
 	public Overseer(Grid g, Recti w)
 		throws IOException
 	{
 		grid = g;
 		workable = w;
-		threadWork = new Vector<ThreadState>();
+		vm = new HexcoreVM();
 		capIP = new CAPIPClient(this);
+		capIP.start();
+	}
+	
+	public int checkState()
+	{
+		if(threadWork == null)
+			return 0;
+		else
+			return 1;
+	}
+	
+	public void disconnect()
+	{
+		capIP.disconnect();
+	}
+	
+	//Used for testing purposes only
+	public Grid getGrid()
+	{
+		return grid;
+	}
+	
+	//Used for testing purposes only
+	public Recti getWorkable()
+	{
+		return workable;
 	}
 	
 	public void setGrid(Grid g)
@@ -58,35 +84,33 @@ public class Overseer
 				grid.setCell(x, y, g.getCell(x, y).getValues());
 	}
 	
-	public void setWorkable(Recti r)
-	{
-		workable = r;
-	}
-	
 	public void setRules(byte[] b)
 	{
 		//vm.loadRules(b);
 	}
 	
-	//Used for testing purposes only
-	public Grid getGrid()
+	public void setWorkable(Recti r)
 	{
-		return grid;
-	}
-	
-	//Used for testing purposes only
-	public Recti getWorkable()
-	{
-		return workable;
+		workable = r;
 	}
 	
 	public void start()
 	{
+		threadWork = new Vector<ThreadState>();
+		/*
+		 * Work is divided up for the CoreThreads.
+		 * Each thread will have an equal number of cells to work on,
+		 * with the exception of the last thread, which may have the
+		 * same number of cells of the rest, else it will have more,
+		 * which is the remainder cells of
+		 * 		totalNumberOfCells / totalNumberOfThreads
+		 */
 		int coreNum = Runtime.getRuntime().availableProcessors();
 		CoreThread[] cores = new CoreThread[coreNum];
 		int totalCellNum = grid.getHeight() * grid.getWidth();
 		int div = totalCellNum / coreNum;
 		int rem = totalCellNum % coreNum;
+		
 		Vector2i[] startingPoints = new Vector2i[coreNum];
 		int[] sizes = new int[coreNum];
 		int pos = 0;
@@ -126,6 +150,9 @@ public class Overseer
 			ex.printStackTrace();
 		}
 		
+		/*
+		 * Sets all the changes made by the threads to the grid of the overseer.
+		 */
 		for(int i = 0; i < threadWork.size(); i++)
 		{
 			int cnt = 0;
@@ -151,14 +178,40 @@ public class Overseer
 					break;
 			}
 		}
+		
+		Grid g = null;
+		switch(grid.getType())
+		{
+			case 'h':
+			case 'H':
+				g = new HexagonGrid(grid.getSize(), new Cell(grid.getCell(0, 0).getValueCount()));
+				break;
+			case 'r':
+			case 'R':
+				g = new RectangleGrid(grid.getSize(), new Cell(grid.getCell(0, 0).getValueCount()));
+				break;
+			case 't':
+			case 'T':
+				g = new TriangleGrid(grid.getSize(), new Cell(grid.getCell(0, 0).getValueCount()));
+				break;
+			default:
+				System.out.println("Grid in overseer had no type!");
+				break;
+		}
+		for(int y = workable.getY(); y < (workable.getPosition().y + workable.getSize().y); y++)
+			for(int x = workable.getX(); x < (workable.getPosition().x + workable.getSize().x); x++)
+				for(int i = 0; i < grid.getCell(x, y).getValueCount(); i++)
+					g.getCell(x, y).setValue(i, grid.getCell(x, y).getValue(i));
+		threadWork = null;
+		capIP.sendGrid(g);
 	}
 	
 	public class CoreThread extends Thread
 	{
-		private Vector2i workPos = null;
-		private int num = -1;
 		private Cell[] mywork = null;
 		private int myworkPos = -1;
+		private int num = -1;
+		private Vector2i workPos = null;
 		
 		public CoreThread(Vector2i p, int n)
 		{
@@ -168,7 +221,7 @@ public class Overseer
 			myworkPos = 0;
 		}
 		
-		/*private void gameOfLife(int x, int y)
+		private void gameOfLife(int x, int y)
 		{
 			Cell[] neigh = grid.getNeighbours(new Vector2i(x, y));
 			int cnt = 0;
@@ -188,7 +241,7 @@ public class Overseer
 			else
 				mywork[myworkPos] = new Cell(grid.getCell(x, y));
 			myworkPos++;
-		}*/
+		}
 		
 		public void run()
 		{
@@ -204,7 +257,7 @@ public class Overseer
 						break;
 					}
 					
-					//gameOfLife(x, y);
+					gameOfLife(x, y);
 					/*
 					 * Cell c = mywork[myworkPos++];
 					 * mywork[myworkPos++] = new Cell(vm.run(c, c.getNeighbours()));

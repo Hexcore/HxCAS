@@ -50,21 +50,23 @@ public class HexagonGrid extends Grid
 		{
 			if((x%2) == 0)//if the column is even:
 			{
-				neighbours[0] = this.getCell(new Vector2i( x, (y+ydim-2)%ydim));
-				neighbours[1] = this.getCell(new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim));
-				neighbours[2] = this.getCell(new Vector2i( x, (y+ydim-1)%ydim));
-				neighbours[3] = this.getCell(new Vector2i((x+xdim-1)%xdim, (y+1)%ydim));
-				neighbours[4] = this.getCell(new Vector2i( x, (y+1)%ydim));
-				neighbours[5] = this.getCell(new Vector2i( x, (y+2)%ydim));
+				neighbours[0] = this.getCell(new Vector2i((x+xdim-1)%xdim, (y+ydim-1)%ydim));
+				neighbours[1] = this.getCell(new Vector2i(x, (y+ydim-1)%ydim));
+				neighbours[2] = this.getCell(new Vector2i((x+1)%xdim, (y+ydim-1)%ydim));
+				
+				neighbours[3] = this.getCell(new Vector2i((x+xdim-1)%xdim, y));
+				neighbours[4] = this.getCell(new Vector2i( (x+1)%xdim, y));
+				neighbours[5] = this.getCell(new Vector2i( x, (y+1)%ydim));
 			}//if
 			else//the column is odd
 			{
-				neighbours[0] = this.getCell(new Vector2i( x, (y+ydim-2)%ydim));
-				neighbours[1] = this.getCell(new Vector2i( x, (y+ydim-1)%ydim));
-				neighbours[2] = this.getCell(new Vector2i((x+1)%xdim, (y+ydim-1)%ydim));
-				neighbours[3] = this.getCell(new Vector2i( x, (y+1)%ydim));
-				neighbours[4] = this.getCell(new Vector2i((x+1)%xdim, (y+1)%ydim));
-				neighbours[5] = this.getCell(new Vector2i( x, (y+2)%ydim));
+				neighbours[0] = this.getCell(new Vector2i( x, (y+ydim-1)%ydim));
+				neighbours[1] = this.getCell(new Vector2i( (x+xdim-1)%xdim, y));
+				neighbours[2] = this.getCell(new Vector2i((x+1)%xdim, y));
+				
+				neighbours[3] = this.getCell(new Vector2i( (x+xdim-1)%xdim, (y+1)%ydim));
+				neighbours[4] = this.getCell(new Vector2i( x, (y+1)%ydim));
+				neighbours[5] = this.getCell(new Vector2i( (x+1)%xdim, (y+1)%ydim));
 			}//else
 		}//if
 		else
@@ -74,6 +76,7 @@ public class HexagonGrid extends Grid
 				neighbours = setNeighbours(neighbours, x-1, y-1, 	xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y-1, 	xdim, ydim, i++);
+				
 				neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
@@ -83,6 +86,7 @@ public class HexagonGrid extends Grid
 				neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
+				
 				neighbours = setNeighbours(neighbours, x-1, y+1, 	xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y+1, 	xdim, ydim, i++);
@@ -97,18 +101,19 @@ public class HexagonGrid extends Grid
 	 * @param x - x position of target cell.
 	 * @param y - y position of target cell.
 	 * @param neighbours - array to be altered.
-	 * @param temp - Vector2i where the neighbour should be found.
+	 * @param xdim - x dimension of the grid
+	 * @param ydim - y dimension of the grid.
 	 * @param i - number of neighbour.
 	 * @return - the updated neighbours array.
 	 * @author Apurva Kumar
 	 */
 	private Cell[] setNeighbours(Cell [] neighbours, int x, int y, int xdim, int ydim, int i)
 	{
-		if((x < 0) || (x > xdim))
+		if((x < 0) || (x >= xdim))
 		{
 			neighbours[i] = null;
 		}
-		else if((y < 0) || (y > ydim))
+		else if((y < 0) || (y >= ydim))
 		{
 			neighbours[i] = null;
 		}
