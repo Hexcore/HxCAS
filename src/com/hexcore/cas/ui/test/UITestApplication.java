@@ -401,6 +401,8 @@ public class UITestApplication implements WindowEventListener
 			if (event.target == createWorldButton)
 			{
 				mainView.setIndex(1 - mainView.getIndex());
+				
+				window.setFullscreen(mainView.getIndex() == 1);
 			}
 			else if (event.target == loadWorldButton)
 			{
