@@ -125,8 +125,17 @@ public class UIProtoApplication implements WindowEventListener
 
 	public Button				nextIterationButton;
 	
+	public ColourRuleSet		colourRules;
+	
+	public String	currentThemeName = "lightV2";
+	public String	themeName = currentThemeName;
+	
+	
+	
 	UIProtoApplication()
 	{
+		
+		
 		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
@@ -151,15 +160,33 @@ public class UIProtoApplication implements WindowEventListener
 		triGameOfLife = new GameOfLife(triGrid);
 		
 		
+		colourRules = new ColourRuleSet(3);
+		ColourRule	colourRule;
 		
-		window = new Window("Cellular Automata Simulator - v1.0", 800, 600);
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
+		colourRules.setColourRule(0, colourRule);
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
+		colourRules.setColourRule(1, colourRule);	
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
+		colourRules.setColourRule(2, colourRule);	
+		
+		
+		window = new Window("Cellular Automata Simulator - v1.0", 1024, 700);
+		
 		window.addListener(this);
 		window.show();
 	}
 	
 	public void initialise()
 	{
-		window.loadTheme("data/default.thm");
+		window.loadTheme("data/"+themeName+".thm");
 		
 		
 		masterView = new View(new Vector2i(10, 10));
@@ -175,10 +202,9 @@ public class UIProtoApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
 		mainMenuLayout.add(headerLayout);
 						
-		headingImage = new ImageWidget("data/logo.png");
+		headingImage = new ImageWidget("data/logo2.png");
 		headingImage.setFlag(Widget.CENTER);
 		headerLayout.add(headingImage);		
 		
@@ -199,7 +225,7 @@ public class UIProtoApplication implements WindowEventListener
 		buttonBarLayout.setFlag(Widget.FILL_VERTICAL);
 		mainLayout.add(buttonBarLayout);
 		
-		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Blank world. Parameters must be specified");
+		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Create a blank world");
 		createWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(createWorldButton);
 		
@@ -245,7 +271,20 @@ public class UIProtoApplication implements WindowEventListener
 		tabbedWorldView.setFlag(Widget.FILL);
 		
 		
+		LinearLayout gutterLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		gutterLayout.setHeight(55);
+		gutterLayout.setFlag(Widget.FILL_HORIZONTAL);
+		gutterLayout.setBackground(new Fill(new Colour(0.5f,0.5f,0.4f)));
+		
+		worldLayout.add(gutterLayout);
+		
+		
+	
+		
+		
 		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
+		
+		
 		worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
 		worldLayout.add(worldEditorLabel);
 		worldLayout.add(tabbedWorldView);
@@ -404,7 +443,15 @@ public class UIProtoApplication implements WindowEventListener
 	@Override
 	public void update(float delta)
 	{
-		
+		if (!themeName.equals(currentThemeName))
+		{
+			System.out.println("Changing theme to "+themeName);
+			
+			window.loadTheme("data/"+themeName+".thm");
+			currentThemeName = themeName;
+			
+			window.relayout();
+		}	
 	}
 	
 	@Override
