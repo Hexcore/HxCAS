@@ -4,6 +4,7 @@ import com.hexcore.cas.model.Grid;
 
 public abstract class CAPInformationProcessor extends Thread
 {
+	protected boolean connected = false;
 	private volatile boolean running = false;
 	protected CAPMessageProtocol protocol = null;
 		
@@ -13,8 +14,14 @@ public abstract class CAPInformationProcessor extends Thread
 	{
 	}
 	
+	public boolean isConnected()
+	{
+		return connected;
+	}
+	
 	public void disconnect()
 	{
+		connected = false;
 		running = false;
 	}
 	
@@ -60,6 +67,7 @@ public abstract class CAPInformationProcessor extends Thread
 		body.addToDict("DATA", d);
 		
 		Message msg = new Message(makeHeader("RESULT"), body);
+		System.out.println("Protocol: " + protocol);
 		protocol.sendMessage(msg);
 	}
 	
@@ -82,8 +90,26 @@ public abstract class CAPInformationProcessor extends Thread
 		protocol.sendMessage(msg);
 	}
 	
+	public void setup()
+	{
+		
+	}
+	
+	@Override
+	public void start()
+	{
+		setup();
+		
+		if (connected) super.start();
+	}
+	
+	@Override
 	public void run()
 	{
+		if (!connected) return;
+		
+		System.out.println("Running...");
+		
 		running = true;
 		
 		protocol.start();
@@ -96,5 +122,5 @@ public abstract class CAPInformationProcessor extends Thread
 		}
 		
 		protocol.disconnect();
-	}
+	}	
 }

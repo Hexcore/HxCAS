@@ -2,6 +2,7 @@ package com.hexcore.cas.control.protocol;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,7 +17,6 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private CAPMessageProtocol inter = null;
 	private Overseer parent = null;
 	private ServerSocket sock = null;
 	
@@ -24,6 +24,9 @@ public class CAPIPClient extends CAPInformationProcessor
 		throws IOException
 	{
 		super();
+		
+		System.out.println("Creating Client...");
+		
 		parent = o;
 		try
 		{
@@ -81,7 +84,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("DISCONNECT") == 0)
 			{
-				inter.disconnect();
+				protocol.disconnect();
 			}
 			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
 			{
@@ -195,18 +198,20 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 	}
 	
-	@Override
-	public void run()
+	public void setup()
 	{
+		System.out.println("Waiting for server...");
+		
 		try
 		{
-			inter = new CAPMessageProtocol(sock.accept());
+			Socket clientSocket = sock.accept();
+			protocol = new CAPMessageProtocol(clientSocket);
+			connected = true;
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error making inter");
+			System.out.println("Error making protocol");
 			e.printStackTrace();
 		}
-		super.run();
 	}
 }
