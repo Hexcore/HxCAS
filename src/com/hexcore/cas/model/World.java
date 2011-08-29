@@ -29,7 +29,7 @@ public class World
 	
 	public void sendRulesAndColours()
 	{
-		HexcoreVM h = new HexcoreVM();
+		//HexcoreVM h = new HexcoreVM();
 		//h.loadRules(rulesAndColours);
 	}
 	

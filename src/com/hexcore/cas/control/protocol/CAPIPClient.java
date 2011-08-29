@@ -19,6 +19,7 @@ public class CAPIPClient extends CAPInformationProcessor
 {
 	private Overseer parent = null;
 	private ServerSocket sock = null;
+	private boolean sentAccept = false;
 	
 	public CAPIPClient(Overseer o)
 		throws IOException
@@ -66,10 +67,15 @@ public class CAPIPClient extends CAPInformationProcessor
 		{
 			if(map.get("TYPE").toString().compareTo("CODE") == 0)
 			{
+				if(!sentAccept)
+				{
+					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+					return;
+				}
 				Map<String, Node> codeInfo = body.getDictValues();
 				if(codeInfo.containsKey("DATA"))
 				{
-					parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
+					//parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
 					System.out.println("-- not sure how to handle code yet --");
 				}
 				else
@@ -80,14 +86,59 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("CONNECT") == 0)
 			{
-				System.out.println("-- not sure how to handle connect yet --");
+				if(sentAccept)
+				{
+					sendState(2, "CONNECT MESSAGE HAS ALREADY BEEN RECEIVED");
+					return;
+				}
+				if(map.containsKey("VERSION"))
+				{
+					if(PROTOCOL_VERSION == ((IntNode)map.get("VERSION")).getIntValue())
+					{
+						DictNode h = new DictNode();
+						h.addToDict("TYPE", new ByteNode("ACCEPT"));
+						h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+						
+						DictNode b = new DictNode();
+						Message msg = new Message(h, b);
+						protocol.sendMessage(msg);
+						sentAccept = true;
+					}
+					else
+					{
+						DictNode h = new DictNode();
+						h.addToDict("TYPE", new ByteNode("REJECT"));
+						h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+						
+						DictNode b = new DictNode();
+						b.addToDict("MSG", new ByteNode("VERSIONS INCOMPATIBLE"));
+						Message msg = new Message(h, b);
+						protocol.sendMessage(msg);
+					}
+				}
+				else
+				{
+					sendState(2, "VERSION MISSING");
+					return;
+				}
 			}
 			else if(map.get("TYPE").toString().compareTo("DISCONNECT") == 0)
 			{
+				if(!sentAccept)
+				{
+					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+					return;
+				}
 				protocol.disconnect();
+				sentAccept = false;
 			}
 			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
 			{
+				if(!sentAccept)
+				{
+					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+					return;
+				}
 				Map<String, Node> gi = body.getDictValues();
 				Vector2i size = null;
 				Recti area = null;
@@ -183,6 +234,11 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("QUERY") == 0)
 			{
+				if(!sentAccept)
+				{
+					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+					return;
+				}
 				sendState(parent.checkState());
 			}
 			else

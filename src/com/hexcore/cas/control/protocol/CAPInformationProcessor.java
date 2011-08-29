@@ -4,7 +4,7 @@ import com.hexcore.cas.model.Grid;
 
 public abstract class CAPInformationProcessor extends Thread
 {
-	private final static int PROTOCOL_VERSION = 1;
+	protected final static int PROTOCOL_VERSION = 1;
 	
 	protected boolean connected = false;
 	private volatile boolean running = false;

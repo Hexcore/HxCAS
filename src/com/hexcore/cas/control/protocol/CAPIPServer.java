@@ -2,14 +2,22 @@ package com.hexcore.cas.control.protocol;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeMap;
+
+import com.hexcore.cas.control.client.Overseer;
+import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.Grid;
 
 public class CAPIPServer extends CAPInformationProcessor
 {
 	private ArrayList<CAPMessageProtocol> clients = null;
+	private boolean receivedAccept = false;
+	private Overseer parent = null;
 	
-	public CAPIPServer()
+	public CAPIPServer(Overseer o)
 	{
 		super();
+		parent = o;
 		clients = new ArrayList<CAPMessageProtocol>();
 	}
 
@@ -25,10 +33,12 @@ public class CAPIPServer extends CAPInformationProcessor
 			if(map.get("TYPE").toString().compareTo("ACCEPT") == 0)
 			{
 				System.out.println("-- not sure how to handle accept yet --");
+				receivedAccept = true;
 			}
 			else if(map.get("TYPE").toString().compareTo("REJECT") == 0)
 			{
 				System.out.println("-- not sure how to handle reject yet --");
+				receivedAccept = false;
 			}
 			else if(map.get("TYPE").toString().compareTo("STATUS") == 0)
 			{
@@ -37,7 +47,12 @@ public class CAPIPServer extends CAPInformationProcessor
 			else if(map.get("TYPE").toString().compareTo("RESULT") == 0)
 			{
 				System.out.println("-- not sure how to handle result EXACTLY yet --");
-				/*HashMap<String, Node> gi = body.getDictValues();
+				if(!receivedAccept)
+				{
+					sendState(2, "ACCEPT MESSAGE HAS NOT BEEN RECEIVED YET");
+					return;
+				}
+				TreeMap<String, Node> gi = body.getDictValues();
 				Vector2i size = null;
 				
 				if(gi.containsKey("SIZE"))
@@ -51,6 +66,7 @@ public class CAPIPServer extends CAPInformationProcessor
 					return;
 				}
 				
+				Grid grid = null;//THIS MUST CHANGE
 				if(gi.containsKey("DATA"))
 				{
 					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
@@ -72,7 +88,7 @@ public class CAPIPServer extends CAPInformationProcessor
 					sendState(2, "GRID DATA MISSING");
 					return;
 				}
-				
+				/*
 				parent.setGrid(grid);
 				parent.setWorkable(area);*/
 			}
