@@ -15,6 +15,7 @@ import com.hexcore.cas.ui.Button;
 import com.hexcore.cas.ui.CheckBox;
 import com.hexcore.cas.ui.Colour;
 import com.hexcore.cas.ui.Container;
+import com.hexcore.cas.ui.Dialog;
 import com.hexcore.cas.ui.DropDownBox;
 import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
@@ -28,6 +29,7 @@ import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
+import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.Text.Size;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
@@ -56,11 +58,12 @@ public class UIProtoApplication implements WindowEventListener
 	
 	//1st,2,3,4 ...tab
 	
-	
+	public Button backButton;
 	public Container propertiesContainer;
 		
 		public LinearLayout masterPropertiesLayout;
 		public Container widgetPreviewContainer;
+		public Container widget3DPreviewContainer;
 		public LinearLayout widgetPreviewLayout;
 		public LinearLayout cellShapeLayout;
 		
@@ -82,15 +85,24 @@ public class UIProtoApplication implements WindowEventListener
 		public CheckBox wrapCheckBox;
 		public DropDownBox cellShapeDropDownBox;
 		
+		public Button submitButton;
+		
 		public RectangleGrid3DWidget	rectGrid3DViewer;
 		public HexagonGrid3DWidget		hexGrid3DViewer;
 		public TriangleGrid3DWidget		triGrid3DViewer;
+		
+		public HexagonGridWidget gridViewer;
+		public RectangleGridWidget rectGridViewer;
+		public TriangleGridWidget triGridViewer;
 		
 		
 	public Container rulesContainer;
 		public LinearLayout rulesLayout;
 		
-
+		public Button clearRulesButton;
+		public Button submitRulesButton;
+		
+		TextArea CALTextArea;
 	
 	
 	public Container distributionContainer;
@@ -125,15 +137,32 @@ public class UIProtoApplication implements WindowEventListener
 
 	public Button				nextIterationButton;
 	
+	public ColourRuleSet		colourRules;
+	
+	public String	currentThemeName = "lightV2";
+	public String	themeName = currentThemeName;
+	
+	public Dialog		dialog;
+	public LinearLayout	dialogLayout;
+	public TextWidget	dialogTitle;
+	public TextWidget	dialogMessage;
+	public Button		dialogOKButton;
+	
+	
+	public HexagonGrid grid;
+	public RectangleGrid rectGrid;
+	public TriangleGrid triGrid;
 	UIProtoApplication()
 	{
-		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
+		
+		
+		grid = new HexagonGrid(new Vector2i(12, 12));
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
 		grid.getCell(6, 7).setValue(0, 1);		
 		hexGameOfLife = new GameOfLife(grid);
 		
-		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(12, 12));
+		rectGrid = new RectangleGrid(new Vector2i(12, 12));
 		rectGrid.getCell(2, 4).setValue(0, 1);
 		rectGrid.getCell(3, 4).setValue(0, 1);
 		rectGrid.getCell(4, 4).setValue(0, 1);
@@ -141,7 +170,7 @@ public class UIProtoApplication implements WindowEventListener
 		rectGrid.getCell(3, 2).setValue(0, 1);
 		rectGameOfLife = new GameOfLife(rectGrid);
 		
-		TriangleGrid triGrid = new TriangleGrid(new Vector2i(12, 12));
+		triGrid = new TriangleGrid(new Vector2i(12, 12));
 		triGrid.getCell(7, 6).setValue(0, 1);
 		triGrid.getCell(7, 7).setValue(0, 1);
 		triGrid.getCell(7, 8).setValue(0, 1);
@@ -151,15 +180,33 @@ public class UIProtoApplication implements WindowEventListener
 		triGameOfLife = new GameOfLife(triGrid);
 		
 		
+		colourRules = new ColourRuleSet(3);
+		ColourRule	colourRule;
 		
-		window = new Window("Cellular Automata Simulator - v1.0", 800, 600);
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
+		colourRules.setColourRule(0, colourRule);
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
+		colourRules.setColourRule(1, colourRule);	
+		
+		colourRule = new ColourRule();
+		colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
+		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
+		colourRules.setColourRule(2, colourRule);	
+		
+		
+		window = new Window("Cellular Automata Simulator - v1.0", 1024, 700);
+		
 		window.addListener(this);
 		window.show();
 	}
 	
 	public void initialise()
 	{
-		window.loadTheme("data/default.thm");
+		window.loadTheme("data/"+themeName+".thm");
 		
 		
 		masterView = new View(new Vector2i(10, 10));
@@ -175,10 +222,9 @@ public class UIProtoApplication implements WindowEventListener
 		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
 		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setBackground(new Fill(Colour.WHITE, new Colour(1.0f, 1.0f, 1.0f, 0.0f)));
 		mainMenuLayout.add(headerLayout);
 						
-		headingImage = new ImageWidget("data/logo.png");
+		headingImage = new ImageWidget("data/logo2.png");
 		headingImage.setFlag(Widget.CENTER);
 		headerLayout.add(headingImage);		
 		
@@ -186,9 +232,6 @@ public class UIProtoApplication implements WindowEventListener
 		headingContainer.setFlag(Widget.FILL);
 		headerLayout.add(headingContainer);
 		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
-		headingLabel.setFlag(Widget.CENTER);
-		headingContainer.setContents(headingLabel);
 		
 		mainLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		mainLayout.setFlag(Widget.FILL);
@@ -199,7 +242,7 @@ public class UIProtoApplication implements WindowEventListener
 		buttonBarLayout.setFlag(Widget.FILL_VERTICAL);
 		mainLayout.add(buttonBarLayout);
 		
-		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Blank world. Parameters must be specified");
+		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Create a blank world");
 		createWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(createWorldButton);
 		
@@ -245,9 +288,35 @@ public class UIProtoApplication implements WindowEventListener
 		tabbedWorldView.setFlag(Widget.FILL);
 		
 		
-		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
-		worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
-		worldLayout.add(worldEditorLabel);
+		
+		LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(100, 30), LinearLayout.Direction.HORIZONTAL);
+		worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
+		worldLayout.add(worldHeaderLayout);
+		
+		
+		
+		headingImage = new ImageWidget("data/logo3.png");
+		
+		headingImage.setFlag(Widget.CENTER_HORIZONTAL);
+	worldHeaderLayout.add(headingImage);
+
+		
+		
+	
+	//	worldHeaderLayout.add(minimizeImage);
+	//	worldHeaderLayout.add(fullscreenImage);
+	//	worldHeaderLayout.add(quitImage);
+		
+		
+		
+	
+		
+		
+//		worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
+		
+		
+	//	worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
+		//worldLayout.add(worldEditorLabel);
 		worldLayout.add(tabbedWorldView);
 		
 		// OUR WORLD EDITOR Containers
@@ -264,7 +333,7 @@ public class UIProtoApplication implements WindowEventListener
 	
 		
    	LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-   	instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
+   	//instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
 
    	instructionsLayout.setHeight(35);
 
@@ -280,6 +349,28 @@ public class UIProtoApplication implements WindowEventListener
 		
    	instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
 		
+   	
+   	
+   		//2d
+
+	
+	gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
+	gridViewer.setColourRuleSet(colourRules);
+
+	
+
+	
+	rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
+	rectGridViewer.setColourRuleSet(colourRules);
+	
+
+
+
+	triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
+	triGridViewer.setColourRuleSet(colourRules);
+	
+   	
+   		//
 		
 		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGrid3DViewer.setFlag(Widget.FILL);
@@ -301,9 +392,7 @@ public class UIProtoApplication implements WindowEventListener
 		masterPropertiesLayout.add(propertiesLayout);
 		
 		
-		widgetPreviewContainer = new Container(new Vector2i (100,100));
-		widgetPreviewContainer.setFlag(Widget.FILL);
-		masterPropertiesLayout.add(widgetPreviewContainer);
+		
 		
 		worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		worldSizeLayout.setHeight(50);
@@ -315,7 +404,7 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
-		worldSizeXTextBox = new TextBox(new Vector2i(35, 25));
+		worldSizeXTextBox = new TextBox(35);
 		worldSizeXTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXTextBox);
 		
@@ -323,9 +412,14 @@ public class UIProtoApplication implements WindowEventListener
 		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
-		worldSizeYTextBox = new TextBox(new Vector2i(35,25));
+		worldSizeYTextBox = new TextBox(35);
 		worldSizeYTextBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeYTextBox);
+		
+		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
+		wrapCheckBox.setFlag(Widget.CENTER_VERTICAL);
+		wrapCheckBox.setMargin(new Vector2i(50,0));
+		worldSizeLayout.add(wrapCheckBox);
 		
 	
 		cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
@@ -351,24 +445,110 @@ public class UIProtoApplication implements WindowEventListener
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
 		cellShapeDropDownBox.setSelected(0);
-		widgetPreviewContainer.setContents(rectGrid3DViewer);
 		
+		
+		
+		
+		
+	
 		
 		cellShapeLayout.add(cellShapeDropDownBox);
 				
+		submitButton = new Button(new Vector2i(120,35), "Preview");
+		propertiesLayout.add(submitButton);
+		
+		LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
+		widgetPreviewLayout.setFlag(Widget.FILL);
+		propertiesLayout.add(widgetPreviewLayout);
 		
 		
 		
-		wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
-		propertiesLayout.add(wrapCheckBox);
+		widgetPreviewContainer = new Container(new Vector2i(200,100));
+		widgetPreviewContainer.setFlag(Widget.FILL);
+		widgetPreviewLayout.add(widgetPreviewContainer);
 		
+		widget3DPreviewContainer = new Container(new Vector2i (300,100));
+		widget3DPreviewContainer.setFlag(Widget.FILL);
+		widgetPreviewLayout.add(widget3DPreviewContainer);
 		
+		widget3DPreviewContainer.setContents(rectGrid3DViewer);
+		widgetPreviewContainer.setContents(rectGridViewer);
+		
+
+		LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(525, 50), LinearLayout.Direction.HORIZONTAL);
+		buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		worldLayout.add(buttonHeaderLayout);
+			
+			backButton = new Button(new Vector2i(100, 50), "Back to Main Menu");
+			backButton.setWidth(165);
+			backButton.setHeight(35);
+			buttonHeaderLayout.add(backButton);
+			
+			Button saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
+			saveWorldButton.setWidth(165);
+			saveWorldButton.setHeight(35);
+			buttonHeaderLayout.add(saveWorldButton);
+			
+			Button simulateButton = new Button(new Vector2i(100, 50), "Simulate");
+			simulateButton.setWidth(165);
+			simulateButton.setHeight(35);
+			buttonHeaderLayout.add(simulateButton);
+			
 		
 		
 		
 		
 		rulesContainer = new Container(new Vector2i(100, 100));
+		tabbedWorldView.add(rulesContainer, "CAL Rules");
 		rulesContainer.setFlag(Widget.FILL);
+		
+		
+		
+		
+		LinearLayout masterRulesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		masterRulesLayout.setFlag(Widget.FILL);
+		rulesContainer.setContents(masterRulesLayout);
+		
+		
+		
+		//
+		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(355, 50), LinearLayout.Direction.HORIZONTAL);
+		//buttonRulesLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		masterRulesLayout.add(buttonRulesLayout);
+			
+			clearRulesButton = new Button(new Vector2i(100, 50), "Clear Rules");
+			clearRulesButton.setWidth(165);
+			clearRulesButton.setHeight(35);
+			buttonRulesLayout.add(clearRulesButton);
+			
+			submitRulesButton = new Button(new Vector2i(100, 50), "Submit Rules");
+			submitRulesButton.setWidth(165);
+			submitRulesButton.setHeight(35);
+			buttonRulesLayout.add(submitRulesButton);
+			
+		
+		
+		//
+		
+		
+		
+		
+		 CALTextArea = new TextArea(100, 20);
+		 CALTextArea.setFlag(Widget.FILL);
+		 CALTextArea.setLineNumbers(true);
+		
+		
+		ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
+		textAreaContainer.setFlag(Widget.FILL);
+		masterRulesLayout.add(textAreaContainer);
+		
+		textAreaContainer.setContents(CALTextArea);
+		
 		
 		distributionContainer = new Container(new Vector2i(100, 100));
 		distributionContainer.setFlag(Widget.FILL);
@@ -377,9 +557,12 @@ public class UIProtoApplication implements WindowEventListener
 		worldPreviewContainer.setFlag(Widget.FILL);
 		
 		
-		tabbedWorldView.add(rulesContainer, "CAL Rules");
+
 		tabbedWorldView.add(distributionContainer, "Distribution Settings");
 		tabbedWorldView.add(worldPreviewContainer, "World Preview");
+		
+		
+		
 		
 		
 		
@@ -388,6 +571,31 @@ public class UIProtoApplication implements WindowEventListener
 		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
 		headingLabel.setFlag(Widget.CENTER);
 		
+		
+		////
+		
+		
+		// Dialog
+		dialog = new Dialog(window, new Vector2i(400, 200));
+		
+		dialogLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		dialogLayout.setFlag(Widget.FILL);
+		dialog.setContents(dialogLayout);
+		
+		dialogTitle = new TextWidget("Invalid World Size", Text.Size.LARGE);
+		dialogTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogLayout.add(dialogTitle);
+		
+		dialogMessage = new TextWidget("World Sizes cannot be less than 5 cells.");
+		dialogMessage.setFlag(Widget.FILL_HORIZONTAL);
+		dialogMessage.setFlag(Widget.FILL_VERTICAL); // This pushes the OK button down because it fills the space in between
+		dialogMessage.setFlowed(true);
+		dialogMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogLayout.add(dialogMessage);
+		
+		dialogOKButton = new Button(new Vector2i(120, 30), "OK");
+		dialogOKButton.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogLayout.add(dialogOKButton);
 		
 		
 		
@@ -404,7 +612,15 @@ public class UIProtoApplication implements WindowEventListener
 	@Override
 	public void update(float delta)
 	{
-		
+		if (!themeName.equals(currentThemeName))
+		{
+			System.out.println("Changing theme to "+themeName);
+			
+			window.loadTheme("data/"+themeName+".thm");
+			currentThemeName = themeName;
+			
+			window.relayout();
+		}	
 	}
 	
 	@Override
@@ -446,6 +662,105 @@ public class UIProtoApplication implements WindowEventListener
 					
 			
 			}
+			else if (event.target == dialogOKButton)
+			{
+				window.closeModalDialog();
+			}
+			
+			else if (event.target == backButton)
+			{
+				masterView.setIndex(0);
+			}
+			else if (event.target == submitButton)
+			{
+				
+				
+				if(( Integer.parseInt(worldSizeXTextBox.getText()) < 5) || ( Integer.parseInt(worldSizeYTextBox.getText()) < 5))
+				{
+					window.showModalDialog(dialog);
+					return;
+				}
+			
+			String shape = cellShapeDropDownBox.getSelectedText();
+				
+				
+			
+				if (shape == "Square")
+				{
+					// 3D Rectangle Grid
+					
+					rectGrid = new RectangleGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+					rectGrid.getCell(2, 4).setValue(0, 1);
+					rectGrid.getCell(3, 4).setValue(0, 1);
+					rectGrid.getCell(4, 4).setValue(0, 1);
+					rectGrid.getCell(4, 3).setValue(0, 1);
+					rectGrid.getCell(3, 2).setValue(0, 1);
+					rectGameOfLife = new GameOfLife(rectGrid);
+					
+					rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
+					rectGrid3DViewer.setFlag(Widget.FILL);
+					rectGrid3DViewer.addSlice(0, 16.0f);
+					
+					
+					rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
+					rectGridViewer.setColourRuleSet(colourRules);
+					
+					widgetPreviewContainer.setContents(rectGridViewer);
+					widget3DPreviewContainer.setContents(rectGrid3DViewer);
+				}
+				else if (shape == "Triangle")
+				{
+					// 3D Triangle Grid
+					
+					triGrid = new TriangleGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+					triGrid.getCell(7, 6).setValue(0, 1);
+					triGrid.getCell(7, 7).setValue(0, 1);
+					triGrid.getCell(7, 8).setValue(0, 1);
+					triGrid.getCell(6, 6).setValue(0, 1);
+					triGrid.getCell(6, 7).setValue(0, 1);
+					triGrid.getCell(6, 8).setValue(0, 1);
+					triGameOfLife = new GameOfLife(triGrid);
+		
+					
+					
+					triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
+					triGrid3DViewer.setFlag(Widget.FILL);
+					triGrid3DViewer.addSlice(0, 16.0f);
+					
+					triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
+					triGridViewer.setColourRuleSet(colourRules);
+					
+					
+					widgetPreviewContainer.setContents(triGridViewer);
+					widget3DPreviewContainer.setContents(triGrid3DViewer);
+					
+				}
+				else
+				{
+					grid = new HexagonGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+					grid.getCell(6, 5).setValue(0, 1);
+					grid.getCell(6, 6).setValue(0, 1);
+					grid.getCell(6, 7).setValue(0, 1);		
+					hexGameOfLife = new GameOfLife(grid);
+					
+					hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
+					hexGrid3DViewer.setFlag(Widget.FILL);
+				    hexGrid3DViewer.addSlice(0, 16.0f);
+			
+					gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
+					gridViewer.setColourRuleSet(colourRules);
+
+				    widgetPreviewContainer.setContents(gridViewer);
+					widget3DPreviewContainer.setContents(hexGrid3DViewer);
+				}
+			}
+			else if (event.target == clearRulesButton)
+			{
+				CALTextArea.setText(" ");
+	
+			}
+			
+			
 		}
 		else if (event.type == Event.Type.CHANGE)
 		{
@@ -458,29 +773,11 @@ public class UIProtoApplication implements WindowEventListener
 			}
 			else if (event.target == cellShapeDropDownBox)
 			{
-				String shape = cellShapeDropDownBox.getSelectedText();
-				
-				if (shape == "Square")
-				{
-					// 3D Rectangle Grid
-					
-					widgetPreviewContainer.setContents(rectGrid3DViewer);
-				}
-				else if (shape == "Triangle")
-				{
-					// 3D Triangle Grid
-					
-					widgetPreviewContainer.setContents(triGrid3DViewer);
-					
-				}
-				else
-				{
-					
-					widgetPreviewContainer.setContents(hexGrid3DViewer);
-				}
+	
 				
 				
 			}
+			
 		}
 	}
 }

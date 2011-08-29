@@ -12,17 +12,19 @@ public class IntNode extends Node
 		value = v;
 	}
 	
-	public void setValue(int v)
-	{
-		value = v;
-	}
-	
 	public int getIntValue()
 	{
 		return value;
 	}
 	
-	public void write(OutputStream out) throws IOException
+	public void setValue(int v)
+	{
+		value = v;
+	}
+	
+	@Override
+	public void write(OutputStream out)
+		throws IOException
 	{
 		out.write('i');
 		out.write(value);

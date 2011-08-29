@@ -2,6 +2,7 @@ package com.hexcore.cas.control.protocol;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,14 +17,16 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private ServerSocket sock = null;
-	private CAPMessageProtocol inter = null;
 	private Overseer parent = null;
+	private ServerSocket sock = null;
 	
 	public CAPIPClient(Overseer o)
 		throws IOException
 	{
 		super();
+		
+		System.out.println("Creating Client...");
+		
 		parent = o;
 		try
 		{
@@ -36,7 +39,23 @@ public class CAPIPClient extends CAPInformationProcessor
 			ex.printStackTrace();
 		}
 	}
+	
+	@Override
+	public void disconnect()
+	{
+		super.disconnect();
+		try
+		{
+			sock.close();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error closing ServerSocket");
+			e.printStackTrace();
+		}
+	}
 
+	@Override
 	protected void interpretInput(Message message)
 	{
 		DictNode header = message.getHeader();
@@ -65,7 +84,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("DISCONNECT") == 0)
 			{
-				inter.disconnect();
+				protocol.disconnect();
 			}
 			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
 			{
@@ -75,6 +94,7 @@ public class CAPIPClient extends CAPInformationProcessor
 				int n = -1;
 				char type = 'X';
 				Grid grid = null;
+				
 				if(gi.containsKey("SIZE"))
 				{
 					ArrayList<Node> sizeList = ((ListNode)gi.get("SIZE")).getListValues();
@@ -85,6 +105,7 @@ public class CAPIPClient extends CAPInformationProcessor
 					sendState(2, "GRID MISSING A SIZE");
 					return;
 				}
+				
 				if(gi.containsKey("AREA"))
 				{
 					ArrayList<Node> sizeList = ((ListNode)gi.get("AREA")).getListValues();
@@ -95,6 +116,7 @@ public class CAPIPClient extends CAPInformationProcessor
 					sendState(2, "GRID MISSING AN AREA");
 					return;
 				}
+				
 				if(gi.containsKey("PROPERTIES"))
 				{
 					n = ((IntNode)gi.get("PROPERTIES")).getIntValue();
@@ -104,6 +126,7 @@ public class CAPIPClient extends CAPInformationProcessor
 					sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
 					return;
 				}
+				
 				if(gi.containsKey("GRIDTYPE"))
 				{
 					type = gi.get("GRIDTYPE").toString().charAt(0);
@@ -113,6 +136,7 @@ public class CAPIPClient extends CAPInformationProcessor
 					sendState(2, "GRID MISSING THE GRID TYPE");
 					return;
 				}
+				
 				switch(type)
 				{
 					case 'h':
@@ -131,6 +155,7 @@ public class CAPIPClient extends CAPInformationProcessor
 						sendState(2, "GRID TYPE INVALID");
 						return;
 				}
+				
 				if(gi.containsKey("DATA"))
 				{
 					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
@@ -158,17 +183,11 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("QUERY") == 0)
 			{
-				// Unsure what this is doing
-				/*
-				if(currInBytes == null)
-					inter.sendState(0);
-				else
-					inter.sendState(1);
-				*/
+				sendState(parent.checkState());
 			}
 			else
 			{
-				sendState(2, "MESSAGE TYPE NOT RECOGNSED");
+				sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 				return;
 			}
 		}
@@ -179,31 +198,20 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 	}
 	
-	public void disconnect()
+	public void setup()
 	{
-		super.disconnect();
+		System.out.println("Waiting for server...");
+		
 		try
 		{
-			sock.close();
+			Socket clientSocket = sock.accept();
+			protocol = new CAPMessageProtocol(clientSocket);
+			connected = true;
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error closing ServerSocket");
+			System.out.println("Error making protocol");
 			e.printStackTrace();
 		}
-	}
-	
-	public void run()
-	{
-		try
-		{
-			inter = new CAPMessageProtocol(sock.accept());
-		}
-		catch(IOException e)
-		{
-			System.out.println("Error making inter");
-			e.printStackTrace();
-		}
-		super.run();
 	}
 }

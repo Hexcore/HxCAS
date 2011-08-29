@@ -34,7 +34,8 @@ public class Message
 	{
 		header.write(out);
 		out.write(';');
-		if (body != null) body.write(out);
+		if (body != null)
+			body.write(out);
 		out.write(';');
 	}
 }

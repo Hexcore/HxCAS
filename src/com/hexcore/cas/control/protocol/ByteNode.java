@@ -6,15 +6,15 @@ import java.io.OutputStream;
 public class ByteNode extends Node
 {
 	private byte[] values = null;
+
+	public ByteNode(byte[] b)
+	{
+		values = b.clone();
+	}
 	
 	public ByteNode(String s)
 	{
 		values = s.getBytes().clone();
-	}	
-	
-	public ByteNode(byte[] b)
-	{
-		values = b.clone();
 	}
 	
 	public byte[] getByteValues()
@@ -27,7 +27,9 @@ public class ByteNode extends Node
 		return new String(values);
 	}
 
-	public void write(OutputStream out) throws IOException
+	@Override
+	public void write(OutputStream out)
+		throws IOException
 	{
 		out.write(values.length);
 		out.write(':');

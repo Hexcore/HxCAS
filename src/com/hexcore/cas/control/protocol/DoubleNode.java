@@ -13,22 +13,22 @@ public class DoubleNode extends Node
 		value = v;
 	}
 	
-	public void setValue(double v)
-	{
-		value = v;
-	}
-	
 	public double getDoubleValue()
 	{
 		return value;
 	}
 	
+	public void setValue(double v)
+	{
+		value = v;
+	}
+	
 	@Override
-	public void write(OutputStream out) throws IOException
+	public void write(OutputStream out)
+		throws IOException
 	{
 		ByteBuffer buf = ByteBuffer.allocate(Double.SIZE);
 		buf.putDouble(value);
-		
 		out.write('f');
 		out.write(buf.array());
 		out.write('e');

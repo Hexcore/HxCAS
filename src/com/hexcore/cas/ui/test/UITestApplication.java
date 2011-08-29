@@ -105,8 +105,11 @@ public class UITestApplication implements WindowEventListener
 	
 	UITestApplication()
 	{
+
+
 		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
 		waterFlowGrid.setWrappable(false);
+
 		waterFlow = new WaterFlow(waterFlowGrid);
 		
 		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
@@ -262,10 +265,7 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
 		
-		description = new TextArea(100, 20);
-		description.setFlag(Widget.FILL);
-		description.setLineNumbers(true);
-		outerLayout.add(description);
+		
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);
@@ -398,6 +398,8 @@ public class UITestApplication implements WindowEventListener
 			if (event.target == createWorldButton)
 			{
 				mainView.setIndex(1 - mainView.getIndex());
+				
+				window.setFullscreen(mainView.getIndex() == 1);
 			}
 			else if (event.target == loadWorldButton)
 			{

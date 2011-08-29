@@ -25,17 +25,16 @@ public class DictNode extends Node
 	}
 	
 	@Override
-	public void write(OutputStream out) throws IOException
+	public void write(OutputStream out)
+		throws IOException
 	{
 		out.write('d');
-		
 		for (Entry<String, Node> entry : values.entrySet())
 		{
 			ByteNode keyNode = new ByteNode(entry.getKey().getBytes());
 			keyNode.write(out);
 			entry.getValue().write(out);
 		}
-		
 		out.write('e');
 	}
 }
