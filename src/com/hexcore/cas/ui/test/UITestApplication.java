@@ -20,6 +20,7 @@ import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
+import com.hexcore.cas.ui.NumberBox;
 import com.hexcore.cas.ui.Panel;
 import com.hexcore.cas.ui.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.RectangleGridWidget;
@@ -49,6 +50,7 @@ public class UITestApplication implements WindowEventListener
 	
 	public TextBox		nameTextBox;
 	public TextBox		nameTextBox2;
+	public NumberBox	valueBox;
 	public CheckBox		checkBox;
 	public DropDownBox	dropDownBox;
 	public TextWidget	themeLabel;
@@ -238,12 +240,16 @@ public class UITestApplication implements WindowEventListener
 		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
 		nameTextBox.setText("Benny");
 		innerLayout.add(nameTextBox);
-		
-		
+
 		nameTextBox2 = new TextBox(100);
 		nameTextBox2.setFlag(Widget.FILL_HORIZONTAL);
 		nameTextBox2.setText("Benny2");
 		innerLayout.add(nameTextBox2);
+		
+		valueBox = new NumberBox(100);
+		valueBox.setFlag(Widget.FILL_HORIZONTAL);
+		valueBox.setValue(10);
+		innerLayout.add(valueBox);		
 		
 		checkBox = new CheckBox(new Vector2i(100, 20), "Can fly");
 		checkBox.setFlag(Widget.FILL_HORIZONTAL);
