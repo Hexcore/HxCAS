@@ -254,6 +254,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 	}
 	
+	@Override
 	public void setup()
 	{
 		System.out.println("Waiting for server...");

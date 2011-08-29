@@ -1,5 +1,8 @@
 package com.hexcore.cas.control.protocol;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,12 +16,22 @@ public class CAPIPServer extends CAPInformationProcessor
 	private ArrayList<CAPMessageProtocol> clients = null;
 	private boolean receivedAccept = false;
 	private Overseer parent = null;
+	private int numOfClients = 0;
 	
-	public CAPIPServer(Overseer o)
+	public CAPIPServer(Overseer o, int n)
 	{
 		super();
 		parent = o;
 		clients = new ArrayList<CAPMessageProtocol>();
+		numOfClients = n;
+	}
+	
+	@Override
+	public void disconnect()
+	{
+		super.disconnect();
+		for(int i = 0; i < clients.size(); i++)
+			clients.get(i).disconnect();
 	}
 
 	@Override
@@ -102,6 +115,25 @@ public class CAPIPServer extends CAPInformationProcessor
 		{
 			sendState(2, "MESSAGE TYPE NOT FOUND");
 			return;
+		}
+	}
+	
+	@Override
+	public void start()
+	{
+		int startPort = 50000;
+		for(int i = startPort; i < startPort + numOfClients; i++)
+		{
+			try
+			{
+				Socket clientSocket = new Socket(InetAddress.getLocalHost().getHostName(), i);
+				protocol = new CAPMessageProtocol(clientSocket);
+			}
+			catch(IOException e)
+			{
+				System.out.println("Error making protocols");
+				e.printStackTrace();
+			}
 		}
 	}
 }

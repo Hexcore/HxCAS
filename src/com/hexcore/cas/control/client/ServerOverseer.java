@@ -11,7 +11,6 @@ public class ServerOverseer extends Overseer
 	public ServerOverseer(Grid g, Recti w)
 	{
 		super(g, w);
-		capIP = new CAPIPServer(this);
 	}
 	
 	public int getNumberOfClients()
@@ -22,6 +21,7 @@ public class ServerOverseer extends Overseer
 	public void setNumberOfClients(int num)
 	{
 		numOfClients = num;
+		capIP = new CAPIPServer(this, numOfClients);
 	}
 	
 	@Override
