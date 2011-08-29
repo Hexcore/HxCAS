@@ -43,7 +43,14 @@ public class TextBox extends Widget
 	public boolean	canGetFocus() {return true;}
 	
 	public String	getText() {return text;}
-	public void		setText(String text) {this.text = text; reflowText();}
+	public void		setText(String text) 
+	{
+		this.text = text; 
+		reflowText();
+		
+		cursorIndex = cursorIndex >= text.length() ? text.length() - 1 : cursorIndex;
+		selectIndex = cursorIndex;
+	}
 	
 	public void reflowText()
 	{

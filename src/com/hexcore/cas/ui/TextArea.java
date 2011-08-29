@@ -64,7 +64,14 @@ public class TextArea extends TextBox
 	}
 		
 	@Override
-	public void	setText(String text) {this.text = text; relayout();}
+	public void	setText(String text) 
+	{
+		this.text = text; 
+		relayout();
+		
+		cursorIndex = cursorIndex >= text.length() ? text.length() - 1 : cursorIndex;
+		selectIndex = cursorIndex;
+	}
 	
 	@Override
 	public void setSize(Vector2i v)
