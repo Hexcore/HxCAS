@@ -4,6 +4,8 @@ import com.hexcore.cas.model.Grid;
 
 public abstract class CAPInformationProcessor extends Thread
 {
+	private final static int PROTOCOL_VERSION = 1;
+	
 	protected boolean connected = false;
 	private volatile boolean running = false;
 	protected CAPMessageProtocol protocol = null;
@@ -29,8 +31,8 @@ public abstract class CAPInformationProcessor extends Thread
 	{
 		DictNode header = new DictNode();
 		header.addToDict("TYPE", new ByteNode(type));
-		header.addToDict("VERSION", new IntNode(1));
-		return header;	
+		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+		return header;
 	}
 
 	public void sendGrid(Grid g)
