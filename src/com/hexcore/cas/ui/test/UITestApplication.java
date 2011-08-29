@@ -265,10 +265,7 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
 		
-		description = new TextArea(100, 20);
-		description.setFlag(Widget.FILL);
-		description.setLineNumbers(true);
-		outerLayout.add(description);
+		
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);

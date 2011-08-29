@@ -32,6 +32,18 @@ Button : active
 	text-shadow-offset: 0 -1;
 }
 
+DialogFade
+{
+	background: image("data/fade_dialog.png");
+}
+
+Dialog
+{
+	background: rgb(0.95, 0.95, 0.95) rgb(0.9, 0.9, 0.9);
+	border: rgb(0.8, 0.8, 0.8) rgb(0.7, 0.7, 0.7);
+	border-radius: 16;
+}
+
 Panel
 {
 	background: rgb(0.93, 0.93, 0.93);
