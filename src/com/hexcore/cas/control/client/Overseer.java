@@ -29,7 +29,7 @@ public class Overseer
 		workable = w;
 		vm = new HexcoreVM();
 		capIP = new CAPIPClient(this);
-		capIP.start();
+		//capIP.start();
 	}
 	
 	public int checkState()
@@ -203,7 +203,7 @@ public class Overseer
 				for(int i = 0; i < grid.getCell(x, y).getValueCount(); i++)
 					g.getCell(x, y).setValue(i, grid.getCell(x, y).getValue(i));
 		threadWork = null;
-		capIP.sendGrid(g);
+		//capIP.sendGrid(g);
 	}
 	
 	public class CoreThread extends Thread
