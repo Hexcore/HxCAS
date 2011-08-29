@@ -16,28 +16,23 @@ public class TextBox extends Widget
 	protected int		selectIndex = 0;
 	protected boolean	selecting = false;
 	protected float		cursorFlash = 0.0f;
-	
-	protected Vector2i	padding = new Vector2i(2, 2);
-	
-	@Deprecated
-	public TextBox(Vector2i size)
-	{
-		super(size);
-	}
-	
+
 	public TextBox(int width)
 	{
 		super(new Vector2i(width, 10));
+		padding = new Vector2i(2, 2);
 	}
 
 	public TextBox(Vector2i position, Vector2i size)
 	{
 		super(position, size);
+		padding = new Vector2i(2, 2);
 	}
 	
 	public TextBox(Vector2i position, int width)
 	{
 		super(position, new Vector2i(width, 10));
+		padding = new Vector2i(2, 2);
 	}
 
 	public boolean	canGetFocus() {return true;}

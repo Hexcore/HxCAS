@@ -19,6 +19,7 @@ public abstract class Widget
 	protected Vector2i	position;
 	protected Vector2i	size;
 	protected Vector2i	margin;
+	protected Vector2i	padding;
 	
 	protected Widget	parent = null;
 	
@@ -38,6 +39,7 @@ public abstract class Widget
 		this.position = position;
 		this.size = size;
 		this.margin = new Vector2i(-1, -1);
+		this.padding = new Vector2i(0, 0);
 	}
 		
 	public void setX(int position)
@@ -73,6 +75,11 @@ public abstract class Widget
 	public void setMargin(Vector2i margin)
 	{
 		this.margin = margin;
+	}
+	
+	public void setPadding(Vector2i padding)
+	{
+		this.padding = padding;
 	}
 	
 	public void setParent(Widget parent)
@@ -121,6 +128,7 @@ public abstract class Widget
 	public Vector2i	getPosition() {return position;}
 	public Window	getWindow() {return window;}
 	public Vector2i	getMargin() {return margin;}	
+	public Vector2i	getPadding() {return padding;}	
 	public Widget	getParent() {return parent;}
 	public boolean	isMouseOver() {return mouseover;}
 	public boolean	hasFocus() {return focused;}

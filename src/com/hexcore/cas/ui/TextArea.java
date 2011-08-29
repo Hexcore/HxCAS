@@ -10,25 +10,13 @@ public class TextArea extends TextBox
 {	
 	private	int		rows;
 	private boolean lineNumbers;
-	
-	@Deprecated
-	public TextArea(Vector2i size)
-	{
-		super(size);
-	}
-	
+
 	public TextArea(int width, int rows)
 	{
 		super(width);
 		this.rows = rows;
 	}
-	
-	@Deprecated
-	public TextArea(Vector2i position, Vector2i size)
-	{
-		super(position, size);
-	}
-	
+
 	public TextArea(Vector2i position, int width, int rows)
 	{
 		super(position, width);
