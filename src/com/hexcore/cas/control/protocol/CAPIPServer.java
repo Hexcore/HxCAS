@@ -1,17 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.hexcore.cas.control.client.Overseer;
-import com.hexcore.cas.math.Recti;
-import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Cell;
-import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.TriangleGrid;
+import java.util.Map;
 
 public class CAPIPServer extends CAPInformationProcessor
 {
@@ -29,7 +19,7 @@ public class CAPIPServer extends CAPInformationProcessor
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
-		HashMap<String, Node> map = header.getDictValues();
+		Map<String, Node> map = header.getDictValues();
 		if(map.containsKey("TYPE"))
 		{
 			if(map.get("TYPE").toString().compareTo("ACCEPT") == 0)

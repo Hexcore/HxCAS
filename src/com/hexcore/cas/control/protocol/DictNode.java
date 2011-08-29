@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 public class DictNode extends Node
 {
-	private HashMap<String, Node> values = null;
+	// Values must be in alphabetical order
+	private TreeMap<String, Node> values = null;
 	
 	public DictNode()
 	{
-		values = new HashMap<String, Node>();
+		values = new TreeMap<String, Node>();
 	}
 	
 	public void addToDict(String s, Node n)
@@ -19,7 +21,7 @@ public class DictNode extends Node
 		values.put(s, n);
 	}
 	
-	public HashMap<String, Node> getDictValues()
+	public TreeMap<String, Node> getDictValues()
 	{
 		return values;
 	}

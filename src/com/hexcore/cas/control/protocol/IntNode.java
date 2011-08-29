@@ -27,7 +27,7 @@ public class IntNode extends Node
 		throws IOException
 	{
 		out.write('i');
-		out.write(value);
+		out.write(Integer.toString(value).getBytes());
 		out.write('e');
 	}
 }

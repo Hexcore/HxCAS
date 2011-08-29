@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.hexcore.cas.control.client.Overseer;
 import com.hexcore.cas.math.Recti;
@@ -61,12 +61,12 @@ public class CAPIPClient extends CAPInformationProcessor
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
-		HashMap<String, Node> map = header.getDictValues();
+		Map<String, Node> map = header.getDictValues();
 		if(map.containsKey("TYPE"))
 		{
 			if(map.get("TYPE").toString().compareTo("CODE") == 0)
 			{
-				HashMap<String, Node> codeInfo = body.getDictValues();
+				Map<String, Node> codeInfo = body.getDictValues();
 				if(codeInfo.containsKey("DATA"))
 				{
 					parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
@@ -88,7 +88,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
 			{
-				HashMap<String, Node> gi = body.getDictValues();
+				Map<String, Node> gi = body.getDictValues();
 				Vector2i size = null;
 				Recti area = null;
 				int n = -1;

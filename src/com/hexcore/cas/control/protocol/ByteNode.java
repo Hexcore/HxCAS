@@ -31,7 +31,7 @@ public class ByteNode extends Node
 	public void write(OutputStream out)
 		throws IOException
 	{
-		out.write(values.length);
+		out.write(Integer.toString(values.length).getBytes());
 		out.write(':');
 		out.write(values);
 	}
