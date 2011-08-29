@@ -136,8 +136,8 @@ public class TriangleGrid extends Grid
 				n[3] = setNeighbours(xPLUS1, yMIN1, xSize, ySize);
 				n[4] = setNeighbours(xPLUS2, yMIN1, xSize, ySize);
 				n[5] = setNeighbours(xMIN2, y, xSize, ySize);
-				n[6] = setNeighbours(xPLUS2, y, xSize, ySize);
-				n[7] = setNeighbours(xMIN2, yPLUS1, xSize, ySize);
+				n[6] = setNeighbours(xMIN1, y, xSize, ySize);
+				n[7] = setNeighbours(xPLUS1, y, xSize, ySize);
 				n[8] = setNeighbours(xPLUS2, y, xSize, ySize);
 				n[9] = setNeighbours(xMIN1, yPLUS1, xSize, ySize);
 				n[10] = setNeighbours(x, yPLUS1, xSize, ySize);
