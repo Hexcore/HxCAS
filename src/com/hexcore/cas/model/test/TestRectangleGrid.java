@@ -13,20 +13,55 @@ public class TestRectangleGrid extends TestCase
 	{
 		RectangleGrid grid;
 		
-		//Test square grid (2 x 2 grid)
-		grid = addNeighbours(2,2);
+		grid = addNeighbours(2,2, true);
+		assertEquals(18.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(10.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(6.0, 	grid.getCell(1, 1).getValue(0));
 		
-		//Test vertically rectangular grid :P i.e. 2 x 3 grid
-		grid = addNeighbours(2,3);
+		grid = addNeighbours(2,2, false);
+		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(4.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(3.0, 	grid.getCell(1, 1).getValue(0));
 		
-		//Test horizontally rectangular grid :P i.e. 3 x 1 grid
-		grid = addNeighbours(3,1);
+		grid = addNeighbours(2,3, true);
+		assertEquals(27.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(26.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(25.0, 	grid.getCell(0, 2).getValue(0));
+		assertEquals(15.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(14.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(13.0, 	grid.getCell(1, 2).getValue(0));
 		
+		grid = addNeighbours(2,3, false);
+		assertEquals(8.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(10.0, 	grid.getCell(0, 2).getValue(0));
+		assertEquals(5.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(11.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(7.0, 	grid.getCell(1, 2).getValue(0));
+		
+		grid = addNeighbours(3,2,true);
+		assertEquals(24.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(20.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(22.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(18.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(20.0, 	grid.getCell(2, 0).getValue(0));
+		assertEquals(16.0, 	grid.getCell(2, 1).getValue(0));
+		
+		grid = addNeighbours(3,2, false);
+		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0));
+		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0));
+		assertEquals(13.0, 	grid.getCell(1, 0).getValue(0));
+		assertEquals(12.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(10.0, 	grid.getCell(2, 0).getValue(0));
+		assertEquals(9.0, 	grid.getCell(2, 1).getValue(0));
 	}
 	
-	private static RectangleGrid addNeighbours(int x, int y)
+	private static RectangleGrid addNeighbours(int x, int y, boolean wrap)
 	{
 		RectangleGrid grid = new RectangleGrid(new Vector2i(x,y));
+		grid.setWrappable(wrap);
 		int count = 0;
 		
 		for(int i = 0; i < x; i++)
