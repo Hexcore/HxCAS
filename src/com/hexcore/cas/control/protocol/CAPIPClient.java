@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.hexcore.cas.control.client.ClientOverseer;
 import com.hexcore.cas.control.client.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
@@ -17,9 +18,10 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private Overseer parent = null;
+	private ClientOverseer parent = null;
 	private ServerSocket sock = null;
 	private boolean sentAccept = false;
+	private CAPMessageProtocol protocol = null;
 	
 	public CAPIPClient(Overseer o)
 		throws IOException
@@ -28,7 +30,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		
 		System.out.println("Creating Client...");
 		
-		parent = o;
+		parent = (ClientOverseer)o;
 		try
 		{
 			sock = new ServerSocket(3119);
@@ -54,6 +56,63 @@ public class CAPIPClient extends CAPInformationProcessor
 			System.out.println("Error closing ServerSocket");
 			e.printStackTrace();
 		}
+	}
+
+	public void sendGrid(Grid g)
+	{
+		String sizeStr = "SIZE";
+		ListNode sizeNode = new ListNode();
+		sizeNode.addToList(new IntNode(g.getWidth()));
+		sizeNode.addToList(new IntNode(g.getHeight()));
+		
+		String dataStr = "DATA";
+		ListNode rows = new ListNode();
+		for(int y = 0; y < g.getHeight(); y++)
+		{
+			ListNode currRow = new ListNode(); 
+			for(int x = 0; x < g.getWidth(); x++)
+			{
+				ListNode currCell = new ListNode();
+				for(int i = 0; i < g.getCell(x, y).getValueCount(); i++)
+					currCell.addToList(new DoubleNode(g.getCell(x, y).getValue(i)));
+				currRow.addToList(currCell);
+			}
+			rows.addToList(currRow);
+		}
+		
+		DictNode d = new DictNode();
+		d.addToDict(sizeStr, sizeNode);
+		d.addToDict(dataStr, rows);
+		sendResult(d);
+	}
+	
+	public void sendResult(DictNode d)
+	{
+		DictNode body = new DictNode();
+		body.addToDict("DATA", d);
+		
+		Message msg = new Message(makeHeader("RESULT"), body);
+		System.out.println("Protocol: " + protocol);
+		protocol.sendMessage(msg);
+	}
+	
+	public void sendState(int is)
+	{
+		DictNode body = new DictNode();
+		body.addToDict("STATE", new IntNode(is));
+		
+		Message msg = new Message(makeHeader("STATUS"), body);
+		protocol.sendMessage(msg);
+	}
+	
+	public void sendState(int is, String mess)
+	{
+		DictNode body = new DictNode();
+		body.addToDict("STATE", new IntNode(is));
+		body.addToDict("MSG", new ByteNode(mess));
+		
+		Message msg = new Message(makeHeader("STATUS"), body);
+		protocol.sendMessage(msg);
 	}
 
 	@Override
@@ -270,5 +329,26 @@ public class CAPIPClient extends CAPInformationProcessor
 			System.out.println("Error making protocol");
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void run()
+	{
+		if (!connected) return;
+		
+		System.out.println("Running...");
+		
+		running = true;
+		
+		protocol.start();
+		
+		while(running)
+		{
+			Message message = protocol.waitForMessage();
+			if (message != null)
+				interpretInput(message);
+		}
+		
+		protocol.disconnect();
 	}
 }
