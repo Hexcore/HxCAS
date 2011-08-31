@@ -1,13 +1,17 @@
 package com.hexcore.cas.control.discovery.test;
 
-import com.hexcore.cas.control.discovery.Lobby;
+import java.net.SocketAddress;
 
-public class ServerLobbyTest
+import com.hexcore.cas.control.discovery.Lobby;
+import com.hexcore.cas.control.discovery.LobbyListener;
+
+public class ServerLobbyTest implements LobbyListener
 {
 	public ServerLobbyTest()
 	{
 		Lobby lobby = new Lobby();
 		
+		lobby.addListener(this);
 		lobby.start();
 		
 		try
@@ -25,5 +29,11 @@ public class ServerLobbyTest
 	public static void main(String[] args)
 	{
 		new ServerLobbyTest();
+	}
+
+	@Override
+	public void foundClient(SocketAddress address)
+	{
+		System.out.println("A client has been discovered : " + address);
 	}
 }

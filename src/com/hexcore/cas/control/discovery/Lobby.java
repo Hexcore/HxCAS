@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 
 public class Lobby extends Thread
 {
@@ -16,9 +17,13 @@ public class Lobby extends Thread
 	private SocketAddress beaconAddress = null;
 	private DatagramChannel	channel = null;
 	
+	private ArrayList<LobbyListener> listeners = null;
+	
 	public Lobby()
 	{
 		System.setProperty("java.net.preferIPv4Stack", "true");
+		
+		listeners = new ArrayList<LobbyListener>();
 		
 		address = new InetSocketAddress(LISTEN_PORT);
 		beaconAddress = new InetSocketAddress("255.255.255.255", BEACON_PORT);
@@ -34,6 +39,16 @@ public class Lobby extends Thread
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public void addListener(LobbyListener listener)
+	{
+		listeners.add(listener);
+	}
+	
+	public void removeListener(LobbyListener listener)
+	{
+		listeners.remove(listener);
 	}
 	
 	public void disconnect()
@@ -70,7 +85,17 @@ public class Lobby extends Thread
 			while (running)
 			{
 				SocketAddress replyAddress = channel.receive(buffer);
+				
+				if (buffer.position() < 8) continue;
+				if (buffer.get(0) != (byte)0xBE) continue;
+				if (buffer.get(1) != (byte)0xEF) continue;
+				if (buffer.get(2) != (byte)0xCA) continue;
+				if (buffer.get(3) != (byte)0xFE) continue;
+				
 				System.out.println("Discovery: Got reply from " + replyAddress);
+				
+				for (LobbyListener listener : listeners)
+					listener.foundClient(replyAddress);
 			}
 		}
 		catch (IOException e)

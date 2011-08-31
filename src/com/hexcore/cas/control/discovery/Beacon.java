@@ -29,20 +29,29 @@ public class Beacon extends Thread
 	public void run()
 	{
 		running = true;
-		byte[]	buffer = new byte[8];
+		byte[]	requestBuffer = new byte[8];
+		byte[]	responseBuffer = new byte[8];
 		
 		System.out.println("Discovery: Listening on " + address);
 		
 		try
 		{
 			DatagramSocket socket = new DatagramSocket(address);
-			DatagramPacket request = new DatagramPacket(buffer, 8);
+			DatagramPacket request = new DatagramPacket(requestBuffer, 8);
 			
 			while (running)
 			{
+				// Wait for request
 				socket.receive(request);
 				System.out.println("Discovery: Got request from " + request.getSocketAddress());
-				DatagramPacket response = new DatagramPacket(buffer, 8, request.getSocketAddress());
+	
+				// Construct response
+				responseBuffer[0] = (byte)0xBE;
+				responseBuffer[1] = (byte)0xEF;
+				responseBuffer[2] = (byte)0xCA;
+				responseBuffer[3] = (byte)0xFE;
+				
+				DatagramPacket response = new DatagramPacket(responseBuffer, 8, request.getSocketAddress());
 				socket.send(response);
 				System.out.println("Discovery: Reply sent");
 			}
