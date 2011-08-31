@@ -1,7 +1,5 @@
 package com.hexcore.cas.control.protocol;
 
-import com.hexcore.cas.model.Grid;
-
 public abstract class CAPInformationProcessor extends Thread
 {
 	protected final static int PROTOCOL_VERSION = 1;

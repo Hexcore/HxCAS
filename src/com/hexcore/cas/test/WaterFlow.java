@@ -3,9 +3,6 @@ package com.hexcore.cas.test;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.TriangleGrid;
 
 public class WaterFlow 
 {	
