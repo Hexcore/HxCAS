@@ -16,13 +16,15 @@ import com.hexcore.cas.model.TriangleGrid;
 public class ClientOverseer extends Overseer
 {
 	private Vector<ThreadState> threadWork = null;
+	private Recti workable = null;
 	
 	public ClientOverseer(Grid g, Recti w)
 		throws IOException
 	{
-		super(g, w);
+		super(g);
 		capIP = new CAPIPClient(this);
 		//capIP.start();
+		workable = w;
 	}
 	
 	@Override
@@ -34,9 +36,19 @@ public class ClientOverseer extends Overseer
 			return 1;
 	}
 	
+	public Recti getWorkable()
+	{
+		return workable;
+	}
+	
 	public void setRules(byte[] b)
 	{
 		//vm.loadRules(b);
+	}
+	
+	public void setWorkable(Recti r)
+	{
+		workable = r;
 	}
 	
 	@Override

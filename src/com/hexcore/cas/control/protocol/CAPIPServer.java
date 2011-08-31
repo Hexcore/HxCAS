@@ -1,29 +1,51 @@
 package com.hexcore.cas.control.protocol;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.hexcore.cas.control.client.Overseer;
+import com.hexcore.cas.control.client.ServerOverseer;
+import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPServer extends CAPInformationProcessor
 {
 	private ArrayList<CAPMessageProtocol> clients = null;
-	private boolean receivedAccept = false;
-	private Overseer parent = null;
+	private boolean[] receivedAccept = null;
+	private ServerOverseer parent = null;
 	private int numOfClients = 0;
+	private ArrayList<String> clientNames = null;
+	private Recti[] clientWorkables = null;
+	private Grid[] clientGrids = null;
+	private boolean[] clientsConnected = null;
+	private int gridsDone = 0;
 	
-	public CAPIPServer(Overseer o, int n)
+	public CAPIPServer(Overseer o, ArrayList<String> names)
 	{
 		super();
-		parent = o;
+		parent = (ServerOverseer)o;
 		clients = new ArrayList<CAPMessageProtocol>();
-		numOfClients = n;
+		clientNames = names;
+		numOfClients = clientNames.size();
+		receivedAccept = new boolean[numOfClients];
+		clientWorkables = new Recti[numOfClients];
+		clientGrids = new Grid[numOfClients];
+		clientsConnected = new boolean[numOfClients];
+		for(int i = 0; i < numOfClients; i++)
+		{
+			receivedAccept[i] = false;
+			clientWorkables[i] = null;
+			clientGrids[i] = null;
+			clientsConnected[i] = false;
+		}
 	}
 	
 	@Override
@@ -37,6 +59,32 @@ public class CAPIPServer extends CAPInformationProcessor
 	@Override
 	protected void interpretInput(Message message)
 	{
+		System.out.println("THIS INTERPRETINPUT FUNCTION IN CAPIPSERVER SHOULD NOT BE CALLED!");
+		return;
+	}
+
+	protected void interpretInput(Message message, String host)
+	{
+		int hostPos = -1;
+		for(int i = 0; i < numOfClients; i++)
+		{
+			if(clients.get(i).getSocket().getInetAddress().getHostName().compareTo(host) == 0)
+			{
+				hostPos = i;
+				break;
+			}
+			else
+			{
+				continue;
+			}
+		}
+		
+		if(hostPos == -1)
+		{
+			System.out.println("HOST NAME NOT FOUND AS A CLIENT");
+			return;
+		}
+		
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
@@ -46,12 +94,12 @@ public class CAPIPServer extends CAPInformationProcessor
 			if(map.get("TYPE").toString().compareTo("ACCEPT") == 0)
 			{
 				System.out.println("-- not sure how to handle accept yet --");
-				receivedAccept = true;
+				receivedAccept[hostPos] = true;
 			}
 			else if(map.get("TYPE").toString().compareTo("REJECT") == 0)
 			{
 				System.out.println("-- not sure how to handle reject yet --");
-				receivedAccept = false;
+				receivedAccept[hostPos] = false;
 			}
 			else if(map.get("TYPE").toString().compareTo("STATUS") == 0)
 			{
@@ -60,9 +108,9 @@ public class CAPIPServer extends CAPInformationProcessor
 			else if(map.get("TYPE").toString().compareTo("RESULT") == 0)
 			{
 				System.out.println("-- not sure how to handle result EXACTLY yet --");
-				if(!receivedAccept)
+				if(!receivedAccept[hostPos])
 				{
-					sendState(2, "ACCEPT MESSAGE HAS NOT BEEN RECEIVED YET");
+					System.out.println("ACCEPT MESSAGE HAS NOT BEEN RECEIVED YET");
 					return;
 				}
 				TreeMap<String, Node> gi = body.getDictValues();
@@ -75,11 +123,11 @@ public class CAPIPServer extends CAPInformationProcessor
 				}
 				else
 				{
-					sendState(2, "GRID MISSING A SIZE");
+					System.out.println("GRID MISSING A SIZE");
 					return;
 				}
 				
-				Grid grid = null;//THIS MUST CHANGE
+				Grid grid = clientGrids[hostPos];//makeGrid(clientWorkables[hostPos]);
 				if(gi.containsKey("DATA"))
 				{
 					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
@@ -98,41 +146,81 @@ public class CAPIPServer extends CAPInformationProcessor
 				}
 				else
 				{
-					sendState(2, "GRID DATA MISSING");
+					System.out.println("GRID DATA MISSING");
 					return;
 				}
-				/*
-				parent.setGrid(grid);
-				parent.setWorkable(area);*/
+				clientGrids[hostPos] = grid;
+				gridsDone++;
 			}
 			else
 			{
-				sendState(2, "MESSAGE TYPE NOT RECOGNISED");
+				System.out.println("MESSAGE TYPE NOT RECOGNISED");
 				return;
 			}
 		}
 		else
 		{
-			sendState(2, "MESSAGE TYPE NOT FOUND");
+			System.out.println("MESSAGE TYPE NOT FOUND");
 			return;
 		}
 	}
 	
-	@Override
-	public void start()
+	public void setClientGrids(Grid[] grids)
 	{
-		int startPort = 50000;
-		for(int i = startPort; i < startPort + numOfClients; i++)
+		clientGrids = grids.clone();
+	}
+	
+	public void setClientWorkables(Recti[] works)
+	{
+		clientWorkables = works.clone();
+	}
+	
+	@Override
+	public void setup()
+	{
+		for(int i = 0; i < numOfClients; i++)
 		{
 			try
 			{
-				Socket clientSocket = new Socket(InetAddress.getLocalHost().getHostName(), i);
-				protocol = new CAPMessageProtocol(clientSocket);
+				Socket clientSocket = new Socket(clientNames.get(i), 3119);
+				clients.add(new CAPMessageProtocol(clientSocket));
+				clientsConnected[i] = true;
 			}
 			catch(IOException e)
 			{
 				System.out.println("Error making protocols");
 				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void run()
+	{
+		for(int i = 0; i < numOfClients; i++)
+			if(!clientsConnected[i])
+				return;
+		
+		System.out.println("Running...");
+		
+		running = true;
+		
+		for(int i = 0; i < numOfClients; i++)
+			clients.get(i).start();
+		
+		while(running)
+		{
+			for(int i = 0; i < numOfClients; i++)
+			{
+				Message message = clients.get(i).waitForMessage();
+				if(message != null)
+					interpretInput(message, clients.get(i).getSocket().getInetAddress().getHostName());
+			}
+			if(gridsDone == numOfClients)
+			{
+				//parent.setClientWorkables(clientWorkables);
+				parent.setClientGrids(clientGrids);
+				gridsDone = 0;
 			}
 		}
 	}
