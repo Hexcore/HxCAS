@@ -31,11 +31,17 @@ public class Configuration extends ConfigParser
 			
 			if (symbol.type != Symbol.Type.STRING)
 			{
-				System.out.println("A block's name must be a string");
+				System.out.println("A category's name must be a string");
+				break;
+			}
+			
+			if (symbol.text.contains("."))
+			{
+				System.out.println("A category's name may not include a '.'");
 				break;
 			}
 						
-			System.out.println("Block: " + symbol.text);
+			//System.out.println("Block: " + symbol.text);
 			ConfigCategory category = new ConfigCategory(symbol.text);
 			
 			readBlock(category);
@@ -57,7 +63,7 @@ public class Configuration extends ConfigParser
 		{
 			scanner.nextSymbol();
 			
-			System.out.println("Key: " + symbol.text);		
+			//System.out.println("Key: " + symbol.text);		
 			String key = symbol.text;
 			
 			symbol = scanner.peakSymbol();
@@ -66,7 +72,7 @@ public class Configuration extends ConfigParser
 			{				
 				String blockName = category.name + "." + key;
 				
-				System.out.println("Block: " + blockName);
+				//System.out.println("Block: " + blockName);
 				ConfigCategory subCategory = new ConfigCategory(blockName);
 				
 				readBlock(subCategory);
@@ -82,7 +88,7 @@ public class Configuration extends ConfigParser
 				}
 				
 				symbol = scanner.getSymbol();
-				System.out.println("Value: " + symbol.text);
+				//System.out.println("Value: " + symbol.text);
 				String value = symbol.text;
 				
 				expect(";");
