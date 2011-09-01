@@ -1,11 +1,15 @@
 package com.hexcore.cas.control.discovery;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class Lobby extends Thread
 {
@@ -64,7 +68,18 @@ public class Lobby extends Thread
 		
 		try
 		{
-			channel.send(buffer, beaconAddress);
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			
+			while (interfaces.hasMoreElements())
+			{
+				NetworkInterface networkInterface = interfaces.nextElement();
+				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
+				{
+					InetAddress broadcast = interfaceAddress.getBroadcast();
+					
+					channel.send(buffer, new InetSocketAddress(broadcast, BEACON_PORT));
+				}
+			}
 		}
 		catch (IOException e)
 		{
