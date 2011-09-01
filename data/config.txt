@@ -1,0 +1,11 @@
+
+Network
+{
+	beaconPort = 31118;
+	beaconReplyPort = 3117;
+}
+
+Theme
+{
+	name = "light.thm";
+}

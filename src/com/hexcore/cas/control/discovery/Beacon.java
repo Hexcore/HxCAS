@@ -9,16 +9,16 @@ import java.net.SocketTimeoutException;
 
 public class Beacon extends Thread
 {
-	public final static int BEACON_PORT = 3118;
-	
+	private int beaconPort;
 	private boolean running = false;
 	private SocketAddress address = null;
 	
-	public Beacon()
+	public Beacon(int beaconPort)
 	{
 		System.setProperty("java.net.preferIPv4Stack", "true");
 		
-		address = new InetSocketAddress(BEACON_PORT);
+		this.beaconPort = beaconPort;
+		address = new InetSocketAddress(beaconPort);
 	}
 	
 	public void disconnect()

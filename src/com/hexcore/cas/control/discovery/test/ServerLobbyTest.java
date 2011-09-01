@@ -9,7 +9,7 @@ public class ServerLobbyTest implements LobbyListener
 {
 	public ServerLobbyTest()
 	{
-		Lobby lobby = new Lobby();
+		Lobby lobby = new Lobby(3118, 3117);
 		
 		lobby.addListener(this);
 		lobby.start();

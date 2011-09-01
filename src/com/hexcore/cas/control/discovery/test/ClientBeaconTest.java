@@ -6,7 +6,7 @@ public class ClientBeaconTest
 {
 	public ClientBeaconTest()
 	{
-		Beacon beacon = new Beacon();
+		Beacon beacon = new Beacon(3118);
 		beacon.start();
 	}
 	

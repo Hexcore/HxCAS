@@ -13,24 +13,25 @@ import java.util.Enumeration;
 
 public class Lobby extends Thread
 {
-	public final static int LISTEN_PORT = 3117;
-	public final static int BEACON_PORT = 3118;
+	public int listenPort;
+	public int beaconPort;
 	
 	private boolean running = false;
 	private SocketAddress address = null;
-	private SocketAddress beaconAddress = null;
 	private DatagramChannel	channel = null;
 	
 	private ArrayList<LobbyListener> listeners = null;
 	
-	public Lobby()
+	public Lobby(int beaconPort, int listenPort)
 	{
 		System.setProperty("java.net.preferIPv4Stack", "true");
 		
+		this.beaconPort = beaconPort;
+		this.listenPort = listenPort;
+		
 		listeners = new ArrayList<LobbyListener>();
 		
-		address = new InetSocketAddress(LISTEN_PORT);
-		beaconAddress = new InetSocketAddress("255.255.255.255", BEACON_PORT);
+		address = new InetSocketAddress(listenPort);
 		
 		try
 		{
@@ -62,7 +63,7 @@ public class Lobby extends Thread
 	
 	public void ping()
 	{
-		System.out.println("Pinging for clients on port " + BEACON_PORT);
+		System.out.println("Pinging for clients on port " + beaconPort);
 		
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		
@@ -78,14 +79,14 @@ public class Lobby extends Thread
 				{
 					InetAddress broadcast = interfaceAddress.getBroadcast();
 					buffer.position(0);
-					channel.send(buffer, new InetSocketAddress(broadcast, BEACON_PORT));
+					channel.send(buffer, new InetSocketAddress(broadcast, beaconPort));
 				}
 			}
 			
 			// Try an generic local network broadcast
 			InetAddress broadcast = InetAddress.getByName("255.255.255.255");
 			buffer.position(0);
-			channel.send(buffer, new InetSocketAddress(broadcast, BEACON_PORT));			
+			channel.send(buffer, new InetSocketAddress(broadcast, beaconPort));			
 		}
 		catch (IOException e)
 		{
