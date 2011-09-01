@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,10 +14,11 @@ public class ConfigScanner
 	{
 		public enum Type {UNKNOWN, STRING, INTEGER, DECIMAL};
 		
-		public Symbol(String text)
+		public Symbol(String text, int line)
 		{
 			type = Type.UNKNOWN;
 			this.text = text;
+			this.line = line;
 		}
 		
 		public Type		type;
@@ -34,7 +36,21 @@ public class ConfigScanner
 	
 	private Symbol			nextSymbol;
 	
-	public ConfigScanner(String filename)
+	public ConfigScanner()
+	{		
+		symbols = new HashSet<Character>();
+	}
+	
+	public void readString(String text)
+	{
+		reader = new BufferedReader(new StringReader(text));
+		line = 1;
+		valid = true;
+		
+		nextSymbol();
+	}
+	
+	public void readFile(String filename)
 	{
 		try
 		{
@@ -43,22 +59,24 @@ public class ConfigScanner
 		catch (FileNotFoundException e)
 		{
 			System.out.println("Error: Could not open file : " + filename);
-			e.printStackTrace();
+			valid = false;
+			return;
 		}
-		
-		symbols = new HashSet<Character>();
-		symbols.add(':');
-		symbols.add('{');
-		symbols.add('}');
-		symbols.add(',');
-		symbols.add('(');
-		symbols.add(')');
-		symbols.add(';');
 		
 		line = 1;
 		valid = true;
 		
 		nextSymbol();
+	}
+	
+	public void addSymbol(char symbol)
+	{
+		this.symbols.add(symbol);
+	}	
+	
+	public void addSymbols(char[] symbols)
+	{
+		for (char symbol : symbols) this.symbols.add(symbol);
 	}
 			 
 	public int getLineNumber()
@@ -88,10 +106,11 @@ public class ConfigScanner
 	// Steps to the next symbol
 	public void nextSymbol() 
 	{
+		if (!valid) return;
+		
 		nextSymbol = getToken();
 		if (nextSymbol == null) return;
 		
-		nextSymbol.line = line;
 		if (nextSymbol.type == Symbol.Type.STRING) return;
 
 		nextSymbol.type = Symbol.Type.STRING;
@@ -114,8 +133,9 @@ public class ConfigScanner
 		}
 	}
 	
-	
-	/// Private Methods
+	///////////////////////
+	/// Private Methods ///
+	///////////////////////
 	
 	private void nextChar()
 	{
@@ -141,18 +161,19 @@ public class ConfigScanner
 	{
 		String 	buf = "";
 		boolean	quoted = false;
+		int		curLine = line;
 		
 		int	c = -1;
 		while (true)
 		{
 			c = getChar();
-			if (c < 0) return null;
+			if (c < 0) break;
 			
 			if (c == '"')
 			{	
 				nextChar();
 				if (!quoted && !buf.isEmpty()) break;
-				if (quoted) return new Symbol(buf);
+				if (quoted) return new Symbol(buf, curLine);
 				
 				quoted = !quoted;
 			}
@@ -172,19 +193,21 @@ public class ConfigScanner
 				{
 					nextChar();
 					buf += (char)c;
-					return new Symbol(buf);
+					curLine = line;
+					return new Symbol(buf, curLine);
 				}
 				else
 					break;
 			}
 			else
 			{
+				curLine = line;
 				nextChar();
 				buf += (char)c;
 			}
 		}
 		
 		if (buf.isEmpty()) return null;
-		return new Symbol(buf);
+		return new Symbol(buf, curLine);
 	}
 }

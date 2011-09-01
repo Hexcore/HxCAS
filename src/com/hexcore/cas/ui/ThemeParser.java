@@ -65,7 +65,9 @@ public class ThemeParser
 		validProperties.add("padding");
 		
 		types = new HashMap<String, Theme.Type>();
-		scanner = new ConfigScanner(filename);
+		scanner = new ConfigScanner();
+		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
+		scanner.readFile(filename);
 
 		while (scanner.isValid())
 		{
