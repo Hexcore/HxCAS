@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 
 public class Beacon extends Thread
 {
@@ -37,12 +38,22 @@ public class Beacon extends Thread
 		try
 		{
 			DatagramSocket socket = new DatagramSocket(address);
+			socket.setSoTimeout(2000);
+			
 			DatagramPacket request = new DatagramPacket(requestBuffer, 8);
 			
 			while (running)
 			{
 				// Wait for request
-				socket.receive(request);
+				try
+				{
+					socket.receive(request);
+				}
+				catch (SocketTimeoutException e)
+				{
+					continue;
+				}
+				
 				System.out.println("Discovery: Got request from " + request.getSocketAddress());
 	
 				// Construct response
@@ -60,5 +71,7 @@ public class Beacon extends Thread
 		{
 			e.printStackTrace();
 		}
+		
+		System.out.println("Discovery: Beacon has been shutdown");
 	}
 }

@@ -70,16 +70,22 @@ public class Lobby extends Thread
 		{
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			
+			// Try to broadcast on each interface on it's network's broadcast address
 			while (interfaces.hasMoreElements())
 			{
 				NetworkInterface networkInterface = interfaces.nextElement();
 				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
 				{
 					InetAddress broadcast = interfaceAddress.getBroadcast();
-					
+					buffer.position(0);
 					channel.send(buffer, new InetSocketAddress(broadcast, BEACON_PORT));
 				}
 			}
+			
+			// Try an generic local network broadcast
+			InetAddress broadcast = InetAddress.getByName("255.255.255.255");
+			buffer.position(0);
+			channel.send(buffer, new InetSocketAddress(broadcast, BEACON_PORT));			
 		}
 		catch (IOException e)
 		{
