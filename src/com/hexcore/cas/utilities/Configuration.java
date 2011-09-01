@@ -8,7 +8,10 @@ public class Configuration extends ConfigParser
 {	
 	public class ConfigCategory
 	{
+		String					name;
 		HashMap<String, String>	properties = new HashMap<String, String>();
+		
+		public ConfigCategory(String name) {this.name = name;}
 	}
 	
 	HashMap<String, ConfigCategory>	categories;
@@ -32,24 +35,46 @@ public class Configuration extends ConfigParser
 				break;
 			}
 						
-			//System.out.println("Block: " + symbol.text);
-			ConfigCategory category = new ConfigCategory();
-			categories.put(symbol.text, category);
+			System.out.println("Block: " + symbol.text);
+			ConfigCategory category = new ConfigCategory(symbol.text);
+			
+			readBlock(category);
+			
+			addCategory(category);
+		}
+	}
+	
+	private void readBlock(ConfigCategory category)
+	{
+		if (!expect("{"))
+		{
+			fastForward("}");
+			return;
+		}
 		
-			if (!expect("{"))
-			{
-				fastForward("}");
-				continue;
-			}
+		Symbol symbol = scanner.peakSymbol();
+		while (!symbol.text.equals("}"))
+		{
+			scanner.nextSymbol();
+			
+			System.out.println("Key: " + symbol.text);		
+			String key = symbol.text;
 			
 			symbol = scanner.peakSymbol();
-			while (!symbol.text.equals("}"))
+			
+			if (symbol.text.equals("{")) 
+			{				
+				String blockName = category.name + "." + key;
+				
+				System.out.println("Block: " + blockName);
+				ConfigCategory subCategory = new ConfigCategory(blockName);
+				
+				readBlock(subCategory);
+				
+				addCategory(subCategory);
+			}
+			else
 			{
-				scanner.nextSymbol();
-				
-				//System.out.println("Key: " + symbol.text);		
-				String key = symbol.text;
-				
 				if (!expect("="))
 				{
 					fastForward(";", "}");
@@ -57,20 +82,25 @@ public class Configuration extends ConfigParser
 				}
 				
 				symbol = scanner.getSymbol();
-				//System.out.println("Value: " + symbol.text);
+				System.out.println("Value: " + symbol.text);
 				String value = symbol.text;
 				
 				expect(";");
 				
 				category.properties.put(key, value);
-				
-				symbol = scanner.peakSymbol();
 			}
 			
-			expect("}");
+			symbol = scanner.peakSymbol();
 		}
+		
+		expect("}");
 	}
 	
+	private void addCategory(ConfigCategory category)
+	{
+		categories.put(category.name, category);
+	}
+		
 	public String getString(String categoryName, String propertyName, String fallback)
 	{
 		ConfigCategory category = categories.get(categoryName);

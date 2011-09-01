@@ -25,7 +25,7 @@ public class Client
 		config = new Configuration("data/config.txt");
 		
 		System.out.println(" * Setting up beacon...");
-		beacon = new Beacon(config.getInteger("Network", "beaconPort", 3118));
+		beacon = new Beacon(config.getInteger("Network.Beacon", "port", 3118));
 		beacon.start();
 		
 		System.out.println("\nCAS Client ready");
