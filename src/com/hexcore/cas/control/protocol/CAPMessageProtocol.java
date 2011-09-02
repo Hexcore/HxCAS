@@ -1,7 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -11,34 +11,80 @@ import java.util.concurrent.TimeUnit;
 
 public class CAPMessageProtocol extends Thread
 {
+	private static final int NO_BYTE = -2;
+	
 	private volatile boolean running = false;
-	private byte[] currInBytes = null;	
-	private int index = 0;
 	private LinkedBlockingQueue<Message> messageQueue = null;
 	private Socket socket = null;
 	
-	CAPMessageProtocol(Socket socket)
+	private BufferedInputStream inputStream;
+	private int currentByte = NO_BYTE;
+	
+	public CAPMessageProtocol(Socket socket)
 	{
 		this.socket = socket;
 		this.messageQueue = new LinkedBlockingQueue<Message>();
+		
+		try
+		{
+			inputStream = new BufferedInputStream(socket.getInputStream());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
-	private ByteNode byteString()
+	private Node readNode()
 	{
-		int num = 0;
-		while(currInBytes[index] != ':')
+		Node node = null;
+		byte b = peakByte();
+		switch(b)
 		{
-			num = num * 10 + currInBytes[index];
-			index++;
+			case 'l':
+				node = list();
+				break;
+			case 'i':
+				node = intValue();
+				break;
+			case 'd':
+				node = dictionary();
+				break;
+			case 'f':
+				node = doubleValue();
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				node = byteString();
+				break;
+			default:
+				System.out.println("Expected start of a node, got '" + (char)b + "'");
 		}
-		index++;
+		
+		return node;
+	}
+		
+	private ByteNode byteString()
+	{		
+		int num = 0;
+		while(peakByte() != ':') num = num * 10 + (nextByte() - '0');
+		
+		expect(':');
 		
 		ArrayList<Byte> list = new ArrayList<Byte>();
 		int cnt = 0;
 		while(cnt++ < num)
 		{
-			list.add(new Byte(currInBytes[index]));
-			index++;
+			list.add(new Byte(peakByte()));
+			nextByte();
 		}
 		int s = list.size();
 		byte[] b = new byte[s];
@@ -48,13 +94,19 @@ public class CAPMessageProtocol extends Thread
 	}
 	
 	private DictNode dictionary()
-	{
-		ArrayList<String> keys = new ArrayList<String>();
-		ArrayList<Node> values = new ArrayList<Node>();
-		while(currInBytes[index] != 'e')
-		{
+	{		
+		DictNode d = new DictNode();
+		
+		expect('d');
+		
+		while(peakByte() != 'e')
+		{			
+			String key;
+			Node value;
+						
 			//Keys
-			switch(currInBytes[index++])
+			byte b = peakByte();
+			switch(b)
 			{
 				case '0':
 				case '1':
@@ -66,39 +118,29 @@ public class CAPMessageProtocol extends Thread
 				case '7':
 				case '8':
 				case '9':
-					keys.add(byteString().toString());
+					key = byteString().toString();
 					break;
 				default:
+					System.out.println("Expected start of byte string, got '" + (char)b + "'");
 					sendState(2, "KEY FOR DICTIONARY NOT A BYTE STRING");
 					System.out.println("Key for dictionary not a byte string.");
 					return null;
 			}
+			
 			//Values
-			switch(currInBytes[index++])
+			value = readNode();
+			if (value == null)
 			{
-				case 'l':
-					values.add(list());
-					break;
-				case 'i':
-					values.add(intValue());
-					break;
-				case 'd':
-					values.add(dictionary());
-					break;
-				case 'f':
-					values.add(doubleValue());
-					break;
-				default:
-					sendState(2, "VALUE FOR DICTIONARY NOT A NODE TYPE");
-					System.out.println("Value for dictionary not a valid choice.");
-					return null;
+				sendState(2, "VALUE FOR DICTIONARY NOT A NODE TYPE");
+				System.out.println("Value for dictionary not a valid choice.");
+				break;
 			}
+			
+			d.addToDict(key, value);
 		}
 		
-		DictNode d = new DictNode();
-		for(int i = 0; i < keys.size(); i++)
-			d.addToDict(keys.get(i).toUpperCase(), values.get(i));
-		index++;
+		expect('e');
+		
 		return d;
 	}
 	
@@ -110,8 +152,13 @@ public class CAPMessageProtocol extends Thread
 	private DoubleNode doubleValue()
 	{
 		ByteBuffer buff = ByteBuffer.allocate(8);
-		buff.put(currInBytes, index, 8);
-		index += 9;
+		
+		expect('f');
+		
+		for (int i = 0; i < 8; i++) buff.put(nextByte());
+		
+		expect('e');
+		
 		return new DoubleNode(buff.getDouble());
 	}
 	
@@ -123,88 +170,62 @@ public class CAPMessageProtocol extends Thread
 	private IntNode intValue()
 	{
 		int value = 0;
-		while(currInBytes[index] != 'e')
-		{
-			value = value * 10 + currInBytes[index];
-			index++;
-		}
-		index++;
+		expect('i');
+		while(peakByte() != 'e') value = value * 10 + (nextByte() - '0');
+		expect('e');
 		return new IntNode(value);
 	}
 	
 	private ListNode list()
 	{
+		expect('l');
+		
 		ListNode list = new ListNode();
-		while(currInBytes[index] != 'e')
+		
+		while(peakByte() != 'e')
 		{
-			switch(currInBytes[index++])
-			{
-				case 'l':
-					list.addToList(list());
-					break;
-				case 'i':
-					list.addToList(intValue());
-					break;
-				case 'd':
-					list.addToList(dictionary());
-					break;
-				case 'f':
-					list.addToList(doubleValue());
-					break;
-				default:
-					sendState(2, "VALUE FOR LIST NOT A NODE TYPE");
-					System.out.println("Value for list not a valid choice.");
-					return null;
-			}
+			Node node = readNode();
+			if (node == null) break;
+			list.addToList(node);
 		}
-		index++;
+		
+		expect('e');
+		
 		return list;
 	}
 	
-	private Message processInput()
+	private void receiveMessage()
 	{
 		Node body = null;
+				
 		DictNode header = dictionary();
-		index++;
-		//No body in the message.
-		if(currInBytes[index] != ';')
-		{
-			body = dictionary();
-			index++;
-		}
-		//Not all the bytes have been accounted for.
-		if(index < currInBytes.length)
-		{
-			sendState(2, "MESSAGE NOT COMPLETELY INTERPRETED");
-			System.out.println("There was a problem with interpreting the message.");
-			return null;
-		}
-		//All bytes have been accounted for.
-		return new Message(header, body);
-	}
-
-	public void receiveData(byte[] in)
-	{
-		currInBytes = in.clone();
-		index = 0;
+				
+		expect(';');
 		
-		Message message = processInput();
+		// Read in body
+		if(peakByte() != ';') body = dictionary();
+				
+		// Read in last separator
+		expect(';');
+		
+		// Add message
 		try
 		{
-			messageQueue.put(message);
+			messageQueue.put(new Message(header, body));
 		}
 		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void sendMessage(Message message)
 	{
 		try
 		{
 			OutputStream out = socket.getOutputStream();	
 			message.write(out);
+			out.flush();
 		}
 		catch(IOException e)
 		{
@@ -237,36 +258,64 @@ public class CAPMessageProtocol extends Thread
 		}
 	}
 	
-	public void run()
+	private void expect(char c)
 	{
-		running = true;
+		expect((byte)c);
+	}
+	
+	private void expect(byte b)
+	{
+		byte g = nextByte(); 
+		if (g != b)
+			System.err.println("Protocol Stream Error: Byte '" + (char)b + "' expected, got '" + (char)g + "'");
+	}
+	
+	private byte nextByte()
+	{
+		byte b = 0;
 		
-		byte[] buff = new byte[1];
-		while (running)
+		if (currentByte == NO_BYTE)
 		{
 			try
 			{
-				ArrayList<Byte> inBy = new ArrayList<Byte>();
-				InputStream in = socket.getInputStream();
-				int tmp = in.read(buff);
-				while(tmp != -1)
-				{
-					inBy.add(buff[0]);
-					tmp = in.read();
-				}
-				
-				byte[] sendThrough = new byte[inBy.size()];
-				for(int i = 0; i < inBy.size(); i++)
-					sendThrough[i] = inBy.get(i).byteValue();
-				
-				receiveData(sendThrough);
+				b = (byte)inputStream.read();
 			}
-			catch(IOException e)
+			catch (IOException e1)
 			{
-				sendState(2, "ERROR RECEIVING BYTES");
-				System.out.println("-- ERROR IN RUN OF CAPINTERFACE -- could not receive bytes correctly");
+				e1.printStackTrace();
 			}
 		}
+		else
+		{
+			b = (byte)currentByte;
+			currentByte = NO_BYTE;
+		}
+		
+		return b;
+	}	
+	
+	private byte peakByte()
+	{
+		if (currentByte == NO_BYTE)
+		{
+			try
+			{
+				currentByte = inputStream.read();
+			}
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
+			}
+		}
+		
+		return (byte)currentByte;
+	}
+	
+	public void run()
+	{
+		running = true;
+
+		while (running) receiveMessage();
 		
 		try
 		{
