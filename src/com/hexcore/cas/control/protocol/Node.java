@@ -7,7 +7,6 @@ public abstract class Node
 {
 	public Node()
 	{
-		System.out.println("This constructor should not be used. One of the child nodes created was not given a parameter.");
 	}
 	
 	public abstract void write(OutputStream out) throws IOException;

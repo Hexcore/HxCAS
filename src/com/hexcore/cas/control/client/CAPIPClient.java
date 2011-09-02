@@ -1,4 +1,4 @@
-package com.hexcore.cas.control.protocol;
+package com.hexcore.cas.control.client;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -6,8 +6,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.hexcore.cas.control.client.ClientOverseer;
-import com.hexcore.cas.control.client.Overseer;
+import com.hexcore.cas.control.protocol.ByteNode;
+import com.hexcore.cas.control.protocol.CAPInformationProcessor;
+import com.hexcore.cas.control.protocol.CAPMessageProtocol;
+import com.hexcore.cas.control.protocol.DictNode;
+import com.hexcore.cas.control.protocol.DoubleNode;
+import com.hexcore.cas.control.protocol.IntNode;
+import com.hexcore.cas.control.protocol.ListNode;
+import com.hexcore.cas.control.protocol.Message;
+import com.hexcore.cas.control.protocol.Node;
+import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -88,6 +96,7 @@ public class CAPIPClient extends CAPInformationProcessor
 	
 	public void sendResult(DictNode d)
 	{
+		System.out.println("-- SENDING RESULT GRID -- CAPIPCLIENT");
 		DictNode body = new DictNode();
 		body.addToDict("DATA", d);
 		
@@ -118,6 +127,7 @@ public class CAPIPClient extends CAPInformationProcessor
 	@Override
 	protected void interpretInput(Message message)
 	{
+		System.out.println("-- INTERPRETING MESSAGE -- CAIPCLIENT");
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
@@ -193,6 +203,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
 			{
+				System.out.println("-- RECEIVED GRID FROM SERVER -- CAIPCLIENT");
 				if(!sentAccept)
 				{
 					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
@@ -288,8 +299,10 @@ public class CAPIPClient extends CAPInformationProcessor
 					return;
 				}
 				
+				System.out.println("-- SETTING GRID AND WORKABLE -- CAPIPCLIENT");
 				parent.setGrid(grid);
 				parent.setWorkable(area);
+				parent.start();
 			}
 			else if(map.get("TYPE").toString().compareTo("QUERY") == 0)
 			{
@@ -313,7 +326,6 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 	}
 	
-	@Override
 	public void setup()
 	{
 		System.out.println("Waiting for server...");
@@ -321,6 +333,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		try
 		{
 			Socket clientSocket = sock.accept();
+			System.out.println("Server connected");
 			protocol = new CAPMessageProtocol(clientSocket);
 			connected = true;
 		}
@@ -334,9 +347,11 @@ public class CAPIPClient extends CAPInformationProcessor
 	@Override
 	public void run()
 	{
+		setup();
+		
 		if (!connected) return;
 		
-		System.out.println("Running...");
+		System.out.println("Client Running...");
 		
 		running = true;
 		
@@ -346,7 +361,10 @@ public class CAPIPClient extends CAPInformationProcessor
 		{
 			Message message = protocol.waitForMessage();
 			if (message != null)
+			{
+				System.out.println("-- MESSAGE NOT NULL -- CAPIPCLIENT");
 				interpretInput(message);
+			}
 		}
 		
 		protocol.disconnect();

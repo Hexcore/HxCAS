@@ -17,7 +17,7 @@ public class CAPMessageProtocol extends Thread
 	private LinkedBlockingQueue<Message> messageQueue = null;
 	private Socket socket = null;
 	
-	CAPMessageProtocol(Socket socket)
+	public CAPMessageProtocol(Socket socket)
 	{
 		this.socket = socket;
 		this.messageQueue = new LinkedBlockingQueue<Message>();

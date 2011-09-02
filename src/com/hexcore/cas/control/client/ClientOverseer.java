@@ -3,7 +3,7 @@ package com.hexcore.cas.control.client;
 import java.io.IOException;
 import java.util.Vector;
 
-import com.hexcore.cas.control.protocol.CAPIPClient;
+import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -18,13 +18,12 @@ public class ClientOverseer extends Overseer
 	private Vector<ThreadState> threadWork = null;
 	private Recti workable = null;
 	
-	public ClientOverseer(Grid g, Recti w)
+	public ClientOverseer()
 		throws IOException
 	{
-		super(g);
+		super();
 		capIP = new CAPIPClient(this);
-		//capIP.start();
-		workable = w;
+		capIP.start();
 	}
 	
 	@Override
@@ -54,6 +53,7 @@ public class ClientOverseer extends Overseer
 	@Override
 	public void start()
 	{
+		System.out.println("-- CLIENT RUNNIN -- CO");
 		threadWork = new Vector<ThreadState>();
 		/*
 		 * Work is divided up for the CoreThreads.
@@ -161,7 +161,8 @@ public class ClientOverseer extends Overseer
 				for(int i = 0; i < grid.getCell(x, y).getValueCount(); i++)
 					g.getCell(x, y).setValue(i, grid.getCell(x, y).getValue(i));
 		threadWork = null;
-		//capIP.sendGrid(g);
+		System.out.println("-- SENDING RESULT GRID -- CO");
+		((CAPIPClient)capIP).sendGrid(g);
 	}
 	
 	public class CoreThread extends Thread
