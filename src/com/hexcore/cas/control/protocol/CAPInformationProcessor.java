@@ -13,11 +13,19 @@ public abstract class CAPInformationProcessor extends Thread
 	{
 	}
 	
+	//IN TEST - SERVER
 	public boolean isConnected()
 	{
 		return connected;
 	}
 	
+	//IN TEST - SERVER
+	public boolean isRunning()
+	{
+		return running;
+	}
+	
+	//IN TEST IMPLICITLY - SERVER
 	public void disconnect()
 	{
 		connected = false;
@@ -31,18 +39,4 @@ public abstract class CAPInformationProcessor extends Thread
 		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
 		return header;
 	}
-	
-	public void setup()
-	{
-		
-	}
-	
-	@Override
-	public void start()
-	{
-		setup();
-		
-		if(connected)
-			super.start();
-	}	
 }

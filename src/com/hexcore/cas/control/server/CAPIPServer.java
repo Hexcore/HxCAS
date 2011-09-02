@@ -1,4 +1,4 @@
-package com.hexcore.cas.control.protocol;
+package com.hexcore.cas.control.server;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -6,8 +6,16 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.hexcore.cas.control.client.Overseer;
-import com.hexcore.cas.control.client.ServerOverseer;
+import com.hexcore.cas.control.protocol.ByteNode;
+import com.hexcore.cas.control.protocol.CAPInformationProcessor;
+import com.hexcore.cas.control.protocol.CAPMessageProtocol;
+import com.hexcore.cas.control.protocol.DictNode;
+import com.hexcore.cas.control.protocol.DoubleNode;
+import com.hexcore.cas.control.protocol.IntNode;
+import com.hexcore.cas.control.protocol.ListNode;
+import com.hexcore.cas.control.protocol.Message;
+import com.hexcore.cas.control.protocol.Node;
+import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -27,13 +35,16 @@ public class CAPIPServer extends CAPInformationProcessor
 	private Grid[] clientGrids = null;
 	private boolean[] clientsConnected = null;
 	private int gridsDone = 0;
-	
+
+	//IN TEST IMPLICITLY
 	public CAPIPServer(Overseer o, ArrayList<String> names)
 	{
 		super();
 		parent = (ServerOverseer)o;
 		clients = new ArrayList<CAPMessageProtocol>();
-		clientNames = names;
+		clientNames = new ArrayList<String>();
+		for(int i = 0; i < names.size(); i++)
+			clientNames.add(names.get(i));
 		numOfClients = clientNames.size();
 		receivedAccept = new boolean[numOfClients];
 		clientWorkables = new Recti[numOfClients];
@@ -48,6 +59,7 @@ public class CAPIPServer extends CAPInformationProcessor
 		}
 	}
 	
+	//IN TEST IMPLICITLY 
 	@Override
 	public void disconnect()
 	{
@@ -55,7 +67,7 @@ public class CAPIPServer extends CAPInformationProcessor
 		for(int i = 0; i < clients.size(); i++)
 			clients.get(i).disconnect();
 	}
-
+	
 	@Override
 	protected void interpretInput(Message message)
 	{
@@ -65,6 +77,7 @@ public class CAPIPServer extends CAPInformationProcessor
 
 	protected void interpretInput(Message message, String host)
 	{
+		System.out.println("-- RECEIVED A MESSAGE -- CAPIPSERVER");
 		int hostPos = -1;
 		for(int i = 0; i < numOfClients; i++)
 		{
@@ -107,7 +120,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("RESULT") == 0)
 			{
-				System.out.println("-- not sure how to handle result EXACTLY yet --");
+				System.out.println("-- RECEIVED RESULT GRID -- CAIPSERVER");
 				if(!receivedAccept[hostPos])
 				{
 					System.out.println("ACCEPT MESSAGE HAS NOT BEEN RECEIVED YET");
@@ -127,7 +140,7 @@ public class CAPIPServer extends CAPInformationProcessor
 					return;
 				}
 				
-				Grid grid = clientGrids[hostPos];//makeGrid(clientWorkables[hostPos]);
+				Grid grid = clientGrids[hostPos];
 				if(gi.containsKey("DATA"))
 				{
 					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
@@ -165,17 +178,97 @@ public class CAPIPServer extends CAPInformationProcessor
 		}
 	}
 	
+	public void sendCode()
+	{
+		
+	}
+	
+	public void sendConnect(int index)
+	{
+		System.out.println("-- SENDING CONNECT TO " + index + " -- CAPIPSERVER");
+		CAPMessageProtocol CAPMP = clients.get(index);
+		DictNode header = this.makeHeader("CONNECT");
+		
+		Message msg = new Message(header);
+		CAPMP.sendMessage(msg);
+	}
+	
+	public void sendGrids()
+	{
+		System.out.println("-- SENDING GRIDS TO CLIENTS -- CAPIPSERVER");
+		for(int i = 0; i < numOfClients; i++)
+		{
+			System.out.println("-- SENDING TO CLIENT " + i + " --");
+			CAPMessageProtocol CAPMP = clients.get(i);
+			DictNode header = this.makeHeader("GRID");
+			
+			DictNode grid = new DictNode();
+			ListNode size = new ListNode();
+			size.addToList(new IntNode(clientGrids[i].getSize().x));
+			size.addToList(new IntNode(clientGrids[i].getSize().y));
+			grid.addToDict("SIZE", size);
+			
+			ListNode area = new ListNode();
+			area.addToList(new IntNode(clientWorkables[i].getPosition().x));
+			area.addToList(new IntNode(clientWorkables[i].getPosition().y));
+			area.addToList(new IntNode(clientWorkables[i].getSize().x));
+			area.addToList(new IntNode(clientWorkables[i].getSize().y));
+			grid.addToDict("AREA", area);
+			
+			grid.addToDict("PROPERTIES", new IntNode(clientGrids[i].getCell(0, 0).getValueCount()));
+			
+			char[] c = new char[1];
+			c[0] = clientGrids[i].getType();
+			grid.addToDict("GRIDTYPE", new ByteNode(new String(c)));
+			
+			ListNode rows = new ListNode();
+			for(int y = 0; y < clientGrids[i].getHeight(); y++)
+			{
+				ListNode currRow = new ListNode(); 
+				for(int x = 0; x < clientGrids[i].getWidth(); x++)
+				{
+					ListNode currCell = new ListNode();
+					for(int j = 0; j < clientGrids[i].getCell(x, y).getValueCount(); j++)
+					{
+						currCell.addToList(new DoubleNode(clientGrids[i].getCell(x, y).getValue(j)));
+					}
+					currRow.addToList(currCell);
+				}
+				rows.addToList(currRow);
+			}
+			grid.addToDict("DATA", rows);
+			
+			Message msg = new Message(header, grid);
+			CAPMP.sendMessage(msg);
+		}
+	}
+	
+	public void sendQuery(int index)
+	{
+		CAPMessageProtocol CAPMP = clients.get(index);
+		DictNode header = this.makeHeader("QUERY");
+		
+		Message msg = new Message(header);
+		CAPMP.sendMessage(msg);
+	}
+	
+	//IN TEST IMPLICITLY
 	public void setClientGrids(Grid[] grids)
 	{
-		clientGrids = grids.clone();
+		clientGrids = new Grid[grids.length];
+		for(int i = 0; i < grids.length; i++)
+			clientGrids[i] = grids[i].clone();
 	}
 	
+	//IN TEST IMPLICITLY
 	public void setClientWorkables(Recti[] works)
 	{
-		clientWorkables = works.clone();
+		clientWorkables = new Recti[works.length];
+		for(int i = 0; i < works.length; i++)
+			clientWorkables[i] = new Recti(works[i].getPosition(), works[i].getSize());
 	}
-	
-	@Override
+
+	//IN TEST IMPLICITLY
 	public void setup()
 	{
 		for(int i = 0; i < numOfClients; i++)
@@ -191,17 +284,21 @@ public class CAPIPServer extends CAPInformationProcessor
 				System.out.println("Error making protocols");
 				e.printStackTrace();
 			}
+			sendConnect(i);
 		}
 	}
-	
+
+	//IN TEST IMPLICITLY
 	@Override
 	public void run()
 	{
+		setup();
+		
 		for(int i = 0; i < numOfClients; i++)
 			if(!clientsConnected[i])
 				return;
 		
-		System.out.println("Running...");
+		System.out.println("Server Running...");
 		
 		running = true;
 		
@@ -218,7 +315,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			}
 			if(gridsDone == numOfClients)
 			{
-				//parent.setClientWorkables(clientWorkables);
+				System.out.println("-- SETTING CLIENTGRIDS -- CAPIPSERVER");
 				parent.setClientGrids(clientGrids);
 				gridsDone = 0;
 			}
