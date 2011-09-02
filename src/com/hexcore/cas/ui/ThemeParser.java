@@ -1,21 +1,17 @@
 package com.hexcore.cas.ui;
 
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.hexcore.cas.ui.Theme.Property;
+import com.hexcore.cas.utilities.ConfigParser;
 import com.hexcore.cas.utilities.ConfigScanner;
 import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 
-
-public class ThemeParser
+public class ThemeParser extends ConfigParser
 {
-	private ConfigScanner				scanner;
 	private HashMap<String, Theme.Type>	types;
-	
-	private int	errors = 0;
 	
 	private Set<String>	validStates;
 	private Set<String>	validTypes;
@@ -23,6 +19,9 @@ public class ThemeParser
 	
 	ThemeParser(String filename)
 	{
+		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
+		scanner.readFile(filename);
+		
 		validStates = new HashSet<String>();
 		validStates.add("normal");
 		validStates.add("hover");
@@ -65,8 +64,7 @@ public class ThemeParser
 		validProperties.add("padding");
 		
 		types = new HashMap<String, Theme.Type>();
-		scanner = new ConfigScanner(filename);
-
+		
 		while (scanner.isValid())
 		{
 			ConfigScanner.Symbol symbol = scanner.getSymbol();
@@ -341,56 +339,5 @@ public class ThemeParser
 		}
 		
 		return null;
-	}
-		
-	private boolean expect(String expected)
-	{
-		ConfigScanner.Symbol symbol = scanner.getSymbol();
-		if (!expected.equals(symbol.text))
-		{
-			error("Expected '" + expected + "' - Got '" + symbol.text + "'");
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean expect(String expected, String msg)
-	{		
-		ConfigScanner.Symbol symbol = scanner.getSymbol();
-		if (!expected.equals(symbol.text))
-		{
-			error("Expected '" + expected + "' - Got '" + symbol.text + "' - " + msg);
-			return false;
-		}
-		return true;
-	}
-
-	private float expectDecimal()
-	{
-		ConfigScanner.Symbol symbol = scanner.getSymbol();
-		if (symbol.type != ConfigScanner.Symbol.Type.DECIMAL)
-		{
-			error("Expected a decimal value");
-			return 0.0f;
-		}	
-		return symbol.decimal;
-	}
-	
-	private void fastForward(String until)
-	{
-		String str = scanner.getSymbol().text;
-		while ((str != null) && !str.equals(until)) str = scanner.getSymbol().text;
-	}
-	
-	private void fastForward(String until1, String until2)
-	{
-		String str = scanner.getSymbol().text;
-		while ((str != null) && !str.equals(until1) && !str.equals(until2)) str = scanner.getSymbol().text;
-	}	
-	
-	private void error(String msg)
-	{
-		System.out.println("Error (Line " + scanner.getLineNumber() + "): " + msg);
-		errors++;
 	}
 }

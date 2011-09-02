@@ -1,0 +1,14 @@
+
+Network
+{
+	Beacon
+	{
+		port = 31181;
+		replyPort = 31171;
+	}
+}
+
+Theme
+{
+	name = "light.thm";
+}
