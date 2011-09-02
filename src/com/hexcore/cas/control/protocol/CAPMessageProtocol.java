@@ -16,7 +16,7 @@ public class CAPMessageProtocol extends Thread
 	private volatile boolean running = false;
 	private LinkedBlockingQueue<Message> messageQueue = null;
 	private Socket socket = null;
-	
+
 	private BufferedInputStream inputStream;
 	private int currentByte = NO_BYTE;
 	
