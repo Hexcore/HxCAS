@@ -140,6 +140,7 @@ public class TestDistributionSystem extends TestCase
 		assertEquals(4, aw[1].getSize().y);
 	}
 	
+	/*
 	@SuppressWarnings("unchecked")
 	private void testRectangleVersion()
 		throws IOException, InterruptedException
@@ -174,7 +175,6 @@ public class TestDistributionSystem extends TestCase
 		
 		so.start();
 		
-		/*
 		{
 			Recti[] workables = new Recti[2];
 			workables[0] = new Recti(new Vector2i(0, 0), new Vector2i(2, 4));
@@ -189,8 +189,7 @@ public class TestDistributionSystem extends TestCase
 			Grid[] cG = so.getClientGrids();
 			testClientGridsRectangleVersion(cG);
 		}
-		*/
-		/*
+		
 		{
 			Thread.sleep(1000);
 			so.send();
@@ -198,10 +197,10 @@ public class TestDistributionSystem extends TestCase
 			Grid[] cG = so.getClientGrids();
 			testClientGridsAfterRectangleVersion(cG);
 		}
-		*/
+		
 		System.out.println("Testing Distribution System complete");
 		
 		so.disconnect();
 	}
-
+	*/
 }
