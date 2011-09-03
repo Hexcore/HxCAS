@@ -141,7 +141,7 @@ public class TestDistributionSystem extends TestCase
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void testRectangleVersion()
+	private void testRectangleVersion()
 		throws IOException, InterruptedException
 	{
 		System.out.println("===============================================");
