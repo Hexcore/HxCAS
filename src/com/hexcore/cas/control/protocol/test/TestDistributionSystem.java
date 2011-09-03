@@ -174,6 +174,7 @@ public class TestDistributionSystem extends TestCase
 		
 		so.start();
 		
+		/*
 		{
 			Recti[] workables = new Recti[2];
 			workables[0] = new Recti(new Vector2i(0, 0), new Vector2i(2, 4));
@@ -188,6 +189,7 @@ public class TestDistributionSystem extends TestCase
 			Grid[] cG = so.getClientGrids();
 			testClientGridsRectangleVersion(cG);
 		}
+		*/
 		/*
 		{
 			Thread.sleep(1000);
