@@ -158,15 +158,14 @@ public class CAPMessageProtocol extends Thread
 	
 	private DoubleNode doubleValue() throws ProtocolErrorException
 	{
-		ByteBuffer buff = ByteBuffer.allocate(8);
+		ByteBuffer buf = ByteBuffer.allocate(8);
 		
 		expect('f');
-		
-		for (int i = 0; i < 8; i++) buff.put(nextByte());
-		
+		for (int i = 0; i < 8; i++) buf.put(nextByte());
 		expect('e');
 		
-		return new DoubleNode(buff.getDouble());
+		buf.rewind();
+		return new DoubleNode(buf.getDouble());
 	}
 	
 	public Socket getSocket()

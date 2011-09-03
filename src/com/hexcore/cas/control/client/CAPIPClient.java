@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Map;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPInformationProcessor;
@@ -132,7 +131,6 @@ public class CAPIPClient extends CAPInformationProcessor
 	@Override
 	protected void interpretInput(Message message)
 	{
-		Log.information(TAG, "Got message");
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
@@ -141,6 +139,8 @@ public class CAPIPClient extends CAPInformationProcessor
 			sendState(2, "MESSAGE TYPE NOT FOUND");
 			return;
 		}
+		
+		Log.information(TAG, "Got message: " + header.get("TYPE").toString());
 		
 		if(header.get("TYPE").toString().equals("CODE"))
 		{
@@ -205,12 +205,12 @@ public class CAPIPClient extends CAPInformationProcessor
 				return;
 			}
 			
+			System.out.println("CAPIPClient: Got disconnect");
+			
 			parent.disconnect();
 		}
 		else if(header.get("TYPE").toString().equals("GRID"))
-		{
-			System.out.println("CAPIPClient: Got work from server");
-			
+		{			
 			if(!sentAccept)
 			{
 				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
@@ -223,47 +223,46 @@ public class CAPIPClient extends CAPInformationProcessor
 			char type = 'X';
 			Grid grid = null;
 			
-			if(body.has("SIZE"))
+			if(body == null)
 			{
-				ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
-				size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
-			}
-			else
+				sendState(2, "GRID MISSING A BODY");
+				return;
+			}			
+			else if(!body.has("SIZE"))
 			{
 				sendState(2, "GRID MISSING A SIZE");
 				return;
 			}
-			
-			if(body.has("AREA"))
-			{
-				ArrayList<Node> sizeList = ((ListNode)body.get("AREA")).getListValues();
-				area = new Recti(new Vector2i(((IntNode)sizeList.get(2)).getIntValue(), ((IntNode)sizeList.get(3)).getIntValue()), size);
-			}
-			else
+			else if(!body.has("AREA"))
 			{
 				sendState(2, "GRID MISSING AN AREA");
 				return;
 			}
-			
-			if(body.has("PROPERTIES"))
-			{
-				n = ((IntNode)body.get("PROPERTIES")).getIntValue();
-			}
-			else
+			else if(!body.has("PROPERTIES"))
 			{
 				sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
 				return;
 			}
-			
-			if(body.has("GRIDTYPE"))
-			{
-				type = body.get("GRIDTYPE").toString().charAt(0);
-			}
-			else
+			else if(!body.has("GRIDTYPE"))
 			{
 				sendState(2, "GRID MISSING THE GRID TYPE");
 				return;
 			}
+			else if(!body.has("DATA"))
+			{
+				sendState(2, "GRID DATA MISSING");
+				return;
+			}
+						
+			ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
+			size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
+
+			ArrayList<Node> areaList = ((ListNode)body.get("AREA")).getListValues();
+			area = new Recti(new Vector2i(((IntNode)areaList.get(0)).getIntValue(), ((IntNode)areaList.get(1)).getIntValue()), new Vector2i(((IntNode)areaList.get(2)).getIntValue(), ((IntNode)areaList.get(3)).getIntValue()));
+
+			n = ((IntNode)body.get("PROPERTIES")).getIntValue();
+			
+			type = body.get("GRIDTYPE").toString().charAt(0);
 			
 			switch(type)
 			{
@@ -284,28 +283,21 @@ public class CAPIPClient extends CAPInformationProcessor
 					return;
 			}
 			
-			if(body.has("DATA"))
+			ArrayList<Node> rows = ((ListNode)body.get("DATA")).getListValues();
+			for(int y = 0; y < rows.size(); y++)
 			{
-				ArrayList<Node> rows = ((ListNode)body.get("DATA")).getListValues();
-				for(int y = 0; y < rows.size(); y++)
+				ArrayList<Node> currRow = ((ListNode)rows.get(y)).getListValues(); 
+				for(int x = 0; x < currRow.size(); x++)
 				{
-					ArrayList<Node> currRow = ((ListNode)rows.get(y)).getListValues(); 
-					for(int x = 0; x < currRow.size(); x++)
+					ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
+					for(int i = 0; i < currCell.size(); i++)
 					{
-						ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
-						for(int i = 0; i < currCell.size(); i++)
-						{
-							grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
-						}
+						grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
 					}
 				}
 			}
-			else
-			{
-				sendState(2, "GRID DATA MISSING");
-				return;
-			}
-			
+
+			System.out.println("CAPIPClient: Got work from server");
 			parent.addGrid(grid, area);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)
@@ -319,6 +311,14 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 		else
 			sendState(2, "MESSAGE TYPE NOT RECOGNISED");
+	}
+	
+	@Override
+	public void start()
+	{
+		setup();
+		running = true;
+		super.start();
 	}
 	
 	public void setup()
@@ -341,28 +341,19 @@ public class CAPIPClient extends CAPInformationProcessor
 		
 	@Override
 	public void run()
-	{		
-		running = true;
+	{				
+		Log.information(TAG, "Client Running...");
 		
-		while(running)
+		protocol.start();
+		
+		while (running && protocol.isRunning())
 		{
-			setup();
-			
-			Log.information(TAG, "Client Running...");
-			
-			running = true;
-			
-			protocol.start();
-			
-			while (running && protocol.isRunning())
-			{
-				Message message = protocol.waitForMessage();
-				if (message == null) continue; 
-					
-				interpretInput(message);
-			}
-
-			protocol.disconnect();
+			Message message = protocol.waitForMessage();
+			if (message == null) continue; 
+				
+			interpretInput(message);
 		}
+
+		protocol.disconnect();
 	}
 }

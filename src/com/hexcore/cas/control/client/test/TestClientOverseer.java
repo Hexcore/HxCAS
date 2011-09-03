@@ -14,7 +14,9 @@ import com.hexcore.cas.control.client.ClientOverseer;
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
+import com.hexcore.cas.control.protocol.DoubleNode;
 import com.hexcore.cas.control.protocol.IntNode;
+import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
@@ -29,30 +31,20 @@ public class TestClientOverseer
 	{				
 		// Create client overseer
 		ClientOverseer client = new ClientOverseer();
-			
-		// Test work queue and status
-		assertEquals(0, client.checkState());
-		
-		Grid grid = new RectangleGrid(new Vector2i(10, 10));
-		client.addGrid(grid, new Recti(new Vector2i(1, 1), new Vector2i(8, 8)));
-		
-		assertEquals(1, client.checkState());
-				
 		client.start();
+				
+		// Create dummy server
+		ServerThread server = new ServerThread();
+		server.start();
 		
-		// Wait for client to get ready
 		try
 		{
-			Thread.sleep(1000);
+			server.join();
 		}
 		catch (InterruptedException e)
 		{
 			e.printStackTrace();
 		}
-		
-		// Create dummy server
-		ServerThread server = new ServerThread();
-		server.start();
 		
 		try
 		{
@@ -62,8 +54,6 @@ public class TestClientOverseer
 		{
 			e.printStackTrace();
 		}
-		
-		client.disconnect();
 	}
 	
 	private class ServerThread extends Thread
@@ -71,6 +61,17 @@ public class TestClientOverseer
 		@Override
 		public void run()
 		{
+			// Wait for client to get ready
+			try
+			{
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			
+			// Connect to client
 			Socket socket = null;
 			
 			try
@@ -105,6 +106,55 @@ public class TestClientOverseer
 			ByteNode typeNode = (ByteNode)message.getHeader().get("TYPE");
 			Log.debug("TestServer", "Got message: " + typeNode.toString());
 			assertEquals("ACCEPT", typeNode.toString());
+
+			// Send a test grid
+			header = new DictNode();
+			header.addToDict("TYPE", new ByteNode("GRID"));
+			header.addToDict("VERSION", new IntNode(CAPIPClient.PROTOCOL_VERSION));
+			
+			ListNode sizeNode = new ListNode();
+			sizeNode.addToList(new IntNode(10));
+			sizeNode.addToList(new IntNode(10));
+			
+			ListNode areaNode = new ListNode();
+			areaNode.addToList(new IntNode(1));
+			areaNode.addToList(new IntNode(1));	
+			areaNode.addToList(new IntNode(8));
+			areaNode.addToList(new IntNode(8));	
+			
+			ListNode data = new ListNode();
+			
+			for (int y = 0; y < 10; y++)
+			{
+				ListNode row = new ListNode();
+				for (int x = 0; x < 10; x++)
+				{
+					ListNode cell = new ListNode();
+					
+					if ((x <= 6) && (x >= 4) && (y <= 6) && (y >= 4))
+						cell.addToList(new DoubleNode(1.0));
+					else
+						cell.addToList(new DoubleNode(0.0));
+					
+					row.addToList(cell);
+				}
+				data.addToList(row);
+			}
+			
+			body = new DictNode();
+			body.addToDict("SIZE", sizeNode);
+			body.addToDict("AREA", areaNode);
+			body.addToDict("PROPERTIES", new IntNode(1));
+			body.addToDict("GRIDTYPE", new ByteNode("R"));
+			body.addToDict("DATA", data);
+			
+			serverProtocol.sendMessage(new Message(header, body));
+			
+			// Wait for result
+			message = serverProtocol.waitForMessage();
+			typeNode = (ByteNode)message.getHeader().get("TYPE");
+			Log.debug("TestServer", "Got message: " + typeNode.toString());
+			assertEquals("RESULT", typeNode.toString());
 			
 			// Send disconnect
 			header = new DictNode();

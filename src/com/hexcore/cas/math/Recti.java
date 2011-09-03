@@ -20,6 +20,12 @@ public class Recti
 		this.size.set(size);
 	}
 	
+	public Recti(Recti rect)
+	{
+		this.position.set(rect.position);
+		this.size.set(rect.size);		
+	}
+
 	public Vector2i	getPosition() {return position;}
 	public Vector2i	getSize() {return size;}
 	public int		getX() {return position.x;}

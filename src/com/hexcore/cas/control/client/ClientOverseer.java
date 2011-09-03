@@ -16,6 +16,7 @@ public class ClientOverseer extends Overseer
 	private static final String TAG = "ClientOverseer";
 	
 	private LinkedBlockingQueue<Work> workQueue;
+	private LinkedBlockingQueue<Work> completedQueue;
 	
 	private boolean running = false;
 
@@ -24,6 +25,7 @@ public class ClientOverseer extends Overseer
 		super();
 		
 		workQueue = new LinkedBlockingQueue<Work>();
+		completedQueue = new LinkedBlockingQueue<Work>();
 		
 		try
 		{
@@ -54,8 +56,8 @@ public class ClientOverseer extends Overseer
 		Log.information(TAG, "Got work");
 		
 		Work work = new Work();
-		work.grid = grid;
-		work.workArea = workArea;
+		work.grid = grid.clone();
+		work.workArea = new Recti(workArea);
 		try
 		{
 			workQueue.put(work);
@@ -81,27 +83,32 @@ public class ClientOverseer extends Overseer
 		
 		WorkerThread[] thread = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++)
-		{
-			thread[i] = new WorkerThread();
-			thread[i].start();
-		}
-		
+		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread();
+
 		capIP.start();
-		
+				
 		Log.information(TAG, "Ready");
+		
+		for (int i = 0; i < cores; i++) thread[i].start();
 		
 		running = true;
 		while (running)
 		{
+			Work work = null;
+			
 			try
 			{
-				Thread.sleep(500);
+				work = completedQueue.poll(1000, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();
 			}
+			
+			if (work == null) continue;
+			
+			Log.information(TAG, "Sending completed work");
+			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, !workQueue.isEmpty());
 		}
 		
 		Log.information(TAG, "Stopping...");
@@ -151,6 +158,7 @@ public class ClientOverseer extends Overseer
 		@Override
 		public void run()
 		{
+			running = true;
 			while (running)
 			{
 				try
@@ -159,13 +167,19 @@ public class ClientOverseer extends Overseer
 				
 					if (work == null) continue;
 					
+					Log.information(TAG, "Doing work");
+					
 					Vector2i end = work.workArea.position.add(work.workArea.size);
 					
 					for (int y = work.workArea.position.y; y < end.y; y++)
 						for (int x = work.workArea.position.x; x < end.x; x++)
-							calculateCell(grid.getCell(x, y), grid.getNeighbours(new Vector2i(x, y)));
-	
-					((CAPIPClient)capIP).sendResult(work.grid, work.workArea, !workQueue.isEmpty());
+						{
+							Cell cell = work.grid.getCell(x, y);
+							Cell[] neighbours = work.grid.getNeighbours(new Vector2i(x, y));
+							calculateCell(cell, neighbours);
+						}
+					
+					completedQueue.put(work);
 				}
 				catch (InterruptedException e)
 				{
