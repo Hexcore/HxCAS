@@ -23,9 +23,12 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.utilities.Log;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
+	private static final String TAG = "CAPIPClient";
+	
 	private boolean sentAccept = false;
 	private CAPMessageProtocol protocol = null;
 	private ClientOverseer parent = null;
@@ -36,17 +39,17 @@ public class CAPIPClient extends CAPInformationProcessor
 	{
 		super();
 		
-		System.out.println("Creating Client...");
+		Log.information(TAG, "Creating Client...");
 		
 		parent = (ClientOverseer)o;
 		try
 		{
 			sock = new ServerSocket(3119);
-			System.out.println("Sock listening on " + sock.getLocalPort());
+			Log.information(TAG, "Socket listening on " + sock.getLocalPort());
 		}
 		catch(IOException ex)
 		{
-			System.out.println("Error connecting sock to port 3119");
+			Log.error(TAG, "Could not connect socket to port 3119");
 			ex.printStackTrace();
 		}
 	}
@@ -54,26 +57,29 @@ public class CAPIPClient extends CAPInformationProcessor
 	@Override
 	public void disconnect()
 	{
+		Log.information(TAG, "Disconnecting...");
+		
 		super.disconnect();
+				
 		try
 		{
-			sock.close();
+			if (sock != null) sock.close();
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error closing ServerSocket");
+			Log.error(TAG, "Error closing ServerSocket");
 			e.printStackTrace();
 		}
+		
+		sentAccept = false;
 	}
 
-	public void sendGrid(Grid g)
+	public void sendResult(Grid g, Recti area, boolean more)
 	{
-		String sizeStr = "SIZE";
 		ListNode sizeNode = new ListNode();
 		sizeNode.addToList(new IntNode(g.getWidth()));
 		sizeNode.addToList(new IntNode(g.getHeight()));
 		
-		String dataStr = "DATA";
 		ListNode rows = new ListNode();
 		for(int y = 0; y < g.getHeight(); y++)
 		{
@@ -91,19 +97,16 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 		
 		DictNode d = new DictNode();
-		d.addToDict(sizeStr, sizeNode);
-		d.addToDict(dataStr, rows);
+		d.addToDict("SIZE", sizeNode);
+		d.addToDict("DATA", rows);
+		d.addToDict("MORE", new IntNode(more ? 1 : 0));
 		sendResult(d);
 	}
 	
-	public void sendResult(DictNode d)
+	private void sendResult(DictNode d)
 	{
-		System.out.println("-- SENDING RESULT GRID -- CAPIPCLIENT");
-		DictNode body = new DictNode();
-		body.addToDict("DATA", d);
-		
-		Message msg = new Message(makeHeader("RESULT"), body);
-		System.out.println("Protocol: " + protocol);
+		Log.information(TAG, "Sending result");		
+		Message msg = new Message(makeHeader("RESULT"), d);
 		protocol.sendMessage(msg);
 	}
 	
@@ -129,247 +132,237 @@ public class CAPIPClient extends CAPInformationProcessor
 	@Override
 	protected void interpretInput(Message message)
 	{
-		System.out.println("-- INTERPRETING MESSAGE -- CAIPCLIENT");
+		Log.information(TAG, "Got message");
 		DictNode header = message.getHeader();
 		DictNode body = (DictNode)message.getBody();
 		
-		Map<String, Node> map = header.getDictValues();
-		if(map.containsKey("TYPE"))
-		{
-			if(map.get("TYPE").toString().compareTo("CODE") == 0)
-			{
-				if(!sentAccept)
-				{
-					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
-					return;
-				}
-				Map<String, Node> codeInfo = body.getDictValues();
-				if(codeInfo.containsKey("DATA"))
-				{
-					//parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
-					System.out.println("-- not sure how to handle code yet --");
-				}
-				else
-				{
-					sendState(2, "DATA MISSING FOR CODE MESSAGE TYPE");
-					return;
-				}
-			}
-			else if(map.get("TYPE").toString().compareTo("CONNECT") == 0)
-			{
-				if(sentAccept)
-				{
-					sendState(2, "CONNECT MESSAGE HAS ALREADY BEEN RECEIVED");
-					return;
-				}
-				if(map.containsKey("VERSION"))
-				{
-					if(PROTOCOL_VERSION == ((IntNode)map.get("VERSION")).getIntValue())
-					{
-						DictNode h = new DictNode();
-						h.addToDict("TYPE", new ByteNode("ACCEPT"));
-						h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
-						
-						DictNode b = new DictNode();
-						Message msg = new Message(h, b);
-						protocol.sendMessage(msg);
-						sentAccept = true;
-					}
-					else
-					{
-						DictNode h = new DictNode();
-						h.addToDict("TYPE", new ByteNode("REJECT"));
-						h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
-						
-						DictNode b = new DictNode();
-						b.addToDict("MSG", new ByteNode("VERSIONS INCOMPATIBLE"));
-						Message msg = new Message(h, b);
-						protocol.sendMessage(msg);
-					}
-				}
-				else
-				{
-					sendState(2, "VERSION MISSING");
-					return;
-				}
-			}
-			else if(map.get("TYPE").toString().compareTo("DISCONNECT") == 0)
-			{
-				if(!sentAccept)
-				{
-					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
-					return;
-				}
-				protocol.disconnect();
-				sentAccept = false;
-			}
-			else if(map.get("TYPE").toString().compareTo("GRID") == 0)
-			{
-				System.out.println("-- RECEIVED GRID FROM SERVER -- CAIPCLIENT");
-				if(!sentAccept)
-				{
-					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
-					return;
-				}
-				Map<String, Node> gi = body.getDictValues();
-				Vector2i size = null;
-				Recti area = null;
-				int n = -1;
-				char type = 'X';
-				Grid grid = null;
-				
-				if(gi.containsKey("SIZE"))
-				{
-					ArrayList<Node> sizeList = ((ListNode)gi.get("SIZE")).getListValues();
-					size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
-				}
-				else
-				{
-					sendState(2, "GRID MISSING A SIZE");
-					return;
-				}
-				
-				if(gi.containsKey("AREA"))
-				{
-					ArrayList<Node> sizeList = ((ListNode)gi.get("AREA")).getListValues();
-					area = new Recti(new Vector2i(((IntNode)sizeList.get(2)).getIntValue(), ((IntNode)sizeList.get(3)).getIntValue()), size);
-				}
-				else
-				{
-					sendState(2, "GRID MISSING AN AREA");
-					return;
-				}
-				
-				if(gi.containsKey("PROPERTIES"))
-				{
-					n = ((IntNode)gi.get("PROPERTIES")).getIntValue();
-				}
-				else
-				{
-					sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
-					return;
-				}
-				
-				if(gi.containsKey("GRIDTYPE"))
-				{
-					type = gi.get("GRIDTYPE").toString().charAt(0);
-				}
-				else
-				{
-					sendState(2, "GRID MISSING THE GRID TYPE");
-					return;
-				}
-				
-				switch(type)
-				{
-					case 'h':
-					case 'H':
-						grid = new HexagonGrid(size, new Cell(n));
-						break;
-					case 't':
-					case 'T':
-						grid = new TriangleGrid(size, new Cell(n));
-						break;
-					case 'r':
-					case 'R':
-						grid = new RectangleGrid(size, new Cell(n));
-						break;
-					default:
-						sendState(2, "GRID TYPE INVALID");
-						return;
-				}
-				
-				if(gi.containsKey("DATA"))
-				{
-					ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
-					for(int y = 0; y < rows.size(); y++)
-					{
-						ArrayList<Node> currRow = ((ListNode)rows.get(y)).getListValues(); 
-						for(int x = 0; x < currRow.size(); x++)
-						{
-							ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
-							for(int i = 0; i < currCell.size(); i++)
-							{
-								grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
-							}
-						}
-					}
-				}
-				else
-				{
-					sendState(2, "GRID DATA MISSING");
-					return;
-				}
-				
-				System.out.println("-- SETTING GRID AND WORKABLE -- CAPIPCLIENT");
-				parent.setGrid(grid);
-				parent.setWorkable(area);
-				parent.start();
-			}
-			else if(map.get("TYPE").toString().compareTo("QUERY") == 0)
-			{
-				if(!sentAccept)
-				{
-					sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
-					return;
-				}
-				sendState(parent.checkState());
-			}
-			else
-			{
-				sendState(2, "MESSAGE TYPE NOT RECOGNISED");
-				return;
-			}
-		}
-		else
+		if(!header.has("TYPE"))
 		{
 			sendState(2, "MESSAGE TYPE NOT FOUND");
 			return;
 		}
+		
+		if(header.get("TYPE").toString().equals("CODE"))
+		{
+			if(!sentAccept)
+			{
+				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+				return;
+			}
+
+			if(!body.has("DATA"))
+			{
+				sendState(2, "DATA MISSING FOR CODE MESSAGE TYPE");
+				return;
+			}
+
+			//parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
+			Log.warning(TAG, "DATA message unimplemented");
+		}
+		else if(header.get("TYPE").toString().equals("CONNECT"))
+		{
+			if(sentAccept)
+			{
+				sendState(2, "CONNECT MESSAGE HAS ALREADY BEEN RECEIVED");
+				return;
+			}
+			else if(header.has("VERSION"))
+			{
+				if(PROTOCOL_VERSION == ((IntNode)header.get("VERSION")).getIntValue())
+				{
+					DictNode h = new DictNode();
+					h.addToDict("TYPE", new ByteNode("ACCEPT"));
+					h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+					
+					Message msg = new Message(h);
+					protocol.sendMessage(msg);
+					sentAccept = true;
+					
+					Log.information(TAG, "Accepted connection from server");
+				}
+				else
+				{
+					DictNode h = new DictNode();
+					h.addToDict("TYPE", new ByteNode("REJECT"));
+					h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+					
+					DictNode b = new DictNode();
+					b.addToDict("MSG", new ByteNode("VERSIONS INCOMPATIBLE"));
+					Message msg = new Message(h, b);
+					protocol.sendMessage(msg);
+					
+					Log.information(TAG, "Rejected connection from server");
+				}
+			}
+			else
+				sendState(2, "VERSION MISSING");
+		}
+		else if(header.get("TYPE").toString().equals("DISCONNECT"))
+		{
+			if(!sentAccept)
+			{
+				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+				return;
+			}
+			
+			parent.disconnect();
+		}
+		else if(header.get("TYPE").toString().equals("GRID"))
+		{
+			System.out.println("CAPIPClient: Got work from server");
+			
+			if(!sentAccept)
+			{
+				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+				return;
+			}
+			
+			Vector2i size = null;
+			Recti area = null;
+			int n = -1;
+			char type = 'X';
+			Grid grid = null;
+			
+			if(body.has("SIZE"))
+			{
+				ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
+				size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
+			}
+			else
+			{
+				sendState(2, "GRID MISSING A SIZE");
+				return;
+			}
+			
+			if(body.has("AREA"))
+			{
+				ArrayList<Node> sizeList = ((ListNode)body.get("AREA")).getListValues();
+				area = new Recti(new Vector2i(((IntNode)sizeList.get(2)).getIntValue(), ((IntNode)sizeList.get(3)).getIntValue()), size);
+			}
+			else
+			{
+				sendState(2, "GRID MISSING AN AREA");
+				return;
+			}
+			
+			if(body.has("PROPERTIES"))
+			{
+				n = ((IntNode)body.get("PROPERTIES")).getIntValue();
+			}
+			else
+			{
+				sendState(2, "GRID MISSING THE PROPERTY AMOUNT");
+				return;
+			}
+			
+			if(body.has("GRIDTYPE"))
+			{
+				type = body.get("GRIDTYPE").toString().charAt(0);
+			}
+			else
+			{
+				sendState(2, "GRID MISSING THE GRID TYPE");
+				return;
+			}
+			
+			switch(type)
+			{
+				case 'h':
+				case 'H':
+					grid = new HexagonGrid(size, new Cell(n));
+					break;
+				case 't':
+				case 'T':
+					grid = new TriangleGrid(size, new Cell(n));
+					break;
+				case 'r':
+				case 'R':
+					grid = new RectangleGrid(size, new Cell(n));
+					break;
+				default:
+					sendState(2, "GRID TYPE INVALID");
+					return;
+			}
+			
+			if(body.has("DATA"))
+			{
+				ArrayList<Node> rows = ((ListNode)body.get("DATA")).getListValues();
+				for(int y = 0; y < rows.size(); y++)
+				{
+					ArrayList<Node> currRow = ((ListNode)rows.get(y)).getListValues(); 
+					for(int x = 0; x < currRow.size(); x++)
+					{
+						ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
+						for(int i = 0; i < currCell.size(); i++)
+						{
+							grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
+						}
+					}
+				}
+			}
+			else
+			{
+				sendState(2, "GRID DATA MISSING");
+				return;
+			}
+			
+			parent.addGrid(grid, area);
+		}
+		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)
+		{
+			if(!sentAccept)
+			{
+				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
+				return;
+			}
+			sendState(parent.checkState());
+		}
+		else
+			sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 	}
 	
 	public void setup()
 	{
-		System.out.println("Waiting for server...");
+		Log.information(TAG, "Waiting for server...");
 		
 		try
 		{
 			Socket clientSocket = sock.accept();
-			System.out.println("Server connected");
+			Log.information(TAG, "Server connected");
 			protocol = new CAPMessageProtocol(clientSocket);
 			connected = true;
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error making protocol");
+			Log.error(TAG, "Error starting protocol");
 			e.printStackTrace();
 		}
 	}
-	
+		
 	@Override
 	public void run()
-	{
-		setup();
-		
-		if (!connected)
-			return;
-		
-		System.out.println("Client Running...");
-		
+	{		
 		running = true;
-		
-		protocol.start();
 		
 		while(running)
 		{
-			Message message = protocol.waitForMessage();
-			if (message != null)
+			setup();
+			
+			Log.information(TAG, "Client Running...");
+			
+			running = true;
+			
+			protocol.start();
+			
+			while (running && protocol.isRunning())
 			{
-				System.out.println("-- MESSAGE NOT NULL -- CAPIPCLIENT");
+				Message message = protocol.waitForMessage();
+				if (message == null) continue; 
+					
 				interpretInput(message);
 			}
+
+			protocol.disconnect();
 		}
-		
-		protocol.disconnect();
 	}
 }

@@ -27,7 +27,7 @@ public abstract class Overseer extends Thread
 	
 	public void disconnect()
 	{
-		capIP.disconnect();
+		if (capIP != null) capIP.disconnect();
 	}
 	
 	public Grid getGrid()
@@ -39,6 +39,4 @@ public abstract class Overseer extends Thread
 	{
 		grid = g.clone();
 	}
-	
-	public abstract void start();
 }

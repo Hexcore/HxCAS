@@ -2,7 +2,7 @@ package com.hexcore.cas.control.protocol;
 
 public abstract class CAPInformationProcessor extends Thread
 {
-	protected final static int PROTOCOL_VERSION = 1;
+	public final static int PROTOCOL_VERSION = 1;
 	
 	protected boolean connected = false;
 	protected volatile boolean running = false;

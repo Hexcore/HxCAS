@@ -333,10 +333,16 @@ public class CAPMessageProtocol extends Thread
 		return (byte)currentByte;
 	}
 	
-	public void run()
+	@Override
+	public void start()
 	{
 		running = true;
-
+		super.start();
+	}
+	
+	@Override
+	public void run()
+	{
 		while (running) 
 		{
 			try
