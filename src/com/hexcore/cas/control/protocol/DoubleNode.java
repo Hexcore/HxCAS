@@ -27,7 +27,7 @@ public class DoubleNode extends Node
 	public void write(OutputStream out)
 		throws IOException
 	{
-		ByteBuffer buf = ByteBuffer.allocate(Double.SIZE);
+		ByteBuffer buf = ByteBuffer.allocate(Double.SIZE / 8);
 		buf.putDouble(value);
 		out.write('f');
 		out.write(buf.array());

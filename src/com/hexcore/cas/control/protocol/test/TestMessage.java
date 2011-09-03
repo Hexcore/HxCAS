@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.DictNode;
+import com.hexcore.cas.control.protocol.DoubleNode;
 import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
@@ -60,6 +61,37 @@ public class TestMessage
 		String output = out.toString();
 			
 		assertTrue(output.equals("d3:numi10ee;;"));
+	}
+	
+	@Test
+	public void testDoubleMessage()
+	{
+		DictNode	header = new DictNode();
+		header.addToDict("num", new DoubleNode(10));
+		
+		Message message = new Message(header);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		try
+		{
+			message.write(out);
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		String output = out.toString();
+		byte[] bytes = out.toByteArray();
+			
+		assertTrue(output.startsWith("d3:numf"));
+		
+		byte[] comp = new byte[] {64, 36, 0, 0, 0, 0, 0, 0};
+		
+		for (int i = 0; i < 8; i++)
+			assertEquals(comp[i], bytes[i+7]);
+		
+		assertTrue(output.endsWith("ee;;"));
 	}
 	
 	@Test
