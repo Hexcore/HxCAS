@@ -2,7 +2,6 @@ package com.hexcore.cas.control.server;
 
 import java.util.ArrayList;
 
-import com.hexcore.cas.control.protocol.CAPInformationProcessor;
 import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
@@ -10,23 +9,23 @@ import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.model.TriangleGrid;
 
 public class ServerOverseer extends Overseer
 {
 	private ArrayList<String> clientNames = null;
-	private Grid[] clientGrids = null;
+	//private Grid[] clientGrids = null;
 	private int numOfClients = 0;
-	private Recti[] alteredClientWorkables = null;
-	private Recti[] unalteredClientWorkables = null;
+	//private Recti[] alteredClientWorkables = null;
+	private Recti[] clientWorkables = null;
+	private ThreadWork[] clientWork = null;
 	
-	//IN TEST
 	public ServerOverseer(Grid g)
 	{
 		super(g);
 	}
-	
-	//IN TEST IMPLICITLY
+	/*
 	public void alterClientWorkables()
 	{
 		alteredClientWorkables = new Recti[unalteredClientWorkables.length];
@@ -51,54 +50,58 @@ public class ServerOverseer extends Overseer
 		}
 	}
 	
-	//IN TEST
 	public Grid[] getClientGrids()
 	{
 		return clientGrids;
 	}
+	*/
+	public ThreadWork[] getClientWork()
+	{
+		return clientWork;
+	}
 	
-	//IN TEST
 	public ArrayList<String> getClientNames()
 	{
 		return clientNames;
 	}
-	
-	//IN TEST
+	/*
 	public Recti[] getClientWorkablesAltered()
 	{
 		return alteredClientWorkables;
 	}
-	
-	//IN TEST
-	public Recti[] getClientWorkablesUnaltered()
+	*/
+	public Recti[] getClientWorkables()//getClientWorkablesUnaltered()
 	{
-		return unalteredClientWorkables;
+		//return unalteredClientWorkables;
+		return clientWorkables;
 	}
 	
-	//IN TEST
 	public Grid getGrid()
 	{
 		return grid;
 	}
 	
-	//IN TEST
 	public int getNumberOfClients()
 	{
 		return numOfClients;
 	}
 	
-	//IN TEST IMPLICITLY
 	public void makeGrids()
 	{
-		clientGrids = new Grid[numOfClients];
+		int numOfClientWorks = clientWorkables.length;
+		clientWork = new ThreadWork[numOfClientWorks];
+		//clientGrids = new Grid[numOfClients];
 		
-		for(int i = 0; i < numOfClients; i++)
+		//for(int i = 0; i < numOfClients; i++)
+		for(int i = 0; i < numOfClientWorks; i++)
 		{
-			Grid clientGrid = null;
+			//Grid clientGrid = null;
+			Grid workingGrid = null;
 			int width = 1;
 			int height = 1;
 
-			Recti w = unalteredClientWorkables[i];
+			//Recti w = unalteredClientWorkables[i];
+			Recti w = clientWorkables[i];
 			Vector2i size = new Vector2i(w.getSize().x + (2 * width), w.getSize().y + (2 * height));
 			Cell cell = new Cell(grid.getCell(0, 0).getValueCount());
 
@@ -106,17 +109,20 @@ public class ServerOverseer extends Overseer
 			{
 				case 'h':
 				case 'H':
-					clientGrid = new HexagonGrid(size, cell);
+					//clientGrid = new HexagonGrid(size, cell);
+					workingGrid = new HexagonGrid(size, cell);
 					break;
 				case 'r':
 				case 'R':
-					clientGrid = new RectangleGrid(size, cell);
+					//clientGrid = new RectangleGrid(size, cell);
+					workingGrid = new RectangleGrid(size, cell);
 					break;
 				case 't':
 				case 'T':
 					width += 1;
 					size = new Vector2i(w.getSize().x + (2 * width), w.getSize().y + (2 * height));
-					clientGrid = new TriangleGrid(size, cell);
+					//clientGrid = new TriangleGrid(size, cell);
+					workingGrid = new TriangleGrid(size, cell);
 					break;
 			}
 
@@ -129,24 +135,47 @@ public class ServerOverseer extends Overseer
 					int xx = (grid.getWidth() + x) % grid.getWidth();
 					int yy = (grid.getHeight() + y) % grid.getHeight();
 					for(int j = 0; j < grid.getCell(xx, yy).getValueCount(); j++)
-						clientGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+					{
+						//clientGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+						workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+					}
 					gXPos++;
 					if(gXPos >= w.getSize().x + (width * 2))
 						gXPos = 0;
 				}
 				gYPos++;
 			}
-			clientGrids[i] = clientGrid;
+			
+			Recti aw = new Recti(w.getPosition(), w.getSize());
+			switch(workingGrid.getType())
+			{
+				case 'h':
+				case 'H':
+				case 'r':
+				case 'R':
+					aw.setPosition(new Vector2i(1, 1));
+					break;
+				case 't':
+				case 'T':
+					aw.setPosition(new Vector2i(2, 1));
+					break;
+			}
+			
+			//clientGrids[i] = clientGrid;
+			clientWork[i] = new ThreadWork(grid, aw);
 		}
 	}
 	
 	public void rebuildGrid()
 	{
-		for(int i = 0; i < numOfClients; i++)
+		for(int i = 0; i < clientWorkables.length; i++)
 		{
-			Grid g = clientGrids[i];
+			/*Grid g = clientGrids[i];
 			Recti aw = alteredClientWorkables[i];
-			Recti uw = unalteredClientWorkables[i];
+			Recti uw = unalteredClientWorkables[i];*/
+			Grid g = clientWork[i].getGrid();
+			Recti aw = clientWork[i].getWorkableArea();
+			Recti uw = clientWorkables[i];
 			for(int y = uw.getPosition().y, yy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, yy++)
 			{
 				for(int x = uw.getPosition().x, xx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, xx++)
@@ -161,24 +190,31 @@ public class ServerOverseer extends Overseer
 		}
 	}
 	
-	//IN TEST
 	public void send()
 	{
 		System.out.println("-- SENDING GRIDS TO CLIENTS -- SO");
+		((CAPIPServer)capIP).setClientWork(clientWork);
+		/*
 		((CAPIPServer)capIP).setClientGrids(clientGrids);
 		((CAPIPServer)capIP).setClientWorkables(alteredClientWorkables);
+		*/
 		((CAPIPServer)capIP).sendGrids();
 		System.out.println("-- SEND GRIDS RETURNED -- SO");
 	}
 	
-	//IN TEST IMPLICITLY
 	//Called from CAPIPServer to pass up work done
-	public void setClientGrids(Grid[] grids)
+	//public void setClientGrids(Grid[] grids)
+	public void setClientWork(ArrayList<ThreadWork> CW)
 	{
-		System.out.println("Gotten ClientGrids Back!");
-		clientGrids = new Grid[grids.length];
+		System.out.println("-- CLIENT WORK RECEIVED BACK FROM BEEN COMPUTED -- SO");
+		int size = CW.size();
+		clientWork = new ThreadWork[size];
+		for(int i = 0; i < size; i++)
+			clientWork[i] = CW.get(i).clone();
+		/*clientGrids = new Grid[grids.length];
 		for(int i = 0; i < grids.length; i++)
 			clientGrids[i] = grids[i].clone();
+		//Displaying grid in console
 		for(int y = 0; y < clientGrids[0].getSize().y; y++)
 		{
 			for(int x = 0; x < clientGrids[0].getSize().x; x++)
@@ -186,31 +222,35 @@ public class ServerOverseer extends Overseer
 				System.out.print("[" + clientGrids[0].getCell(x, y).getValue(0) + "]");
 			}
 			System.out.println();
-		}
+		}*/
 		rebuildGrid();
 		makeGrids();
 	}
-	
-	//IN TEST
+
 	public void setClientNames(ArrayList<String> names)
 	{
 		clientNames = names;
 		numOfClients = clientNames.size();
 	}
 	
-	//IN TEST
 	public void setClientWorkables(Recti[] cW)
 	{
-		unalteredClientWorkables = new Recti[cW.length];
+		//unalteredClientWorkables = new Recti[cW.length];
+		clientWorkables = new Recti[cW.length];
 		for(int i = 0; i < cW.length; i++)
-			unalteredClientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
-		alterClientWorkables();
+			clientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
+			//unalteredClientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
+		//alterClientWorkables();
 		makeGrids();
 	}
-	
-	//IN TEST
+
 	@Override
 	public void start()
+	{
+	}
+	
+	@Override
+	public void run()
 	{
 		capIP = new CAPIPServer(this, clientNames);
 		capIP.start();

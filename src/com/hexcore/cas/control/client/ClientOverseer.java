@@ -198,7 +198,9 @@ public class ClientOverseer extends Overseer
 				mywork[myworkPos].setValue(0, 1);
 			}
 			else
+			{
 				mywork[myworkPos] = new Cell(grid.getCell(x, y));
+			}
 			myworkPos++;
 		}
 		

@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import com.hexcore.cas.control.client.ClientOverseer;
-import com.hexcore.cas.control.protocol.CAPInformationProcessor;
-import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.server.ServerOverseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;

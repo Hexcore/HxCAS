@@ -26,10 +26,10 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class CAPIPClient extends CAPInformationProcessor
 {
-	private ClientOverseer parent = null;
-	private ServerSocket sock = null;
 	private boolean sentAccept = false;
 	private CAPMessageProtocol protocol = null;
+	private ClientOverseer parent = null;
+	private ServerSocket sock = null;
 	
 	public CAPIPClient(Overseer o)
 		throws IOException
@@ -82,7 +82,9 @@ public class CAPIPClient extends CAPInformationProcessor
 			{
 				ListNode currCell = new ListNode();
 				for(int i = 0; i < g.getCell(x, y).getValueCount(); i++)
+				{
 					currCell.addToList(new DoubleNode(g.getCell(x, y).getValue(i)));
+				}
 				currRow.addToList(currCell);
 			}
 			rows.addToList(currRow);
@@ -349,7 +351,8 @@ public class CAPIPClient extends CAPInformationProcessor
 	{
 		setup();
 		
-		if (!connected) return;
+		if (!connected)
+			return;
 		
 		System.out.println("Client Running...");
 		

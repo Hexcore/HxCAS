@@ -3,7 +3,7 @@ package com.hexcore.cas.control.protocol;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.rulesystems.HexcoreVM;
 
-public abstract class Overseer
+public abstract class Overseer extends Thread
 {
 	protected CAPInformationProcessor capIP = null;
 	protected HexcoreVM vm = null;
