@@ -20,6 +20,11 @@ public class DictNode extends Node
 		values.put(s, n);
 	}
 	
+	public Node get(String key)
+	{
+		return values.get(key);
+	}
+	
 	public TreeMap<String, Node> getDictValues()
 	{
 		return values;

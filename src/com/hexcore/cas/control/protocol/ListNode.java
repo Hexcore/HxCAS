@@ -18,6 +18,11 @@ public class ListNode extends Node
 		values.add(n);
 	}
 	
+	public Node get(int index)
+	{
+		return values.get(index);
+	}
+	
 	public ArrayList<Node> getListValues()
 	{
 		return values;
