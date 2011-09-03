@@ -140,11 +140,11 @@ public class TestDistributionSystem extends TestCase
 		assertEquals(4, aw[1].getSize().y);
 	}
 	
-	/*
 	@SuppressWarnings("unchecked")
 	private void testRectangleVersion()
 		throws IOException, InterruptedException
 	{
+		/*
 		System.out.println("===============================================");
 		System.out.println("TESTING DISTRIBUTION SYSTEM WITH RECTANGLE GRID");
 		System.out.println("===============================================");
@@ -201,6 +201,6 @@ public class TestDistributionSystem extends TestCase
 		System.out.println("Testing Distribution System complete");
 		
 		so.disconnect();
+		*/
 	}
-	*/
 }

@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.hexcore.cas.utilities.Log;
+
 public class CAPMessageProtocol extends Thread
 {
+	private static final String TAG = "CAPMessageProtocol";
+	
 	private static final int NO_BYTE = -2;
 	
 	private volatile boolean running = false;
@@ -35,7 +39,12 @@ public class CAPMessageProtocol extends Thread
 		}
 	}
 	
-	private Node readNode()
+	public boolean isRunning()
+	{
+		return running;
+	}
+	
+	private Node readNode() throws ProtocolErrorException
 	{
 		Node node = null;
 		byte b = peakByte();
@@ -66,13 +75,13 @@ public class CAPMessageProtocol extends Thread
 				node = byteString();
 				break;
 			default:
-				System.out.println("Expected start of a node, got '" + (char)b + "'");
+				Log.error(TAG, "Expected start of a node, got '" + (char)b + "'");
 		}
 		
 		return node;
 	}
 		
-	private ByteNode byteString()
+	private ByteNode byteString() throws ProtocolErrorException
 	{		
 		int num = 0;
 		while(peakByte() != ':') num = num * 10 + (nextByte() - '0');
@@ -93,7 +102,7 @@ public class CAPMessageProtocol extends Thread
 		return new ByteNode(b);
 	}
 	
-	private DictNode dictionary()
+	private DictNode dictionary() throws ProtocolErrorException
 	{		
 		DictNode d = new DictNode();
 		
@@ -121,9 +130,8 @@ public class CAPMessageProtocol extends Thread
 					key = byteString().toString();
 					break;
 				default:
-					System.out.println("Expected start of byte string, got '" + (char)b + "'");
-					sendState(2, "KEY FOR DICTIONARY NOT A BYTE STRING");
-					System.out.println("Key for dictionary not a byte string.");
+					Log.error(TAG, "Expected start of byte string, got '" + (char)b + "'");
+					Log.error(TAG, "Key for dictionary not a byte string.");
 					return null;
 			}
 			
@@ -131,8 +139,7 @@ public class CAPMessageProtocol extends Thread
 			value = readNode();
 			if (value == null)
 			{
-				sendState(2, "VALUE FOR DICTIONARY NOT A NODE TYPE");
-				System.out.println("Value for dictionary not a valid choice.");
+				Log.error(TAG, "Value for dictionary not a valid choice.");
 				break;
 			}
 			
@@ -149,7 +156,7 @@ public class CAPMessageProtocol extends Thread
 		running = false;
 	}
 	
-	private DoubleNode doubleValue()
+	private DoubleNode doubleValue() throws ProtocolErrorException
 	{
 		ByteBuffer buff = ByteBuffer.allocate(8);
 		
@@ -167,7 +174,7 @@ public class CAPMessageProtocol extends Thread
 		return socket;
 	}
 	
-	private IntNode intValue()
+	private IntNode intValue() throws ProtocolErrorException
 	{
 		int value = 0;
 		expect('i');
@@ -176,7 +183,7 @@ public class CAPMessageProtocol extends Thread
 		return new IntNode(value);
 	}
 	
-	private ListNode list()
+	private ListNode list() throws ProtocolErrorException
 	{
 		expect('l');
 		
@@ -194,7 +201,7 @@ public class CAPMessageProtocol extends Thread
 		return list;
 	}
 	
-	private void receiveMessage()
+	private void receiveMessage() throws ProtocolErrorException
 	{
 		Node body = null;
 				
@@ -231,7 +238,7 @@ public class CAPMessageProtocol extends Thread
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error: Could not send message, OutputStream raised a IOException");
+			Log.error(TAG, "Error: Could not send message, OutputStream raised a IOException");
 		}
 	}
 	
@@ -260,19 +267,18 @@ public class CAPMessageProtocol extends Thread
 		}
 	}
 	
-	private void expect(char c)
+	private void expect(char c) throws ProtocolErrorException
 	{
 		expect((byte)c);
 	}
 	
-	private void expect(byte b)
+	private void expect(byte b) throws ProtocolErrorException
 	{
 		byte g = nextByte(); 
-		if (g != b)
-			System.err.println("Protocol Stream Error: Byte '" + (char)b + "' expected, got '" + (char)g + "'");
+		if (g != b) Log.error(TAG, "Protocol Stream Error: Expected '" + (char)b + "', got '" + (char)g + "'");
 	}
 	
-	private byte nextByte()
+	private byte nextByte() throws ProtocolErrorException
 	{
 		byte b = 0;
 		
@@ -280,11 +286,19 @@ public class CAPMessageProtocol extends Thread
 		{
 			try
 			{
-				b = (byte)inputStream.read();
+				int i = inputStream.read();
+				
+				if (i == -1)
+				{
+					Log.error(TAG, "Unexpected end of stream");
+					throw new ProtocolErrorException("Unexpected end of stream");
+				}
+								
+				b = (byte)i;
 			}
 			catch (IOException e1)
 			{
-				e1.printStackTrace();
+				throw new ProtocolErrorException("Unexpected end of stream - " + e1.getMessage());
 			}
 		}
 		else
@@ -296,17 +310,23 @@ public class CAPMessageProtocol extends Thread
 		return b;
 	}	
 	
-	private byte peakByte()
+	private byte peakByte() throws ProtocolErrorException
 	{
 		if (currentByte == NO_BYTE)
 		{
 			try
 			{
 				currentByte = inputStream.read();
+				
+				if (currentByte == -1)
+				{
+					Log.error(TAG, "Unexpected end of stream");
+					throw new ProtocolErrorException("Unexpected end of stream");
+				}
 			}
 			catch (IOException e1)
 			{
-				e1.printStackTrace();
+				throw new ProtocolErrorException("Unexpected end of stream - " + e1.getMessage());
 			}
 		}
 		
@@ -317,7 +337,18 @@ public class CAPMessageProtocol extends Thread
 	{
 		running = true;
 
-		while (running) receiveMessage();
+		while (running) 
+		{
+			try
+			{
+				receiveMessage();
+			}
+			catch(ProtocolErrorException e)
+			{
+				Log.error(TAG, e.getMessage());
+				disconnect();
+			}
+		}
 		
 		try
 		{
