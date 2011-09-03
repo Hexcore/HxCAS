@@ -45,6 +45,25 @@ public class TestNodes extends TestCase
 		assertEquals(5.00, fN.getDoubleValue());
 	}
 	
+	public void testDoubleNode3()
+	{
+		OutputStream out = new ByteArrayOutputStream();
+		
+		try 
+		{
+			fN.write(out);
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		for (byte b : out.toString().getBytes())
+			System.out.print(":" + b);
+		
+		System.out.println();
+	}
+	
 	public void testByteNode1Getter()
 	{
 		byte[] b = bN.getByteValues();
