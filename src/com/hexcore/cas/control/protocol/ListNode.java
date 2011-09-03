@@ -29,6 +29,20 @@ public class ListNode extends Node
 	}
 	
 	@Override
+	public String toString()
+	{
+		String str = "[";
+		boolean first = true;
+		for (Node node : values) 
+		{
+			if (!first) str += ", ";
+			first = false;	
+			str += node.toString();
+		}
+		return str + "]";
+	}	
+	
+	@Override
 	public void write(OutputStream out)
 		throws IOException
 	{

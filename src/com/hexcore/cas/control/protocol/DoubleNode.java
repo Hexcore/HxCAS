@@ -24,6 +24,12 @@ public class DoubleNode extends Node
 	}
 	
 	@Override
+	public String toString()
+	{
+		return Double.toString(value);
+	}
+	
+	@Override
 	public void write(OutputStream out)
 		throws IOException
 	{

@@ -22,6 +22,7 @@ public class ByteNode extends Node
 		return values;
 	}
 	
+	@Override
 	public String toString()
 	{
 		return new String(values);

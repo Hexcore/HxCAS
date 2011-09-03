@@ -20,6 +20,11 @@ public class DictNode extends Node
 		values.put(s, n);
 	}
 	
+	public boolean has(String key)
+	{
+		return values.containsKey(key);
+	}
+	
 	public Node get(String key)
 	{
 		return values.get(key);
@@ -28,6 +33,20 @@ public class DictNode extends Node
 	public TreeMap<String, Node> getDictValues()
 	{
 		return values;
+	}
+	
+	@Override
+	public String toString()
+	{
+		String str = "{";
+		boolean first = true;
+		for (Entry<String, Node> entry : values.entrySet())
+		{
+			if (!first) str += ", ";
+			first = false;				
+			str += entry.getKey() + " : " + entry.getValue();
+		}
+		return str + "}";
 	}
 	
 	@Override

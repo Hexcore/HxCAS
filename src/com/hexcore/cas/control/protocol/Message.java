@@ -30,6 +30,14 @@ public class Message
 		return body;
 	}
 	
+	public String toString()
+	{
+		String str = "Message(";
+		str += header.toString();
+		if (body != null) str += ", " + body.toString(); 
+		return str + ")";
+	}
+	
 	public void write(OutputStream out) throws IOException
 	{
 		header.write(out);

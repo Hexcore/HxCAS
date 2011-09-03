@@ -5,5 +5,6 @@ import java.io.OutputStream;
 
 public abstract class Node
 {
+	public abstract String toString();
 	public abstract void write(OutputStream out) throws IOException;
 }

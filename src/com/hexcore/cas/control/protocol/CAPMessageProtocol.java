@@ -221,6 +221,8 @@ public class CAPMessageProtocol extends Thread
 
 	public void sendMessage(Message message)
 	{
+		System.out.println(message.toString());
+		
 		try
 		{
 			OutputStream out = socket.getOutputStream();	
