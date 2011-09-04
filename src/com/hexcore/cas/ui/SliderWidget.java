@@ -7,9 +7,12 @@ import com.hexcore.cas.ui.Theme.ButtonState;
 
 public class SliderWidget extends ClickableWidget
 {
-	private float minimum;
-	private float maximum;
-	private float value;
+	protected boolean showValue = false;
+	protected int showValuePlaces = 0;
+	
+	protected float minimum;
+	protected float maximum;
+	protected float value;
 	
 	public SliderWidget(int width)
 	{
@@ -29,10 +32,14 @@ public class SliderWidget extends ClickableWidget
 		this.value = value;
 	}
 	
+	public void setShowValue(boolean state) {showValue = state;}
+	public void setShowValuePlaces(int places) {showValuePlaces = places;}
 	public void setMinimum(float minimum) {this.minimum = minimum;}
 	public void setMaximum(float maximum) {this.maximum = maximum;}
 	public void setValue(float value) {this.value = value;}
 	
+	public boolean getShowValue() {return showValue;}
+	public int getShowValuePlaces() {return showValuePlaces;}
 	public float getMinimum() {return minimum;}
 	public float getMaximum() {return maximum;}
 	public float getValue() {return value;}
@@ -54,9 +61,12 @@ public class SliderWidget extends ClickableWidget
 		ButtonState state = ButtonState.NORMAL;
 		if (mouseover) state = ButtonState.HOVER;
 		if (active) state = ButtonState.ACTIVE;
-		
+				
 		window.getTheme().renderSlider(gl, pos, size, state);
 		window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
+		
+		if (showValue && active) 
+			window.getTheme().renderSliderValue(gl, pos, size, value, showValuePlaces, percent);
 	}
 	
 	@Override

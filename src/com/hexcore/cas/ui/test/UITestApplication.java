@@ -272,6 +272,7 @@ public class UITestApplication implements WindowEventListener
 		
 		slider = new SliderWidget(100);
 		slider.setFlag(Widget.FILL_HORIZONTAL);
+		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");

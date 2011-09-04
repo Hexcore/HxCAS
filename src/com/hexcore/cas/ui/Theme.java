@@ -365,6 +365,28 @@ public class Theme
 		return size;
 	}
 	
+	public void renderSliderValue(GL gl, Vector2i pos, Vector2i size, float value, int decimalPlaces, float percent)
+	{
+		int width = getInteger("SliderHandle", "width", 8);
+		int height = getInteger("SliderHandle", "height", 8);
+		Vector2i textPos = pos.add((int)(percent * (size.x - width)) + width / 2, (size.y - height) / 2);
+		String text;
+		
+		if (decimalPlaces > 0)
+		{
+			float s = (float)Math.pow(10, decimalPlaces);
+			text = "" + (int)(value * s) / s;
+		}
+		else
+			text = "" + (int)value; 
+		
+		Vector2i textSize = calculateTextSize(text, Text.Size.SMALL);
+		textPos = textPos.subtract(textSize.x / 2, textSize.y + 8);
+		
+		Graphics.renderRectangle(gl, textPos.subtract(4, 4), textSize.add(8, 8), new Colour(0.0f, 0.0f, 0.0f, 0.7f));
+		renderText(gl, text, textPos, textSize, Colour.WHITE, Text.Size.SMALL);
+	}
+	
 	public void renderSliderHandle(GL gl, Vector2i pos, Vector2i size, float percent, ButtonState state)
 	{
 		String stateName;
@@ -385,8 +407,8 @@ public class Theme
 				break;
 		}
 		
-		int width = getInteger("SliderHandle", stateName, "width", 8);
-		int height = getInteger("SliderHandle", stateName, "height", 8);
+		int width = getInteger("SliderHandle", "width", 8);
+		int height = getInteger("SliderHandle", "height", 8);
 		Vector2i handlePos = pos.add((int)(percent * (size.x - width)), (size.y - height) / 2);
 		
 		int borderRadius = getInteger("SliderHandle", stateName, "border-radius", 0);
