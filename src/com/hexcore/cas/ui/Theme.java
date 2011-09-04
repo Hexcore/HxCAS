@@ -326,6 +326,36 @@ public class Theme
 		Graphics.renderBorder(gl, pos, size, borderRadius, getFill("Dialog", "border"));
 	}
 	
+	public void renderScrollbar(GL gl, Vector2i pos, Vector2i size, boolean hover)
+	{
+		String stateName = "normal";
+		if (hover) stateName = "hover";
+		
+		int handleWidth = getInteger("SliderHandle", stateName, "width", 8);
+		
+		int width = size.x - handleWidth;
+		int height = getInteger("Slider", stateName, "height");
+		Vector2i backPos = pos.add(handleWidth / 2, (size.y - height) / 2);
+		
+		int borderRadius = getInteger("Slider", stateName, "border-radius", 0);
+		Graphics.renderRectangle(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", stateName, "background"));
+		Graphics.renderBorder(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", stateName, "border"));
+	}
+	
+	public void renderScrollbarHandle(GL gl, Vector2i pos, Vector2i size, float percent, boolean hover)
+	{
+		String stateName = "normal";
+		if (hover) stateName = "hover";
+		
+		int width = getInteger("SliderHandle", stateName, "width", 8);
+		int height = getInteger("SliderHandle", stateName, "height", 8);
+		Vector2i handlePos = pos.add((int)(percent * (size.x - width)), (size.y - height) / 2);
+		
+		int borderRadius = getInteger("SliderHandle", stateName, "border-radius", 0);
+		Graphics.renderRectangle(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", stateName, "background"));
+		Graphics.renderBorder(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", stateName, "border"));
+	}	
+	
 	public int getScrollbarSize()
 	{
 		return 16;

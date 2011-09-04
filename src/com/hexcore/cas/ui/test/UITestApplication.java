@@ -25,6 +25,7 @@ import com.hexcore.cas.ui.Panel;
 import com.hexcore.cas.ui.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
+import com.hexcore.cas.ui.SliderWidget;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextArea;
@@ -59,6 +60,7 @@ public class UITestApplication implements WindowEventListener
 	public ImageWidget	headingImage;
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
+	public SliderWidget	slider;
 	public View			mainView;
 	
 	public Button		createWorldButton;
@@ -267,6 +269,10 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.addItem("blue");
 		dropDownBox.setSelected(0);
 		innerLayout.add(dropDownBox);
+		
+		slider = new SliderWidget(100);
+		slider.setFlag(Widget.FILL_HORIZONTAL);
+		innerLayout.add(slider);
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
 		paragraph.setFlag(Widget.FILL_HORIZONTAL);

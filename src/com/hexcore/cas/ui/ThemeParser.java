@@ -63,6 +63,10 @@ public class ThemeParser extends ConfigParser
 				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset", "padding");
 		addTypeProperties("TabInside", 
 				"background", "border", "border-radius");
+		addTypeProperties("Slider", 
+				"background", "border", "border-radius", "height");
+		addTypeProperties("SliderHandle", 
+				"background", "border", "border-radius", "height", "width");		
 		addTypeProperties("Dialog", 
 				"background", "border", "border-radius");
 		addTypeProperties("DialogFade", 
