@@ -262,6 +262,7 @@ public class UITestApplication implements WindowEventListener
 		
 		dropDownBox = new DropDownBox(new Vector2i(200, 20));
 		dropDownBox.addItem("light");
+		dropDownBox.addItem("lightV2");
 		dropDownBox.addItem("default");
 		dropDownBox.addItem("blue");
 		dropDownBox.setSelected(0);

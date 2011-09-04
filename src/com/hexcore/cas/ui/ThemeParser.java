@@ -2,6 +2,7 @@ package com.hexcore.cas.ui;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.hexcore.cas.ui.Theme.Property;
@@ -14,8 +15,7 @@ public class ThemeParser extends ConfigParser
 	private HashMap<String, Theme.Type>	types;
 	
 	private Set<String>	validStates;
-	private Set<String>	validTypes;
-	private Set<String>	validProperties;
+	private Map<String, Set<String>> validTypeProperties;
 	
 	ThemeParser(String filename)
 	{
@@ -32,36 +32,43 @@ public class ThemeParser extends ConfigParser
 		validStates.add("horizontal");
 		validStates.add("selected");
 		
-		validTypes = new HashSet<String>();
-		validTypes.add("Button");
-		validTypes.add("Panel");
-		validTypes.add("Scrollbar");
-		validTypes.add("ScrollbarHandle");
-		validTypes.add("ScrollbarFill");
-		validTypes.add("TextBox");
-		validTypes.add("TextBoxLineNumbers");
-		validTypes.add("CheckBox");
-		validTypes.add("CheckBoxCaption");
-		validTypes.add("DropDownBox");
-		validTypes.add("DropDownBoxArrow");
-		validTypes.add("DropDownBoxList");
-		validTypes.add("DropDownBoxItem");
-		validTypes.add("Tab");
-		validTypes.add("TabInside");
-		validTypes.add("Dialog");
-		validTypes.add("DialogFade");
-		validTypes.add("Window");
-		
-		validProperties = new HashSet<String>();
-		validProperties.add("background");
-		validProperties.add("border");
-		validProperties.add("border-radius");
-		validProperties.add("text-colour");
-		validProperties.add("text-offset");
-		validProperties.add("text-shadow-colour");
-		validProperties.add("text-shadow-offset");
-		validProperties.add("selected-colour");
-		validProperties.add("padding");
+		validTypeProperties = new HashMap<String, Set<String>>();
+		addTypeProperties("Button", 
+				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset");
+		addTypeProperties("Panel", 
+				"background", "border", "border-radius");
+		addTypeProperties("Scrollbar", 
+				"background", "border");
+		addTypeProperties("ScrollbarHandle", 
+				"background", "border");
+		addTypeProperties("ScrollbarFill", 
+				"background", "border");
+		addTypeProperties("TextBox", 
+				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset", "selected-colour");
+		addTypeProperties("TextBoxLineNumbers", 
+				"background", "border");
+		addTypeProperties("CheckBox", 
+				"background", "border", "border-radius");
+		addTypeProperties("CheckBoxCaption", 
+				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset", "padding");
+		addTypeProperties("DropDownBox", 
+				"background", "border", "text-colour", "text-offset", "border-radius", "padding");
+		addTypeProperties("DropDownBoxArrow", 
+				"background", "border");
+		addTypeProperties("DropDownBoxList", 
+				"background", "border", "text-colour", "text-offset", "padding");
+		addTypeProperties("DropDownBoxItem", 
+				"background", "border", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset", "padding");
+		addTypeProperties("Tab", 
+				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset", "padding");
+		addTypeProperties("TabInside", 
+				"background", "border", "border-radius");
+		addTypeProperties("Dialog", 
+				"background", "border", "border-radius");
+		addTypeProperties("DialogFade", 
+				"background", "border");
+		addTypeProperties("Window", 
+				"background", "border");
 		
 		types = new HashMap<String, Theme.Type>();
 		
@@ -74,8 +81,8 @@ public class ThemeParser extends ConfigParser
 			
 			//System.out.println("Type: " + typeName);
 						
-			if (validTypes.contains(typeName) || (typeName.charAt(0) == '.'))
-				readObject(typeName);
+			if (validTypeProperties.containsKey(typeName) || (typeName.charAt(0) == '.'))
+				readObject(typeName, (typeName.charAt(0) == '.'));
 			else
 			{
 				error("Unknown type '" + typeName + "'");
@@ -91,16 +98,27 @@ public class ThemeParser extends ConfigParser
 			System.out.println("Found " + errors + " in the theme file: " + filename);
 	}
 	
+	private void addTypeProperties(String type, String... properties)
+	{
+		Set<String> propertySet = new HashSet<String>();
+		
+		for (String property : properties) propertySet.add(property);
+		
+		validTypeProperties.put(type, propertySet);
+	}
+	
 	public HashMap<String, Theme.Type> getTypes()
 	{
 		return types;
 	}
 	
-	private void readObject(String typeName)
+	private void readObject(String typeName, boolean isClass)
 	{		
+		Set<String> typesValidProperties = validTypeProperties.get(typeName);
+
 		Theme.Type type = new Theme.Type(typeName);
 		type.state = "normal";
-		
+
 		Symbol symbol = scanner.peakSymbol();
 		
 		if (symbol.text.equals(":"))
@@ -149,12 +167,12 @@ public class ThemeParser extends ConfigParser
 				fastForward(";", "}");
 				continue;
 			}
-			
-			if (validProperties.contains(propertyName))
+				
+			if (isClass || typesValidProperties.contains(propertyName))
 				readProperty(type, propertyName);
 			else
 			{
-				error("Unknown property '" + propertyName + "'");
+				error("Invalid property '" + propertyName + "' for '" + typeName + "'");
 				fastForward(";", "}");
 			}
 		}
