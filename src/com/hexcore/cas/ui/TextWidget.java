@@ -73,6 +73,9 @@ public class TextWidget extends Widget
 			else
 				window.getTheme().renderText(gl, caption, pos, colour, textSize);
 		}
+		
+		if (window.isDebugLayout()) 
+			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}
 	
 	public String 	getCaption() {return caption;}

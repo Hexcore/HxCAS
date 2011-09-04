@@ -186,7 +186,7 @@ public class UITestApplication implements WindowEventListener
 		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.BLACK);
 		headingLabel.setFlag(Widget.CENTER);
 		headingContainer.setContents(headingLabel);
-		
+
 		mainLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
 		mainLayout.setFlag(Widget.FILL);
 		windowLayout.add(mainLayout);
@@ -228,12 +228,13 @@ public class UITestApplication implements WindowEventListener
 		outerLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		outerLayout.setMargin(new Vector2i(0, 0));
 		outerLayout.setFlag(Widget.FILL);
-		outerLayout.setFlag(Widget.WRAP);
+		//outerLayout.setFlag(Widget.WRAP);
 		mainView.add(outerLayout);
 		
 		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		innerLayout.setFlag(Widget.FILL);
-		innerLayout.setFlag(Widget.WRAP);
+		innerLayout.setSize(new Vector2i(128, 128));
+		innerLayout.setFlag(Widget.FILL_VERTICAL);
+		innerLayout.setFlag(Widget.WRAP_HORIZONTAL);
 		outerLayout.add(innerLayout);
 		
 		nameTextBox = new TextBox(100);
@@ -263,7 +264,7 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox.addItem("light");
 		dropDownBox.addItem("default");
 		dropDownBox.addItem("blue");
-		dropDownBox.setSelected(1);
+		dropDownBox.setSelected(0);
 		innerLayout.add(dropDownBox);
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
@@ -271,7 +272,10 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
 		
-		
+		description = new TextArea(200, 10);
+		description.setFlag(Widget.FILL);
+		description.setLineNumbers(true);
+		outerLayout.add(description);
 		
 		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		gridViewLayout.setFlag(Widget.FILL);
