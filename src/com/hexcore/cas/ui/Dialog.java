@@ -13,6 +13,13 @@ public class Dialog extends Container
 	}
 	
 	@Override
+	public void relayout()
+	{
+		super.relayout();
+		setPosition(new Vector2i((window.getWidth() - size.x) / 2, (window.getHeight() - size.y) / 2));
+	}
+	
+	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		if (!visible) return;

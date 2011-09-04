@@ -210,6 +210,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		giveUpFocus(focusedWidget);
 		modalDialog = dialog;
+		modalDialog.relayout();
 	}
 	
 	public void closeModalDialog()
@@ -290,7 +291,27 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection selection = new StringSelection(text);
-	    clipboard.setContents(selection, this);
+		clipboard.setContents(selection, this);
+	}
+	
+	public void addListener(WindowEventListener wel)
+	{
+		eventListeners.add(wel);
+	}
+	
+	public void sendWindowEvent(Event event)
+	{
+		for (WindowEventListener listener : eventListeners)
+			listener.handleWindowEvent(event);
+		
+		canvas.display();
+	}
+	
+	@Override
+	public void relayout()
+	{
+		super.relayout();
+		if (modalDialog != null) modalDialog.relayout();
 	}
 		
 	@Override
@@ -351,24 +372,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		if (height < 600) height = 600;
 		
 		size = new Vector2i(width, height);
-        relayout();
+		
+		relayout();
 	}
 		
 	///////////
-	
-	public void addListener(WindowEventListener wel)
-	{
-		eventListeners.add(wel);
-	}
-	
-	public void sendWindowEvent(Event event)
-	{
-		for (WindowEventListener listener : eventListeners)
-			listener.handleWindowEvent(event);
-		
-		canvas.display();
-	}
-		
+			
 	private void renderWidgets(GLAutoDrawable drawable)
 	{
 		if (updateComponents)
