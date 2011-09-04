@@ -248,3 +248,9 @@ SliderHandle : hover
 	background: rgb(0.64, 0.76, 0.94) rgb(0.4, 0.63, 0.91);
 	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
 }
+
+SliderHandle : active
+{
+	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
+	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
+}

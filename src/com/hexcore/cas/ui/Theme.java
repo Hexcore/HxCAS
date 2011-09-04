@@ -326,10 +326,25 @@ public class Theme
 		Graphics.renderBorder(gl, pos, size, borderRadius, getFill("Dialog", "border"));
 	}
 	
-	public void renderScrollbar(GL gl, Vector2i pos, Vector2i size, boolean hover)
+	public void renderSlider(GL gl, Vector2i pos, Vector2i size, ButtonState state)
 	{
-		String stateName = "normal";
-		if (hover) stateName = "hover";
+		String stateName;
+		switch (state)
+		{
+			default:
+			case NORMAL:
+				stateName = "normal";
+				break;
+			case FOCUS:
+				stateName = "focus";
+				break;				
+			case HOVER:
+				stateName = "hover";
+				break;
+			case ACTIVE:
+				stateName = "active";
+				break;
+		}
 		
 		int handleWidth = getInteger("SliderHandle", stateName, "width", 8);
 		
@@ -342,10 +357,33 @@ public class Theme
 		Graphics.renderBorder(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", stateName, "border"));
 	}
 	
-	public void renderScrollbarHandle(GL gl, Vector2i pos, Vector2i size, float percent, boolean hover)
+	public Vector2i getSliderHandleSize()
 	{
-		String stateName = "normal";
-		if (hover) stateName = "hover";
+		Vector2i size = new Vector2i();
+		size.x = getInteger("SliderHandle", "width", 8);
+		size.y = getInteger("SliderHandle", "height", 8);
+		return size;
+	}
+	
+	public void renderSliderHandle(GL gl, Vector2i pos, Vector2i size, float percent, ButtonState state)
+	{
+		String stateName;
+		switch (state)
+		{
+			default:
+			case NORMAL:
+				stateName = "normal";
+				break;
+			case FOCUS:
+				stateName = "focus";
+				break;				
+			case HOVER:
+				stateName = "hover";
+				break;
+			case ACTIVE:
+				stateName = "active";
+				break;
+		}
 		
 		int width = getInteger("SliderHandle", stateName, "width", 8);
 		int height = getInteger("SliderHandle", stateName, "height", 8);

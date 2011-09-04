@@ -23,6 +23,7 @@ public abstract class Widget
 	
 	protected Widget	parent = null;
 	
+	protected boolean	active = false;
 	protected boolean	visible = true;
 	protected boolean	focused = false;
 	protected boolean	mouseover = false;
@@ -185,14 +186,18 @@ public abstract class Widget
 			if ((event.position.x <= start.x) || (event.position.y <= start.y)
 					|| (event.position.x >= end.x) || (event.position.y >= end.y))
 			{
-				if (mouseover && (event.type == Event.Type.MOUSE_MOTION))
+				mouseover = false;
+				
+				if (!active && (event.type != Event.Type.MOUSE_MOTION))
 				{
-					mouseover = false;
-					handleEvent(new Event(Event.Type.MOUSE_OUT), pos);
-					return false;
+					if (mouseover && (event.type == Event.Type.MOUSE_MOTION))
+					{
+						handleEvent(new Event(Event.Type.MOUSE_OUT), pos);
+						return false;
+					}
+					else if (!event.isMouseRelease()) 
+						return false;
 				}
-				else if (!event.isMouseRelease()) 
-					return false;
 			}
 			else
 				mouseover = true;

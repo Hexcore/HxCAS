@@ -6,7 +6,7 @@ import com.hexcore.cas.math.Vector2i;
 
 public class Event
 {
-	public enum Type {MOUSE_MOTION, MOUSE_CLICK, MOUSE_SCROLL, KEY_PRESS, KEY_TYPED, GAINED_FOCUS, LOST_FOCUS, ACTION, CHANGE, MOUSE_OUT};
+	public enum Type {MOUSE_MOTION, MOUSE_CLICK, MOUSE_SCROLL, KEY_PRESS, KEY_TYPED, GAINED_FOCUS, LOST_FOCUS, ACTION, CLICK, CHANGE, MOUSE_OUT};
 
 	public static final int	CTRL = 1;
 	public static final int	ALT = 2;

@@ -3,8 +3,9 @@ package com.hexcore.cas.ui;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.Theme.ButtonState;
 
-public class SliderWidget extends Widget
+public class SliderWidget extends ClickableWidget
 {
 	private float minimum;
 	private float maximum;
@@ -23,6 +24,9 @@ public class SliderWidget extends Widget
 	public SliderWidget(int width, float minimum, float maximum, float value)
 	{
 		super(new Vector2i(width, 10));
+		this.minimum = minimum;
+		this.maximum = maximum;
+		this.value = value;
 	}
 	
 	public void setMinimum(float minimum) {this.minimum = minimum;}
@@ -47,7 +51,31 @@ public class SliderWidget extends Widget
 		
 		float percent = (value - minimum) / (maximum - minimum);
 		
-		window.getTheme().renderScrollbar(gl, pos, size, mouseover);
-		window.getTheme().renderScrollbarHandle(gl, pos, size, percent, mouseover);
+		ButtonState state = ButtonState.NORMAL;
+		if (mouseover) state = ButtonState.HOVER;
+		if (active) state = ButtonState.ACTIVE;
+		
+		window.getTheme().renderSlider(gl, pos, size, state);
+		window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
+	}
+	
+	@Override
+	public boolean handleEvent(Event event, Vector2i position)
+	{
+		receiveEventExtras(event, position);
+		return super.handleEvent(event, position);
+	}
+	
+	@Override
+	public boolean receiveEventExtras(Event event, Vector2i position)
+	{
+		if ((event.type == Event.Type.MOUSE_MOTION || event.type == Event.Type.MOUSE_CLICK) && active)
+		{
+			int width = window.getTheme().getSliderHandleSize().x;
+			value = (float)(event.position.x - position.x - width / 2) * maximum / (size.x - width) + minimum;
+			value = Math.max(Math.min(value, maximum), minimum);
+		}
+		
+		return super.receiveEventExtras(event, position);
 	}
 }

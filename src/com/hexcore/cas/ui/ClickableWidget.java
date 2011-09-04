@@ -4,8 +4,6 @@ import com.hexcore.cas.math.Vector2i;
 
 public class ClickableWidget extends Widget
 {
-	protected boolean active;
-	
 	public ClickableWidget(Vector2i position, Vector2i size)
 	{
 		super(position, size);
