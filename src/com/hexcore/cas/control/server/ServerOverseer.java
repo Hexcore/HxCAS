@@ -86,7 +86,84 @@ public class ServerOverseer extends Overseer
 		return numOfClients;
 	}
 	
-	public void makeGrids()
+	public void makeNonwrappableGrids()
+	{
+		int numOfClientWorks = clientWorkables.length;
+		clientWork = new ThreadWork[numOfClientWorks];
+		
+		for(int i = 0; i < numOfClientWorks; i++)
+		{
+			Grid workingGrid = null;
+			int width = 2;
+			int height = 2;
+
+			Recti w = clientWorkables[i];
+			if(w.getPosition().x == 0)
+				width--;
+			if(w.getPosition().y == 0)
+				height--;
+			if(w.getSize().x == grid.getWidth())
+				width--;
+			if(w.getSize().y == grid.getHeight())
+				height--;
+			Vector2i size = new Vector2i(w.getSize().x + width, w.getSize().y + height);
+			Cell cell = new Cell(grid.getCell(0, 0).getValueCount());
+
+			switch(grid.getType())
+			{
+				case 'h':
+				case 'H':
+					workingGrid = new HexagonGrid(size, cell);
+					break;
+				case 'r':
+				case 'R':
+					workingGrid = new RectangleGrid(size, cell);
+					break;
+				case 't':
+				case 'T':
+					width += 2;
+					if(w.getPosition().x - 1 < 0)
+						width--;
+					if(w.getSize().x + width >= grid.getWidth())
+						width--;
+					size = new Vector2i(w.getSize().x + width, w.getSize().y + height);
+					workingGrid = new TriangleGrid(size, cell);
+					break;
+			}
+	
+			int gYPos = 0;
+			int gXPos = 0;
+			for(int y = w.getPosition().y - height; y < w.getPosition().y + w.getSize().y + height; y++)
+			{
+				for(int x = w.getPosition().x - width; x < w.getPosition().x + w.getSize().x + width; x++)
+				{
+					int xx = x % grid.getWidth();
+					int yy = y % grid.getHeight();
+					if(xx < 0 || y < 0)
+						continue;
+					for(int j = 0; j < grid.getCell(xx, yy).getValueCount(); j++)
+						workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+					gXPos++;
+					if(gXPos >= w.getSize().x + (width * 2))
+						gXPos = 0;
+				}
+				gYPos++;
+			}
+			//WAS HERE
+			Recti aw = new Recti(new Vector2i(1, 1), w.getSize());
+			switch(workingGrid.getType())
+			{
+				case 't':
+				case 'T':
+					aw.setPosition(new Vector2i(2, 1));
+					break;
+			}
+
+			clientWork[i] = new ThreadWork(workingGrid, aw);
+		}
+	}
+	
+	public void makeWrappableGrids()
 	{
 		int numOfClientWorks = clientWorkables.length;
 		clientWork = new ThreadWork[numOfClientWorks];
@@ -125,7 +202,7 @@ public class ServerOverseer extends Overseer
 					workingGrid = new TriangleGrid(size, cell);
 					break;
 			}
-
+	
 			int gYPos = 0;
 			int gXPos = 0;
 			for(int y = w.getPosition().y - height; y < w.getPosition().y + w.getSize().y + height; y++)
@@ -146,23 +223,17 @@ public class ServerOverseer extends Overseer
 				gYPos++;
 			}
 			
-			Recti aw = new Recti(w.getPosition(), w.getSize());
+			Recti aw = new Recti(new Vector2i(1, 1), w.getSize());
 			switch(workingGrid.getType())
 			{
-				case 'h':
-				case 'H':
-				case 'r':
-				case 'R':
-					aw.setPosition(new Vector2i(1, 1));
-					break;
 				case 't':
 				case 'T':
 					aw.setPosition(new Vector2i(2, 1));
 					break;
 			}
-			
+
 			//clientGrids[i] = clientGrid;
-			clientWork[i] = new ThreadWork(grid, aw);
+			clientWork[i] = new ThreadWork(workingGrid, aw);
 		}
 	}
 	
@@ -192,21 +263,21 @@ public class ServerOverseer extends Overseer
 	
 	public void send()
 	{
-		System.out.println("-- SENDING GRIDS TO CLIENTS -- SO");
+		//System.out.println("-- SENDING GRIDS TO CLIENTS -- SO");
 		((CAPIPServer)capIP).setClientWork(clientWork);
 		/*
 		((CAPIPServer)capIP).setClientGrids(clientGrids);
 		((CAPIPServer)capIP).setClientWorkables(alteredClientWorkables);
 		*/
 		((CAPIPServer)capIP).sendGrids();
-		System.out.println("-- SEND GRIDS RETURNED -- SO");
+		//System.out.println("-- SEND GRIDS RETURNED -- SO");
 	}
 	
 	//Called from CAPIPServer to pass up work done
 	//public void setClientGrids(Grid[] grids)
 	public void setClientWork(ArrayList<ThreadWork> CW)
 	{
-		System.out.println("-- CLIENT WORK RECEIVED BACK FROM BEEN COMPUTED -- SO");
+		//System.out.println("-- CLIENT WORK RECEIVED BACK FROM BEEN COMPUTED -- SO");
 		int size = CW.size();
 		clientWork = new ThreadWork[size];
 		for(int i = 0; i < size; i++)
@@ -224,7 +295,10 @@ public class ServerOverseer extends Overseer
 			System.out.println();
 		}*/
 		rebuildGrid();
-		makeGrids();
+		if(grid.getWrappable())
+			makeWrappableGrids();
+		else
+			makeNonwrappableGrids();
 	}
 
 	public void setClientNames(ArrayList<String> names)
@@ -241,7 +315,10 @@ public class ServerOverseer extends Overseer
 			clientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
 			//unalteredClientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
 		//alterClientWorkables();
-		makeGrids();
+		if(grid.getWrappable())
+			makeWrappableGrids();
+		else
+			makeNonwrappableGrids();
 	}
 
 	@Override

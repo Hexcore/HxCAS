@@ -87,7 +87,7 @@ public class CAPIPServer extends CAPInformationProcessor
 
 	protected void interpretInput(Message message, String host)
 	{
-		System.out.println("-- RECEIVED A MESSAGE -- CAPIPSERVER");
+		//System.out.println("-- RECEIVED A MESSAGE -- CAPIPSERVER");
 		int hostPos = -1;
 		for(int i = 0; i < numOfClients; i++)
 		{
@@ -285,7 +285,7 @@ public class CAPIPServer extends CAPInformationProcessor
 	
 	public void sendConnect(int index)
 	{
-		System.out.println("-- SENDING CONNECT TO " + index + " -- CAPIPSERVER");
+		//System.out.println("-- SENDING CONNECT TO " + index + " -- CAPIPSERVER");
 		CAPMessageProtocol CAPMP = clients.get(index);
 		DictNode header = this.makeHeader("CONNECT");
 		
@@ -361,13 +361,28 @@ public class CAPIPServer extends CAPInformationProcessor
 	
 	public void sendGrids()
 	{
-		System.out.println("-- SENDING GRIDS TO CLIENTS -- CAPIPSERVER");
+		//System.out.println("-- SENDING GRIDS TO CLIENTS -- CAPIPSERVER");
+		int numOfAllCores = 0;
+		for(int i = 0; i < clientCoreAmounts.length; i++)
+			numOfAllCores += clientCoreAmounts[i];
+		//workForClients.size()
+		boolean sendToAllCores = false;
+		if(workForClients.size() >= numOfAllCores)
+			sendToAllCores = true;
 		
 		for(int i = 0; i < numOfClients; i++)
 		{
-			System.out.println("-- SENDING TO CLIENT " + i + " --");
+			//System.out.println("-- SENDING TO CLIENT " + i + " --");
 			CAPMessageProtocol CAPMP = clients.get(i);
-			sendAGrid(CAPMP);
+			if(sendToAllCores)
+			{
+				for(int j = 0; j < clientCoreAmounts[i]; j++)
+					sendAGrid(CAPMP);
+			}
+			else
+			{
+				sendAGrid(CAPMP);
+			}
 			//MOVED STUFF THAT WAS HERE INTO sendAGrid()
 		}
 	}
