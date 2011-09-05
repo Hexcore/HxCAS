@@ -3,8 +3,8 @@ Network
 {
 	Beacon
 	{
-		port = 31181;
-		replyPort = 31171;
+		port = 3118;
+		replyPort = 3117;
 	}
 }
 

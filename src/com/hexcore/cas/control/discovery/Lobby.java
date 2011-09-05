@@ -11,8 +11,12 @@ import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import com.hexcore.cas.utilities.Log;
+
 public class Lobby extends Thread
 {
+	private static final String TAG = "Lobby";
+	
 	public int listenPort;
 	public int beaconPort;
 	
@@ -63,7 +67,7 @@ public class Lobby extends Thread
 	
 	public void ping()
 	{
-		System.out.println("Pinging for clients on port " + beaconPort);
+		Log.information(TAG, "Pinging for clients on port " + beaconPort);
 		
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		
@@ -100,7 +104,7 @@ public class Lobby extends Thread
 		running = true;
 		ByteBuffer buffer = ByteBuffer.allocate(8);
 		
-		System.out.println("Discovery: Listening for replies on " + address);
+		Log.information(TAG, "Listening for replies on " + address);
 		
 		try
 		{
@@ -114,7 +118,7 @@ public class Lobby extends Thread
 				if (buffer.get(2) != (byte)0xCA) continue;
 				if (buffer.get(3) != (byte)0xFE) continue;
 				
-				System.out.println("Discovery: Got reply from " + replyAddress);
+				Log.information(TAG, "Got reply from " + replyAddress);
 				
 				for (LobbyListener listener : listeners)
 					listener.foundClient(replyAddress);
