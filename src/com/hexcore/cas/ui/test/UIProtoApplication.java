@@ -22,11 +22,13 @@ import com.hexcore.cas.ui.Fill;
 import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
 import com.hexcore.cas.ui.ImageWidget;
+import com.hexcore.cas.ui.Layout;
 import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.Panel;
 import com.hexcore.cas.ui.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.RectangleGridWidget;
 import com.hexcore.cas.ui.ScrollableContainer;
+import com.hexcore.cas.ui.SliderWidget;
 import com.hexcore.cas.ui.TabbedView;
 import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextArea;
@@ -55,6 +57,8 @@ public class UIProtoApplication implements WindowEventListener
 	
 	
 	public TextWidget worldEditorLabel;
+	
+	public Button simulateButton;
 	
 	//1st,2,3,4 ...tab
 	
@@ -152,8 +156,27 @@ public class UIProtoApplication implements WindowEventListener
 	public HexagonGrid grid;
 	public RectangleGrid rectGrid;
 	public TriangleGrid triGrid;
+	
+	
+	
+	
+	//Simulation Screen
+	
+	public Container simulationContainer;
+	
+	
+	
+	public HexagonGrid				waterFlowGrid;
+	public WaterFlow				waterFlow;
+	public HexagonGrid3DWidget		waterGrid3DViewer;
+	
 	UIProtoApplication()
 	{
+		
+		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlowGrid.setWrappable(false);
+
+		waterFlow = new WaterFlow(waterFlowGrid);
 		
 		
 		grid = new HexagonGrid(new Vector2i(12, 12));
@@ -384,6 +407,15 @@ public class UIProtoApplication implements WindowEventListener
 		hexGrid3DViewer.setFlag(Widget.FILL);
 	    hexGrid3DViewer.addSlice(0, 16.0f);
 		
+	    
+	 // Water Flow
+		waterGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)waterFlow.getGrid(), 24);
+		waterGrid3DViewer.setFlag(Widget.FILL);
+		waterGrid3DViewer.setBackgroundColour(new Colour(0.6f, 0.85f, 1.0f));
+		waterGrid3DViewer.setColourRuleSet(colourRules);
+		waterGrid3DViewer.addSlice(2, 2, 15.0f);
+		waterGrid3DViewer.addSlice(1, 1, 15.0f);
+		
 		
 		
 		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -492,7 +524,7 @@ public class UIProtoApplication implements WindowEventListener
 			saveWorldButton.setHeight(35);
 			buttonHeaderLayout.add(saveWorldButton);
 			
-			Button simulateButton = new Button(new Vector2i(100, 50), "Simulate");
+			simulateButton = new Button(new Vector2i(100, 50), "Simulate");
 			simulateButton.setWidth(165);
 			simulateButton.setHeight(35);
 			buttonHeaderLayout.add(simulateButton);
@@ -599,8 +631,142 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		
-		////
-			
+		////Simulation
+		
+		simulationContainer = new Container(new Vector2i(100,100));
+		simulationContainer.setFlag(Widget.FILL);
+		masterView.add(simulationContainer);
+		
+		
+		LinearLayout masterSimulationLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		masterSimulationLayout.setFlag(Widget.FILL);
+		simulationContainer.setContents(masterSimulationLayout);
+		
+		masterSimulationLayout.add(worldHeaderLayout);
+		
+		Container simulationWindowContainer = new Container(new Vector2i(100,400));
+		simulationWindowContainer.setFlag(Widget.FILL);
+		simulationWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
+		masterSimulationLayout.add(simulationWindowContainer);
+		simulationWindowContainer.setContents(waterGrid3DViewer);
+		
+		
+		
+		
+		
+
+		//SLIDER
+		
+		LinearLayout sliderLayout = new LinearLayout(new Vector2i(40, 60), LinearLayout.Direction.VERTICAL);
+		sliderLayout.setFlag(Widget.FILL_HORIZONTAL);
+		masterSimulationLayout.add(sliderLayout);
+		
+		SliderWidget slider = new SliderWidget(100);
+		slider.setFlag(Widget.FILL_HORIZONTAL);
+		sliderLayout.add(slider);
+		
+		
+		
+		
+		
+		LinearLayout simulationControlsLayout = new LinearLayout(new Vector2i(100,135), LinearLayout.Direction.HORIZONTAL);
+		//simulationControlsLayout.setMargin(new Vector2i(0,50));
+		simulationControlsLayout.setFlag(Widget.FILL_HORIZONTAL);
+		
+		
+		masterSimulationLayout.add(simulationControlsLayout);
+		
+		
+		
+		
+		
+		
+		// WORLD DETAILS
+		LinearLayout detailsLayout = new LinearLayout(new Vector2i(250, 1), LinearLayout.Direction.VERTICAL);
+		detailsLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		detailsLayout.setFlag(Widget.FILL_VERTICAL);
+		simulationControlsLayout.add(detailsLayout);
+		
+		LinearLayout innerDetailsLayout = new LinearLayout(new Vector2i(205, 55), LinearLayout.Direction.HORIZONTAL);
+		innerDetailsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		detailsLayout.add(innerDetailsLayout);
+		
+		
+
+		
+		
+		ImageWidget detailsImage = new ImageWidget("data/details_header.png");
+		detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
+		innerDetailsLayout.add(detailsImage);
+		
+		
+		// PLAY BACK CONTROLS
+		LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 1), LinearLayout.Direction.VERTICAL);
+		playbackLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		playbackLayout.setFlag(Widget.FILL_VERTICAL);
+		simulationControlsLayout.add(playbackLayout);
+		
+		LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 35), LinearLayout.Direction.HORIZONTAL);
+		innerPlaybackLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		playbackLayout.add(innerPlaybackLayout);
+		
+		LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(205,35), LinearLayout.Direction.HORIZONTAL);
+		innerPlaybackLayout2.setFlag(Widget.FILL_HORIZONTAL);
+		playbackLayout.add(innerPlaybackLayout2);
+		
+		LinearLayout innerPlaybackLayout3 = new LinearLayout(new Vector2i(205,35), LinearLayout.Direction.VERTICAL);
+		innerPlaybackLayout3.setFlag(Widget.FILL_HORIZONTAL);
+		playbackLayout.add(innerPlaybackLayout3);
+		
+		
+		Button playButton = new Button(new Vector2i(70,30), "Play");
+		innerPlaybackLayout2.add(playButton);
+		
+		Button pauseButton = new Button(new Vector2i(70,30), "Pause");
+		innerPlaybackLayout2.add(pauseButton);
+		
+		
+		
+		
+		
+		Button resetButton = new Button(new Vector2i(70,30), "Reset");
+		innerPlaybackLayout3.add(resetButton);
+		
+		
+		
+		
+		
+
+		
+		
+		ImageWidget playbackImage = new ImageWidget("data/playback_header.png");
+		playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
+		innerPlaybackLayout.add(playbackImage);
+		
+		
+		// CAMERA CONTROLS
+		LinearLayout cameraLayout = new LinearLayout(new Vector2i(250, 1), LinearLayout.Direction.VERTICAL);
+		cameraLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		cameraLayout.setFlag(Widget.FILL_VERTICAL);
+		simulationControlsLayout.add(cameraLayout);
+		
+		LinearLayout innerCameraLayout = new LinearLayout(new Vector2i(205, 55), LinearLayout.Direction.HORIZONTAL);
+		innerCameraLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		cameraLayout.add(innerCameraLayout);
+		
+		
+
+		
+		
+		ImageWidget cameraImage = new ImageWidget("data/camera_header.png");
+		cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
+		innerCameraLayout.add(cameraImage);	
+		
+		
+		
+		
+		
+		///
 		window.relayout();
 	}
 	
@@ -758,6 +924,11 @@ public class UIProtoApplication implements WindowEventListener
 			{
 				CALTextArea.setText(" ");
 	
+			}
+			
+			else if (event.target == simulateButton)
+			{
+				masterView.setIndex(2);
 			}
 			
 			

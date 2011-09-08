@@ -1,14 +1,19 @@
 package com.hexcore.cas.control.discovery;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 
+import com.hexcore.cas.utilities.Log;
+
 public class Beacon extends Thread
 {
+	private final static String TAG = "Beacon";
+	
 	private int beaconPort;
 	private boolean running = false;
 	private SocketAddress address = null;
@@ -16,8 +21,7 @@ public class Beacon extends Thread
 	public Beacon(int beaconPort)
 	{
 		System.setProperty("java.net.preferIPv4Stack", "true");
-		
-		this.beaconPort = beaconPort;
+		this.beaconPort = beaconPort;		
 		address = new InetSocketAddress(beaconPort);
 	}
 	
@@ -33,7 +37,7 @@ public class Beacon extends Thread
 		byte[]	requestBuffer = new byte[8];
 		byte[]	responseBuffer = new byte[8];
 		
-		System.out.println("Discovery: Listening on " + address);
+		Log.information(TAG, "Listening on " + address);
 		
 		try
 		{
@@ -54,7 +58,7 @@ public class Beacon extends Thread
 					continue;
 				}
 				
-				System.out.println("Discovery: Got request from " + request.getSocketAddress());
+				Log.information(TAG, "Got request from " + request.getSocketAddress());
 	
 				// Construct response
 				responseBuffer[0] = (byte)0xBE;
@@ -64,14 +68,19 @@ public class Beacon extends Thread
 				
 				DatagramPacket response = new DatagramPacket(responseBuffer, 8, request.getSocketAddress());
 				socket.send(response);
-				System.out.println("Discovery: Reply sent");
+				Log.information(TAG, "Reply sent");
 			}
+		}
+		catch (BindException e)
+		{
+			running = false;
+			Log.error(TAG, "Could not bind socket to port " + beaconPort + " - " + e.getMessage());
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 		
-		System.out.println("Discovery: Beacon has been shutdown");
+		Log.information(TAG, "Beacon has been shutdown");
 	}
 }

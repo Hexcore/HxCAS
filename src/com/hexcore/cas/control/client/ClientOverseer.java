@@ -19,6 +19,7 @@ public class ClientOverseer extends Overseer
 	private LinkedBlockingQueue<Work> completedQueue;
 	
 	private boolean running = false;
+	private boolean valid = false;
 
 	public ClientOverseer()
 	{
@@ -30,6 +31,7 @@ public class ClientOverseer extends Overseer
 		try
 		{
 			capIP = new CAPIPClient(this);
+			valid = ((CAPIPClient)capIP).isValid();
 		}
 		catch (IOException e)
 		{
@@ -69,15 +71,28 @@ public class ClientOverseer extends Overseer
 		}
 	}
 	
+	public boolean isValid()
+	{
+		return valid;
+	}
+	
 	@Override
 	public void disconnect()
 	{
+		valid = false;
 		running = false;
 	}
 	
 	@Override
 	public void run()
 	{
+		if (!valid)
+		{
+			Log.warning(TAG, "Socket not connected - Shutting down");
+			disconnect();
+			return;
+		}
+		
 		Log.information(TAG, "Starting...");
 
 		int cores = Runtime.getRuntime().availableProcessors();

@@ -29,6 +29,7 @@ public class CAPIPClient extends CAPInformationProcessor
 	private static final String TAG = "CAPIPClient";
 	
 	private boolean sentAccept = false;
+	private boolean valid = false;
 	private CAPMessageProtocol protocol = null;
 	private ClientOverseer parent = null;
 	private ServerSocket sock = null;
@@ -44,13 +45,18 @@ public class CAPIPClient extends CAPInformationProcessor
 		try
 		{
 			sock = new ServerSocket(3119);
+			valid = true;
 			Log.information(TAG, "Socket listening on " + sock.getLocalPort());
 		}
 		catch(IOException ex)
 		{
-			Log.error(TAG, "Could not connect socket to port 3119");
-			ex.printStackTrace();
+			Log.error(TAG, "Could not bind socket to port 3119 - " + ex.getMessage());
 		}
+	}
+	
+	public boolean isValid()
+	{
+		return valid;
 	}
 	
 	@Override
@@ -58,6 +64,7 @@ public class CAPIPClient extends CAPInformationProcessor
 	{
 		Log.information(TAG, "Disconnecting...");
 		
+		valid = false;
 		super.disconnect();
 				
 		try
