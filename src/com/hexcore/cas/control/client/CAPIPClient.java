@@ -73,12 +73,8 @@ public class CAPIPClient extends CAPInformationProcessor
 		sentAccept = false;
 	}
 
-	public void sendResult(Grid g, Recti area, boolean more)
+	public void sendResult(Grid g, Recti area, boolean more, int id)
 	{
-		ListNode sizeNode = new ListNode();
-		sizeNode.addToList(new IntNode(g.getWidth()));
-		sizeNode.addToList(new IntNode(g.getHeight()));
-		
 		ListNode rows = new ListNode();
 		for(int y = 0; y < g.getHeight(); y++)
 		{
@@ -96,15 +92,15 @@ public class CAPIPClient extends CAPInformationProcessor
 		}
 		
 		DictNode d = new DictNode();
-		d.addToDict("SIZE", sizeNode);
 		d.addToDict("DATA", rows);
 		d.addToDict("MORE", new IntNode(more ? 1 : 0));
+		d.addToDict("ID", new IntNode(id));
 		sendResult(d);
 	}
 	
 	private void sendResult(DictNode d)
 	{
-		Log.information(TAG, "Sending result");		
+		Log.information(TAG, "Sending result");
 		Message msg = new Message(makeHeader("RESULT"), d);
 		protocol.sendMessage(msg);
 	}
@@ -222,6 +218,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			int n = -1;
 			char type = 'X';
 			Grid grid = null;
+			int id = -1;
 			
 			if(body == null)
 			{
@@ -253,6 +250,11 @@ public class CAPIPClient extends CAPInformationProcessor
 				sendState(2, "GRID DATA MISSING");
 				return;
 			}
+			else if(!body.has("ID"))
+			{
+				sendState(2, "GRID ID MISSING");
+				return;
+			}
 						
 			ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
 			size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
@@ -260,6 +262,8 @@ public class CAPIPClient extends CAPInformationProcessor
 			ArrayList<Node> areaList = ((ListNode)body.get("AREA")).getListValues();
 			area = new Recti(new Vector2i(((IntNode)areaList.get(0)).getIntValue(), ((IntNode)areaList.get(1)).getIntValue()), new Vector2i(((IntNode)areaList.get(2)).getIntValue(), ((IntNode)areaList.get(3)).getIntValue()));
 
+			id = ((IntNode)body.get("ID")).getIntValue();
+			
 			n = ((IntNode)body.get("PROPERTIES")).getIntValue();
 			
 			type = body.get("GRIDTYPE").toString().charAt(0);
@@ -298,7 +302,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 
 			System.out.println("CAPIPClient: Got work from server");
-			parent.addGrid(grid, area);
+			parent.addGrid(grid, area, id);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)
 		{
