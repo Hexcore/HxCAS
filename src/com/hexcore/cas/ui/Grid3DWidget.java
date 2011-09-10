@@ -127,25 +127,38 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	@Override
 	public void update(Vector2i position, float delta)
 	{
+		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
+		if (speed < 10.0f) speed = 10.0f;
+		
+		Vector2f posDelta = new Vector2f(0.0f, 0.0f);
+		float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+		float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+		
 		if (window.getKeyState(KeyEvent.VK_UP))
 		{
-			cameraPosition.x -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			posDelta.x -= sinYaw;
+			posDelta.y -= cosYaw;
 		}
 		if (window.getKeyState(KeyEvent.VK_DOWN))
 		{
-			cameraPosition.x += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			posDelta.x += sinYaw;
+			posDelta.y += cosYaw;
 		}
 		if (window.getKeyState(KeyEvent.VK_LEFT))
 		{
-			cameraPosition.x -= Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y += Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			posDelta.x -= sinYaw;
+			posDelta.y += cosYaw;
 		}
 		if (window.getKeyState(KeyEvent.VK_RIGHT))
 		{
-			cameraPosition.x += Math.cos(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
-			cameraPosition.y -= Math.sin(yaw * Math.PI / 180.0f) * 0.25f * cameraPosition.z * delta;
+			posDelta.x += sinYaw;
+			posDelta.y -= cosYaw;
+		}
+		
+		if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
+		{
+			posDelta.normalise();
+			cameraPosition.inc(posDelta.x * speed * delta, posDelta.y * speed * delta, 0.0f);
 		}
 	}
 	
@@ -224,6 +237,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
 			cameraPosition.z += event.amount;
+			if (cameraPosition.z < 0.0f) cameraPosition.z = 0.001f;
 		}
 		
 		return false;
