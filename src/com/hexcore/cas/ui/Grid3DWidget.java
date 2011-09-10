@@ -146,13 +146,13 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		}
 		if (window.getKeyState(KeyEvent.VK_LEFT))
 		{
-			posDelta.x -= sinYaw;
-			posDelta.y += cosYaw;
+			posDelta.x -= cosYaw;
+			posDelta.y += sinYaw;
 		}
 		if (window.getKeyState(KeyEvent.VK_RIGHT))
 		{
-			posDelta.x += sinYaw;
-			posDelta.y -= cosYaw;
+			posDelta.x += cosYaw;
+			posDelta.y -= sinYaw;
 		}
 		
 		if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
