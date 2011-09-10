@@ -12,21 +12,14 @@ import com.hexcore.cas.math.Vector2i;
 
 public class WorldReader
 {
-	private String worldFileName = null;
-	private Grid[] world = null;
-	private String rulesAndColours = null;
+	private World world = null;
 	
-	public WorldReader(String name)
+	public WorldReader(World w)
 	{
-		worldFileName = name;
+		world = w;
 	}
 	
-	public String getWorldName()
-	{
-		return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
-	}
-	
-	public World readWorld()
+	public void readWorld(String worldFileName)
 		throws IOException
 	{
 		/*
@@ -34,7 +27,8 @@ public class WorldReader
 		 * It will specifically look for the configuration file first,
 		 * then the rules set and then all the generation files.
 		 */
-		//System.out.println("Starting readWorld Function");
+		String rulesAndColours = "";
+		
 		File f = new File(worldFileName);
 		ZipFile zip = new ZipFile(f);
 		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
@@ -48,7 +42,7 @@ public class WorldReader
 			if(!generationFiles.hasMoreElements())
 			{
 				System.out.println("Configuration file not found.");
-				return null;
+				return;
 			}
 			ZipEntry config = (ZipEntry)generationFiles.nextElement();
 			if(config.getName().indexOf(".cac") != -1)
@@ -75,32 +69,33 @@ public class WorldReader
 				break;
 			}
 		}
-		//System.out.println("First while loop");
+		
+		Grid[] worldGenerations = null;
 		Vector2i gridSize = new Vector2i(x, y);
 		Cell cell = new Cell(n);
 		switch(type)
 		{
 			case 'r':
 			case 'R':
-				world = new RectangleGrid[zip.size() - 2];
+				worldGenerations = new RectangleGrid[zip.size() - 2];
 				for(int i = 0; i < zip.size() - 2; i++)
-					world[i] = new RectangleGrid(gridSize, cell);
+					worldGenerations[i] = new RectangleGrid(gridSize, cell);
 				break;
 			case 'h':
 			case 'H':
-				world = new HexagonGrid[zip.size() - 2];
+				worldGenerations = new HexagonGrid[zip.size() - 2];
 				for(int i = 0; i < zip.size() - 2; i++)
-					world[i] = new HexagonGrid(gridSize, cell);
+					worldGenerations[i] = new HexagonGrid(gridSize, cell);
 				break;
 			case 't':
 			case 'T':
-				world = new TriangleGrid[zip.size() - 2];
+				worldGenerations = new TriangleGrid[zip.size() - 2];
 				for(int i = 0; i < zip.size() - 2; i++)
-					world[i] = new TriangleGrid(gridSize, cell);
+					worldGenerations[i] = new TriangleGrid(gridSize, cell);
 				break;
 			default:
 				System.out.println("Unable to create a grid with no type.");
-				return null;
+				return;
 		}
 		
 		generationFiles = zip.entries();
@@ -109,7 +104,7 @@ public class WorldReader
 			if(!generationFiles.hasMoreElements())
 			{
 				System.out.println("Rules and colours file not found.");
-				return null;
+				return;
 			}
 			ZipEntry config = (ZipEntry)generationFiles.nextElement();
 			if(config.getName().indexOf(".car") != -1)
@@ -127,7 +122,7 @@ public class WorldReader
 				break;
 			}
 		}
-		//System.out.println("Second while loop");
+		
 		int worldPos = -1;
 		generationFiles = zip.entries();
 		while(generationFiles.hasMoreElements())
@@ -139,13 +134,13 @@ public class WorldReader
 			{
 				if(size > 0)
 				{
+					worldPos = Integer.parseInt(name.substring(0, name.indexOf(".cag")));
 					BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(file)));
 					String line;
 					for(int rows = 0; rows < y; rows++)
 					{
 						for(int cols = 0; cols < x; cols++)
 						{
-							worldPos = Integer.parseInt(name.substring(0, name.indexOf(".cag")));
 							line = in.readLine();
 							double[] vals = new double[n];
 							int prevIndex = -1;
@@ -158,7 +153,7 @@ public class WorldReader
 							}
 							vals[n - 1] = Double.parseDouble(line.substring(prevIndex + 1));
 							for(int i = 0; i < n; i++)
-								world[worldPos].getCell(cols, rows).setValue(i, vals[i]);
+								worldGenerations[worldPos].getCell(cols, rows).setValue(i, vals[i]);
 						}
 						line = in.readLine();
 					}
@@ -169,22 +164,8 @@ public class WorldReader
 				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
 			}
 		}
-		//System.out.println("Third while loop");
 		
-		World w = new World();
-		w.setRulesAndColours(rulesAndColours);
-		//System.out.println("Third while loop");
-		w.sendRulesAndColours();
-		//System.out.println("Third while loop");
-		w.setWorld(world);
-		
-		//System.out.println("Finished readWorld Function");
-		
-		return w;
-	}
-	
-	public void setWorldName(String name)
-	{
-		worldFileName = name;
+		world.setRulesAndColours(rulesAndColours);
+		world.setWorldGenerations(worldGenerations);
 	}
 }

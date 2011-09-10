@@ -1,20 +1,25 @@
 package com.hexcore.cas.model;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.rulesystems.HexcoreVM;
 
 public class World
 {
+	private ArrayList<Grid> worldGenerations = null;
 	private Grid[] world = null;
+	private String worldFileName = null;
 	private String rulesAndColours = null;
 	
 	public World()
 	{
+		worldGenerations = new ArrayList<Grid>();
 	}
 	
-	public void setRulesAndColours(String RAC)
+	public void addGeneration(Grid gen)
 	{
-		rulesAndColours = RAC;
+		worldGenerations.add(gen);
 	}
 	
 	public String getRulesAndColours()
@@ -27,13 +32,31 @@ public class World
 		return world;
 	}
 	
+	public String getWorldName()
+	{
+		if(worldFileName.lastIndexOf('/') != -1)
+			return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
+		else
+			return worldFileName;
+	}
+	
+	public void setRulesAndColours(String RAC)
+	{
+		rulesAndColours = RAC;
+	}
+	
 	public void sendRulesAndColours()
 	{
 		//HexcoreVM h = new HexcoreVM();
 		//h.loadRules(rulesAndColours);
 	}
-	
-	public void setWorld(Grid[] w)
+
+	public void setFileName(String name)
+	{
+		worldFileName = name;
+	}
+
+	public void setWorldGenerations(Grid[] w)
 	{
 		char type = w[0].getType();
 		int len = w.length;
@@ -61,17 +84,48 @@ public class World
 				System.out.println("Unable to create a grid with no type.");
 				return;
 		}
-		for(int pos = 0; pos < len; pos++)
+		for(int i = 0; i < w.length; i++)
+			world[i] = w[i].clone();
+	}
+	
+	public void load()
+		throws IOException
+	{
+		WorldReader wr = new WorldReader(this);
+		wr.readWorld(worldFileName);
+	}
+	
+	public void save()
+		throws IOException
+	{
+		WorldSaver ws = new WorldSaver();
+		char type = worldGenerations.get(0).getType();
+		int len = worldGenerations.size();
+		switch(type)
 		{
-			for(int rows = 0; rows < w[pos].getHeight(); rows++)
-			{
-				for(int cols = 0; cols < w[pos].getWidth(); cols++)
-				{
-					int n = w[pos].getCell(cols, rows).getValueCount();
-					for(int i = 0; i < n; i++)
-						world[pos].getCell(cols, rows).setValue(i, w[pos].getCell(cols, rows).getValue(i));
-				}
-			}
+			case 'r':
+			case 'R':
+				world = new RectangleGrid[len];
+				for(int i = 0; i < len; i++)
+					world[i] = new RectangleGrid(worldGenerations.get(i).getSize(), worldGenerations.get(i).getCell(new Vector2i(0, 0)));
+				break;
+			case 'h':
+			case 'H':
+				world = new HexagonGrid[len];
+				for(int i = 0; i < len; i++)
+					world[i] = new HexagonGrid(worldGenerations.get(i).getSize(), worldGenerations.get(i).getCell(new Vector2i(0, 0)));
+				break;
+			case 't':
+			case 'T':
+				world = new TriangleGrid[len];
+				for(int i = 0; i < len; i++)
+					world[i] = new TriangleGrid(worldGenerations.get(i).getSize(), worldGenerations.get(i).getCell(new Vector2i(0, 0)));
+				break;
+			default:
+				System.out.println("Unable to create a grid with no type.");
+				return;
 		}
+		worldGenerations.toArray(world);
+		ws.saveWorld(worldFileName, world, rulesAndColours);
 	}
 }
