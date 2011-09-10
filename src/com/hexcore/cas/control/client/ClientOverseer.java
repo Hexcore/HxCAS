@@ -53,13 +53,14 @@ public class ClientOverseer extends Overseer
 		//vm.loadRules(b);
 	}
 	
-	public void addGrid(Grid grid, Recti workArea)
+	public void addGrid(Grid grid, Recti workArea, int id)
 	{
 		Log.information(TAG, "Got work");
 		
 		Work work = new Work();
 		work.grid = grid.clone();
 		work.workArea = new Recti(workArea);
+		work.ID = id;
 		try
 		{
 			workQueue.put(work);
@@ -123,7 +124,7 @@ public class ClientOverseer extends Overseer
 			if (work == null) continue;
 			
 			Log.information(TAG, "Sending completed work");
-			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, !workQueue.isEmpty());
+			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, !workQueue.isEmpty(), work.ID);
 		}
 		
 		Log.information(TAG, "Stopping...");
@@ -159,6 +160,7 @@ public class ClientOverseer extends Overseer
 	{
 		Grid	grid;
 		Recti	workArea;
+		int		ID;
 	}
 	
 	class WorkerThread extends Thread

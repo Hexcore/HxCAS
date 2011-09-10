@@ -39,7 +39,7 @@ public class Client
 		if (overseer.isValid())
 		{
 			System.out.println("\nCAS Client ready");
-			System.out.println(" * Press 'q' to shutdown");
+			System.out.println(" * Press 'q' to shutdown\n");
 			
 			while (true)
 			{
@@ -60,5 +60,6 @@ public class Client
 		
 		Log.information(TAG, "Shutting down...");
 		beacon.disconnect();
+		overseer.disconnect();
 	}
 }

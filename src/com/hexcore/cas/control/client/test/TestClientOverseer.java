@@ -146,6 +146,7 @@ public class TestClientOverseer
 			body.addToDict("AREA", areaNode);
 			body.addToDict("PROPERTIES", new IntNode(1));
 			body.addToDict("GRIDTYPE", new ByteNode("R"));
+			body.addToDict("ID", new IntNode(1));
 			body.addToDict("DATA", data);
 			
 			serverProtocol.sendMessage(new Message(header, body));
