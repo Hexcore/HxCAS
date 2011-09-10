@@ -18,6 +18,7 @@ import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
 import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
+import com.hexcore.cas.ui.Image;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.LinearLayout;
 import com.hexcore.cas.ui.NumberBox;
@@ -66,6 +67,7 @@ public class UITestApplication implements WindowEventListener
 	public Button		createWorldButton;
 	public Button		loadWorldButton;
 	public Button		optionsButton;
+	public Button		wrenchButton;
 	public Button		helpButton;
 	public Button		quitButton;
 		
@@ -209,13 +211,15 @@ public class UITestApplication implements WindowEventListener
 		optionsButton = new Button(new Vector2i(100, 50), "Options", "Change preferences and settings");
 		optionsButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(optionsButton);
-		
+				
 		helpButton = new Button(new Vector2i(100, 50), "Help");
 		helpButton.setFlag(Widget.FILL_HORIZONTAL);
+		helpButton.setIcon(new Image("data/book_side_icon.png"));
 		buttonBarLayout.add(helpButton);
 		
 		quitButton = new Button(new Vector2i(100, 50), "Quit");
 		quitButton.setFlag(Widget.FILL_HORIZONTAL);
+		quitButton.setIcon(new Image("data/on-off_icon.png"));
 		buttonBarLayout.add(quitButton);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
@@ -275,6 +279,9 @@ public class UITestApplication implements WindowEventListener
 		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
+		wrenchButton = new Button(new Image("data/wrench_icon.png"));
+		innerLayout.add(wrenchButton);	
+		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
 		paragraph.setFlag(Widget.FILL_HORIZONTAL);
 		paragraph.setFlowed(true);
@@ -324,6 +331,7 @@ public class UITestApplication implements WindowEventListener
 		triGridViewerContainer.setContents(triGridViewer);	
 		
 		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
+		nextIterationButton.setIcon(new Image("data/arrow_right_icon.png"));
 		gridViewLayout.add(nextIterationButton);
 		
 		// 3D Rectangle Grid
