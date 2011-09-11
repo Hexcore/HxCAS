@@ -704,6 +704,14 @@ public class TestServerControl extends TestCase
 				if(header.get("TYPE").toString().equals("DISCONNECT"))
 				{
 					capMP.disconnect();
+					try
+					{
+						sock.close();
+					}
+					catch(IOException e)
+					{
+						e.printStackTrace();
+					}
 				}
 				else
 				{
