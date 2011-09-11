@@ -11,21 +11,116 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
 public class ServerOverseer extends Overseer
 {
 	private ArrayList<String> clientNames = null;
+	private boolean isFinishedGenerations = false;
+	private volatile boolean isFinishedWork = false;
 	private int numOfClients = 0;
+	private int numOfGenerations = 0;
 	private int threadWorkID = 0;
 	private int[] clientStatuses = null;
 	private Recti[] clientWorkables = null;
 	private static final String TAG = "Server";
 	private ThreadWork[] clientWork = null;
+	private World theWorld = null;
 	
-	public ServerOverseer(Grid g)
+	public ServerOverseer(World w)
 	{
-		super(g);
+		super();
+		theWorld = w;
+	}
+	
+	/*
+	 * Function done by Abby Kumar
+	 */
+	public static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor)
+	{
+		int temp;
+		//calculate how many splits needed:
+		if (sizeOfGrid.x > sizeOfGrid.y)
+			temp = 1;
+		else
+			temp = -1;
+		
+		int x = 1, y = 1;
+		int product = x * y;
+		
+		while(product < splittingFactor)
+		{
+			if (temp > 0)
+			{
+				x += x;
+				temp = temp * (-1);
+			}
+			else if(temp < 0)
+			{
+				y += y;
+				temp = temp * (-1);
+			}
+			product = x * y;
+		}
+		
+		int splitx[] = new int [x+1];
+		int splity[] = new int [y+1];
+		
+		for(int a = 0; a < x; a++)
+		{
+			splitx[a] = 0;
+		}
+		for(int a = 0; a < y; a++)
+		{
+			splity[a] = 0;
+		}
+		int i = 1, j = 1;
+		
+		double px = (double)sizeOfGrid.x/x;
+		double py = (double)sizeOfGrid.y/y;
+		
+		int posx = 0;
+		int posy = 0;
+		
+		double cx = 0.0;
+		double cy = 0.0;
+		
+		while(i < splitx.length)
+		{
+			while((posx-cx) < px)
+			{
+					posx++;
+			}
+			splitx[i] = posx;
+			i++;
+			cx += px;
+		}
+		
+		while(j < splity.length)
+		{
+			while((posy-cy) < py)
+			{
+					posy++;
+			}
+			splity[j] = posy;
+			j++;
+			cy += py;
+		}
+		Recti[] split = new Recti[product];
+		int c = 0;
+		
+		for(int a = 0; a < splity.length-1; a++)
+		{
+			for(int b = 0; b < splitx.length-1; b++)
+			{
+				int widthx = splitx[b+1] - splitx[b];
+				int widthy = splity[a+1] - splity[a];
+				split[c++] = new Recti(new Vector2i(splitx[b],splity[a]), new Vector2i(widthx, widthy));
+			}
+		}
+		
+		return split;
 	}
 	
 	public ThreadWork[] getClientWork()
@@ -51,6 +146,11 @@ public class ServerOverseer extends Overseer
 	public int getNumberOfClients()
 	{
 		return numOfClients;
+	}
+	
+	public boolean isFinished()
+	{
+		return isFinishedGenerations;
 	}
 	
 	//===== NEEDS REVIEWING =====\\
@@ -229,6 +329,7 @@ public class ServerOverseer extends Overseer
 	
 	public void send()
 	{
+		isFinishedWork = false;
 		((CAPIPServer)capIP).setClientWork(clientWork);
 		((CAPIPServer)capIP).sendGrids();
 	}
@@ -248,11 +349,17 @@ public class ServerOverseer extends Overseer
 		for(int i = 0; i < size; i++)
 			clientWork[i] = CW.get(i).clone();
 		threadWorkID = 0;
+		CW.clear();
+		
 		rebuildGrid();
+		theWorld.addGeneration(grid);
+		
 		if(grid.getWrappable())
 			makeWrappableGrids();
 		else
 			makeNonwrappableGrids();
+		isFinishedWork = true;
+		
 	}
 
 	public void setClientNames(ArrayList<String> names)
@@ -262,11 +369,12 @@ public class ServerOverseer extends Overseer
 		clientStatuses = new int[numOfClients];
 	}
 	
-	public void setClientWorkables(Recti[] cW)
+	public void setClientWorkables()
 	{
-		clientWorkables = new Recti[cW.length];
-		for(int i = 0; i < cW.length; i++)
-			clientWorkables[i] = new Recti(cW[i].getPosition(), cW[i].getSize());
+		Recti[] split = divideToClients(grid.getSize(), ((CAPIPServer)capIP).getTotalCoreAmount() * 2);
+		clientWorkables = new Recti[split.length];
+		for(int i = 0; i < split.length; i++)
+			clientWorkables[i] = new Recti(split[i].getPosition(), split[i].getSize());
 		if(grid.getWrappable())
 			makeWrappableGrids();
 		else
@@ -276,6 +384,31 @@ public class ServerOverseer extends Overseer
 	public void setStatus(int index, int status)
 	{
 		clientStatuses[index] = status;
+	}
+
+	public void simulate(Grid g, int gN)
+	{
+		super.setGrid(g);
+		theWorld.addGeneration(g);
+		numOfGenerations = gN;
+		
+		setClientWorkables();
+		
+		/*((CAPIPServer)capIP).reset();
+		
+		while(!((CAPIPServer)capIP).isReset())
+		{
+		}*/
+		
+		isFinishedGenerations = false;
+		for(int i = 0; i < numOfGenerations; i++)
+		{
+			send();
+			while(!isFinishedWork)
+			{
+			}
+		}
+		isFinishedGenerations = true;
 	}
 	
 	@Override

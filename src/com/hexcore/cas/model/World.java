@@ -29,6 +29,34 @@ public class World
 	
 	public Grid[] getWorld()
 	{
+		if(world != null)
+			return world;
+		
+		if(worldGenerations.size() == 0)
+			return null;
+		
+		char type = worldGenerations.get(0).getType();
+		int len = worldGenerations.size();
+		switch(type)
+		{
+			case 'r':
+			case 'R':
+				world = new RectangleGrid[len];
+				break;
+			case 'h':
+			case 'H':
+				world = new HexagonGrid[len];
+				break;
+			case 't':
+			case 'T':
+				world = new TriangleGrid[len];
+				break;
+			default:
+				System.out.println("Unable to create a grid with no type.");
+				return null;
+		}
+		
+		worldGenerations.toArray(world);
 		return world;
 	}
 	
