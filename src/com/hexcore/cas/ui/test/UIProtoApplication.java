@@ -173,7 +173,7 @@ public class UIProtoApplication implements WindowEventListener
 	UIProtoApplication()
 	{
 		
-		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlowGrid = new HexagonGrid(new Vector2i(620, 620));
 		waterFlowGrid.setWrappable(false);
 
 		waterFlow = new WaterFlow(waterFlowGrid);
