@@ -707,18 +707,18 @@ public class UIProtoApplication implements WindowEventListener
 		playbackLayout.setFlag(Widget.FILL_VERTICAL);
 		simulationControlsLayout.add(playbackLayout);
 		
-		LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 35), LinearLayout.Direction.HORIZONTAL);
+		LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 25), LinearLayout.Direction.HORIZONTAL);
 		innerPlaybackLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		playbackLayout.add(innerPlaybackLayout);
 		
-		LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(205,35), LinearLayout.Direction.HORIZONTAL);
-		innerPlaybackLayout2.setFlag(Widget.FILL_HORIZONTAL);
+		LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(180,35), LinearLayout.Direction.HORIZONTAL);
+		innerPlaybackLayout2.setFlag(Widget.CENTER_HORIZONTAL);
+		//innerPlaybackLayout2.setFlag(Widget.FILL_HORIZONTAL);
+		
 		playbackLayout.add(innerPlaybackLayout2);
 		
-		LinearLayout innerPlaybackLayout3 = new LinearLayout(new Vector2i(205,35), LinearLayout.Direction.VERTICAL);
-		innerPlaybackLayout3.setFlag(Widget.FILL_HORIZONTAL);
-		playbackLayout.add(innerPlaybackLayout3);
-		
+		Button stepBackwardButton = new Button(new Image("data/step_backward_icon.png"));
+		innerPlaybackLayout2.add(stepBackwardButton);
 		
 		Button playButton = new Button(new Image("data/play_icon.png"));
 		innerPlaybackLayout2.add(playButton);
@@ -730,8 +730,12 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		
-		Button resetButton = new Button(new Vector2i(70,30), "Reset");
-		innerPlaybackLayout3.add(resetButton);
+		Button stepForwardButton = new Button(new Image("data/step_forward_icon.png"));
+		innerPlaybackLayout2.add(stepForwardButton);
+		
+		
+
+
 		
 		
 		
