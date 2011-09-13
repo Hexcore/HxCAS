@@ -365,6 +365,15 @@ public class CAPIPClient extends CAPInformationProcessor
 			interpretInput(message);
 		}
 
+		Log.information(TAG, "Stopping client...");
 		protocol.disconnect();
+		
+		try
+		{
+			sock.close();
+		} 
+		catch (IOException e)
+		{
+		}
 	}
 }
