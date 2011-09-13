@@ -67,7 +67,21 @@ public class Theme
 		}
 	};
 	
-	public enum ButtonState {NORMAL, FOCUS, HOVER, ACTIVE, SELECTED};
+	public enum ButtonState
+	{
+		NORMAL ("normal"), 
+		FOCUS ("focus"), 
+		HOVER ("hover"), 
+		ACTIVE ("active"), 
+		SELECTED ("selected");
+		
+		public final String name;
+		
+		ButtonState(String name)
+		{
+			this.name = name;
+		}
+	};
 	
 	public static class Property
 	{
@@ -252,60 +266,12 @@ public class Theme
 		ThemeParser themeParser = new ThemeParser(file);
 		typeProperties = themeParser.getTypes();		
 	}
-		
-	public void renderButton(GL gl, Vector2i pos, Vector2i size, ButtonState state, String caption, String description)
-	{
-		String stateName;
-		
-		switch (state)
-		{
-			default:
-			case NORMAL:
-				stateName = "normal";
-				break;
-			case FOCUS:
-				stateName = "focus";
-				break;				
-			case HOVER:
-				stateName = "hover";
-				break;
-			case ACTIVE:
-				stateName = "active";
-				break;
-		}
 	
-		int 		borderRadius = getInteger("Button", stateName, "border-radius", 0);
-		BorderShape corners = new BorderShape(BorderShape.ALL_CORNERS);
-		
-		Graphics.renderRoundedBorderedRectangle(gl, pos, size, borderRadius, corners, 
-				getFill("Button", stateName, "background"),
-				getFill("Button", stateName, "border"));	 
-		
-		Colour 		textColour = getColour("Button", stateName, "text-colour");
-		Colour 		shadowColour = getColour("Button", stateName, "text-shadow-colour", Colour.TRANSPARENT);
-		
-		Vector2i	textOffset = getVector2i("Button", stateName, "text-offset");
-		Vector2i	shadowOffset = getVector2i("Button", stateName, "text-shadow-offset", new Vector2i(0, 1));
-
-		pos = pos.add(textOffset);
-		
-		if (description.isEmpty())
-			renderShadowedText(gl, caption, pos, size, textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
-		else
-		{
-			int			textGap = 4;
-			Vector2i	bigTextSize = calculateTextSize(caption, Text.Size.MEDIUM);
-			Vector2i	smallTextSize = calculateTextSize(description, Text.Size.SMALL);
-					
-			int		top = (size.y - bigTextSize.y - textGap - smallTextSize.y) / 2;
-			int		bigLeft = (size.x - bigTextSize.x) / 2;
-			int		smallLeft = (size.x - smallTextSize.x) / 2;
-			
-			renderShadowedText(gl, caption, pos.add(bigLeft, top), textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
-			renderShadowedText(gl, description, pos.add(smallLeft, top + bigTextSize.y + textGap), textColour, shadowColour, shadowOffset, Text.Size.SMALL);
-		}
-	}
-	
+	/*
+	 * 
+	 * These functions (all starting with render*) should actually go in their respective widget
+	 *  
+	 */
 	public void renderPanel(GL gl, Vector2i pos, Vector2i size)
 	{
 		int borderRadius = getInteger("Panel", "border-radius", 0);
@@ -328,33 +294,15 @@ public class Theme
 	
 	public void renderSlider(GL gl, Vector2i pos, Vector2i size, ButtonState state)
 	{
-		String stateName;
-		switch (state)
-		{
-			default:
-			case NORMAL:
-				stateName = "normal";
-				break;
-			case FOCUS:
-				stateName = "focus";
-				break;				
-			case HOVER:
-				stateName = "hover";
-				break;
-			case ACTIVE:
-				stateName = "active";
-				break;
-		}
-		
-		int handleWidth = getInteger("SliderHandle", stateName, "width", 8);
+		int handleWidth = getInteger("SliderHandle", state.name, "width", 8);
 		
 		int width = size.x - handleWidth;
-		int height = getInteger("Slider", stateName, "height");
+		int height = getInteger("Slider", state.name, "height");
 		Vector2i backPos = pos.add(handleWidth / 2, (size.y - height) / 2);
 		
-		int borderRadius = getInteger("Slider", stateName, "border-radius", 0);
-		Graphics.renderRectangle(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", stateName, "background"));
-		Graphics.renderBorder(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", stateName, "border"));
+		int borderRadius = getInteger("Slider", state.name, "border-radius", 0);
+		Graphics.renderRectangle(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", state.name, "background"));
+		Graphics.renderBorder(gl, backPos, new Vector2i(width, height), borderRadius, getFill("Slider", state.name, "border"));
 	}
 	
 	public Vector2i getSliderHandleSize()
@@ -389,31 +337,13 @@ public class Theme
 	
 	public void renderSliderHandle(GL gl, Vector2i pos, Vector2i size, float percent, ButtonState state)
 	{
-		String stateName;
-		switch (state)
-		{
-			default:
-			case NORMAL:
-				stateName = "normal";
-				break;
-			case FOCUS:
-				stateName = "focus";
-				break;				
-			case HOVER:
-				stateName = "hover";
-				break;
-			case ACTIVE:
-				stateName = "active";
-				break;
-		}
-		
 		int width = getInteger("SliderHandle", "width", 8);
 		int height = getInteger("SliderHandle", "height", 8);
 		Vector2i handlePos = pos.add((int)(percent * (size.x - width)), (size.y - height) / 2);
 		
-		int borderRadius = getInteger("SliderHandle", stateName, "border-radius", 0);
-		Graphics.renderRectangle(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", stateName, "background"));
-		Graphics.renderBorder(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", stateName, "border"));
+		int borderRadius = getInteger("SliderHandle", state.name, "border-radius", 0);
+		Graphics.renderRectangle(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", state.name, "background"));
+		Graphics.renderBorder(gl, handlePos, new Vector2i(width, height), borderRadius, getFill("SliderHandle", state.name, "border"));
 	}	
 	
 	public int getScrollbarSize()
@@ -717,39 +647,20 @@ public class Theme
 	
 	public void renderTab(GL gl, Vector2i position, String caption, ButtonState state, BorderShape sides)
 	{
-		String stateName;
-		
-		switch (state)
-		{
-			default:
-			case NORMAL:
-				stateName = "normal";
-				break;		
-			case HOVER:
-				stateName = "hover";
-				break;
-			case ACTIVE:
-				stateName = "active";
-				break;
-			case SELECTED:
-				stateName = "selected";
-				break;				
-		}
-		
 		Vector2i size = getTabSize(caption);
 				
-		int			borderRadius = getInteger("Tab", stateName, "border-radius", 8);
+		int			borderRadius = getInteger("Tab", state.name, "border-radius", 8);
 		BorderShape corners = new BorderShape();
 		if (sides.has(BorderShape.LEFT)) corners.add(BorderShape.TOP_LEFT | BorderShape.BOTTOM_LEFT);
 		if (sides.has(BorderShape.RIGHT)) corners.add(BorderShape.TOP_RIGHT | BorderShape.BOTTOM_RIGHT);
 		Graphics.renderRoundedBorderedRectangle(gl, position, size.add(1, 0), borderRadius, corners, 
-				getFill("Tab", stateName, "background"), getFill("Tab", stateName, "border"));
+				getFill("Tab", state.name, "background"), getFill("Tab", state.name, "border"));
 		
-		Colour	textColour = getColour("Tab", stateName, "text-colour");
-		Colour	textShadowColour = getColour("Tab", stateName, "text-shadow-colour", Colour.TRANSPARENT);
+		Colour	textColour = getColour("Tab", state.name, "text-colour");
+		Colour	textShadowColour = getColour("Tab", state.name, "text-shadow-colour", Colour.TRANSPARENT);
 		
-		Vector2i textOffset = getVector2i("Tab", stateName, "text-offset", new Vector2i(0, 0));
-		Vector2i shadowOffset = getVector2i("Tab", stateName, "text-shadow-offset", new Vector2i(0, 1));
+		Vector2i textOffset = getVector2i("Tab", state.name, "text-offset", new Vector2i(0, 0));
+		Vector2i shadowOffset = getVector2i("Tab", state.name, "text-shadow-offset", new Vector2i(0, 1));
 		
 		renderShadowedText(gl, caption, position.add(textOffset), size, textColour, textShadowColour, shadowOffset, Text.Size.MEDIUM);
 	}

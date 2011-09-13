@@ -13,19 +13,16 @@ public abstract class CAPInformationProcessor extends Thread
 	{
 	}
 	
-	//IN TEST - SERVER
 	public boolean isConnected()
 	{
 		return connected;
 	}
 	
-	//IN TEST - SERVER
 	public boolean isRunning()
 	{
 		return running;
 	}
 	
-	//IN TEST IMPLICITLY - SERVER
 	public void disconnect()
 	{
 		connected = false;
