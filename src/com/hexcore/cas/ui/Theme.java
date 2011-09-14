@@ -92,6 +92,19 @@ public class Theme
 			this.name = name;
 			this.type = Type.STRING;
 		}
+		
+		Property(String name, String value)
+		{
+			this.name = name;
+			this.type = Type.STRING;
+			this.value = value;
+		}	
+		
+		@Override
+		public String toString()
+		{
+			return name + "=" + value;
+		}
 
 		int			getInteger() {return x;}
 		Vector2i	getVector2i() {return new Vector2i(x, y);}
@@ -115,6 +128,14 @@ public class Theme
 		void add(Property property)
 		{
 			properties.put(property.name, property);
+		}
+		
+		@Override
+		public String toString()
+		{
+			String str = "";
+			for (Property property : properties.values()) str += property + ", ";
+			return name + ":" + state + "<" + str + ">";
 		}
 		
 		String		state;
@@ -143,12 +164,16 @@ public class Theme
 		this();
 		loadFromFile(filename);
 	}
+	
+	public String getName() {return getStringFallback("#", "name", "none");}
+	public String getAuthor() {return getStringFallback("#", "author", "unknown");}
+	public String getIconSet() {return getStringFallback("#", "iconSet", "default");}
 		
 	public Property getProperty(String typeName, String propertyName)
 	{
 		return getProperty(typeName, "normal", propertyName);
 	}
-	
+
 	public Property getProperty(String typeName, String state, String propertyName)
 	{
 		String typeState = typeName + ":" + state;
@@ -160,7 +185,7 @@ public class Theme
 		if (property == null) return state.equals("normal") ? null : getProperty(typeName, "normal", propertyName);
 		
 		return property;
-	}	
+	}
 	
 	public Colour getColour(String typeName, String propertyName)
 	{
@@ -236,6 +261,15 @@ public class Theme
 		
 		return property.getInteger();
 	}
+
+	public String getStringFallback(String typeName, String propertyName, String fallback)
+	{
+		Property property = getProperty(typeName, propertyName);
+		if (property == null) return fallback;
+		if (property.type != Property.Type.STRING) return fallback;
+		
+		return property.value;
+	}	
 	
 	public Vector2i getVector2i(String typeName, String propertyName)
 	{
@@ -261,10 +295,17 @@ public class Theme
 		return property.getVector2i();
 	}
 	
+	public Image loadIcon(String name)
+	{
+		return new Image("data/icons/" + getIconSet() + "/" + name + ".png");
+	}
+	
 	public void loadFromFile(String file)
 	{
 		ThemeParser themeParser = new ThemeParser(file);
-		typeProperties = themeParser.getTypes();		
+		typeProperties = themeParser.getTypes();
+
+		System.out.println("Theme <Name: " + getName() + " - Author: " + getAuthor() + " - IconSet: " + getIconSet() + ">");
 	}
 	
 	/*

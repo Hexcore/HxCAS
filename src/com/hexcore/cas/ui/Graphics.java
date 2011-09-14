@@ -121,6 +121,8 @@ public class Graphics
 		
 		image.bind();
 		
+		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
 		applyColour(gl2, Colour.WHITE);
         gl2.glBegin(GL.GL_TRIANGLE_STRIP);
 	    	gl2.glTexCoord2f(0.0f, 0.0f); gl2.glVertex2f(pos.x,pos.y);
@@ -128,6 +130,8 @@ public class Graphics
 	    	gl2.glTexCoord2f(1.0f, 0.0f); gl2.glVertex2f(pos.x+size.x,pos.y);
 	    	gl2.glTexCoord2f(1.0f, 1.0f); gl2.glVertex2f(pos.x+size.x,pos.y+size.y);
 		gl2.glEnd();
+		
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
 		image.unbind();
 	}

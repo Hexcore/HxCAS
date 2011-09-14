@@ -36,7 +36,7 @@ public class ThemeParser extends ConfigParser
 		addTypeProperties("Button", 
 				"background", "border", "border-radius", "text-colour", "text-offset", 
 				"text-shadow-colour","text-shadow-offset", "padding",
-				"divider-left-colour", "divider-right-colour");
+				"divider-left-colour", "divider-right-colour", "icon-space-width");
 		addTypeProperties("Panel", 
 				"background", "border", "border-radius");
 		addTypeProperties("Scrollbar", 
@@ -78,6 +78,9 @@ public class ThemeParser extends ConfigParser
 		
 		types = new HashMap<String, Theme.Type>();
 		
+		Theme.Type themeType = new Theme.Type("#:normal");
+		types.put("#:normal", themeType);
+		
 		while (scanner.isValid())
 		{
 			ConfigScanner.Symbol symbol = scanner.getSymbol();
@@ -86,8 +89,27 @@ public class ThemeParser extends ConfigParser
 			String typeName = symbol.text;
 			
 			//System.out.println("Type: " + typeName);
-						
-			if (validTypeProperties.containsKey(typeName) || (typeName.charAt(0) == '.'))
+			
+			if (typeName.equals("name") || typeName.equals("author") || typeName.equals("iconSet"))
+			{
+				if (!expect(":")) 
+				{
+					fastForward(";");
+					return;
+				}
+				
+				String value = scanner.getSymbol().text;
+				
+				if (typeName.equals("name"))
+					themeType.add(new Property("name", value));
+				else if (typeName.equals("author"))
+					themeType.add(new Property("author", value));
+				else if (typeName.equals("iconSet"))
+					themeType.add(new Property("iconSet", value));
+				
+				if (!expect(";")) return;	
+			}
+			else if (validTypeProperties.containsKey(typeName) || (typeName.charAt(0) == '.'))
 				readObject(typeName, (typeName.charAt(0) == '.'));
 			else
 			{

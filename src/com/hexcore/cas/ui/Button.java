@@ -4,7 +4,7 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
-import com.hexcore.cas.utilities.Log;
+import com.hexcore.cas.ui.Theme.ButtonState;
 
 public class Button extends ClickableWidget
 {
@@ -88,23 +88,29 @@ public class Button extends ClickableWidget
 		
 		if (description.isEmpty())
 		{
-			if (icon != null)
+			int	iconWidth = 0;
+			Image currentIcon = icon;
+			if (mouseover && hoverIcon != null) currentIcon = hoverIcon;
+
+			if (currentIcon != null)
 			{
-				int xpos = caption.isEmpty() ? 8 : (64 - icon.getWidth()) / 2;
-				Vector2i iconPos = pos.add(xpos, (size.y - icon.getHeight()) / 2);
-				Graphics.renderRectangle(gl, iconPos, icon);
+				iconWidth = theme.getInteger("Button", state.name, "icon-space-width", 56);
+				
+				int xpos = caption.isEmpty() ? 8 : (iconWidth - currentIcon.getWidth()) / 2;
+				Vector2i iconPos = pos.add(xpos, (size.y - currentIcon.getHeight()) / 2);
+				Graphics.renderRectangle(gl, iconPos, currentIcon);
 				
 				if (!caption.isEmpty())
 				{
 					Fill leftFill = theme.getFill("Button", state.name, "divider-left-colour", Fill.NONE);
 					Fill rightFill = theme.getFill("Button", state.name, "divider-right-colour", Fill.NONE);
 	
-					Graphics.renderRectangle(gl, pos.add(64, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, leftFill);
-					Graphics.renderRectangle(gl, pos.add(65, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, rightFill);
+					Graphics.renderRectangle(gl, pos.add(iconWidth, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, leftFill);
+					Graphics.renderRectangle(gl, pos.add(iconWidth+1, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, rightFill);
 				}
 			}
 			
-			Vector2i	textPos = pos.add(64 + (size.x - 64 - textSize.x) / 2, (size.y - textSize.y) / 2);
+			Vector2i	textPos = pos.add(iconWidth + (size.x - iconWidth - textSize.x) / 2, (size.y - textSize.y) / 2);
 			theme.renderShadowedText(gl, caption, textPos, textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
 		}
 		else

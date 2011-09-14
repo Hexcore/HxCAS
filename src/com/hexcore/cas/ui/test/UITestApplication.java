@@ -195,31 +195,31 @@ public class UITestApplication implements WindowEventListener
 		mainLayout.setFlag(Widget.FILL);
 		windowLayout.add(mainLayout);
 		
-		buttonBarLayout = new LinearLayout(new Vector2i(250, 50), LinearLayout.Direction.VERTICAL);
+		buttonBarLayout = new LinearLayout(new Vector2i(220, 50), LinearLayout.Direction.VERTICAL);
 		buttonBarLayout.setMargin(new Vector2i(0, 0));
 		buttonBarLayout.setFlag(Widget.FILL_VERTICAL);
 		mainLayout.add(buttonBarLayout);
 		
-		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Specify parameters from scratch");
+		createWorldButton = new Button(new Vector2i(100, 50), "Create New World");
 		createWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(createWorldButton);
 		
-		loadWorldButton = new Button(new Vector2i(100, 50), "Load World", "Load a world from a file");
+		loadWorldButton = new Button(new Vector2i(100, 50), "Load World");
 		loadWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(loadWorldButton);
 		
-		optionsButton = new Button(new Vector2i(100, 50), "Options", "Change preferences and settings");
+		optionsButton = new Button(new Vector2i(100, 50), "Options");
 		optionsButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(optionsButton);
 				
 		helpButton = new Button(new Vector2i(100, 50), "Help");
 		helpButton.setFlag(Widget.FILL_HORIZONTAL);
-		helpButton.setIcon(new Image("data/book_side_icon.png"));
+		helpButton.setIcon(window.getTheme().loadIcon("info_icon"), window.getTheme().loadIcon("info_icon-white"));
 		buttonBarLayout.add(helpButton);
 		
 		quitButton = new Button(new Vector2i(100, 50), "Quit");
 		quitButton.setFlag(Widget.FILL_HORIZONTAL);
-		quitButton.setIcon(new Image("data/on-off_icon.png"));
+		quitButton.setIcon(window.getTheme().loadIcon("on-off_icon"), window.getTheme().loadIcon("on-off_icon-white"));
 		buttonBarLayout.add(quitButton);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
@@ -279,7 +279,7 @@ public class UITestApplication implements WindowEventListener
 		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
-		wrenchButton = new Button(new Image("data/wrench_icon.png"));
+		wrenchButton = new Button(window.getTheme().loadIcon("wrench_icon"));
 		innerLayout.add(wrenchButton);	
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
@@ -330,8 +330,8 @@ public class UITestApplication implements WindowEventListener
 		triGridViewer.setColourRuleSet(colourRules);
 		triGridViewerContainer.setContents(triGridViewer);	
 		
-		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
-		nextIterationButton.setIcon(new Image("data/arrow_right_icon.png"));
+		nextIterationButton = new Button(new Vector2i(150, 50), "Next");
+		nextIterationButton.setIcon(window.getTheme().loadIcon("arrow_right_icon"));
 		gridViewLayout.add(nextIterationButton);
 		
 		// 3D Rectangle Grid

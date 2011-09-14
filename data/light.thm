@@ -1,3 +1,6 @@
+name: "Light";
+author: "Divan Burger";
+iconSet: "light";
 
 .Header
 {
@@ -10,6 +13,7 @@ Button
 	border: rgb(0.7, 0.7, 0.7) rgb(0.6, 0.6, 0.6);
 	divider-left-colour: rgb(0.8, 0.8, 0.8);
 	divider-right-colour: rgb(1.0, 1.0, 1.0);
+	icon-space-width: 52;
 	text-colour: rgb(0.0, 0.0, 0.0);
 	text-shadow-colour: rgb(1.0, 1.0, 1.0);
 	border-radius: 8;
