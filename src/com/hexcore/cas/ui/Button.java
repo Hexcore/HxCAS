@@ -11,12 +11,19 @@ public class Button extends ClickableWidget
 	private String	description;
 	
 	private Image	icon;
+	private Image	hoverIcon;
 	
 	public Button(Image icon)
 	{
 		this(new Vector2i(0, 0), icon.getSize().add(16, 16), "", "");
 		setIcon(icon);
-	}	
+	}
+	
+	public Button(Image icon, Image hoverIcon)
+	{
+		this(new Vector2i(0, 0), Vector2i.max(icon.getSize(), hoverIcon.getSize()).add(16, 16), "", "");
+		setIcon(icon, hoverIcon);
+	}
 	
 	public Button(Vector2i size, String caption)
 	{
@@ -108,5 +115,6 @@ public class Button extends ClickableWidget
 	
 	public void		setCaption(String caption) {this.caption = caption;}
 	public void		setDescription(String description) {this.description = description;}
-	public void		setIcon(Image icon) {this.icon = icon;}
+	public void		setIcon(Image icon) {this.icon = icon; this.hoverIcon = null;}
+	public void		setIcon(Image icon, Image hoverIcon) {this.icon = icon; this.hoverIcon = hoverIcon;}
 }

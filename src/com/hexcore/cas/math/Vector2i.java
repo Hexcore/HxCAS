@@ -95,4 +95,9 @@ public class Vector2i
 	{
 		return new Vector2i(this.x - x, this.y - y);
 	}
+	
+	public static Vector2i max(Vector2i a, Vector2i b)
+	{
+		return new Vector2i(Math.max(a.x, b.x), Math.max(a.y, b.y));
+	}
 }
