@@ -21,6 +21,7 @@ import com.hexcore.cas.ui.Event;
 import com.hexcore.cas.ui.Fill;
 import com.hexcore.cas.ui.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.HexagonGridWidget;
+import com.hexcore.cas.ui.Image;
 import com.hexcore.cas.ui.ImageWidget;
 import com.hexcore.cas.ui.Layout;
 import com.hexcore.cas.ui.LinearLayout;
@@ -173,7 +174,7 @@ public class UIProtoApplication implements WindowEventListener
 	UIProtoApplication()
 	{
 		
-		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlowGrid = new HexagonGrid(new Vector2i(100, 100));
 		waterFlowGrid.setWrappable(false);
 
 		waterFlow = new WaterFlow(waterFlowGrid);
@@ -719,10 +720,10 @@ public class UIProtoApplication implements WindowEventListener
 		playbackLayout.add(innerPlaybackLayout3);
 		
 		
-		Button playButton = new Button(new Vector2i(70,30), "Play");
+		Button playButton = new Button(new Image("data/play_icon.png"));
 		innerPlaybackLayout2.add(playButton);
 		
-		Button pauseButton = new Button(new Vector2i(70,30), "Pause");
+		Button pauseButton = new Button(new Image("data/pause_icon.png"));
 		innerPlaybackLayout2.add(pauseButton);
 		
 		

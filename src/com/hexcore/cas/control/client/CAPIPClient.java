@@ -80,7 +80,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		sentAccept = false;
 	}
 
-	public void sendResult(Grid g, Recti area, boolean more, int id)
+	public void sendResult(Grid g, Recti area, int more, int id)
 	{
 		ListNode rows = new ListNode();
 		for(int y = 0; y < g.getHeight(); y++)
@@ -100,7 +100,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		
 		DictNode d = new DictNode();
 		d.addToDict("DATA", rows);
-		d.addToDict("MORE", new IntNode(more ? 1 : 0));
+		d.addToDict("MORE", new IntNode(more));
 		d.addToDict("ID", new IntNode(id));
 		sendResult(d);
 	}
@@ -365,6 +365,15 @@ public class CAPIPClient extends CAPInformationProcessor
 			interpretInput(message);
 		}
 
+		Log.information(TAG, "Stopping client...");
 		protocol.disconnect();
+		
+		try
+		{
+			sock.close();
+		} 
+		catch (IOException e)
+		{
+		}
 	}
 }

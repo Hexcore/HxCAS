@@ -34,7 +34,9 @@ public class ThemeParser extends ConfigParser
 		
 		validTypeProperties = new HashMap<String, Set<String>>();
 		addTypeProperties("Button", 
-				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset");
+				"background", "border", "border-radius", "text-colour", "text-offset", 
+				"text-shadow-colour","text-shadow-offset", "padding",
+				"divider-left-colour", "divider-right-colour");
 		addTypeProperties("Panel", 
 				"background", "border", "border-radius");
 		addTypeProperties("Scrollbar", 
@@ -99,7 +101,7 @@ public class ThemeParser extends ConfigParser
 		else if (errors == 1)
 			System.out.println("Found a error in theme file: " + filename);
 		else
-			System.out.println("Found " + errors + " in the theme file: " + filename);
+			System.out.println("Found " + errors + " errors in the theme file: " + filename);
 	}
 	
 	private void addTypeProperties(String type, String... properties)

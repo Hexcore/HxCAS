@@ -29,6 +29,8 @@ public class CAPIPServer extends CAPInformationProcessor
 	private ArrayList<String> clientNames = null;
 	private ArrayList<ThreadWork> workDoneByClients = null;
 	private ArrayList<ThreadWork> workSentToClients = null;
+	private volatile boolean toReset = false;
+	private volatile boolean isReset = false;
 	private boolean[] clientsConnected = null;
 	private boolean[] receivedAccept = null;
 	private int gridsDone = 0;
@@ -67,6 +69,7 @@ public class CAPIPServer extends CAPInformationProcessor
 	public void disconnect()
 	{
 		Log.information(TAG, "Disconnecting clients");
+		
 		for(int i = 0; i < clients.size(); i++)
 			sendDisconnect(i);
 		
@@ -74,6 +77,19 @@ public class CAPIPServer extends CAPInformationProcessor
 			clients.get(i).disconnect();
 		
 		super.disconnect();
+	}
+	
+	public boolean isReset()
+	{
+		return isReset;
+	}
+	
+	public int getTotalCoreAmount()
+	{
+		int cores = 0;
+		for(int i = 0; i < clientCoreAmounts.length; i++)
+			cores += clientCoreAmounts[i];
+		return cores;
 	}
 	
 	@Override
@@ -229,8 +245,9 @@ public class CAPIPServer extends CAPInformationProcessor
 				
 				ThreadWork TW = new ThreadWork(grid, area, ID);
 				workDoneByClients.add(TW);
-				gridsDone++;
 				workSentToClients.remove(origPos);
+				
+				gridsDone++;
 			}
 			else
 			{
@@ -243,6 +260,11 @@ public class CAPIPServer extends CAPInformationProcessor
 			Log.error(TAG, "The message type field if not found");
 			return;
 		}
+	}
+	
+	public void reset()
+	{
+		toReset = true;
 	}
 	
 	public void sendCode()
@@ -274,29 +296,31 @@ public class CAPIPServer extends CAPInformationProcessor
 		ThreadWork TW = null;
 		DictNode header = this.makeHeader("GRID");
 		
-		DictNode grid = new DictNode();
-		ListNode size = new ListNode();
 		if(workForClients.size() != 0)
 		{
 			TW = workForClients.poll();
 		}
 		else
 		{
-			if(workSentToClients.size() != 0)
+			/*if(workSentToClients.size() != 0)
 			{
 				int len = workSentToClients.size();
+				System.out.println("Injecting more work : " + len);
 				for(int i = len - 1; i >= 0; i--)
 				{
 					workForClients.add(workSentToClients.get(i));
 					workSentToClients.remove(i);
 				}
 			}
-			else
+			else*/
 			{
 				Log.information(TAG, "No more grid work is available to be sent to clients");
 				return;
 			}
 		}
+		
+		DictNode grid = new DictNode();
+		ListNode size = new ListNode();
 		size.addToList(new IntNode(TW.getGrid().getSize().x));
 		size.addToList(new IntNode(TW.getGrid().getSize().y));
 		grid.addToDict("SIZE", size);
@@ -421,7 +445,6 @@ public class CAPIPServer extends CAPInformationProcessor
 		Log.information(TAG, "Now running");
 		
 		running = true;
-		
 		while(running)
 		{
 			for(int i = 0; i < numOfClients; i++)
@@ -432,6 +455,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			}
 			if(gridsDone == totalGrids)
 			{
+				Log.debug(TAG, "Sending work done by clients");
 				parent.setClientWork(workDoneByClients);
 				gridsDone = 0;
 			}

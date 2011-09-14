@@ -4,6 +4,7 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
+import com.hexcore.cas.utilities.Log;
 
 public class Button extends ClickableWidget
 {
@@ -79,21 +80,31 @@ public class Button extends ClickableWidget
 		Vector2i	textOffset = theme.getVector2i("Button", state.name, "text-offset");
 		Vector2i	shadowOffset = theme.getVector2i("Button", state.name, "text-shadow-offset", new Vector2i(0, 1));
 
+		Vector2i	padding = theme.getVector2i("Button", state.name, "padding");
+		
 		pos = pos.add(textOffset);
 		
 		Vector2i	textSize = theme.calculateTextSize(caption, Text.Size.MEDIUM);
 		
 		if (description.isEmpty())
 		{
-			int			imagePad = caption.isEmpty() ? 0 : 6;
-			int			imageSpace = (icon != null) ? (icon.getWidth() + imagePad) : 0;
-			int			imageHeight = (icon != null) ? icon.getHeight() : 0;
+			if (icon != null)
+			{
+				int xpos = caption.isEmpty() ? 8 : (64 - icon.getWidth()) / 2;
+				Vector2i iconPos = pos.add(xpos, (size.y - icon.getHeight()) / 2);
+				Graphics.renderRectangle(gl, iconPos, icon);
+				
+				if (!caption.isEmpty())
+				{
+					Fill leftFill = theme.getFill("Button", state.name, "divider-left-colour", Fill.NONE);
+					Fill rightFill = theme.getFill("Button", state.name, "divider-right-colour", Fill.NONE);
+	
+					Graphics.renderRectangle(gl, pos.add(64, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, leftFill);
+					Graphics.renderRectangle(gl, pos.add(65, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, rightFill);
+				}
+			}
 			
-			int			xPos = (size.x - textSize.x - imageSpace) / 2;
-			Vector2i	iconPos = pos.add(xPos, (size.y - imageHeight) / 2);
-			Vector2i	textPos = pos.add(xPos + imageSpace, (size.y - textSize.y) / 2);
-			
-			if (icon != null) Graphics.renderRectangle(gl, iconPos, icon);
+			Vector2i	textPos = pos.add(64 + (size.x - 64 - textSize.x) / 2, (size.y - textSize.y) / 2);
 			theme.renderShadowedText(gl, caption, textPos, textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
 		}
 		else
