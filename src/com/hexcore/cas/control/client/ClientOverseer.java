@@ -124,7 +124,8 @@ public class ClientOverseer extends Overseer
 			if (work == null) continue;
 			
 			Log.information(TAG, "Sending completed work");
-			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, !workQueue.isEmpty(), work.ID);
+			int more = Math.max(Runtime.getRuntime().availableProcessors() - workQueue.size(), 0);			
+			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, more, work.ID);
 		}
 		
 		Log.information(TAG, "Stopping...");
