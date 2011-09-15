@@ -80,7 +80,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		sentAccept = false;
 	}
 
-	public void sendResult(Grid g, Recti area, int more, int id)
+	public void sendResult(Grid g, Recti area, int more, int id, int gen)
 	{
 		ListNode rows = new ListNode();
 		for(int y = 0; y < g.getHeight(); y++)
@@ -102,6 +102,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		d.addToDict("DATA", rows);
 		d.addToDict("MORE", new IntNode(more));
 		d.addToDict("ID", new IntNode(id));
+		d.addToDict("GENERATION", new IntNode(gen));
 		sendResult(d);
 	}
 	
@@ -226,6 +227,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			char type = 'X';
 			Grid grid = null;
 			int id = -1;
+			int gen = 0;
 			
 			if(body == null)
 			{
@@ -262,6 +264,11 @@ public class CAPIPClient extends CAPInformationProcessor
 				sendState(2, "GRID ID MISSING");
 				return;
 			}
+			else if(!body.has("GENERATION"))
+			{
+				sendState(2, "GRID GENERATION MISSING");
+				return;
+			}
 						
 			ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
 			size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
@@ -270,6 +277,8 @@ public class CAPIPClient extends CAPInformationProcessor
 			area = new Recti(new Vector2i(((IntNode)areaList.get(0)).getIntValue(), ((IntNode)areaList.get(1)).getIntValue()), new Vector2i(((IntNode)areaList.get(2)).getIntValue(), ((IntNode)areaList.get(3)).getIntValue()));
 
 			id = ((IntNode)body.get("ID")).getIntValue();
+			
+			gen = ((IntNode)body.get("GENERATION")).getIntValue();
 			
 			n = ((IntNode)body.get("PROPERTIES")).getIntValue();
 			
@@ -309,7 +318,7 @@ public class CAPIPClient extends CAPInformationProcessor
 			}
 
 			System.out.println("CAPIPClient: Got work from server");
-			parent.addGrid(grid, area, id);
+			parent.addGrid(grid, area, id, gen);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)
 		{

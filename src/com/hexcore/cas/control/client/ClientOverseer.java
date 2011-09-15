@@ -20,6 +20,7 @@ public class ClientOverseer extends Overseer
 	
 	private boolean running = false;
 	private boolean valid = false;
+	private int gen = 0;
 
 	public ClientOverseer()
 	{
@@ -53,9 +54,10 @@ public class ClientOverseer extends Overseer
 		//vm.loadRules(b);
 	}
 	
-	public void addGrid(Grid grid, Recti workArea, int id)
+	public void addGrid(Grid grid, Recti workArea, int id, int g)
 	{
 		Log.information(TAG, "Got work");
+		gen = g;
 		
 		Work work = new Work();
 		work.grid = grid.clone();
@@ -125,7 +127,7 @@ public class ClientOverseer extends Overseer
 			
 			Log.information(TAG, "Sending completed work");
 			int more = Math.max(Runtime.getRuntime().availableProcessors() - workQueue.size(), 0);			
-			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, more, work.ID);
+			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, more, work.ID, gen);
 		}
 		
 		Log.information(TAG, "Stopping...");
