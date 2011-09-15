@@ -168,12 +168,12 @@ public class TestServerControl extends TestCase
 		Log.information(TAG, "SUCCESS - grid was calculated and set correctly");
 	}
 	
-	private void testNameList(ArrayList<String> nameList)
+	private void testNameList(String[] nameList)
 	{
 		Log.information(TAG, "Testing nameList was set correctly");
 		
-		for(int i = 0; i < nameList.size(); i++)
-			assertEquals("localhost", nameList.get(i));
+		for(int i = 0; i < nameList.length; i++)
+			assertEquals("localhost", nameList[i]);
 
 		Log.information(TAG, "SUCCESS - nameList was set correctly");
 	}
@@ -225,9 +225,9 @@ public class TestServerControl extends TestCase
 			e1.printStackTrace();
 		}
 
-		Log.information(TAG, "===============================================");
-		Log.information(TAG, "TESTING DISTRIBUTION SYSTEM WITH RECTANGLE GRID");
-		Log.information(TAG, "===============================================");
+		Log.information(TAG, "=============================================");
+		Log.information(TAG, "TESTING SERVER CONTROL IN DISTRIBUTION SYSTEM");
+		Log.information(TAG, "=============================================");
 		RectangleGrid g = new RectangleGrid(new Vector2i(4, 4), new Cell(1));
 		for(int y = 0; y < 4; y++)
 			for(int x = 0; x < 4; x++)
@@ -252,8 +252,8 @@ public class TestServerControl extends TestCase
 		nameList.add("localhost");
 		server.setClientNames(nameList);
 		
-		nameList = server.getClientNames();
-		testNameList(nameList);
+		String[] nameListArr = server.getClientNames();
+		testNameList(nameListArr);
 
 		server.start();
 		
@@ -334,6 +334,7 @@ public class TestServerControl extends TestCase
 		private CAPMessageProtocol capMP = null;
 		private boolean sentAccept = false;
 		private Grid grid = null;
+		private int gen = 0;
 		private int ID = -1;
 		private static final int PROTOCOL_VERSION = 1;
 		private Recti workable = null;
@@ -503,7 +504,7 @@ public class TestServerControl extends TestCase
 				}
 			}
 			
-			for(int a = 0; a < 4 * genNum; a++)
+			for(int a = 0; /*a < 4 * genNum*/; a++)
 			{
 				//Waiting for GRID message type.
 				message = null;
@@ -533,6 +534,7 @@ public class TestServerControl extends TestCase
 						char type = 'X';
 						Grid grid = null;
 						int id = -1;
+						int gen = 0;
 						
 						if(body == null)
 						{
@@ -562,9 +564,15 @@ public class TestServerControl extends TestCase
 						{
 							capMP.sendState(2, "GRID ID MISSING");
 						}
+						else if(!body.has("GENERATION"))
+						{
+							capMP.sendState(2, "GRID GENERATION MISSING");
+						}
 						
 						id = ((IntNode)body.get("ID")).getIntValue();
-									
+						
+						gen = ((IntNode)body.get("GENERATION")).getIntValue();
+						
 						ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
 						size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
 	
@@ -611,10 +619,14 @@ public class TestServerControl extends TestCase
 						this.grid = grid;
 						this.workable = area;
 						this.ID = id;
+						this.gen = gen;
 					}
 					else
 					{
-						capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE GRID");
+						if(header.get("TYPE").toString().equals("DISCONNECT"))
+							break;
+						else
+							capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE GRID");
 					}
 				}
 				//Create and send grid
@@ -660,6 +672,7 @@ public class TestServerControl extends TestCase
 				d.addToDict("DATA", rows);
 				int val = (a <= (4 * genNum - 2)) ? 1 : 0;
 				d.addToDict("MORE", new IntNode(val));
+				d.addToDict("GENERATION", new IntNode(gen));
 				d.addToDict("ID", new IntNode(ID));
 	
 				DictNode h = new DictNode();
@@ -681,22 +694,6 @@ public class TestServerControl extends TestCase
 				capMP.sendMessage(msg);
 			}
 			
-			//Waiting for DISCONNECT message type.
-			message = null;
-			while(true)
-			{
-				if(!displayed)
-				{
-					Log.debug(TAG, "Waiting for a disconnect message.");
-					displayed = true;
-				}
-				message = capMP.waitForMessage();
-				if(message != null)
-				{
-					displayed = false;
-					break;
-				}
-			}
 			if(message != null)
 			{
 				Log.debug(TAG, "Received disconnect message");
