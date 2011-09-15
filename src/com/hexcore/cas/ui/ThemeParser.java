@@ -12,15 +12,19 @@ import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 
 public class ThemeParser extends ConfigParser
 {
+	private String	themeName;
+	
 	private HashMap<String, Theme.Type>	types;
 	
 	private Set<String>	validStates;
 	private Map<String, Set<String>> validTypeProperties;
 	
-	ThemeParser(String filename)
+	ThemeParser(String themeName)
 	{
+		this.themeName = themeName;
+		
 		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
-		scanner.readFile(filename);
+		scanner.readFile("data/themes/" + themeName + "/theme.thm");
 		
 		validStates = new HashSet<String>();
 		validStates.add("normal");
@@ -117,11 +121,11 @@ public class ThemeParser extends ConfigParser
 		}
 		
 		if (errors == 0)
-			System.out.println("Loaded theme: " + filename);
+			System.out.println("Loaded theme: " + themeName);
 		else if (errors == 1)
-			System.out.println("Found a error in theme file: " + filename);
+			System.out.println("Found a error in theme file: " + themeName);
 		else
-			System.out.println("Found " + errors + " errors in the theme file: " + filename);
+			System.out.println("Found " + errors + " errors in the theme file: " + themeName);
 	}
 	
 	private void addTypeProperties(String type, String... properties)
@@ -343,9 +347,18 @@ public class ThemeParser extends ConfigParser
 		if (!expect("image")) return null;
 		if (!expect("(")) return null;
 		
-		String	filename = scanner.getSymbol().text;
-		Image	image = new Image(filename);
-		if (!image.isValid()) return null;
+		String	category = scanner.getSymbol().text;
+		
+		if (!expect(",")) return null;
+		
+		String	name = scanner.getSymbol().text;
+		
+		Image	image = new Image("data/themes/" + themeName + "/images/" + category + "/" + name);
+		if (!image.isValid()) 
+		{
+			expect(")");
+			return null;
+		}
 		
 		if (!expect(")")) return null;
 		return image;

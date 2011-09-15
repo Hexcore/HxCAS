@@ -215,12 +215,12 @@ public class UITestApplication implements WindowEventListener
 				
 		helpButton = new Button(new Vector2i(100, 50), "Help");
 		helpButton.setFlag(Widget.FILL_HORIZONTAL);
-		helpButton.setIcon(theme.getImage("icons", "info_icon"), theme.getImage("icons", "info_icon-white"));
+		helpButton.setIcon(theme.getImage("icons", "info_icon.png"), theme.getImage("icons", "info_icon-white.png"));
 		buttonBarLayout.add(helpButton);
 		
 		quitButton = new Button(new Vector2i(100, 50), "Quit");
 		quitButton.setFlag(Widget.FILL_HORIZONTAL);
-		quitButton.setIcon(theme.getImage("icons", "on-off_icon"), theme.getImage("icons", "on-off_icon-white"));
+		quitButton.setIcon(theme.getImage("icons", "on-off_icon.png"), theme.getImage("icons", "on-off_icon-white.png"));
 		buttonBarLayout.add(quitButton);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
@@ -270,7 +270,6 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox = new DropDownBox(new Vector2i(200, 20));
 		dropDownBox.addItem("light");
 		dropDownBox.addItem("lightV2");
-		dropDownBox.addItem("default");
 		dropDownBox.addItem("blue");
 		dropDownBox.setSelected(0);
 		innerLayout.add(dropDownBox);
@@ -280,7 +279,7 @@ public class UITestApplication implements WindowEventListener
 		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
-		wrenchButton = new Button(theme.getImage("icons", "wrench_icon"));
+		wrenchButton = new Button(theme.getImage("icons", "wrench_icon.png"));
 		innerLayout.add(wrenchButton);	
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
@@ -332,7 +331,7 @@ public class UITestApplication implements WindowEventListener
 		triGridViewerContainer.setContents(triGridViewer);	
 		
 		nextIterationButton = new Button(new Vector2i(150, 50), "Next");
-		nextIterationButton.setIcon(theme.getImage("icons", "arrow_right_icon"));
+		nextIterationButton.setIcon(theme.getImage("icons", "arrow_right_icon.png"));
 		gridViewLayout.add(nextIterationButton);
 		
 		// 3D Rectangle Grid

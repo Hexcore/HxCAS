@@ -293,14 +293,14 @@ public class Theme
 	
 	public Image getImage(String category, String name)
 	{
-		return new Image("data/themes/" + getName() + "/images/" + category + "/" + name + ".png");
+		return new Image("data/themes/" + getName() + "/images/" + category + "/" + name);
 	}	
 	
 	public void loadTheme(String name)
 	{
 		this.name = name;
 		
-		ThemeParser themeParser = new ThemeParser("data/themes/" + name + "/theme.thm");
+		ThemeParser themeParser = new ThemeParser(name);
 		typeProperties = themeParser.getTypes();
 
 		System.out.println("Theme " + getName() + ": <Name: " + getDisplayName() + " - Author: " + getAuthor() + ">");
