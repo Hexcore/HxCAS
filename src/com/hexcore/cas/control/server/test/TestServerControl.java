@@ -315,8 +315,6 @@ public class TestServerControl extends TestCase
 		Grid[] gens = theWorld.getWorld();
 		assertEquals(2, gens.length);
 		
-		//server.simulate(g, genNum);
-		
 		server.disconnect();
 		
 		try 
