@@ -32,6 +32,7 @@ import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.Theme;
 import com.hexcore.cas.ui.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.TriangleGridWidget;
 import com.hexcore.cas.ui.View;
@@ -41,6 +42,7 @@ import com.hexcore.cas.ui.WindowEventListener;
 
 public class UITestApplication implements WindowEventListener
 {
+	public Theme		theme;
 	public Window		window;
 	
 	public LinearLayout	windowLayout;
@@ -111,8 +113,6 @@ public class UITestApplication implements WindowEventListener
 	
 	UITestApplication()
 	{
-
-
 		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
 		waterFlowGrid.setWrappable(false);
 
@@ -159,14 +159,15 @@ public class UITestApplication implements WindowEventListener
 		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
-		window = new Window("GUI Test", 1024, 768);
+		theme = new Theme();
+		window = new Window("GUI Test", 1024, 768, theme);
 		window.addListener(this);
 		window.show();
 	}
 	
 	public void initialise()
 	{
-		window.loadTheme("data/"+themeName+".thm");
+		theme.loadTheme(themeName);
 		
 		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		windowLayout.setFlag(Widget.FILL);
@@ -214,12 +215,12 @@ public class UITestApplication implements WindowEventListener
 				
 		helpButton = new Button(new Vector2i(100, 50), "Help");
 		helpButton.setFlag(Widget.FILL_HORIZONTAL);
-		helpButton.setIcon(window.getTheme().loadIcon("info_icon"), window.getTheme().loadIcon("info_icon-white"));
+		helpButton.setIcon(theme.getImage("icons", "info_icon"), theme.getImage("icons", "info_icon-white"));
 		buttonBarLayout.add(helpButton);
 		
 		quitButton = new Button(new Vector2i(100, 50), "Quit");
 		quitButton.setFlag(Widget.FILL_HORIZONTAL);
-		quitButton.setIcon(window.getTheme().loadIcon("on-off_icon"), window.getTheme().loadIcon("on-off_icon-white"));
+		quitButton.setIcon(theme.getImage("icons", "on-off_icon"), theme.getImage("icons", "on-off_icon-white"));
 		buttonBarLayout.add(quitButton);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
@@ -279,7 +280,7 @@ public class UITestApplication implements WindowEventListener
 		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
-		wrenchButton = new Button(window.getTheme().loadIcon("wrench_icon"));
+		wrenchButton = new Button(theme.getImage("icons", "wrench_icon"));
 		innerLayout.add(wrenchButton);	
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
@@ -331,7 +332,7 @@ public class UITestApplication implements WindowEventListener
 		triGridViewerContainer.setContents(triGridViewer);	
 		
 		nextIterationButton = new Button(new Vector2i(150, 50), "Next");
-		nextIterationButton.setIcon(window.getTheme().loadIcon("arrow_right_icon"));
+		nextIterationButton.setIcon(theme.getImage("icons", "arrow_right_icon"));
 		gridViewLayout.add(nextIterationButton);
 		
 		// 3D Rectangle Grid
@@ -403,7 +404,7 @@ public class UITestApplication implements WindowEventListener
 		{
 			System.out.println("Changing theme to "+themeName);
 			
-			window.loadTheme("data/"+themeName+".thm");
+			theme.loadTheme(themeName);
 			currentThemeName = themeName;
 			
 			window.relayout();

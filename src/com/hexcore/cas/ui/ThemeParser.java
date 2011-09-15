@@ -104,8 +104,6 @@ public class ThemeParser extends ConfigParser
 					themeType.add(new Property("name", value));
 				else if (typeName.equals("author"))
 					themeType.add(new Property("author", value));
-				else if (typeName.equals("iconSet"))
-					themeType.add(new Property("iconSet", value));
 				
 				if (!expect(";")) return;	
 			}

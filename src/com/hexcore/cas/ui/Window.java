@@ -56,12 +56,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private boolean	debugLayout = false;
 	private boolean	fullscreen = false;
 	
-	public Window(String title)
+	public Window(String title, Theme theme)
 	{
-		this(title, 800, 600);
+		this(title, 800, 600, theme);
 	}
 	
-	public Window(String title, int width, int height)
+	public Window(String title, int width, int height, Theme theme)
 	{
 		super(new Vector2i(width, height));
 				
@@ -73,7 +73,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		eventListeners = new ArrayList<WindowEventListener>();
 		setWindow(this);
 		
-		theme = new Theme();
+		this.theme = theme;
 		
 		//////////////////
 		
@@ -142,13 +142,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		return defaultMargin;
 	}
-	
-	public void loadTheme(String filename)
-	{
-		theme = new Theme();
-		theme.loadFromFile(filename);
-	}
-	
+
 	public Theme getTheme()
 	{
 		return theme;

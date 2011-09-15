@@ -144,6 +144,8 @@ public class Theme
 		HashMap<String, Property>	properties;
 	}
 	
+	private String	name;
+	
 	private HashMap<String, Type> 				typeProperties;
 	private HashMap<Text.Size, TextRenderer>	textRenderers;
 
@@ -159,15 +161,9 @@ public class Theme
 		typeProperties = new HashMap<String, Type>();
 	}
 	
-	public Theme(String filename)
-	{
-		this();
-		loadFromFile(filename);
-	}
-	
-	public String getName() {return getStringFallback("#", "name", "none");}
+	public String getName() {return name;}
+	public String getDisplayName() {return getStringFallback("#", "name", "none");}
 	public String getAuthor() {return getStringFallback("#", "author", "unknown");}
-	public String getIconSet() {return getStringFallback("#", "iconSet", "default");}
 		
 	public Property getProperty(String typeName, String propertyName)
 	{
@@ -295,18 +291,20 @@ public class Theme
 		return property.getVector2i();
 	}
 	
-	public Image loadIcon(String name)
+	public Image getImage(String category, String name)
 	{
-		return new Image("data/icons/" + getIconSet() + "/" + name + ".png");
-	}
+		return new Image("data/themes/" + getName() + "/images/" + category + "/" + name + ".png");
+	}	
 	
-	public void loadFromFile(String file)
+	public void loadTheme(String name)
 	{
-		ThemeParser themeParser = new ThemeParser(file);
+		this.name = name;
+		
+		ThemeParser themeParser = new ThemeParser("data/themes/" + name + "/theme.thm");
 		typeProperties = themeParser.getTypes();
 
-		System.out.println("Theme <Name: " + getName() + " - Author: " + getAuthor() + " - IconSet: " + getIconSet() + ">");
-	}
+		System.out.println("Theme " + getName() + ": <Name: " + getDisplayName() + " - Author: " + getAuthor() + ">");
+	}	
 	
 	/*
 	 * 
