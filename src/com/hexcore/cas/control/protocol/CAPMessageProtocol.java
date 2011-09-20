@@ -204,15 +204,17 @@ public class CAPMessageProtocol extends Thread
 	{
 		Node body = null;
 				
+		expect('#');
+		
 		DictNode header = dictionary();
 				
 		expect(';');
 		
 		// Read in body
-		if(peakByte() != ';') body = dictionary();
+		if(peakByte() != '.') body = dictionary();
 				
 		// Read in last separator
-		expect(';');
+		expect('.');
 		
 		// Add message
 		try
@@ -275,6 +277,13 @@ public class CAPMessageProtocol extends Thread
 	{
 		byte g = nextByte(); 
 		if (g != b) Log.error(TAG, "Protocol Stream Error: Expected '" + (char)b + "', got '" + (char)g + "'");
+	}
+	
+	private void forwardUntil(char c) throws ProtocolErrorException
+	{
+		byte b = (byte)c, g;
+		
+		do { g = nextByte(); } while (g != b);
 	}
 	
 	private byte nextByte() throws ProtocolErrorException
@@ -351,7 +360,16 @@ public class CAPMessageProtocol extends Thread
 			catch(ProtocolErrorException e)
 			{
 				Log.error(TAG, e.getMessage());
-				disconnect();
+				
+				try
+				{
+					forwardUntil('#');
+				}
+				catch (ProtocolErrorException e2)
+				{
+					Log.error(TAG, e.getMessage());
+					disconnect();
+				}
 			}
 		}
 		

@@ -37,7 +37,7 @@ public class TestMessage
 		
 		String output = out.toString();
 		
-		assertTrue(output.equals("de;de;"));
+		assertTrue(output.equals("#de;de."));
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class TestMessage
 		
 		String output = out.toString();
 			
-		assertTrue(output.equals("d3:numi10ee;;"));
+		assertTrue(output.equals("#d3:numi10ee;."));
 	}
 	
 	@Test
@@ -84,14 +84,14 @@ public class TestMessage
 		String output = out.toString();
 		byte[] bytes = out.toByteArray();
 			
-		assertTrue(output.startsWith("d3:numf"));
+		assertTrue(output.startsWith("#d3:numf"));
 		
 		byte[] comp = new byte[] {64, 36, 0, 0, 0, 0, 0, 0};
 		
 		for (int i = 0; i < 8; i++)
-			assertEquals(comp[i], bytes[i+7]);
+			assertEquals(comp[i], bytes[i+8]);
 		
-		assertTrue(output.endsWith("ee;;"));
+		assertTrue(output.endsWith("ee;."));
 	}
 	
 	@Test
@@ -124,7 +124,7 @@ public class TestMessage
 		
 		String output = out.toString();
 			
-		assertTrue(output.equals("d5:firstli1ei2ee3:numi10e6:secondli3ei4eee;;"));
+		assertTrue(output.equals("#d5:firstli1ei2ee3:numi10e6:secondli3ei4eee;."));
 	}
 	
 	@Test
@@ -152,6 +152,6 @@ public class TestMessage
 		
 		String output = out.toString();
 		
-		assertTrue(output.equals("d4:name4:Test3:numi10ee;d3:onei1e3:twoi2ee;"));
+		assertTrue(output.equals("#d4:name4:Test3:numi10ee;d3:onei1e3:twoi2ee."));
 	}	
 }

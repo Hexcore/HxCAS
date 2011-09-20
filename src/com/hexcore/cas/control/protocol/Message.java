@@ -40,10 +40,10 @@ public class Message
 	
 	public void write(OutputStream out) throws IOException
 	{
+		out.write('#');
 		header.write(out);
 		out.write(';');
-		if (body != null)
-			body.write(out);
-		out.write(';');
+		if (body != null) body.write(out);
+		out.write('.');
 	}
 }
