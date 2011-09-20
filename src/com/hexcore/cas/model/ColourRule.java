@@ -2,7 +2,7 @@ package com.hexcore.cas.model;
 
 import java.util.ArrayList;
 
-import com.hexcore.cas.ui.Colour;
+import com.hexcore.cas.ui.toolkit.Colour;
 
 public class ColourRule
 {

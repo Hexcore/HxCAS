@@ -1,6 +1,6 @@
 package com.hexcore.cas.model;
 
-import com.hexcore.cas.ui.Colour;
+import com.hexcore.cas.ui.toolkit.Colour;
 
 public class ColourRuleSet
 {

@@ -3,7 +3,7 @@ package com.hexcore.cas.ui.test;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import com.hexcore.cas.ui.Colour;
+import com.hexcore.cas.ui.toolkit.Colour;
 
 public class TestColour extends TestCase
 {

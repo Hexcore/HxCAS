@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import com.hexcore.cas.model.ColourRule;
-import com.hexcore.cas.ui.Colour;
+import com.hexcore.cas.ui.toolkit.Colour;
 
 public class TestColourRule extends TestCase
 {

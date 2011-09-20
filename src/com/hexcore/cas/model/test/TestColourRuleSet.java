@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
-import com.hexcore.cas.ui.Colour;
+import com.hexcore.cas.ui.toolkit.Colour;
 
 public class TestColourRuleSet
 {
