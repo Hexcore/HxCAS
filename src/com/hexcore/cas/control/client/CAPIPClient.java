@@ -178,7 +178,10 @@ public class CAPIPClient extends CAPInformationProcessor
 					h.addToDict("TYPE", new ByteNode("ACCEPT"));
 					h.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
 					
-					Message msg = new Message(h);
+					DictNode b = new DictNode();
+					b.addToDict("CORES", new IntNode(Runtime.getRuntime().availableProcessors()));
+					
+					Message msg = new Message(h, b);
 					protocol.sendMessage(msg);
 					sentAccept = true;
 					

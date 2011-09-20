@@ -82,6 +82,15 @@ public class CAPIPServer extends CAPInformationProcessor
 		return cores;
 	}
 	
+	public int getConnectedAmount()
+	{
+		int connectedNum = 0;
+		for(int i = 0; i < receivedAccept.length; i++)
+			if(receivedAccept[i])
+				connectedNum++;
+		return connectedNum;
+	}
+	
 	@Override
 	protected void interpretInput(Message message)
 	{
@@ -218,7 +227,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				
 				if(orig == null)
 				{
-					Log.error(TAG, "RESULT message redundant - work already complete.");
+					Log.error(TAG, "RESULT message redundant - work already complete.\r\n");
 					return;
 				}
 				
@@ -249,13 +258,13 @@ public class CAPIPServer extends CAPInformationProcessor
 					}
 				}
 				
-				int moreFlag = ((IntNode)gi.get("MORE")).getIntValue();
-				for(int i = 0; i < moreFlag; i++)
-					sendAGrid(hostPos);
-				
 				ThreadWork TW = new ThreadWork(grid, area, ID, gen);
 				workDoneByClients[ID] = TW.clone();
 				workSentToClients[ID] = null;
+				
+				int moreFlag = ((IntNode)gi.get("MORE")).getIntValue();
+				for(int i = 0; i < moreFlag; i++)
+					sendAGrid(hostPos);
 				
 				gridsDone++;
 			}
@@ -310,6 +319,15 @@ public class CAPIPServer extends CAPInformationProcessor
 		}
 		else
 		{
+			try
+			{
+				Thread.sleep(1000);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
 			int cntNoRes = 0;
 			for(int i = 0; i < workSentToClients.length; i++)
 				if(workSentToClients[i] != null && workDoneByClients[i] == null)
@@ -321,7 +339,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				{
 					if(workSentToClients[i] != null)
 					{
-						workForClients.add(workSentToClients[i]);
+						workForClients.add(workSentToClients[i].clone());
 						workSentToClients[i] = null;
 					}
 				}
@@ -580,14 +598,24 @@ public class CAPIPServer extends CAPInformationProcessor
 			{
 				Message message = clients[i].waitForMessage();
 				if(message != null)
+				{
+					System.out.println("GOT: " + message.toString());
 					interpretInput(message, clients[i].getSocket().getInetAddress().getHostName());
+				}
 			}
 			if(gridsDone == totalGrids)
 			{
 				Log.debug(TAG, "Sending work done by clients");
 				ArrayList<ThreadWork> workTmp = new ArrayList<ThreadWork>();
 				for(int i = 0; i < workDoneByClients.length; i++)
+				{
+					if(workDoneByClients[i] == null)
+					{
+						System.out.println("workDoneByClients[" + i + "] == null");
+						continue;
+					}
 					workTmp.add(workDoneByClients[i].clone());
+				}
 				parent.setClientWork(workTmp);
 				gridsDone = 0;
 			}

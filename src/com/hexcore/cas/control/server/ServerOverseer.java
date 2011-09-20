@@ -408,6 +408,16 @@ public class ServerOverseer extends Overseer
 
 	public void simulate(Grid g, int gN)
 	{
+		boolean displayed = false;
+		while(((CAPIPServer)capIP).getConnectedAmount() != clientNames.length)
+		{
+			if(!displayed)
+			{
+				Log.information(TAG, "Waiting for clients to send connect...");
+				displayed = true;
+			}
+		}
+		
 		super.setGrid(g);
 		theWorld.addGeneration(g);
 		numOfGenerations = gN;
