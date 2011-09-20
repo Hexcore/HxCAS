@@ -92,6 +92,19 @@ public class Theme
 			this.name = name;
 			this.type = Type.STRING;
 		}
+		
+		Property(String name, String value)
+		{
+			this.name = name;
+			this.type = Type.STRING;
+			this.value = value;
+		}	
+		
+		@Override
+		public String toString()
+		{
+			return name + "=" + value;
+		}
 
 		int			getInteger() {return x;}
 		Vector2i	getVector2i() {return new Vector2i(x, y);}
@@ -117,11 +130,21 @@ public class Theme
 			properties.put(property.name, property);
 		}
 		
+		@Override
+		public String toString()
+		{
+			String str = "";
+			for (Property property : properties.values()) str += property + ", ";
+			return name + ":" + state + "<" + str + ">";
+		}
+		
 		String		state;
 		String		name;
 		
 		HashMap<String, Property>	properties;
 	}
+	
+	private String	name;
 	
 	private HashMap<String, Type> 				typeProperties;
 	private HashMap<Text.Size, TextRenderer>	textRenderers;
@@ -138,17 +161,15 @@ public class Theme
 		typeProperties = new HashMap<String, Type>();
 	}
 	
-	public Theme(String filename)
-	{
-		this();
-		loadFromFile(filename);
-	}
+	public String getName() {return name;}
+	public String getDisplayName() {return getStringFallback("#", "name", "none");}
+	public String getAuthor() {return getStringFallback("#", "author", "unknown");}
 		
 	public Property getProperty(String typeName, String propertyName)
 	{
 		return getProperty(typeName, "normal", propertyName);
 	}
-	
+
 	public Property getProperty(String typeName, String state, String propertyName)
 	{
 		String typeState = typeName + ":" + state;
@@ -160,7 +181,7 @@ public class Theme
 		if (property == null) return state.equals("normal") ? null : getProperty(typeName, "normal", propertyName);
 		
 		return property;
-	}	
+	}
 	
 	public Colour getColour(String typeName, String propertyName)
 	{
@@ -236,6 +257,15 @@ public class Theme
 		
 		return property.getInteger();
 	}
+
+	public String getStringFallback(String typeName, String propertyName, String fallback)
+	{
+		Property property = getProperty(typeName, propertyName);
+		if (property == null) return fallback;
+		if (property.type != Property.Type.STRING) return fallback;
+		
+		return property.value;
+	}	
 	
 	public Vector2i getVector2i(String typeName, String propertyName)
 	{
@@ -261,11 +291,20 @@ public class Theme
 		return property.getVector2i();
 	}
 	
-	public void loadFromFile(String file)
+	public Image getImage(String category, String name)
 	{
-		ThemeParser themeParser = new ThemeParser(file);
-		typeProperties = themeParser.getTypes();		
-	}
+		return new Image("data/themes/" + getName() + "/images/" + category + "/" + name);
+	}	
+	
+	public void loadTheme(String name)
+	{
+		this.name = name;
+		
+		ThemeParser themeParser = new ThemeParser(name);
+		typeProperties = themeParser.getTypes();
+
+		System.out.println("Theme " + getName() + ": <Name: " + getDisplayName() + " - Author: " + getAuthor() + ">");
+	}	
 	
 	/*
 	 * 

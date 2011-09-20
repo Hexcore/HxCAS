@@ -16,11 +16,14 @@ import com.hexcore.cas.utilities.Log;
 
 public class ServerOverseer extends Overseer
 {
-	private ArrayList<String> clientNames = null;
-	private boolean isFinishedGenerations = false;
+	private String[] clientNames = null;
+	private volatile boolean isFinishedGenerations = false;
 	private volatile boolean isFinishedWork = false;
-	private int numOfClients = 0;
-	private int numOfGenerations = 0;
+	private volatile boolean paused = false;
+	private volatile boolean reset = false;
+	private volatile int currGen = 0;
+	private volatile int numOfClients = 0;
+	private volatile int numOfGenerations = 0;
 	private int threadWorkID = 0;
 	private int[] clientStatuses = null;
 	private Recti[] clientWorkables = null;
@@ -128,7 +131,7 @@ public class ServerOverseer extends Overseer
 		return clientWork;
 	}
 	
-	public ArrayList<String> getClientNames()
+	public String[] getClientNames()
 	{
 		return clientNames;
 	}
@@ -153,7 +156,6 @@ public class ServerOverseer extends Overseer
 		return isFinishedGenerations;
 	}
 	
-	//===== NEEDS REVIEWING =====\\
 	public void makeNonwrappableGrids()
 	{
 		int numOfClientWorks = clientWorkables.length;
@@ -162,20 +164,22 @@ public class ServerOverseer extends Overseer
 		for(int i = 0; i < numOfClientWorks; i++)
 		{
 			Grid workingGrid = null;
-			int width = 2;
-			int height = 2;
+			int left = 1;
+			int right = 1;
+			int top = 1;
+			int bot = 1;
 
 			Recti w = clientWorkables[i];
 			if(w.getPosition().x == 0)
-				width--;
+				left--;
 			if(w.getPosition().y == 0)
-				height--;
-			if(w.getSize().x == grid.getWidth())
-				width--;
-			if(w.getSize().y == grid.getHeight())
-				height--;
-			Vector2i size = new Vector2i(w.getSize().x + width, w.getSize().y + height);
-			Cell cell = new Cell(grid.getCell(0, 0).getValueCount());
+				top--;
+			if(w.getSize().x + w.getPosition().x == grid.getWidth())
+				right--;
+			if(w.getSize().y + w.getPosition().y == grid.getHeight())
+				bot--;
+			Vector2i size = new Vector2i(w.getSize().x + left + right, w.getSize().y + top + bot);
+			Cell cell = new Cell(grid.getNumProperties());
 
 			switch(grid.getType())
 			{
@@ -189,30 +193,26 @@ public class ServerOverseer extends Overseer
 					break;
 				case 't':
 				case 'T':
-					width += 2;
+					left++;
+					right++;
 					if(w.getPosition().x - 1 < 0)
-						width--;
-					if(w.getSize().x + width >= grid.getWidth())
-						width--;
-					size = new Vector2i(w.getSize().x + width, w.getSize().y + height);
+						left--;
+					if(w.getSize().x + w.getPosition().x + right >= grid.getWidth())
+						right--;
+					size = new Vector2i(w.getSize().x + left + right, w.getSize().y + top + bot);
 					workingGrid = new TriangleGrid(size, cell);
 					break;
 			}
 	
 			int gYPos = 0;
 			int gXPos = 0;
-			for(int y = w.getPosition().y - height; y < w.getPosition().y + w.getSize().y + height; y++)
+			for(int y = w.getPosition().y - top; y < w.getPosition().y + w.getSize().y + bot; y++)
 			{
-				for(int x = w.getPosition().x - width; x < w.getPosition().x + w.getSize().x + width; x++)
+				for(int x = w.getPosition().x - left; x < w.getPosition().x + w.getSize().x + right; x++)
 				{
-					int xx = x % grid.getWidth();
-					int yy = y % grid.getHeight();
-					if(xx < 0 || yy < 0)
-						continue;
-					for(int j = 0; j < grid.getCell(xx, yy).getValueCount(); j++)
-						workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+					workingGrid.setCell(gXPos, gYPos, grid.getCell(x, y));
 					gXPos++;
-					if(gXPos >= w.getSize().x + (width * 2))
+					if(gXPos >= w.getSize().x + right)
 						gXPos = 0;
 				}
 				gYPos++;
@@ -230,7 +230,7 @@ public class ServerOverseer extends Overseer
 					break;
 			}
 
-			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++);
+			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++, currGen);
 		}
 	}
 	
@@ -295,8 +295,18 @@ public class ServerOverseer extends Overseer
 					break;
 			}
 
-			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++);
+			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++, currGen);
 		}
+	}
+	
+	public void pause()
+	{
+		paused = true;
+	}
+	
+	public void play()
+	{
+		paused = false;
 	}
 	
 	public void rebuildGrid()
@@ -327,10 +337,18 @@ public class ServerOverseer extends Overseer
 			((CAPIPServer)capIP).sendQuery(i);
 	}
 	
+	public void reset()
+	{
+		reset = true;
+		numOfGenerations = 0;
+		theWorld.reset();
+		((CAPIPServer)capIP).setGeneration(currGen);
+	}
+	
 	public void send()
 	{
 		isFinishedWork = false;
-		((CAPIPServer)capIP).setClientWork(clientWork);
+		((CAPIPServer)capIP).setClientWork(clientWork, currGen);
 		((CAPIPServer)capIP).sendGrids();
 	}
 	
@@ -364,8 +382,10 @@ public class ServerOverseer extends Overseer
 
 	public void setClientNames(ArrayList<String> names)
 	{
-		clientNames = names;
-		numOfClients = clientNames.size();
+		int size = names.size();
+		clientNames = new String[size];
+		names.toArray(clientNames);
+		numOfClients = size;
 		clientStatuses = new int[numOfClients];
 	}
 	
@@ -391,18 +411,28 @@ public class ServerOverseer extends Overseer
 		super.setGrid(g);
 		theWorld.addGeneration(g);
 		numOfGenerations = gN;
-		
 		setClientWorkables();
 		
-		/*((CAPIPServer)capIP).reset();
-		
-		while(!((CAPIPServer)capIP).isReset())
-		{
-		}*/
-		
 		isFinishedGenerations = false;
-		for(int i = 0; i < numOfGenerations; i++)
+		for(int i = 1; ; i++)
 		{
+			currGen = i;
+			
+			if(reset)
+			{
+				reset = false;
+				i = 1;
+				super.setGrid(theWorld.getGenerationZero());
+				setClientWorkables();
+			}
+			
+			while(paused)
+			{
+			}
+			
+			if(numOfGenerations == 0 || (numOfGenerations != -1 && i > numOfGenerations))
+				break;
+			
 			send();
 			while(!isFinishedWork)
 			{
@@ -414,7 +444,8 @@ public class ServerOverseer extends Overseer
 	@Override
 	public void run()
 	{
-		capIP = new CAPIPServer(this, clientNames);
+		capIP = new CAPIPServer(this);
+		((CAPIPServer)capIP).setClientNames(clientNames);
 		capIP.start();
 	}
 }

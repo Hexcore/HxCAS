@@ -32,6 +32,7 @@ import com.hexcore.cas.ui.Text;
 import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.Theme;
 import com.hexcore.cas.ui.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.TriangleGridWidget;
 import com.hexcore.cas.ui.View;
@@ -41,6 +42,7 @@ import com.hexcore.cas.ui.WindowEventListener;
 
 public class UITestApplication implements WindowEventListener
 {
+	public Theme		theme;
 	public Window		window;
 	
 	public LinearLayout	windowLayout;
@@ -111,8 +113,6 @@ public class UITestApplication implements WindowEventListener
 	
 	UITestApplication()
 	{
-
-
 		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
 		waterFlowGrid.setWrappable(false);
 
@@ -159,14 +159,15 @@ public class UITestApplication implements WindowEventListener
 		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
-		window = new Window("GUI Test", 1024, 768);
+		theme = new Theme();
+		window = new Window("GUI Test", 1024, 768, theme);
 		window.addListener(this);
 		window.show();
 	}
 	
 	public void initialise()
 	{
-		window.loadTheme("data/"+themeName+".thm");
+		theme.loadTheme(themeName);
 		
 		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		windowLayout.setFlag(Widget.FILL);
@@ -195,31 +196,31 @@ public class UITestApplication implements WindowEventListener
 		mainLayout.setFlag(Widget.FILL);
 		windowLayout.add(mainLayout);
 		
-		buttonBarLayout = new LinearLayout(new Vector2i(250, 50), LinearLayout.Direction.VERTICAL);
+		buttonBarLayout = new LinearLayout(new Vector2i(220, 50), LinearLayout.Direction.VERTICAL);
 		buttonBarLayout.setMargin(new Vector2i(0, 0));
 		buttonBarLayout.setFlag(Widget.FILL_VERTICAL);
 		mainLayout.add(buttonBarLayout);
 		
-		createWorldButton = new Button(new Vector2i(100, 50), "Create New World", "Specify parameters from scratch");
+		createWorldButton = new Button(new Vector2i(100, 50), "Create New World");
 		createWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(createWorldButton);
 		
-		loadWorldButton = new Button(new Vector2i(100, 50), "Load World", "Load a world from a file");
+		loadWorldButton = new Button(new Vector2i(100, 50), "Load World");
 		loadWorldButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(loadWorldButton);
 		
-		optionsButton = new Button(new Vector2i(100, 50), "Options", "Change preferences and settings");
+		optionsButton = new Button(new Vector2i(100, 50), "Options");
 		optionsButton.setFlag(Widget.FILL_HORIZONTAL);
 		buttonBarLayout.add(optionsButton);
 				
 		helpButton = new Button(new Vector2i(100, 50), "Help");
 		helpButton.setFlag(Widget.FILL_HORIZONTAL);
-		helpButton.setIcon(new Image("data/book_side_icon.png"));
+		helpButton.setIcon(theme.getImage("icons", "info_icon.png"), theme.getImage("icons", "info_icon-white.png"));
 		buttonBarLayout.add(helpButton);
 		
 		quitButton = new Button(new Vector2i(100, 50), "Quit");
 		quitButton.setFlag(Widget.FILL_HORIZONTAL);
-		quitButton.setIcon(new Image("data/on-off_icon.png"));
+		quitButton.setIcon(theme.getImage("icons", "on-off_icon.png"), theme.getImage("icons", "on-off_icon-white.png"));
 		buttonBarLayout.add(quitButton);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
@@ -269,7 +270,6 @@ public class UITestApplication implements WindowEventListener
 		dropDownBox = new DropDownBox(new Vector2i(200, 20));
 		dropDownBox.addItem("light");
 		dropDownBox.addItem("lightV2");
-		dropDownBox.addItem("default");
 		dropDownBox.addItem("blue");
 		dropDownBox.setSelected(0);
 		innerLayout.add(dropDownBox);
@@ -279,7 +279,7 @@ public class UITestApplication implements WindowEventListener
 		slider.setShowValue(true);
 		innerLayout.add(slider);
 		
-		wrenchButton = new Button(new Image("data/wrench_icon.png"));
+		wrenchButton = new Button(theme.getImage("icons", "wrench_icon.png"));
 		innerLayout.add(wrenchButton);	
 		
 		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
@@ -330,8 +330,8 @@ public class UITestApplication implements WindowEventListener
 		triGridViewer.setColourRuleSet(colourRules);
 		triGridViewerContainer.setContents(triGridViewer);	
 		
-		nextIterationButton = new Button(new Vector2i(100, 50), "Next");
-		nextIterationButton.setIcon(new Image("data/arrow_right_icon.png"));
+		nextIterationButton = new Button(new Vector2i(150, 50), "Next");
+		nextIterationButton.setIcon(theme.getImage("icons", "arrow_right_icon.png"));
 		gridViewLayout.add(nextIterationButton);
 		
 		// 3D Rectangle Grid
@@ -403,7 +403,7 @@ public class UITestApplication implements WindowEventListener
 		{
 			System.out.println("Changing theme to "+themeName);
 			
-			window.loadTheme("data/"+themeName+".thm");
+			theme.loadTheme(themeName);
 			currentThemeName = themeName;
 			
 			window.relayout();

@@ -4,6 +4,7 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.Theme.BorderShape;
+import com.hexcore.cas.ui.Theme.ButtonState;
 
 public class Button extends ClickableWidget
 {
@@ -11,12 +12,19 @@ public class Button extends ClickableWidget
 	private String	description;
 	
 	private Image	icon;
+	private Image	hoverIcon;
 	
 	public Button(Image icon)
 	{
 		this(new Vector2i(0, 0), icon.getSize().add(16, 16), "", "");
 		setIcon(icon);
-	}	
+	}
+	
+	public Button(Image icon, Image hoverIcon)
+	{
+		this(new Vector2i(0, 0), Vector2i.max(icon.getSize(), hoverIcon.getSize()).add(16, 16), "", "");
+		setIcon(icon, hoverIcon);
+	}
 	
 	public Button(Vector2i size, String caption)
 	{
@@ -72,21 +80,37 @@ public class Button extends ClickableWidget
 		Vector2i	textOffset = theme.getVector2i("Button", state.name, "text-offset");
 		Vector2i	shadowOffset = theme.getVector2i("Button", state.name, "text-shadow-offset", new Vector2i(0, 1));
 
+		Vector2i	padding = theme.getVector2i("Button", state.name, "padding");
+		
 		pos = pos.add(textOffset);
 		
 		Vector2i	textSize = theme.calculateTextSize(caption, Text.Size.MEDIUM);
 		
 		if (description.isEmpty())
 		{
-			int			imagePad = caption.isEmpty() ? 0 : 6;
-			int			imageSpace = (icon != null) ? (icon.getWidth() + imagePad) : 0;
-			int			imageHeight = (icon != null) ? icon.getHeight() : 0;
+			int	iconWidth = 0;
+			Image currentIcon = icon;
+			if (mouseover && hoverIcon != null) currentIcon = hoverIcon;
+
+			if (currentIcon != null)
+			{
+				iconWidth = theme.getInteger("Button", state.name, "icon-space-width", 56);
+				
+				int xpos = caption.isEmpty() ? 8 : (iconWidth - currentIcon.getWidth()) / 2;
+				Vector2i iconPos = pos.add(xpos, (size.y - currentIcon.getHeight()) / 2);
+				Graphics.renderRectangle(gl, iconPos, currentIcon);
+				
+				if (!caption.isEmpty())
+				{
+					Fill leftFill = theme.getFill("Button", state.name, "divider-left-colour", Fill.NONE);
+					Fill rightFill = theme.getFill("Button", state.name, "divider-right-colour", Fill.NONE);
+	
+					Graphics.renderRectangle(gl, pos.add(iconWidth, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, leftFill);
+					Graphics.renderRectangle(gl, pos.add(iconWidth+1, padding.y), new Vector2i(1, size.y - padding.y * 2), 0, rightFill);
+				}
+			}
 			
-			int			xPos = (size.x - textSize.x - imageSpace) / 2;
-			Vector2i	iconPos = pos.add(xPos, (size.y - imageHeight) / 2);
-			Vector2i	textPos = pos.add(xPos + imageSpace, (size.y - textSize.y) / 2);
-			
-			if (icon != null) Graphics.renderRectangle(gl, iconPos, icon);
+			Vector2i	textPos = pos.add(iconWidth + (size.x - iconWidth - textSize.x) / 2, (size.y - textSize.y) / 2);
 			theme.renderShadowedText(gl, caption, textPos, textColour, shadowColour, shadowOffset, Text.Size.MEDIUM);
 		}
 		else
@@ -108,5 +132,6 @@ public class Button extends ClickableWidget
 	
 	public void		setCaption(String caption) {this.caption = caption;}
 	public void		setDescription(String description) {this.description = description;}
-	public void		setIcon(Image icon) {this.icon = icon;}
+	public void		setIcon(Image icon) {this.icon = icon; this.hoverIcon = null;}
+	public void		setIcon(Image icon, Image hoverIcon) {this.icon = icon; this.hoverIcon = hoverIcon;}
 }

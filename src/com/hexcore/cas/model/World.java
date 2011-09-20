@@ -27,6 +27,11 @@ public class World
 		return rulesAndColours;
 	}
 	
+	public Grid getGenerationZero()
+	{
+		return worldGenerations.get(0);
+	}
+	
 	public Grid[] getWorld()
 	{
 		if(world != null)
@@ -66,6 +71,13 @@ public class World
 			return worldFileName.substring(worldFileName.lastIndexOf('/') + 1);
 		else
 			return worldFileName;
+	}
+	
+	public void reset()
+	{
+		Grid g = worldGenerations.get(0).clone();
+		worldGenerations.clear();
+		worldGenerations.add(g.clone());
 	}
 	
 	public void setRulesAndColours(String RAC)

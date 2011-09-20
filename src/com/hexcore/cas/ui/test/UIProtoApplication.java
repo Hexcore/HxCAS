@@ -36,6 +36,7 @@ import com.hexcore.cas.ui.TextArea;
 import com.hexcore.cas.ui.Text.Size;
 import com.hexcore.cas.ui.TextBox;
 import com.hexcore.cas.ui.TextWidget;
+import com.hexcore.cas.ui.Theme;
 import com.hexcore.cas.ui.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.TriangleGridWidget;
 import com.hexcore.cas.ui.View;
@@ -45,7 +46,8 @@ import com.hexcore.cas.ui.WindowEventListener;
 
 public class UIProtoApplication implements WindowEventListener
 {
-	public Window		window;
+	public Theme	theme;
+	public Window	window;
 	
 	
 	public View masterView;
@@ -221,8 +223,8 @@ public class UIProtoApplication implements WindowEventListener
 		colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
 		colourRules.setColourRule(2, colourRule);	
 		
-		
-		window = new Window("Cellular Automata Simulator - v1.0", 1024, 700);
+		theme = new Theme();
+		window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
 		
 		window.addListener(this);
 		window.show();
@@ -230,8 +232,7 @@ public class UIProtoApplication implements WindowEventListener
 	
 	public void initialise()
 	{
-		window.loadTheme("data/"+themeName+".thm");
-		
+		theme.loadTheme(themeName);
 		
 		masterView = new View(new Vector2i(10, 10));
 		masterView.setMargin(new Vector2i(0, 0));
@@ -787,7 +788,7 @@ public class UIProtoApplication implements WindowEventListener
 		{
 			System.out.println("Changing theme to "+themeName);
 			
-			window.loadTheme("data/"+themeName+".thm");
+			theme.loadTheme(themeName);
 			currentThemeName = themeName;
 			
 			window.relayout();

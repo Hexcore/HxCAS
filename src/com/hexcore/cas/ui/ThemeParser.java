@@ -12,15 +12,19 @@ import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 
 public class ThemeParser extends ConfigParser
 {
+	private String	themeName;
+	
 	private HashMap<String, Theme.Type>	types;
 	
 	private Set<String>	validStates;
 	private Map<String, Set<String>> validTypeProperties;
 	
-	ThemeParser(String filename)
+	ThemeParser(String themeName)
 	{
+		this.themeName = themeName;
+		
 		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
-		scanner.readFile(filename);
+		scanner.readFile("data/themes/" + themeName + "/theme.thm");
 		
 		validStates = new HashSet<String>();
 		validStates.add("normal");
@@ -34,7 +38,9 @@ public class ThemeParser extends ConfigParser
 		
 		validTypeProperties = new HashMap<String, Set<String>>();
 		addTypeProperties("Button", 
-				"background", "border", "border-radius", "text-colour", "text-offset", "text-shadow-colour","text-shadow-offset");
+				"background", "border", "border-radius", "text-colour", "text-offset", 
+				"text-shadow-colour","text-shadow-offset", "padding",
+				"divider-left-colour", "divider-right-colour", "icon-space-width");
 		addTypeProperties("Panel", 
 				"background", "border", "border-radius");
 		addTypeProperties("Scrollbar", 
@@ -76,6 +82,9 @@ public class ThemeParser extends ConfigParser
 		
 		types = new HashMap<String, Theme.Type>();
 		
+		Theme.Type themeType = new Theme.Type("#:normal");
+		types.put("#:normal", themeType);
+		
 		while (scanner.isValid())
 		{
 			ConfigScanner.Symbol symbol = scanner.getSymbol();
@@ -84,8 +93,25 @@ public class ThemeParser extends ConfigParser
 			String typeName = symbol.text;
 			
 			//System.out.println("Type: " + typeName);
-						
-			if (validTypeProperties.containsKey(typeName) || (typeName.charAt(0) == '.'))
+			
+			if (typeName.equals("name") || typeName.equals("author") || typeName.equals("iconSet"))
+			{
+				if (!expect(":")) 
+				{
+					fastForward(";");
+					return;
+				}
+				
+				String value = scanner.getSymbol().text;
+				
+				if (typeName.equals("name"))
+					themeType.add(new Property("name", value));
+				else if (typeName.equals("author"))
+					themeType.add(new Property("author", value));
+				
+				if (!expect(";")) return;	
+			}
+			else if (validTypeProperties.containsKey(typeName) || (typeName.charAt(0) == '.'))
 				readObject(typeName, (typeName.charAt(0) == '.'));
 			else
 			{
@@ -95,11 +121,11 @@ public class ThemeParser extends ConfigParser
 		}
 		
 		if (errors == 0)
-			System.out.println("Loaded theme: " + filename);
+			System.out.println("Loaded theme: " + themeName);
 		else if (errors == 1)
-			System.out.println("Found a error in theme file: " + filename);
+			System.out.println("Found a error in theme file: " + themeName);
 		else
-			System.out.println("Found " + errors + " in the theme file: " + filename);
+			System.out.println("Found " + errors + " errors in the theme file: " + themeName);
 	}
 	
 	private void addTypeProperties(String type, String... properties)
@@ -321,9 +347,18 @@ public class ThemeParser extends ConfigParser
 		if (!expect("image")) return null;
 		if (!expect("(")) return null;
 		
-		String	filename = scanner.getSymbol().text;
-		Image	image = new Image(filename);
-		if (!image.isValid()) return null;
+		String	category = scanner.getSymbol().text;
+		
+		if (!expect(",")) return null;
+		
+		String	name = scanner.getSymbol().text;
+		
+		Image	image = new Image("data/themes/" + themeName + "/images/" + category + "/" + name);
+		if (!image.isValid()) 
+		{
+			expect(")");
+			return null;
+		}
 		
 		if (!expect(")")) return null;
 		return image;
