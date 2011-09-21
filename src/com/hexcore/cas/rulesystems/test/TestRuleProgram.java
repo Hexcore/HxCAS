@@ -71,10 +71,15 @@ public class TestRuleProgram
 	private byte[] readBytes(String filename) throws Exception
 	{
 		File file = new File(filename);
+		
+		if (!file.exists()) throw new Exception("Test bytecode could not be found");
+		
 		InputStream stream = new FileInputStream(file);
 		
 		int length = (int)file.length();
 		byte[] bytes = new byte[length];
+		
+		System.out.println("Bytecode - File: " + filename + " - Size: " + length);
 		
 		int index = 0;
 	    int numRead = 0;

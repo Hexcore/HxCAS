@@ -16,10 +16,12 @@ public class RuleProgram extends ClassLoader
 	
 	public void loadBytecode(byte[] b)
 	{
+		Log.debug(TAG, "Loading bytecode");
 		Class<?> loadedClass = defineClass(null, b, 0, b.length);
 		
 		try
 		{
+			Log.debug(TAG, "Creating instance of bytecode's class");
 			Object obj = loadedClass.newInstance();
 			if (obj instanceof Rule) 
 				program = (Rule)obj;
