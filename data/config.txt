@@ -6,6 +6,11 @@ Network
 		port = 3118;
 		replyPort = 3117;
 	}
+	
+	Client
+	{
+		port = 3119;
+	}
 }
 
 Theme

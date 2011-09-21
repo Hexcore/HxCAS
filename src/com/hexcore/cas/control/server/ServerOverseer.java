@@ -31,9 +31,12 @@ public class ServerOverseer extends Overseer
 	private ThreadWork[] clientWork = null;
 	private World theWorld = null;
 	
-	public ServerOverseer(World w)
+	private int clientPort;
+	
+	public ServerOverseer(World w, int clientPort)
 	{
 		super();
+		this.clientPort = clientPort;
 		theWorld = w;
 	}
 	
@@ -454,7 +457,7 @@ public class ServerOverseer extends Overseer
 	@Override
 	public void run()
 	{
-		capIP = new CAPIPServer(this);
+		capIP = new CAPIPServer(this, clientPort);
 		((CAPIPServer)capIP).setClientNames(clientNames);
 		capIP.start();
 	}

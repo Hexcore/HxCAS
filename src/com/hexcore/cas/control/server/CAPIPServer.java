@@ -42,10 +42,13 @@ public class CAPIPServer extends CAPInformationProcessor
 	private static final String TAG = "Server";
 	private ThreadWork[] workDoneByClients = null;
 	private ThreadWork[] workSentToClients = null;
+	
+	private int clientPort;
 
-	public CAPIPServer(Overseer o)
+	public CAPIPServer(Overseer o, int clientPort)
 	{
 		super();
+		this.clientPort = clientPort;
 		workForClients = new LinkedBlockingQueue<ThreadWork>();
 		parent = (ServerOverseer)o;
 		lock = new ReentrantLock();
@@ -502,7 +505,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				{
 					try
 					{
-						Socket clientSocket = new Socket(clientNames[i], 3119);
+						Socket clientSocket = new Socket(clientNames[i], clientPort);
 						clients[i] = new CAPMessageProtocol(clientSocket);
 						clients[i].start();
 						clientsConnected[i] = true;
@@ -554,19 +557,19 @@ public class CAPIPServer extends CAPInformationProcessor
 	
 	public void setup()
 	{
-		Log.information(TAG, "Setting up");
+		Log.information(TAG, "Setting up...");
 		for(int i = 0; i < numOfClients; i++)
 		{
 			try
 			{
-				Socket clientSocket = new Socket(clientNames[i], 3119);
+				Socket clientSocket = new Socket(clientNames[i], clientPort);
 				clients[i] = new CAPMessageProtocol(clientSocket);
 				clients[i].start();
 				clientsConnected[i] = true;
 			}
 			catch(IOException e)
 			{
-				Log.error(TAG, "Error making protocols");
+				Log.error(TAG, "Error making protocol for client " + clientNames[i] + " on " + clientPort);
 				e.printStackTrace();
 			}
 		}
