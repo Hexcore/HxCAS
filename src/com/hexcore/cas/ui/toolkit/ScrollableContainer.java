@@ -92,6 +92,7 @@ public class ScrollableContainer extends Container
 		else if (cPos.y < contents.getMargin().y)
 			cPos.y = contents.getMargin().y;
 		
+		scroll(0, 0);
 		contents.relayout();
 	}
 	
