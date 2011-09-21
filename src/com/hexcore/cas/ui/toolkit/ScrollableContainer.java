@@ -14,13 +14,13 @@ public class ScrollableContainer extends Container
 	private boolean		verticalScrollbar;
 	private boolean		horizontalScrollbar;
 	private DragState	dragState = DragState.NONE;
-	private Vector2i	dragPrev;
+	private Vector2i	dragStart;
 	
 	public ScrollableContainer(Vector2i size)
 	{
 		super(size);
 		scrollPos = new Vector2i();
-		dragPrev = new Vector2i();
+		dragStart = new Vector2i();
 		viewSize = new Vector2i(size);
 		maxSize = new Vector2i(size);
 	}
@@ -29,7 +29,7 @@ public class ScrollableContainer extends Container
 	{
 		super(position, size);
 		scrollPos = new Vector2i();
-		dragPrev = new Vector2i();
+		dragStart = new Vector2i();
 		viewSize = new Vector2i(size);
 		maxSize = new Vector2i(size);
 	}
@@ -43,8 +43,9 @@ public class ScrollableContainer extends Container
 	{
 		if (contents == null) return;
 		
-		Vector2i cPos = contents.getPosition(), cSize = contents.getSize();
-		Vector2i cmSize = cSize.add(contents.getMargin()).add(contents.getMargin());
+		Vector2i cPos = contents.getPosition();
+		Vector2i contentsSize = contents.getSize();
+		Vector2i contentsOuterSize = contentsSize.add(contents.getMargin()).add(contents.getMargin());
 		
 		verticalScrollbar = horizontalScrollbar = false;
 
@@ -53,47 +54,44 @@ public class ScrollableContainer extends Container
 		viewSize.x = size.x;
 		viewSize.y = size.y;
 		
-		if ((cmSize.x > size.x) && !contents.isSet(FILL_HORIZONTAL))
-			maxSize.x = cmSize.x;
+		if ((contentsOuterSize.x > size.x) && !contents.isSet(FILL_HORIZONTAL))
+			maxSize.x = contentsOuterSize.x;
 		
-		if ((cmSize.y > size.y) && !contents.isSet(FILL_VERTICAL))
-			maxSize.y = cmSize.y;
+		if ((contentsOuterSize.y > size.y) && !contents.isSet(FILL_VERTICAL))
+			maxSize.y = contentsOuterSize.y;
 		
-		if (maxSize.x > viewSize.x) 
+		for (int i = 0; i < 2; i++) // Do this twice
 		{
-			horizontalScrollbar = true;
-			viewSize.y = size.y - window.getTheme().getScrollbarSize();
-		}
-		
-		if (maxSize.y > viewSize.y) 
-		{
-			verticalScrollbar = true;
-			viewSize.x = size.x - window.getTheme().getScrollbarSize();
-			
 			if (maxSize.x > viewSize.x) 
 			{
 				horizontalScrollbar = true;
 				viewSize.y = size.y - window.getTheme().getScrollbarSize();
+			}
+			
+			if (maxSize.y > viewSize.y) 
+			{
+				verticalScrollbar = true;
+				viewSize.x = size.x - window.getTheme().getScrollbarSize();
 			}
 		}
 		
 		if (contents.isSet(FILL_HORIZONTAL))
 		{
 			cPos.x = contents.getMargin().x; 
-			cSize.x = maxSize.x - contents.getMargin().x * 2; 
+			contentsSize.x = maxSize.x - contents.getMargin().x * 2; 
 		}
 		else if (contents.isSet(CENTER_HORIZONTAL))
-			cPos.x = (maxSize.x - cSize.x) / 2;
+			cPos.x = (maxSize.x - contentsSize.x) / 2;
 		else if (cPos.x < contents.getMargin().x)
 			cPos.x = contents.getMargin().x;
 		
 		if (contents.isSet(FILL_VERTICAL))
 		{
 			cPos.y = contents.getMargin().y; 
-			cSize.y = maxSize.y - contents.getMargin().y * 2; 
+			contentsSize.y = maxSize.y - contents.getMargin().y * 2; 
 		}
 		else if (contents.isSet(CENTER_VERTICAL))
-			cPos.y = (maxSize.y - cSize.y) / 2;
+			cPos.y = (maxSize.y - contentsSize.y) / 2;
 		else if (cPos.y < contents.getMargin().y)
 			cPos.y = contents.getMargin().y;
 		
@@ -133,15 +131,9 @@ public class ScrollableContainer extends Container
 		if (event.type == Event.Type.MOUSE_MOTION)
 		{
 			if (dragState == DragState.VERTICAL)
-			{
-				scroll(0, event.position.y - dragPrev.y);
-				dragPrev.set(event.position);
-			}
+				setScrollY(event.position.y - dragStart.y);
 			else if (dragState == DragState.HORIZONTAL)
-			{
-				scroll(event.position.x - dragPrev.x, 0);
-				dragPrev.set(event.position);				
-			}
+				setScrollX(event.position.x - dragStart.x);			
 		}
 		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
@@ -158,12 +150,12 @@ public class ScrollableContainer extends Container
 				if (event.position.x > position.x + size.x - scrollbarSize)
 				{
 					dragState = DragState.VERTICAL;
-					dragPrev.set(event.position);
+					dragStart.set(event.position);
 				}
 				else if (event.position.y > position.y + size.y - scrollbarSize)
 				{
 					dragState = DragState.HORIZONTAL;
-					dragPrev.set(event.position);
+					dragStart.set(event.position);
 				}				
 			}
 			else
@@ -176,6 +168,20 @@ public class ScrollableContainer extends Container
 		}
 		
 		return handled;
+	}
+	
+	private void setScrollX(int x)
+	{
+		scrollPos.x = x * maxSize.x / viewSize.x;
+		if (scrollPos.x < 0) scrollPos.x = 0;
+		if (scrollPos.x >= maxSize.x - viewSize.x) scrollPos.x = maxSize.x - viewSize.x;
+	}
+	
+	private void setScrollY(int y)
+	{
+		scrollPos.y = y * maxSize.y / viewSize.y;
+		if (scrollPos.y < 0) scrollPos.y = 0;
+		if (scrollPos.y >= maxSize.y - viewSize.y) scrollPos.y = maxSize.y - viewSize.y;
 	}
 	
 	private void scroll(int x, int y)
