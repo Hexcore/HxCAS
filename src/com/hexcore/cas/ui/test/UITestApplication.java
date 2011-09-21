@@ -293,6 +293,7 @@ public class UITestApplication implements WindowEventListener
 		/** A list **/		
 		listScroll = new ScrollableContainer(new Vector2i(50, 50));
 		listScroll.setFlag(Widget.FILL);
+		listScroll.setThemeClass("List");
 		innerLayout.add(listScroll);
 		
 		list = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -305,7 +306,6 @@ public class UITestApplication implements WindowEventListener
 			TextWidget text = new TextWidget(i + "^2 = " + (i * i));
 			list.add(text);
 		}
-		
 		/***********/
 		
 		description = new TextArea(200, 10);

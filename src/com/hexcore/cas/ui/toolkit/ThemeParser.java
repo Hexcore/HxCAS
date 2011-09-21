@@ -44,9 +44,9 @@ public class ThemeParser extends ConfigParser
 		addTypeProperties("Panel", 
 				"background", "border", "border-radius");
 		addTypeProperties("Scrollbar", 
-				"background", "border");
+				"background", "border", "size");
 		addTypeProperties("ScrollbarHandle", 
-				"background", "border");
+				"background", "border", "border-radius", "size");
 		addTypeProperties("ScrollbarFill", 
 				"background", "border");
 		addTypeProperties("TextBox", 

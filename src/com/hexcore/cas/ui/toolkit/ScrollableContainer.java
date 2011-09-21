@@ -54,11 +54,8 @@ public class ScrollableContainer extends Container
 		viewSize.x = size.x;
 		viewSize.y = size.y;
 		
-		if ((contentsOuterSize.x > size.x) && !contents.isSet(FILL_HORIZONTAL))
-			maxSize.x = contentsOuterSize.x;
-		
-		if ((contentsOuterSize.y > size.y) && !contents.isSet(FILL_VERTICAL))
-			maxSize.y = contentsOuterSize.y;
+		if (!contents.isSet(FILL_HORIZONTAL)) maxSize.x = contentsOuterSize.x;
+		if (!contents.isSet(FILL_VERTICAL)) maxSize.y = contentsOuterSize.y;
 		
 		for (int i = 0; i < 2; i++) // Do this twice
 		{
@@ -108,10 +105,15 @@ public class ScrollableContainer extends Container
 		if (contents != null)
 		{
 			window.setClipping(gl, pos, size);
-			if (background != null) Graphics.renderRectangle(gl, pos, size, 0, background);
+			
+			if (background != null) 
+				Graphics.renderRectangle(gl, pos, size, 0, background);
+			else if ((window != null) && !themeClass.isEmpty())
+				Graphics.renderRectangle(gl, pos, size, 0, window.getTheme().getFill(themeClass, "background", Fill.NONE));
+			
 			contents.render(gl, pos.subtract(scrollPos));
 			window.resetView(gl);
-			
+						
 			if (verticalScrollbar)
 				window.getTheme().renderVerticalScrollbar(gl, pos, size, scrollPos.y, maxSize.y, viewSize.y);
 
@@ -120,6 +122,15 @@ public class ScrollableContainer extends Container
 			
 			if (verticalScrollbar && horizontalScrollbar)
 				window.getTheme().renderScrollbarFill(gl, pos, size);
+			
+			Fill borderFill = Fill.NONE;
+			
+			if (border != null)
+				borderFill = border;
+			else if ((window != null) && !themeClass.isEmpty())
+				borderFill = window.getTheme().getFill(themeClass, "border", Fill.NONE);
+			
+			Graphics.renderBorder(gl, pos.subtract(1, 1), size.add(2, 2), 0, borderFill);
 		}
 	}
 	
@@ -187,10 +198,10 @@ public class ScrollableContainer extends Container
 	private void scroll(int x, int y)
 	{
 		scrollPos.inc(x, y);
-		if (scrollPos.x < 0) scrollPos.x = 0;
 		if (scrollPos.x >= maxSize.x - viewSize.x) scrollPos.x = maxSize.x - viewSize.x;
+		if (scrollPos.x < 0) scrollPos.x = 0;
 		
-		if (scrollPos.y < 0) scrollPos.y = 0;
 		if (scrollPos.y >= maxSize.y - viewSize.y) scrollPos.y = maxSize.y - viewSize.y;
+		if (scrollPos.y < 0) scrollPos.y = 0;
 	}
 }

@@ -7,6 +7,12 @@ iconSet: "light";
 	background: none;
 }
 
+.List
+{
+	background: rgb(1.0, 1.0, 1.0);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+}
+
 Button
 {
 	background: rgb(0.95, 0.95, 0.95) rgb(0.85, 0.85, 0.85);
@@ -63,35 +69,26 @@ Dialog
 
 Scrollbar
 {
-	background: rgb(0.8, 0.8, 0.8);
-}
-
-Scrollbar : horizontal
-{
-	background: rgb(0.6, 0.6, 0.6) rgb(0.9, 0.9, 0.9);
-}
-
-Scrollbar : vertical
-{
-	background:  horizontal rgb(0.6, 0.6, 0.6) rgb(0.9, 0.9, 0.9);
+	background: rgba(0.7, 0.7, 0.7, 0.2);
+	size: 16;
 }
 
 ScrollbarHandle
 {
-	background: rgb(0.5, 0.5, 0.5) center image("widgets", "scrollbar_vert.png");
-	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
+	background: rgb(0.5, 0.5, 0.5);
+	border-radius: 6;
+	size: 12;
 }
 
 ScrollbarHandle : horizontal
 {
-	background: rgb(0.5, 0.5, 0.5) center image("widgets", "scrollbar_horz.png");
-	border: rgb(0.6, 0.6, 0.6) rgb(0.3, 0.3, 0.3);
+	background: rgb(0.5, 0.5, 0.5);
+	border-radius: 6;
 }
 
 ScrollbarFill
 {
-	background: rgb(0.6, 0.6, 0.6);
-	border: rgb(0.7, 0.7, 0.7) rgb(0.5, 0.5, 0.5);
+	background: rgba(0.7, 0.7, 0.7, 0.4);
 }
 
 TextBox
