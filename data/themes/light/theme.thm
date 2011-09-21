@@ -69,7 +69,7 @@ Dialog
 
 Scrollbar
 {
-	background: rgba(0.7, 0.7, 0.7, 0.2);
+	background: rgba(0.8, 0.8, 0.8, 0.9);
 	size: 16;
 }
 
@@ -88,7 +88,7 @@ ScrollbarHandle : horizontal
 
 ScrollbarFill
 {
-	background: rgba(0.7, 0.7, 0.7, 0.4);
+	background: rgba(0.7, 0.7, 0.7, 0.9);
 }
 
 TextBox

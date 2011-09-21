@@ -419,9 +419,11 @@ public class Theme
 		int borderRadius = getInteger("Scrollbar", "horizontal", "border-radius", 0);
 		Graphics.renderRectangle(gl, pos, new Vector2i(viewable, wh), borderRadius, getFill("Scrollbar", "horizontal", "background"));
 		
+		int handleSize = getInteger("ScrollbarHandle", "size", wh);
+		int handleOffset = (wh - handleSize) / 2;
 		int handleBorderRadius = getInteger("ScrollbarHandle", "horizontal", "border-radius", 0);
-		Graphics.renderRectangle(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "background"));
-		Graphics.renderBorder(gl, pos.add(scroll, 0), new Vector2i(scrollBlockSize, wh), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "border"));
+		Graphics.renderRectangle(gl, pos.add(scroll, handleOffset), new Vector2i(scrollBlockSize, handleSize), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "background"));
+		Graphics.renderBorder(gl, pos.add(scroll, handleOffset), new Vector2i(scrollBlockSize, handleSize), handleBorderRadius, getFill("ScrollbarHandle", "horizontal", "border"));
 	}
 	
 	public void renderScrollbarFill(GL gl, Vector2i position, Vector2i size)
