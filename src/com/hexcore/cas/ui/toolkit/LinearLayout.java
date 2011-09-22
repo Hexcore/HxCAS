@@ -38,17 +38,17 @@ public class LinearLayout extends Layout
 			for (Widget component : components)
 				if (component.isVisible() && !component.isSet(Widget.FILL))
 				{
-					if (component.getWidth() > maxWidth) maxWidth = component.getWidth();
-					if (component.getHeight() > maxHeight) maxHeight = component.getHeight();
+					if (component.getWidth() > maxWidth) maxWidth = component.getWidth() + component.getMargin().x * 2;
+					if (component.getHeight() > maxHeight) maxHeight = component.getHeight() + component.getMargin().y * 2;
 				}
 			
 			if (direction == Direction.VERTICAL)
 			{
-				if ((maxWidth > 0) && isSet(Widget.WRAP_HORIZONTAL)) setWidth(maxWidth + margin.x * 2);
+				if ((maxWidth > 0) && isSet(Widget.WRAP_HORIZONTAL)) setWidth(maxWidth);
 			}
 			else if (direction == Direction.HORIZONTAL)
 			{
-				if ((maxHeight > 0) && isSet(Widget.WRAP_VERTICAL)) setHeight(maxHeight + margin.y * 2);
+				if ((maxHeight > 0) && isSet(Widget.WRAP_VERTICAL)) setHeight(maxHeight);
 			}
 		}
 				
@@ -93,32 +93,44 @@ public class LinearLayout extends Layout
 		
 		int totalSize = posDir + lastMargin;
 		
-		// Expand components that are marked to fill in the direction of the layout
-		if (fillComponents > 0)
-		{			
-			int distributedSize = (size.get(dirIndex) - totalSize) / fillComponents;
-			
-			if (distributedSize > 0)
-			{
-				int	posAdd = 0;
-				for (Widget component : components)
+		boolean wrapInLayoutDirection = (direction == Direction.VERTICAL) ? isSet(Widget.WRAP_VERTICAL) : isSet(Widget.WRAP_HORIZONTAL);
+		
+		if (wrapInLayoutDirection)
+		{
+			if (direction == Direction.VERTICAL)
+				setHeight(totalSize);
+			else
+				setWidth(totalSize);
+		}
+		else
+		{
+			// Expand components that are marked to fill in the direction of the layout
+			if (fillComponents > 0)
+			{			
+				int distributedSize = (size.get(dirIndex) - totalSize) / fillComponents;
+				
+				if (distributedSize > 0)
 				{
-					if (posAdd > 0)
+					int	posAdd = 0;
+					for (Widget component : components)
 					{
-						if (dirIndex == 0)
-							component.setX(component.getX() + posAdd);
-						else
-							component.setY(component.getY() + posAdd);
-					}
-					
-					if (component.isSet((dirIndex == 1) ? Widget.FILL_VERTICAL : Widget.FILL_HORIZONTAL)) 
-					{
-						if (dirIndex == 0)
-							component.setWidth(distributedSize);
-						else
-							component.setHeight(distributedSize);
+						if (posAdd > 0)
+						{
+							if (dirIndex == 0)
+								component.setX(component.getX() + posAdd);
+							else
+								component.setY(component.getY() + posAdd);
+						}
 						
-						posAdd += distributedSize;
+						if (component.isSet((dirIndex == 1) ? Widget.FILL_VERTICAL : Widget.FILL_HORIZONTAL)) 
+						{
+							if (dirIndex == 0)
+								component.setWidth(distributedSize);
+							else
+								component.setHeight(distributedSize);
+							
+							posAdd += distributedSize;
+						}
 					}
 				}
 			}

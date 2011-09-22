@@ -34,7 +34,7 @@ public class CAPIPClient extends CAPInformationProcessor
 	private ClientOverseer parent = null;
 	private ServerSocket sock = null;
 	
-	public CAPIPClient(Overseer o)
+	public CAPIPClient(Overseer o, int port)
 		throws IOException
 	{
 		super();
@@ -44,13 +44,13 @@ public class CAPIPClient extends CAPInformationProcessor
 		parent = (ClientOverseer)o;
 		try
 		{
-			sock = new ServerSocket(3119);
+			sock = new ServerSocket(port);
 			valid = true;
 			Log.information(TAG, "Socket listening on " + sock.getLocalPort());
 		}
 		catch(IOException ex)
 		{
-			Log.error(TAG, "Could not bind socket to port 3119 - " + ex.getMessage());
+			Log.error(TAG, "Could not bind socket to port " + port + " - " + ex.getMessage());
 		}
 	}
 	

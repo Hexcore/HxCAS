@@ -30,8 +30,10 @@ import com.hexcore.cas.utilities.Log;
 
 public class TestServerControl extends TestCase
 {
-	public ServerOverseer server = null;
 	private static final String TAG = "Test";
+	private static final int TEST_CLIENT_PORT = 3339;
+	
+	public ServerOverseer server = null;
 	public int genNum = 1;
 	
 	private void testClientWork(ThreadWork[] cW)
@@ -246,7 +248,7 @@ public class TestServerControl extends TestCase
 		//================================== Creating ServerOverseer ==================================
 		World theWorld = new World(); 
 		
-		server = new ServerOverseer(theWorld);
+		server = new ServerOverseer(theWorld, TEST_CLIENT_PORT);
 		
 		ArrayList<String> nameList = new ArrayList<String>();
 		nameList.add("localhost");
@@ -331,6 +333,8 @@ public class TestServerControl extends TestCase
 	
 	private class ClientThread extends Thread
 	{
+		private static final String TAG = "ClientThread";
+		
 		private CAPMessageProtocol capMP = null;
 		private boolean sentAccept = false;
 		private Grid grid = null;
@@ -339,8 +343,7 @@ public class TestServerControl extends TestCase
 		private static final int PROTOCOL_VERSION = 1;
 		private Recti workable = null;
 		private ServerSocket sock = null;
-		private static final String TAG = "ClientThread";
-		
+
 		public void accept()
 			throws IOException
 		{
@@ -355,7 +358,7 @@ public class TestServerControl extends TestCase
 		{
 			try
 			{
-				sock = new ServerSocket(3119);
+				sock = new ServerSocket(TEST_CLIENT_PORT);
 			}
 			catch (UnknownHostException e)
 			{

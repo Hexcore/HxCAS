@@ -16,8 +16,8 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 
 	public HexagonGridWidget(Vector2i position, HexagonGrid grid, int tileSize)
 	{
-		super(new Vector2i(grid.getWidth() * 2 * (int)(tileSize * 0.866f) + (int)(tileSize * 0.866f), 
-						   grid.getHeight() * (tileSize + tileSize / 2) + tileSize / 2),
+		super(new Vector2i(grid.getWidth() * (tileSize + tileSize / 2) + tileSize / 2, 
+						   grid.getHeight() * 2 * (int)(tileSize * 0.866f) + (int)(tileSize * 0.866f)),
 						   grid, tileSize);
 	}
 

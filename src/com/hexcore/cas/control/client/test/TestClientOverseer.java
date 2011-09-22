@@ -26,11 +26,13 @@ import com.hexcore.cas.utilities.Log;
 
 public class TestClientOverseer
 {
+	private static final int TEST_CLIENT_PORT = 3229;
+	
 	@Test
 	public void testClientOverseer()
 	{				
 		// Create client overseer
-		ClientOverseer client = new ClientOverseer();
+		ClientOverseer client = new ClientOverseer(TEST_CLIENT_PORT);
 		client.start();
 				
 		// Create dummy server
@@ -76,7 +78,7 @@ public class TestClientOverseer
 			
 			try
 			{
-				socket = new Socket("localhost", 3119);
+				socket = new Socket("localhost", TEST_CLIENT_PORT);
 			}
 			catch (UnknownHostException e)
 			{

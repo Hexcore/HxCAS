@@ -106,7 +106,7 @@ public class Server implements LobbyListener
 							for(int x = 0; x < 20; x++)
 								grid.getCell(x, y).setValue(0, 1.0);
 						
-						overseer = new ServerOverseer(world);
+						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
 						overseer.setClientNames(names);
 						overseer.start();
 						

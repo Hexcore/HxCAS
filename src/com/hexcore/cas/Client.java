@@ -33,7 +33,7 @@ public class Client
 		beacon.start();
 		
 		Log.information(TAG, "Setting up client overseer...");
-		overseer = new ClientOverseer();
+		overseer = new ClientOverseer(config.getInteger("Network.Client", "port", 3119));
 		overseer.start();
 		
 		if (overseer.isValid())

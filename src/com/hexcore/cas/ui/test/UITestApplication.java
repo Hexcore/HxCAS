@@ -66,6 +66,9 @@ public class UITestApplication implements WindowEventListener
 	public SliderWidget	slider;
 	public View			mainView;
 	
+	public ScrollableContainer	listScroll;
+	public LinearLayout			list;
+	
 	public Button		createWorldButton;
 	public Button		loadWorldButton;
 	public Button		optionsButton;
@@ -118,13 +121,13 @@ public class UITestApplication implements WindowEventListener
 
 		waterFlow = new WaterFlow(waterFlowGrid);
 		
-		HexagonGrid grid = new HexagonGrid(new Vector2i(12, 12));
+		HexagonGrid grid = new HexagonGrid(new Vector2i(22, 22));
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
 		grid.getCell(6, 7).setValue(0, 1);		
 		gameOfLife = new GameOfLife(grid);
 		
-		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(12, 12));
+		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(22, 22));
 		rectGrid.getCell(2, 4).setValue(0, 1);
 		rectGrid.getCell(3, 4).setValue(0, 1);
 		rectGrid.getCell(4, 4).setValue(0, 1);
@@ -132,7 +135,7 @@ public class UITestApplication implements WindowEventListener
 		rectGrid.getCell(3, 2).setValue(0, 1);
 		rectGameOfLife = new GameOfLife(rectGrid);
 		
-		TriangleGrid triGrid = new TriangleGrid(new Vector2i(14, 14));
+		TriangleGrid triGrid = new TriangleGrid(new Vector2i(24, 24));
 		triGrid.getCell(7, 6).setValue(0, 1);
 		triGrid.getCell(7, 7).setValue(0, 1);
 		triGrid.getCell(7, 8).setValue(0, 1);
@@ -282,10 +285,28 @@ public class UITestApplication implements WindowEventListener
 		wrenchButton = new Button(theme.getImage("icons", "wrench_icon.png"));
 		innerLayout.add(wrenchButton);	
 		
-		paragraph = new TextWidget("This is a lot of text.\nIt is going to fill the whole width of the screen and then start overflowing to the next line.\nIf it hasn't already then this extra sentence should help force it over the edge. Actually this is now wrapped.\nIt works!");
+		paragraph = new TextWidget("This text is going to fill the whole width of this container and then start overflowing to the next line.\nThis is always on a new line.\n\nIt works!");
 		paragraph.setFlag(Widget.FILL_HORIZONTAL);
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
+		
+		/** A list **/		
+		listScroll = new ScrollableContainer(new Vector2i(50, 50));
+		listScroll.setFlag(Widget.FILL);
+		listScroll.setThemeClass("List");
+		innerLayout.add(listScroll);
+		
+		list = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		list.setMargin(new Vector2i(0, 0));
+		list.setFlag(Widget.WRAP);
+		listScroll.setContents(list);
+		
+		for (int i = 1; i <= 30; i++)
+		{
+			TextWidget text = new TextWidget(i + "^2 = " + (i * i));
+			list.add(text);
+		}
+		/***********/
 		
 		description = new TextArea(200, 10);
 		description.setFlag(Widget.FILL);
@@ -299,7 +320,7 @@ public class UITestApplication implements WindowEventListener
 		tabbedView = new TabbedView(new Vector2i(30, 30));
 		tabbedView.setFlag(Widget.FILL);
 		gridViewLayout.add(tabbedView);
-		
+
 		// Hexagon Grid
 		gridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
 		gridViewerContainer.setFlag(Widget.FILL);

@@ -22,7 +22,7 @@ public class ClientOverseer extends Overseer
 	private boolean valid = false;
 	private int gen = 0;
 
-	public ClientOverseer()
+	public ClientOverseer(int port)
 	{
 		super();
 		
@@ -31,7 +31,7 @@ public class ClientOverseer extends Overseer
 		
 		try
 		{
-			capIP = new CAPIPClient(this);
+			capIP = new CAPIPClient(this, port);
 			valid = ((CAPIPClient)capIP).isValid();
 		}
 		catch (IOException e)
