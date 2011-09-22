@@ -318,16 +318,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			TW = workForClients.poll();
 		}
 		else
-		{
-			try
-			{
-				Thread.sleep(1000);
-			}
-			catch(Exception ex)
-			{
-				ex.printStackTrace();
-			}
-			
+		{			
 			int cntNoRes = 0;
 			for(int i = 0; i < workSentToClients.length; i++)
 				if(workSentToClients[i] != null && workDoneByClients[i] == null)
@@ -348,12 +339,14 @@ public class CAPIPServer extends CAPInformationProcessor
 				else
 				{
 					Log.information(TAG, "No more grid work is available to be sent to clients");
+					lock.unlock();
 					return;
 				}
 			}
 			else
 			{
 				Log.information(TAG, "No more grid work is available to be sent to clients");
+				lock.unlock();
 				return;
 			}
 		}
@@ -532,6 +525,8 @@ public class CAPIPServer extends CAPInformationProcessor
 	
 	public void setClientWork(ThreadWork[] TW, int cG)
 	{
+		lock.lock();
+		workForClients.clear();
 		currGen = cG;
 		gridsDone = 0;
 		for(int i = 0; i < TW.length; i++)
@@ -544,6 +539,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			workDoneByClients[i] = null;
 			workSentToClients[i] = null;
 		}
+		lock.unlock();
 	}
 	
 	public void setGeneration(int cG)
@@ -599,7 +595,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				Message message = clients[i].waitForMessage();
 				if(message != null)
 				{
-					System.out.println("GOT: " + message.toString());
+					//System.out.println("GOT: " + message.toString());
 					interpretInput(message, clients[i].getSocket().getInetAddress().getHostName());
 				}
 			}

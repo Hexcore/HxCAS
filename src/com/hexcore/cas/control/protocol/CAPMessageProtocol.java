@@ -229,7 +229,7 @@ public class CAPMessageProtocol extends Thread
 
 	public void sendMessage(Message message)
 	{
-		System.out.println(message.toString());
+		//System.out.println(message.toString());
 		
 		try
 		{
@@ -356,6 +356,7 @@ public class CAPMessageProtocol extends Thread
 			try
 			{
 				receiveMessage();
+				Log.debug(TAG, "Message Buffer: " + messageQueue.size());
 			}
 			catch(ProtocolErrorException e)
 			{

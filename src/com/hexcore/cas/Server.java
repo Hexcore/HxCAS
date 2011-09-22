@@ -101,9 +101,9 @@ public class Server implements LobbyListener
 						
 						World world = new World();
 						
-						Grid grid = new RectangleGrid(new Vector2i(100, 100));
-						for(int y = 0; y < 100; y++)
-							for(int x = 0; x < 100; x++)
+						Grid grid = new RectangleGrid(new Vector2i(20, 20));
+						for(int y = 0; y < 20; y++)
+							for(int x = 0; x < 20; x++)
 								grid.getCell(x, y).setValue(0, 1.0);
 						
 						overseer = new ServerOverseer(world);
@@ -112,7 +112,7 @@ public class Server implements LobbyListener
 						
 						Thread.sleep(100);
 						
-						overseer.simulate(grid, 10);
+						overseer.simulate(grid, 100);
 						break;
 					}
 					

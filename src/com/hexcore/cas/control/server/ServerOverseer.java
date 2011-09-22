@@ -430,6 +430,7 @@ public class ServerOverseer extends Overseer
 			
 			if(reset)
 			{
+				System.out.println("NEEDS TO RESET!");
 				reset = false;
 				i = 1;
 				super.setGrid(theWorld.getGenerationZero());
@@ -438,15 +439,17 @@ public class ServerOverseer extends Overseer
 			
 			while(paused)
 			{
+				System.out.println("IS PAUSED!");
 			}
 			
 			if(numOfGenerations == 0 || (numOfGenerations != -1 && i > numOfGenerations))
 				break;
-			
+
 			send();
 			while(!isFinishedWork)
 			{
 			}
+			System.out.println("Finished a gen! " + i);
 		}
 		isFinishedGenerations = true;
 	}
