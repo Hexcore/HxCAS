@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.hexcore.cas.utilities.Log;
 
@@ -20,6 +21,7 @@ public class CAPMessageProtocol extends Thread
 	private volatile boolean running = false;
 	private LinkedBlockingQueue<Message> messageQueue = null;
 	private Socket socket = null;
+	private ReentrantLock lock = null;
 
 	private BufferedInputStream inputStream;
 	private int currentByte = NO_BYTE;
@@ -28,6 +30,7 @@ public class CAPMessageProtocol extends Thread
 	{
 		this.socket = socket;
 		this.messageQueue = new LinkedBlockingQueue<Message>();
+		this.lock = new ReentrantLock();
 		
 		try
 		{
@@ -230,7 +233,7 @@ public class CAPMessageProtocol extends Thread
 	public void sendMessage(Message message)
 	{
 		//System.out.println(message.toString());
-		
+		lock.lock();
 		try
 		{
 			OutputStream out = socket.getOutputStream();	
@@ -240,6 +243,10 @@ public class CAPMessageProtocol extends Thread
 		catch(IOException e)
 		{
 			Log.error(TAG, "Error: Could not send message, OutputStream raised a IOException");
+		}
+		finally
+		{
+			lock.unlock();
 		}
 	}
 	
