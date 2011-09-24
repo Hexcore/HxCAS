@@ -6,8 +6,6 @@ public abstract class CAPInformationProcessor extends Thread
 	
 	protected boolean connected = false;
 	protected volatile boolean running = false;
-		
-	protected abstract void interpretInput(Message message);
 	
 	public CAPInformationProcessor()
 	{

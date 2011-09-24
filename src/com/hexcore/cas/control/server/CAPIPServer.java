@@ -27,98 +27,73 @@ import com.hexcore.cas.utilities.Log;
 
 public class CAPIPServer extends CAPInformationProcessor
 {
-	private CAPMessageProtocol[] clients = null;
-	private String[] clientNames = null;
-	private boolean[] clientsConnected = null;
-	private boolean[] receivedAccept = null;
+	private ArrayList<ClientInfo> clients = null;
+	
 	private int currGen = 0;
 	private int gridsDone = 0;
-	private int numOfClients = 0;
 	private int totalGrids = -1;
-	private int[] clientCoreAmounts = null;
 	private LinkedBlockingQueue<ThreadWork> workForClients = null;
-	private Lock lock = null;
+	
+	private Lock workLock;
+	private Lock generationLock;
+	
 	private ServerOverseer parent = null;
 	private static final String TAG = "Server";
 	private ThreadWork[] workDoneByClients = null;
 	private ThreadWork[] workSentToClients = null;
-	
+		
 	private int clientPort;
 
 	public CAPIPServer(Overseer o, int clientPort)
 	{
 		super();
 		this.clientPort = clientPort;
+		
+		this.clients = new ArrayList<ClientInfo>();
+		
 		workForClients = new LinkedBlockingQueue<ThreadWork>();
 		parent = (ServerOverseer)o;
-		lock = new ReentrantLock();
+		
+		workLock = new ReentrantLock();
+		generationLock = new ReentrantLock();
 	}
 	
-	@Override
 	public void disconnect()
 	{
 		Log.information(TAG, "Disconnecting clients");
-		
-		for(int i = 0; i < clients.length; i++)
-			sendDisconnect(i);
-		
-		try
-		{
-			Thread.sleep(3000);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		
-		for(int i = 0; i < clients.length; i++)
-			clients[i].disconnect();
-		
-		super.disconnect();
+		for (ClientInfo client : clients) client.disconnect();
 	}
 	
 	public int getTotalCoreAmount()
 	{
 		int cores = 0;
-		for(int i = 0; i < clientCoreAmounts.length; i++)
-			cores += clientCoreAmounts[i];
+		for (ClientInfo client : clients)
+			cores += client.cores;
 		return cores;
 	}
 	
 	public int getConnectedAmount()
 	{
 		int connectedNum = 0;
-		for(int i = 0; i < receivedAccept.length; i++)
-			if(receivedAccept[i])
+		for (ClientInfo client : clients)
+			if(client.accepted)
 				connectedNum++;
 		return connectedNum;
-	}
-	
-	@Override
-	protected void interpretInput(Message message)
-	{
-		Log.error(TAG, "THIS INTERPRETINPUT FUNCTION IN CAPIPSERVER SHOULD NOT BE CALLED");
-		return;
 	}
 
 	protected void interpretInput(Message message, String host)
 	{
 		Log.information(TAG, "Interpreting received message");
-		int hostPos = -1;
-		for(int i = 0; i < numOfClients; i++)
-		{
-			if(clients[i].getSocket().getInetAddress().getHostName().compareTo(host) == 0)
+		
+		ClientInfo fromClient = null;
+		for (ClientInfo client : clients)
+			if (client.protocol.getSocket().getInetAddress().getHostName().compareTo(host) == 0)
 			{
-				hostPos = i;
+				fromClient = client;
 				break;
 			}
-			else
-			{
-				continue;
-			}
-		}
 		
-		if(hostPos == -1)
+		if (fromClient == null)
 		{
 			Log.error(TAG, "Host name was not found as a client");
 			return;
@@ -132,11 +107,12 @@ public class CAPIPServer extends CAPInformationProcessor
 		{
 			if(map.get("TYPE").toString().compareTo("ACCEPT") == 0)
 			{
-				receivedAccept[hostPos] = true;
+				fromClient.accepted = true;
+				
 				TreeMap<String, Node> bodyMap = body.getDictValues();
 				if(bodyMap.containsKey("CORES"))
 				{
-					clientCoreAmounts[hostPos] = ((IntNode)bodyMap.get("CORES")).getIntValue();
+					fromClient.cores = ((IntNode)bodyMap.get("CORES")).getIntValue();
 				}
 				else
 				{
@@ -146,13 +122,13 @@ public class CAPIPServer extends CAPInformationProcessor
 				
 				if(currGen != 0 && currGen != -1)
 				{
-					for(int i = 0; i < clientCoreAmounts[hostPos]; i++)
-						sendAGrid(hostPos);
+					for(int i = 0; i < fromClient.cores; i++)
+						sendAGrid(fromClient);
 				}
 			}
 			else if(map.get("TYPE").toString().compareTo("REJECT") == 0)
 			{
-				receivedAccept[hostPos] = false;
+				fromClient.accepted = false;
 			}
 			else if(map.get("TYPE").toString().compareTo("STATUS") == 0)
 			{
@@ -178,7 +154,7 @@ public class CAPIPServer extends CAPInformationProcessor
 							Log.error(TAG, "STATE value is not valid");
 							break;
 					}
-					parent.setStatus(hostPos, state);
+					fromClient.status = state;
 				}
 				else
 				{
@@ -188,22 +164,23 @@ public class CAPIPServer extends CAPInformationProcessor
 			}
 			else if(map.get("TYPE").toString().compareTo("RESULT") == 0)
 			{
-				if(!receivedAccept[hostPos])
+				if (!fromClient.accepted)
 				{
 					Log.error(TAG, "ACCEPT message has not been received from client yet");
 					return;
 				}
+				else if (body == null)
+				{
+					Log.error(TAG, "RESULT message is missing a body");
+					return;
+				}
+				
 				TreeMap<String, Node> gi = body.getDictValues();
 				Recti area = null;
 				int ID = -1;
 				int gen = 0;
 				
-				if(body == null)
-				{
-					Log.error(TAG, "RESULT message is missing a body");
-					return;
-				}
-				else if(!body.has("MORE"))
+				if(!body.has("MORE"))
 				{
 					Log.error(TAG, "RESULT message is missing the MORE field");
 					return;
@@ -261,15 +238,27 @@ public class CAPIPServer extends CAPInformationProcessor
 					}
 				}
 				
-				ThreadWork TW = new ThreadWork(grid, area, ID, gen);
-				workDoneByClients[ID] = TW.clone();
+				workDoneByClients[ID] = new ThreadWork(grid, area, ID, gen);
 				workSentToClients[ID] = null;
-				
-				int moreFlag = ((IntNode)gi.get("MORE")).getIntValue();
-				for(int i = 0; i < moreFlag; i++)
-					sendAGrid(hostPos);
-				
+
 				gridsDone++;
+				if(gridsDone == totalGrids)
+				{
+					Log.debug(TAG, "Sending work done by clients");
+					ArrayList<ThreadWork> workTmp = new ArrayList<ThreadWork>();
+					
+					for(int i = 0; i < workDoneByClients.length; i++)
+						workTmp.add(workDoneByClients[i].clone());
+					
+					parent.setClientWork(workTmp);
+					gridsDone = 0;
+				}
+				else
+				{
+					int more = ((IntNode)gi.get("MORE")).getIntValue();
+					
+					for (int i = 0; i < more; i++) sendAGrid(fromClient);
+				}
 			}
 			else
 			{
@@ -283,108 +272,75 @@ public class CAPIPServer extends CAPInformationProcessor
 			return;
 		}
 	}
-	
-	public void sendCode()
+
+	public void sendAGrid(ClientInfo client)
 	{
-		
-	}
-	
-	public void sendConnect(int index)
-	{
-		CAPMessageProtocol CAPMP = clients[index];
-		DictNode header = this.makeHeader("CONNECT");
-		
-		Message msg = new Message(header);
-		CAPMP.sendMessage(msg);
-	}
-	
-	public void sendDisconnect(int index)
-	{
-		CAPMessageProtocol CAPMP = clients[index];
-		DictNode header = this.makeHeader("DISCONNECT");
-		
-		Message msg = new Message(header);
-		CAPMP.sendMessage(msg);
-	}
-	
-	public void sendAGrid(int index)
-	{
-		CAPMessageProtocol MP = clients[index];
 		Log.information(TAG, "Sending grids - follow-up procedure");
-		ThreadWork TW = null;
-		DictNode header = this.makeHeader("GRID");
+		ThreadWork work = null;
 		
-		lock.lock();
+		workLock.lock();
 		
-		if(workForClients.size() != 0)
-		{
-			TW = workForClients.poll();
-		}
-		else
+		if (workForClients.isEmpty())
 		{			
-			int cntNoRes = 0;
+			boolean uncompleteWork = false;
 			for(int i = 0; i < workSentToClients.length; i++)
 				if(workSentToClients[i] != null && workDoneByClients[i] == null)
-					cntNoRes++;
-			if(cntNoRes > 0)
-			{
-				int len = workSentToClients.length;
-				for(int i = len - 1; i >= 0; i--)
 				{
+					uncompleteWork = true;
+					break;
+				}
+			
+			if (uncompleteWork)
+				for(int i = workSentToClients.length - 1; i >= 0; i--)
 					if(workSentToClients[i] != null)
 					{
-						workForClients.add(workSentToClients[i].clone());
+						work = workSentToClients[i];
 						workSentToClients[i] = null;
+						break;
 					}
-				}
-				if(workForClients.size() != 0)
-					TW = workForClients.poll();
-				else
-				{
-					Log.information(TAG, "No more grid work is available to be sent to clients");
-					lock.unlock();
-					return;
-				}
-			}
-			else
-			{
-				Log.information(TAG, "No more grid work is available to be sent to clients");
-				lock.unlock();
-				return;
-			}
+		}
+		else
+			work = workForClients.poll();
+		
+		workLock.unlock();
+		
+		if (work == null)
+		{
+			Log.information(TAG, "No more grid work is available to be sent to clients");
+			return;
 		}
 		
-		lock.unlock();
+		DictNode header = makeHeader("GRID");
 		
 		DictNode grid = new DictNode();
 		ListNode size = new ListNode();
-		size.addToList(new IntNode(TW.getGrid().getSize().x));
-		size.addToList(new IntNode(TW.getGrid().getSize().y));
+		size.addToList(new IntNode(work.getGrid().getSize().x));
+		size.addToList(new IntNode(work.getGrid().getSize().y));
 		grid.addToDict("SIZE", size);
 		
 		ListNode area = new ListNode();
-		area.addToList(new IntNode(TW.getWorkableArea().getPosition().x));
-		area.addToList(new IntNode(TW.getWorkableArea().getPosition().y));
-		area.addToList(new IntNode(TW.getWorkableArea().getSize().x));
-		area.addToList(new IntNode(TW.getWorkableArea().getSize().y));
+		area.addToList(new IntNode(work.getWorkableArea().getPosition().x));
+		area.addToList(new IntNode(work.getWorkableArea().getPosition().y));
+		area.addToList(new IntNode(work.getWorkableArea().getSize().x));
+		area.addToList(new IntNode(work.getWorkableArea().getSize().y));
 		grid.addToDict("AREA", area);
 		
-		grid.addToDict("PROPERTIES", new IntNode(TW.getGrid().getCell(0, 0).getValueCount()));
+		grid.addToDict("PROPERTIES", new IntNode(work.getGrid().getCell(0, 0).getValueCount()));
 		
 		char[] c = new char[1];
-		c[0] = TW.getGrid().getType();
+		c[0] = work.getGrid().getType();
 		grid.addToDict("GRIDTYPE", new ByteNode(new String(c)));
 		
 		ListNode rows = new ListNode();
-		for(int y = 0; y < TW.getGrid().getHeight(); y++)
+		for(int y = 0; y < work.getGrid().getHeight(); y++)
 		{
 			ListNode currRow = new ListNode(); 
-			for(int x = 0; x < TW.getGrid().getWidth(); x++)
+			for(int x = 0; x < work.getGrid().getWidth(); x++)
 			{
 				ListNode currCell = new ListNode();
-				for(int j = 0; j < TW.getGrid().getCell(x, y).getValueCount(); j++)
+				for(int j = 0; j < work.getGrid().getCell(x, y).getValueCount(); j++)
 				{
-					currCell.addToList(new DoubleNode(TW.getGrid().getCell(x, y).getValue(j)));
+					currCell.addToList(new DoubleNode(work.getGrid().getCell(x, y).getValue(j)));
 				}
 				currRow.addToList(currCell);
 			}
@@ -392,143 +348,79 @@ public class CAPIPServer extends CAPInformationProcessor
 		}
 		grid.addToDict("DATA", rows);
 		
-		IntNode ID = new IntNode(TW.getID());
+		IntNode ID = new IntNode(work.getID());
 		grid.addToDict("ID", ID);
 		
 		IntNode genNum = new IntNode(currGen);
 		grid.addToDict("GENERATION", genNum);
 		
 		Message msg = new Message(header, grid);
-		MP.sendMessage(msg);
+		client.protocol.sendMessage(msg);
 		
-		workSentToClients[TW.getID()] = TW.clone();
+		workSentToClients[work.getID()] = work;
 	}
 	
 	public void sendGrids()
 	{
 		Log.information(TAG, "Sending grids - initial procedure");
-		int numOfAllCores = 0;
-		for(int i = 0; i < clientCoreAmounts.length; i++)
-			numOfAllCores += clientCoreAmounts[i];
+		
+		int numOfAllCores = getTotalCoreAmount();
+		
 		boolean sendToAllCores = false;
 		if(workForClients.size() >= numOfAllCores)
 			sendToAllCores = true;
 		
-		for(int i = 0; i < numOfClients; i++)
+		for (ClientInfo client : clients)
 		{
 			if(sendToAllCores)
-				for(int j = 0; j < clientCoreAmounts[i]; j++)
-					sendAGrid(i);
+			{
+				for(int j = 0; j < client.cores; j++)
+					sendAGrid(client);
+			}
 			else
-				sendAGrid(i);
+				sendAGrid(client);
 		}
 	}
 	
-	public void sendQuery(int index)
+	public void updateClientStatus()
 	{
-		CAPMessageProtocol CAPMP = clients[index];
-		DictNode header = this.makeHeader("QUERY");
-		
+		for (ClientInfo client : clients)
+		{
+			DictNode header = this.makeHeader("QUERY");
+			Message msg = new Message(header);
+			client.protocol.sendMessage(msg);
+		}
+	}
+	
+	public void forceConnect(int index)
+	{
+		System.out.println(clients.size());
+		ClientInfo client = clients.get(index);
+		DictNode header = makeHeader("CONNECT");
 		Message msg = new Message(header);
-		CAPMP.sendMessage(msg);
+		client.protocol.sendMessage(msg);
 	}
 	
-	public void setClientNames(String[] names)
+	public void connectClients(String[] names)
 	{
-		int size = names.length;
-		if(clientNames == null)
+		for (ClientInfo client : clients) client.disconnect();
+				
+		clients.clear();
+				
+		for (String name : names) 
 		{
-			clientNames = new String[size];
-			for(int i = 0; i < size; i++)
-				clientNames[i] = names[i];
-			numOfClients = size;
-			clients = new CAPMessageProtocol[numOfClients];
-			clientsConnected = new boolean[numOfClients];
-			receivedAccept = new boolean[numOfClients];
-			clientCoreAmounts = new int[numOfClients];
-			
-			for(int i = 0; i < numOfClients; i++)
-			{
-				clientsConnected[i] = false;
-				receivedAccept[i] = false;
-				clientCoreAmounts[i] = 0;
-			}
+			Log.debug(TAG, "Connecting client");
+			ClientInfo client = new ClientInfo(name);			
+			client.connect();
+			clients.add(client);
 		}
-		else
-		{
-			int currSize = clientNames.length;
-			int newSize = names.length;
-			ArrayList<ClientInfo> tmp = new ArrayList<ClientInfo>();
-			ArrayList<String> tmpClientNames = new ArrayList<String>();
-			for(int i = 0; i < currSize; i++)
-				tmpClientNames.add(clientNames[i]);
-			
-			for(int i = 0; i < newSize; i++)
-			{
-				if(tmpClientNames.contains(names[i]))
-				{
-					int pos = tmpClientNames.indexOf(names[i]);
-					tmp.add(new ClientInfo(clientNames[pos], clients[pos], clientsConnected[pos], receivedAccept[pos], clientCoreAmounts[pos]));
-				}
-				else
-				{
-					tmp.add(new ClientInfo(names[i], null, false, false, 0));
-				}
-			}
-
-			clientNames = new String[newSize];
-			numOfClients = newSize;
-			clients = new CAPMessageProtocol[numOfClients];
-			clientsConnected = new boolean[numOfClients];
-			receivedAccept = new boolean[numOfClients];
-			clientCoreAmounts = new int[numOfClients];
-			
-			for(int i = 0; i < newSize; i++)
-			{
-				clientNames[i] = tmp.get(i).name;
-				clients[i] = tmp.get(i).mp;
-				clientsConnected[i] = tmp.get(i).connected;
-				receivedAccept[i] = tmp.get(i).accepted;
-				clientCoreAmounts[i] = tmp.get(i).cores;
-			}
-			
-			for(int i = 0; i < newSize; i++)
-			{
-				if(clientsConnected[i] == false)
-				{
-					try
-					{
-						Socket clientSocket = new Socket(clientNames[i], clientPort);
-						clients[i] = new CAPMessageProtocol(clientSocket);
-						clients[i].start();
-						clientsConnected[i] = true;
-					}
-					catch(IOException e)
-					{
-						Log.error(TAG, "Error making protocol after client additions/deletions");
-						e.printStackTrace();
-					}
-					
-					try
-					{
-						Thread.sleep(3000);
-					}
-					catch(Exception ex)
-					{
-						ex.printStackTrace();
-					}
-					
-					sendConnect(i);
-				}
-				else
-					continue;
-			}
-		}
+		
+		System.out.println("Connected: " + clients.size());
 	}
 	
 	public void setClientWork(ThreadWork[] TW, int cG)
 	{
-		lock.lock();
+		workLock.lock();
 		workForClients.clear();
 		currGen = cG;
 		gridsDone = 0;
@@ -542,7 +434,7 @@ public class CAPIPServer extends CAPInformationProcessor
 			workDoneByClients[i] = null;
 			workSentToClients[i] = null;
 		}
-		lock.unlock();
+		workLock.unlock();
 	}
 	
 	public void setGeneration(int cG)
@@ -550,73 +442,18 @@ public class CAPIPServer extends CAPInformationProcessor
 		currGen = cG;
 		gridsDone = 0;
 	}
-	
-	public void setup()
-	{
-		Log.information(TAG, "Setting up...");
-		for(int i = 0; i < numOfClients; i++)
-		{
-			try
-			{
-				Socket clientSocket = new Socket(clientNames[i], clientPort);
-				clients[i] = new CAPMessageProtocol(clientSocket);
-				clients[i].start();
-				clientsConnected[i] = true;
-			}
-			catch(IOException e)
-			{
-				Log.error(TAG, "Error making protocol for client " + clientNames[i] + " on " + clientPort);
-				e.printStackTrace();
-			}
-		}
-		
-		try
-		{
-			Thread.sleep(3000);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		
-		for(int i = 0; i < numOfClients; i++)
-			sendConnect(i);
-	}
 
 	@Override
 	public void run()
-	{
-		setup();
-		
-		Log.information(TAG, "Now running");
-		
+	{	
+		Log.information(TAG, "Running...");
 		running = true;
 		while(running)
 		{
-			for(int i = 0; i < numOfClients; i++)
+			for (ClientInfo client : clients)
 			{
-				Message message = clients[i].waitForMessage();
-				if(message != null)
-				{
-					//System.out.println("GOT: " + message.toString());
-					interpretInput(message, clients[i].getSocket().getInetAddress().getHostName());
-				}
-			}
-			if(gridsDone == totalGrids)
-			{
-				Log.debug(TAG, "Sending work done by clients");
-				ArrayList<ThreadWork> workTmp = new ArrayList<ThreadWork>();
-				for(int i = 0; i < workDoneByClients.length; i++)
-				{
-					if(workDoneByClients[i] == null)
-					{
-						System.out.println("workDoneByClients[" + i + "] == null");
-						continue;
-					}
-					workTmp.add(workDoneByClients[i].clone());
-				}
-				parent.setClientWork(workTmp);
-				gridsDone = 0;
+				Message message = client.protocol.waitForMessage();
+				if(message != null) interpretInput(message, client.protocol.getSocket().getInetAddress().getHostName());
 			}
 		}
 	}
@@ -624,18 +461,53 @@ public class CAPIPServer extends CAPInformationProcessor
 	private class ClientInfo
 	{
 		String name = null;
-		CAPMessageProtocol mp = null;
-		boolean connected = false;
+		CAPMessageProtocol protocol = null;
+		int	status = 0;
 		boolean accepted = false;
 		int cores = 0;
 		
-		public ClientInfo(String n, CAPMessageProtocol m, boolean c, boolean a, int co)
+		public ClientInfo(String name)
 		{
-			name = n;
-			mp = m;
-			connected = c;
-			accepted = a;
-			cores = co;
+			this.name = name;
+			this.protocol = null;
+			this.accepted = false;
+			this.cores = 0;
+		}
+		
+		public void connect()
+		{			
+			try
+			{
+				protocol = new CAPMessageProtocol(new Socket(name, clientPort));
+				protocol.start();
+			}
+			catch(IOException e)
+			{
+				Log.error(TAG, "Error making protocol after client additions/deletions");
+				e.printStackTrace();
+			}
+			
+			DictNode header = makeHeader("CONNECT");
+			Message msg = new Message(header);
+			protocol.sendMessage(msg);
+		}
+		
+		public void disconnect()
+		{
+			DictNode header = makeHeader("DISCONNECT");
+			Message msg = new Message(header);
+			protocol.sendMessage(msg);
+			
+			try
+			{
+				Thread.sleep(1000);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			protocol.disconnect();
 		}
 	}
 }

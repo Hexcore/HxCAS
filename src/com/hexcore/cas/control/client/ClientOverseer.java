@@ -18,6 +18,8 @@ public class ClientOverseer extends Overseer
 	private LinkedBlockingQueue<Work> workQueue;
 	private LinkedBlockingQueue<Work> completedQueue;
 	
+	private CAPIPClient informationProcessor;
+	
 	private boolean running = false;
 	private boolean valid = false;
 	private int gen = 0;
@@ -31,8 +33,8 @@ public class ClientOverseer extends Overseer
 		
 		try
 		{
-			capIP = new CAPIPClient(this, port);
-			valid = ((CAPIPClient)capIP).isValid();
+			informationProcessor = new CAPIPClient(this, port);
+			valid = informationProcessor.isValid();
 		}
 		catch (IOException e)
 		{
@@ -78,11 +80,11 @@ public class ClientOverseer extends Overseer
 		return valid;
 	}
 	
-	@Override
 	public void disconnect()
 	{
 		valid = false;
 		running = false;
+		informationProcessor.disconnect();
 	}
 	
 	@Override
@@ -103,7 +105,7 @@ public class ClientOverseer extends Overseer
 		
 		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread();
 
-		capIP.start();
+		informationProcessor.start();
 				
 		Log.information(TAG, "Ready");
 		
@@ -127,12 +129,12 @@ public class ClientOverseer extends Overseer
 			
 			Log.information(TAG, "Sending completed work");
 			int more = Math.max(Runtime.getRuntime().availableProcessors() - workQueue.size(), 0);			
-			((CAPIPClient)capIP).sendResult(work.grid, work.workArea, more, work.ID, gen);
+			informationProcessor.sendResult(work.grid, work.workArea, more, work.ID, gen);
 		}
 		
 		Log.information(TAG, "Stopping...");
 		
-		capIP.disconnect();
+		informationProcessor.disconnect();
 		
 		try
 		{

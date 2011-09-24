@@ -16,6 +16,8 @@ import com.hexcore.cas.utilities.Log;
 
 public class ServerOverseer extends Overseer
 {
+	private static final String TAG = "Server";
+	
 	private String[] clientNames = null;
 	private volatile boolean isFinishedGenerations = false;
 	private volatile boolean isFinishedWork = false;
@@ -25,19 +27,18 @@ public class ServerOverseer extends Overseer
 	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
 	private int threadWorkID = 0;
-	private int[] clientStatuses = null;
-	private Recti[] clientWorkables = null;
-	private static final String TAG = "Server";
-	private ThreadWork[] clientWork = null;
-	private World theWorld = null;
 	
+	private Recti[] clientWorkables = null;
+	private ThreadWork[] clientWork = null;
+	private World world = null;
+	
+	private CAPIPServer informationProcessor = null;
 	private int clientPort;
 	
-	public ServerOverseer(World w, int clientPort)
+	public ServerOverseer(World world, int clientPort)
 	{
-		super();
 		this.clientPort = clientPort;
-		theWorld = w;
+		this.world = world;
 	}
 	
 	/*
@@ -336,32 +337,29 @@ public class ServerOverseer extends Overseer
 	public void requestStatuses()
 	{
 		Log.information(TAG, "Requesting client statuses");
-		for(int i = 0; i < numOfClients; i++)
-			((CAPIPServer)capIP).sendQuery(i);
+		informationProcessor.updateClientStatus();
+	}
+	
+	public void forceConnect(int index)
+	{
+		informationProcessor.forceConnect(index);
 	}
 	
 	public void reset()
 	{
 		reset = true;
 		numOfGenerations = 0;
-		theWorld.reset();
-		((CAPIPServer)capIP).setGeneration(currGen);
+		world.reset();
+		informationProcessor.setGeneration(currGen);
 	}
 	
 	public void send()
 	{
 		isFinishedWork = false;
-		((CAPIPServer)capIP).setClientWork(clientWork, currGen);
-		((CAPIPServer)capIP).sendGrids();
+		informationProcessor.setClientWork(clientWork, currGen);
+		informationProcessor.sendGrids();
 	}
-	
-	//FOR TESTING PURPOSES ONLY
-	public void sendManualConnect(int index)
-	{
-		Log.information(TAG, "Sending manual CONNECT message");
-		((CAPIPServer)capIP).sendConnect(index);
-	}
-	
+
 	//Called from CAPIPServer to pass up work done
 	public void setClientWork(ArrayList<ThreadWork> CW)
 	{
@@ -373,7 +371,7 @@ public class ServerOverseer extends Overseer
 		CW.clear();
 		
 		rebuildGrid();
-		theWorld.addGeneration(grid);
+		world.addGeneration(grid);
 		
 		if(grid.getWrappable())
 			makeWrappableGrids();
@@ -389,12 +387,11 @@ public class ServerOverseer extends Overseer
 		clientNames = new String[size];
 		names.toArray(clientNames);
 		numOfClients = size;
-		clientStatuses = new int[numOfClients];
 	}
 	
 	public void setClientWorkables()
 	{
-		Recti[] split = divideToClients(grid.getSize(), ((CAPIPServer)capIP).getTotalCoreAmount() * 2);
+		Recti[] split = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 2);
 		clientWorkables = new Recti[split.length];
 		for(int i = 0; i < split.length; i++)
 			clientWorkables[i] = new Recti(split[i].getPosition(), split[i].getSize());
@@ -404,25 +401,14 @@ public class ServerOverseer extends Overseer
 			makeNonwrappableGrids();
 	}
 	
-	public void setStatus(int index, int status)
-	{
-		clientStatuses[index] = status;
-	}
-
 	public void simulate(Grid g, int gN)
 	{
-		boolean displayed = false;
-		while(((CAPIPServer)capIP).getConnectedAmount() != clientNames.length)
-		{
-			if(!displayed)
-			{
-				Log.information(TAG, "Waiting for clients to send connect...");
-				displayed = true;
-			}
-		}
-		
+		Log.information(TAG, "Waiting for clients to send connect...");
+		while (informationProcessor.getConnectedAmount() != clientNames.length) {}
+
+		Log.information(TAG, "Starting simulation...");
 		super.setGrid(g);
-		theWorld.addGeneration(g);
+		world.addGeneration(g);
 		numOfGenerations = gN;
 		setClientWorkables();
 		
@@ -430,13 +416,14 @@ public class ServerOverseer extends Overseer
 		for(int i = 1; ; i++)
 		{
 			currGen = i;
+			System.out.println("Starting a gen! " + i);
 			
 			if(reset)
 			{
 				System.out.println("NEEDS TO RESET!");
 				reset = false;
 				i = 1;
-				super.setGrid(theWorld.getGenerationZero());
+				super.setGrid(world.getGenerationZero());
 				setClientWorkables();
 			}
 			
@@ -457,11 +444,16 @@ public class ServerOverseer extends Overseer
 		isFinishedGenerations = true;
 	}
 	
+	public void disconnect()
+	{
+		informationProcessor.disconnect();
+	}
+	
 	@Override
 	public void run()
 	{
-		capIP = new CAPIPServer(this, clientPort);
-		((CAPIPServer)capIP).setClientNames(clientNames);
-		capIP.start();
+		informationProcessor = new CAPIPServer(this, clientPort);
+		informationProcessor.connectClients(clientNames);
+		informationProcessor.start();
 	}
 }

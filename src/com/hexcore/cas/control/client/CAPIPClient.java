@@ -15,6 +15,7 @@ import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
 import com.hexcore.cas.control.protocol.Overseer;
+import com.hexcore.cas.control.server.CAPIPServer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -37,8 +38,6 @@ public class CAPIPClient extends CAPInformationProcessor
 	public CAPIPClient(Overseer o, int port)
 		throws IOException
 	{
-		super();
-		
 		Log.information(TAG, "Creating Client...");
 		
 		parent = (ClientOverseer)o;
@@ -132,7 +131,6 @@ public class CAPIPClient extends CAPInformationProcessor
 		protocol.sendMessage(msg);
 	}
 
-	@Override
 	protected void interpretInput(Message message)
 	{
 		DictNode header = message.getHeader();
@@ -320,7 +318,7 @@ public class CAPIPClient extends CAPInformationProcessor
 				}
 			}
 
-			System.out.println("CAPIPClient: Got work from server");
+			Log.information(TAG, "Got work from server");
 			parent.addGrid(grid, area, id, gen);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)

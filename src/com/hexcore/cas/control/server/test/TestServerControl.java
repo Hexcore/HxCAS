@@ -257,39 +257,43 @@ public class TestServerControl extends TestCase
 		String[] nameListArr = server.getClientNames();
 		testNameList(nameListArr);
 
+		Log.debug(TAG, " -- Start server");
 		server.start();
 		
 		try
 		{
-			Thread.sleep(5000);
+			Thread.sleep(1000);
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
 		
-		server.sendManualConnect(0);
+		Log.debug(TAG, " -- Second connect");
+		server.forceConnect(0);
 		
 		try
 		{
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
 
+		Log.debug(TAG, " -- Get status");
 		server.requestStatuses();
 		
 		try
 		{
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 		}
 		
+		Log.debug(TAG, " -- Simulate");
 		server.simulate(g, genNum);
 		
 		while(!server.isFinished())
@@ -303,6 +307,8 @@ public class TestServerControl extends TestCase
 				ex.printStackTrace();
 			}
 		}
+		
+		Log.debug(TAG, " -- Finished");
 		
 		Grid grid = server.getGrid();
 		testGridAfterFlips(grid);
@@ -347,6 +353,7 @@ public class TestServerControl extends TestCase
 		public void accept()
 			throws IOException
 		{
+			Log.debug(TAG, "Creating client");
 			capMP = new CAPMessageProtocol(sock.accept());
 			capMP.start();
 		
@@ -384,23 +391,11 @@ public class TestServerControl extends TestCase
 			Message message = null;
 			
 			//Waiting for CONNECT message type.
+			Log.debug(TAG, "Waiting for a connect message...");
 			message = null;
-			boolean displayed = false;
-			while(true)
-			{
-				if(!displayed)
-				{
-					Log.debug(TAG, "Waiting for a connect message.");
-					displayed = true;
-				}
-				message = capMP.waitForMessage();
-				if(message != null)
-				{
-					displayed = false;
-					break;
-				}
-			}
-			if(message != null)
+			while (message == null) message = capMP.waitForMessage();
+	
+			if (message != null)
 			{
 				DictNode header = message.getHeader();
 				if(header.get("TYPE").toString().equals("CONNECT"))
@@ -440,28 +435,15 @@ public class TestServerControl extends TestCase
 						capMP.sendState(2, "VERSION MISSING");
 				}
 				else
-				{
-					capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE CONNECT");
-				}
+					fail("Expected 1st CONNECT message");
 			}
 			
 			//Waiting for CONNECT message type to raise error.
+			Log.debug(TAG, "Waiting for a second connect message.");
 			message = null;
-			while(true)
-			{
-				if(!displayed)
-				{
-					Log.debug(TAG, "Waiting for a second connect message.");
-					displayed = true;
-				}
-				message = capMP.waitForMessage();
-				if(message != null)
-				{
-					displayed = false;
-					break;
-				}
-			}
-			if(message != null)
+			while (message == null) message = capMP.waitForMessage();
+
+			if (message != null)
 			{
 				DictNode header = message.getHeader();
 				if(header.get("TYPE").toString().equals("CONNECT"))
@@ -473,59 +455,31 @@ public class TestServerControl extends TestCase
 					}
 				}
 				else
-				{
-					capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE CONNECT");
-				}
+					fail("Expected 2nd CONNECT message");
 			}
 			
 			//Waiting for QUERY message type
+			Log.debug(TAG, "Waiting for a query message.");
 			message = null;
-			while(true)
-			{
-				if(!displayed)
-				{
-					Log.debug(TAG, "Waiting for a query message.");
-					displayed = true;
-				}
-				message = capMP.waitForMessage();
-				if(message != null)
-				{
-					displayed = false;
-					break;
-				}
-			}
-			if(message != null)
+			while (message == null) message = capMP.waitForMessage();
+
+			if (message != null)
 			{
 				DictNode header = message.getHeader();
-				if(header.get("TYPE").toString().equals("QUERY"))
-				{
-					capMP.sendState(2, "TESTING QUERY MESSAGE TYPE - RECIEVED BY CLIENT");
-				}
+				if (header.get("TYPE").toString().equals("QUERY"))
+					Log.debug(TAG, "Got status reply");
 				else
-				{
-					capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE QUERY");
-				}
+					fail("Expected QUERY message");
 			}
 			
 			for(int a = 0; /*a < 4 * genNum*/; a++)
 			{
 				//Waiting for GRID message type.
+				Log.debug(TAG, "Waiting for grid message number " + (a + 1));
 				message = null;
-				while(true)
-				{
-					if(!displayed)
-					{
-						Log.debug(TAG, "Waiting for grid message number " + (a + 1));
-						displayed = true;
-					}
-					message = capMP.waitForMessage();
-					if(message != null)
-					{
-						displayed = false;
-						break;
-					}
-				}
-				if(message != null)
+				while (message == null) message = capMP.waitForMessage();
+
+				if (message != null)
 				{
 					DictNode header = message.getHeader();
 					DictNode body = (DictNode)message.getBody();
@@ -624,14 +578,12 @@ public class TestServerControl extends TestCase
 						this.ID = id;
 						this.gen = gen;
 					}
+					else if (header.get("TYPE").toString().equals("DISCONNECT"))
+						break;
 					else
-					{
-						if(header.get("TYPE").toString().equals("DISCONNECT"))
-							break;
-						else
-							capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE GRID");
-					}
+						fail("Expected either GRID or DISCONNECT message");
 				}
+				
 				//Create and send grid
 				for(int y = workable.getPosition().y; y < workable.getPosition().y + workable.getSize().y; y++)
 				{
@@ -714,9 +666,7 @@ public class TestServerControl extends TestCase
 					}
 				}
 				else
-				{
-					capMP.sendState(2, "MESSAGE TYPE IS NOT OF TYPE DISCONNECT");
-				}
+					fail("Expected DISCONNECT message");
 			}
 		}
 	}

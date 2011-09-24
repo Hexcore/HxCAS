@@ -222,7 +222,9 @@ public class CAPMessageProtocol extends Thread
 		// Add message
 		try
 		{
-			messageQueue.put(new Message(header, body));
+			Message msg = new Message(header, body);
+			//System.out.println("GOT: " + msg.toString());
+			messageQueue.put(msg);
 		}
 		catch(InterruptedException e)
 		{
@@ -357,13 +359,12 @@ public class CAPMessageProtocol extends Thread
 	
 	@Override
 	public void run()
-	{
+	{		
 		while (running) 
 		{
 			try
 			{
 				receiveMessage();
-				Log.debug(TAG, "Message Buffer: " + messageQueue.size());
 			}
 			catch(ProtocolErrorException e)
 			{
