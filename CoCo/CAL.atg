@@ -1,5 +1,8 @@
 import library.*;
 import java.util.ArrayList;
+import com.hexcore.cas.rulesystems.TableEntry;
+import com.hexcore.cas.rulesystems.ConstantRecord;
+import com.hexcore.cas.rulesystems.SymbolTable;
 
 COMPILER CAL $NC
 
@@ -8,13 +11,17 @@ static enum AddOpE{ADD, SUB, OR, UN};
 static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
 
+static SymbolTable table;
+
 CHARACTERS
   digit      = "0123456789" .
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
 
 TOKENS
   number	= digit { digit } .
-  double	= digit {digit}"."{digit} .
+  double	= digit {digit}"."digit{digit} .
+  postInc	= "++" .
+  postDec	= "--" .
   
   identifier = letter { letter | digit } .
   
@@ -24,7 +31,7 @@ IGNORE CHR(0) .. CHR(31)
 
 
 PRODUCTIONS
-	CAL
+	CAL										(. table = new SymbolTable(); .)
   	=
   	RuleSet
   	[ColourSet]
@@ -32,7 +39,10 @@ PRODUCTIONS
   	
   	
 
-  	RuleSet
+  	RuleSet									(.
+  												table.pushScope();
+  												table.prepare();
+  											.)
   	=
   	"ruleset" identifier
   	"{"
@@ -51,9 +61,17 @@ PRODUCTIONS
   	
   	
   	
-  	Property
+  	Property								(. String name = ""; .)
   	=
-  	"property" identifier ";"
+  	"property" Ident< out name >			(.
+  												if(table.find(name).type != TableEntry.noType) SemError("Identifier \"" + name + "\" already declared.");
+  												TableEntry entry = new TableEntry();
+  												entry.name = name;
+  												entry.type = TableEntry.doubleType;
+  												entry.kind = TableEntry.Property;
+  												table.insert(entry);
+  											.)  
+  	";"
   	.
   	
   
@@ -65,9 +83,11 @@ PRODUCTIONS
   	"}"
   	.
   	
-  	RangeSet
+  	RangeSet								(. int value1, value2; .)
   	=
-  	number ".." number
+  	IntConst< out value1 >
+   	"to"
+   	IntConst< out value2 >
   	":"
   	Colour
   	";"
@@ -84,25 +104,29 @@ PRODUCTIONS
   
   	
   	
-  	TypeSpec
+  	TypeSpec								(.
+  												int value = 0;
+  												table.pushScope();
+  											.)
   	=
-  	"type" identifier ":" number
+  	"type" identifier ":"
+  	IntConst< out value >
   	"{"
   		{Statement}
-  	"}"
+  	"}"										(. table.popScope(); .)
   	.
   	
   	
   	
   	Block 
   	=
-  	"{"
+  	"{"										(. table.pushScope(); .)
   		{Statement}
-  	"}"
+  	"}"										(. table.popScope(); .)
   	.
   	
   	
-  	
+  	/***** STATEMENT *****/
   	Statement
   	=
   	 Block
@@ -113,40 +137,111 @@ PRODUCTIONS
   	
   	
   	
-  	AssignCall
+  	AssignCall									(. TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;.)
   	=
-  	Designator						(. PostOpE T = PostOpE.UN; .)
+  	Designator< out entry >						(. PostOpE T = PostOpE.UN; .)
   	(
-  		"=" Expression
-  		| PostOp< out T >
-  		| "(" Arguments ")"
+  		"=" Expression< out type >
+  		| PostOp< out T >						(. if(!TableEntry.isArith(entry.type)) SemError("Cannot perform a post operation on a boolan type."); .)
+  		| "(" Arguments< out typeA >			(.	if(!TableEntry.isFunction(entry.kind))
+  												{
+  													SemError("Arguments can only be given to a function.");
+  												}
+  												
+  												if(entry.kind == TableEntry.aFunction)
+  												{
+  													if(!TableEntry.isArray(typeA))
+  													{
+  														SemError("Invalid argument. Argument must be an array");
+  													}
+  												}
+  												else
+  												{
+  													if(TableEntry.isArray(typeA))
+  													{
+  														SemError("Invalid argument. Argument must be a scalar type");
+  													}
+  												}
+  											.)
+  		
+  		")"
   	)
   	";"
   	.
   	
   	
   	
-  	Designator
+  	Designator<. out TableEntry entry .>		(.
+  													int type = TableEntry.noType;
+  													int typeE = TableEntry.noType;
+  													String name = "";
+  													TableEntry entryA = null;
+  												.)
   	=
-  	identifier
+  	Ident< out name >							(.
+
+  													entry = table.find(name);
+  													if(entry.type == TableEntry.noType)
+  														SemError("Undeclared identifier \"" + name + "\"");
+  													else
+  														type = entry.type;
+  												.)
+  													 
   	[
-  		("." Attribute) | "[" Expression "]"
+  		"["										(. if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
+  													if(!TableEntry.isArith(typeE))
+  													{
+  														SemError("Index must be arithmetic");
+  													}
+  												.)		
+  			Expression< out typeE >				
+  		"]"										(.
+  													if(!TableEntry.isArray(type))
+  													{
+  														SemError("Can only index arrays");
+  													}
+  													TableEntry entryS = new TableEntry();
+  													entryS.name = entry.name;
+  													entryS.kind = entry.kind;
+  													entryS.type = entry.type - 1;
+  													entry = entryS;
+  												.)
+  	]
+  	[  	
+  		"." Attribute< out entryA > 				(.
+  														if(entry.kind != TableEntry.Cell) SemError("Only cells have attributes.");
+  														if(entryA.kind != TableEntry.Property) SemError("Only declared properties can be used as cell attributes.");
+  														TableEntry entryAA = new TableEntry();
+  														entryAA.name = entryA.name;
+  														entryAA.kind = entryA.kind;
+  														if(TableEntry.isArray(type))
+  														{
+  															entryAA.type = entryA.type + 1;
+  														}
+  														else
+  														{
+  															entryAA.type = entryA.type;
+  														}
+  														
+  														entry = entryAA;
+  													.)
   	]
   	.
   	
   	
   	
-  	Attribute
+  	Attribute<. out TableEntry entry .>
   	=
-  	Designator
+  	Designator< out entry >
   	.
   	
   	
   	
-  	IfStatement
+  	IfStatement									(. int type = TableEntry.noType; .)
   	=
   	"if" "("
-  	Expression ")"
+  	Expression< out type > 
+  	")"
   	Statement
   	[
   	"else" Statement
@@ -167,130 +262,255 @@ PRODUCTIONS
   	
   	
   	
-  	Expression
+  	Expression<. out int type .>			(. 	int type1, type2;
+  												type = TableEntry.noType;
+  											.)
   	=
-  	AddExp							(. RelOpE T = RelOpE.UN; .) 
-  	[RelOp< out T >
-  	 AddExp]
+  	AddExp< out type1 >						(.
+  												RelOpE op = RelOpE.UN;
+  												type = type1;
+  											.) 
+  	[
+  	RelOp< out op >							
+  	AddExp< out type2 >						(.
+  												if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
+  												{
+  													SemError("Type mismatch");
+  													type = TableEntry.noType;
+  												}
+  													
+  												type = TableEntry.boolType;  												
+  											.)
+  	]
   	.
   	
   	
   	
-  	AddExp
+  	AddExp<. out int type .>				(.
+  												int type1, type2;
+  												type = TableEntry.noType;
+  												boolean negative = false;
+  											.)
   	=
-  	["+" | "-"]
-  	Term							(. AddOpE T = AddOpE.UN; .)
-  	{AddOp< out T > 
-  	Term}
-  	.
-  	
-  	
-  	
-  	Term									(. double val1, val2; .)
-  	=
-  	Factor< out val1 >						(. MulOpE T = MulOpE.UN; .)
+  	["+" | "-"								(. negative = true; .)
+  	]
+  	Term< out type1 >						(.
+  												AddOpE op = AddOpE.UN;
+  												type = type1;
+  											.)
   	{
-  	MulOp< out T >
-  	Factor< out val2 >
+  	AddOp< out op > 
+  	Term< out type2 >						(.
+  												switch(op)
+  												{
+  													case OR:
+  														if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
+  															SemError("Boolean Types Required");
+  														type = TableEntry.boolType;
+  														break;
+  													default:
+  														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
+  															SemError("Numeric Types Required");
+  														if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
+  															type = TableEntry.intType;
+  														else
+  															type = TableEntry.doubleType;
+  												}
+  											.)
   	}
   	.
   	
   	
   	
-  	Factor<. out double value .>			(. value = 0;	.)
+  	Term<. out int type .>					(.
+  												int type1, type2;
+  												type = TableEntry.noType; 
+  											.)
   	=
-  	Designator
-  	["(" Arguments ")"]
+  	Factor< out type1 >						(.
+  												MulOpE op = MulOpE.UN;
+  												type = type1;
+  											.)
+  	{
+  	MulOp< out op >					
+  	Factor< out type2 >						(.
+  												switch(op)
+  												{
+  													case AND:
+  														if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
+  															SemError("Boolean Types Required");
+  														type = TableEntry.boolType;
+  														break;
+  													default:
+  														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
+  															SemError("Numeric Types Required");
+  														if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
+  															type = TableEntry.intType;
+  														else
+  															type = TableEntry.doubleType;  														
+  												}
+  											.)
+  	}
+  	.
+  	
+  	
+  	Factor<. out int type .>				(. PostOpE T = PostOpE.UN; .)
+  	=
+  	Primary< out type >
+  	[
+  	PostOp< out T >							(. if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type."); .)
+  	]
+  	.
+  	
+  	
+  	
+  	Primary<. out int type .>				(.
+  												type = TableEntry.noType;
+  												int typeA = TableEntry.noType;
+  												ConstantRecord con;
+  												TableEntry entry = null;
+  											.)
+  	=
+  	Designator< out entry >					(.	type = entry.type; .)
+  	[
+  	"("		
+  		Arguments< out typeA >				(.	if(!TableEntry.isFunction(entry.kind))
+  												{
+  													SemError("Arguments can only be given to a function.");
+  												}
+  												
+  												if(entry.kind == TableEntry.aFunction)
+  												{
+  													if(!TableEntry.isArray(typeA))
+  													{
+  														SemError("Invalid argument. Argument must be an array");
+  													}
+  												}
+  												else
+  												{
+  													if(TableEntry.isArray(typeA))
+  													{
+  														SemError("Invalid argument. Argument must be a scalar type");
+  													}
+  												}
+  											.)
+  	")"
+  	]
   	|
-  	Constant< out value >
-  	| "(" Expression ")"
+  	Constant< out con >						(. type = con.type;  .)
+  	|
+  	"(" Expression< out type >				
+  	")"
   	.
   	
   	
   	
-  	Constant<. out double value .>		(. 	
-  											value = 0;
-  											int iValue = 0;
-  											double dValue = 0;
-  										.)
+  	Constant<. out ConstantRecord con .>	(. 	
+  												con = new ConstantRecord();
+  											.)
   	=
-  	DoubleConst< out dValue >			(.	value = dValue; .)
-	| IntConst< out iValue >			(.	value = iValue; .)
+  	DoubleConst< out con.value >			(.	con.type = TableEntry.doubleType;	.)
+	| IntConst< out con.value >				(.	con.type = TableEntry.intType;		.)
   	.
   	
   	
   	
-  	Arguments
+  	Arguments<. out int type .>								(. type = TableEntry.noType; .)
   	=
   	[
-  		Expression 
-  		{"," Expression}
+  		Expression< out type >
+  		
+  		/*
+  		Current version support and requirement for only one argument
+  		{"," Expression< out type >
+  		}*/
   	]
   	.
   	
   	
   	
-  	RelOp<. out RelOpE type .>		(. type = RelOpE.UN;	.)
+  	RelOp<. out RelOpE op .>				(. op = RelOpE.UN;	.)
   	=
-  	"=="							(. type = RelOpE.EQ;	.)
-  	| "!="							(. type = RelOpE.NE;	.)
-  	| ">"							(. type = RelOpE.GT;	.)
-  	| "<"							(. type = RelOpE.LT;	.)
-  	| ">="							(. type = RelOpE.GE;	.)
-  	| "<="							(. type = RelOpE.LE;	.)
+  	"=="									(. op = RelOpE.EQ;	.)
+  	| "!="									(. op = RelOpE.NE;	.)
+  	| ">"									(. op = RelOpE.GT;	.)
+  	| "<"									(. op = RelOpE.LT;	.)
+  	| ">="									(. op = RelOpE.GE;	.)
+  	| "<="									(. op = RelOpE.LE;	.)
   	.
   	
   	
   	
-  	AddOp<. out AddOpE type .>		(. type = AddOpE.UN;	.)
+  	AddOp<. out AddOpE op .>				(. op = AddOpE.UN;	.)
   	=
-  	"+"								(. type = AddOpE.ADD;	.)
-  	| "-"							(. type = AddOpE.SUB;	.)
-  	| "||"							(. type = AddOpE.OR;	.)
+  	"+"										(. op = AddOpE.ADD;	.)
+  	| "-"									(. op = AddOpE.SUB;	.)
+  	| "||"									(. op = AddOpE.OR;	.)
   	.
   	
   	
   	
-  	MulOp<. out MulOpE type .>		(. type = MulOpE.UN;	.)
+  	MulOp<. out MulOpE op .>				(. op = MulOpE.UN;	.)
   	=
-  	"*"								(. type = MulOpE.MUL;	.)
-  	| "/"							(. type = MulOpE.DIV;	.)
-  	| "%"							(. type = MulOpE.MOD;	.)
-  	| "&&"							(. type = MulOpE.AND;	.)
+  	"*"										(. op = MulOpE.MUL;	.)
+  	| "/"									(. op = MulOpE.DIV;	.)
+  	| "%"									(. op = MulOpE.MOD;	.)
+  	| "&&"									(. op = MulOpE.AND;	.)
   	.
   	
   	
   	
-  	PostOp<. out PostOpE type .>	(. type = PostOpE.UN;	.)
+  	PostOp<. out PostOpE op .>				(. op = PostOpE.UN;	.)
   	=
-  	"++"							(. type = PostOpE.INC;	.)
-  	| "--"							(. type = PostOpE.DEC;	.)
+  	postInc									(. op = PostOpE.INC;	.)
+  	| 
+  	postDec									(. op = PostOpE.DEC;	.)
   	.
   	
   	
   	
-  	OneVar
+  	OneVar									(. int type = TableEntry.noType; String name = ""; .)
   	=
-  	identifier
+  	Ident< out name >						(.
+  												TableEntry entry = new TableEntry();
+  												entry.name = "__new__";
+  												if(table.find(name).type != TableEntry.noType) 
+  													SemError("Identifier \"" + name + "\" already declared.");
+  												else
+  													entry.name = name;
+  											.)
   	[
-  	"=" Expression
-  	]
+  	"=" Expression< out type >				(.
+  												if(!entry.name.equals("__new__"))
+  												{
+  													entry.kind = TableEntry.Variable;
+  													entry.type = type;
+  												}
+  											.)
+  											
+  	]										(.
+  												if(!entry.name.equals("__new__"))
+  													table.insert(entry);
+  											.)
   	.
   	
   	
   	
   	DoubleConst<. out double value .>		
   	=
-	double									(. value = Double.parseDouble(token.val); .)
+	double									(. try { value = Double.parseDouble(token.val); } catch(NumberFormatException e){value = 0;} .)
   	.
   	
   	IntConst<. out int value .>
   	=
-  	number									(. value = Integer.parseInt(token.val); .)
+  	number									(. try{value = Integer.parseInt(token.val);} catch(NumberFormatException e){value =  0;} .)
   	.
   	
   
-  	
+  	Ident<. out String name .>				(. name = ""; .)
+  	=
+  	identifier								(. name = token.val; .)
+  	.
   
   	
 

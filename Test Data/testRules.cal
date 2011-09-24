@@ -5,15 +5,17 @@ ruleset Flood
 
 	type Land : 0
 	{
-		if (self.water  0)
+		if (self.water < 0)
 		{
 			var most = max(neighbours.water);
 			var least = min(neighbours.water);
 			
 			
-			if (most < self.water)
+			if ((most < self.water) && (0 < 2))
 			{
+				most = max(neighbours.water);
 				self.water--;
+				most = self.land--;
 			}
 			else if (most == least)
 			{
@@ -28,36 +30,38 @@ ruleset Flood
 	
 	type WaterSource : 1
 	{
-		/*self.water = 100;*/
+		self.water = 100;
 	}
 }
 
-colourset colours1
+
+colourset colours
 {
 	property bla
 	{
-		0..5 : rgb(0.5, 0.1, 0.2);
-		5..10 : rgb(0.3, 0.1, 0.2);
+		0 to 5 : rgb(0.5, 0.1, 0.2);
+		5 to 10 : rgb(0.3, 0.1, 0.2);
 	}
 	
 	property another
 	{
-		0..5 : rgb(0.5, 0.1, 0.2);
-		5..10 : rgb(0.3, 0.1, 0.2);
+		0 to 5 : rgb(0.5, 0.1, 0.2);
+		5 to 10 : rgb(0.3, 0.1, 0.2);
 	}
 }
 
+/*
 colourset colours2
 {
 	property bla
 	{
-		0..5 : rgb(0.5, 0.1, 0.2);
-		5..10 : rgb(0.3, 0.1, 0.2);
+		0 to 5 : rgb(0.5, 0.1, 0.2);
+		5 to 10 : rgb(0.3, 0.1, 0.2);
 	}
 	
 	property another
 	{
-		0..5 : rgb(0.5, 0.1, 0.2);
-		5..10 : rgb(0.3, 0.1, 0.2);
+		0 to 5 : rgb(0.5, 0.1, 0.2);
+		5 to 10 : rgb(0.3, 0.1, 0.2);
 	}
-}
+}*/

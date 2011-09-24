@@ -2,6 +2,9 @@ package com.hexcore.cas.rulesystems;
 
 import library.*;
 import java.util.ArrayList;
+import com.hexcore.cas.rulesystems.TableEntry;
+import com.hexcore.cas.rulesystems.ConstantRecord;
+import com.hexcore.cas.rulesystems.SymbolTable;
 
 import java.io.*;
 
@@ -9,47 +12,49 @@ public class Parser {
 	static final int _EOF = 0;
 	static final int _number = 1;
 	static final int _double = 2;
-	static final int _identifier = 3;
+	static final int _postInc = 3;
+	static final int _postDec = 4;
+	static final int _identifier = 5;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
 	static final int double_Sym = 2;
-	static final int identifier_Sym = 3;
-	static final int ruleset_Sym = 4;
-	static final int lbrace_Sym = 5;
-	static final int rbrace_Sym = 6;
-	static final int colourset_Sym = 7;
-	static final int property_Sym = 8;
-	static final int semicolon_Sym = 9;
-	static final int pointpoint_Sym = 10;
-	static final int colon_Sym = 11;
-	static final int rgblparen_Sym = 12;
-	static final int comma_Sym = 13;
-	static final int rparen_Sym = 14;
-	static final int type_Sym = 15;
-	static final int equal_Sym = 16;
-	static final int lparen_Sym = 17;
-	static final int point_Sym = 18;
-	static final int lbrack_Sym = 19;
-	static final int rbrack_Sym = 20;
-	static final int if_Sym = 21;
-	static final int else_Sym = 22;
-	static final int var_Sym = 23;
-	static final int plus_Sym = 24;
-	static final int minus_Sym = 25;
-	static final int equalequal_Sym = 26;
-	static final int bangequal_Sym = 27;
-	static final int greater_Sym = 28;
-	static final int less_Sym = 29;
-	static final int greaterequal_Sym = 30;
-	static final int lessequal_Sym = 31;
-	static final int barbar_Sym = 32;
-	static final int star_Sym = 33;
-	static final int slash_Sym = 34;
-	static final int percent_Sym = 35;
-	static final int andand_Sym = 36;
-	static final int plusplus_Sym = 37;
-	static final int minusminus_Sym = 38;
+	static final int postInc_Sym = 3;
+	static final int postDec_Sym = 4;
+	static final int identifier_Sym = 5;
+	static final int ruleset_Sym = 6;
+	static final int lbrace_Sym = 7;
+	static final int rbrace_Sym = 8;
+	static final int colourset_Sym = 9;
+	static final int property_Sym = 10;
+	static final int semicolon_Sym = 11;
+	static final int to_Sym = 12;
+	static final int colon_Sym = 13;
+	static final int rgblparen_Sym = 14;
+	static final int comma_Sym = 15;
+	static final int rparen_Sym = 16;
+	static final int type_Sym = 17;
+	static final int equal_Sym = 18;
+	static final int lparen_Sym = 19;
+	static final int lbrack_Sym = 20;
+	static final int rbrack_Sym = 21;
+	static final int point_Sym = 22;
+	static final int if_Sym = 23;
+	static final int else_Sym = 24;
+	static final int var_Sym = 25;
+	static final int plus_Sym = 26;
+	static final int minus_Sym = 27;
+	static final int equalequal_Sym = 28;
+	static final int bangequal_Sym = 29;
+	static final int greater_Sym = 30;
+	static final int less_Sym = 31;
+	static final int greaterequal_Sym = 32;
+	static final int lessequal_Sym = 33;
+	static final int barbar_Sym = 34;
+	static final int star_Sym = 35;
+	static final int slash_Sym = 36;
+	static final int percent_Sym = 37;
+	static final int andand_Sym = 38;
 	static final int NOT_SYM = 39;
 	// pragmas
 
@@ -67,6 +72,8 @@ public class Parser {
 static enum AddOpE{ADD, SUB, OR, UN};
 static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
+
+static SymbolTable table;
 
 
 
@@ -143,6 +150,7 @@ static enum PostOpE{INC, DEC, UN};
 	}
 
 	static void CAL() {
+		table = new SymbolTable();
 		RuleSet();
 		if (la.kind == colourset_Sym) {
 			ColourSet();
@@ -150,6 +158,9 @@ static enum PostOpE{INC, DEC, UN};
 	}
 
 	static void RuleSet() {
+		table.pushScope();
+		table.prepare();
+		
 		Expect(ruleset_Sym);
 		Expect(identifier_Sym);
 		Expect(lbrace_Sym);
@@ -175,21 +186,33 @@ static enum PostOpE{INC, DEC, UN};
 	}
 
 	static void Property() {
+		String name = "";
 		Expect(property_Sym);
-		Expect(identifier_Sym);
+		name  = Ident();
+		if(table.find(name).type != TableEntry.noType) SemError("Identifier \"" + name + "\" already declared.");
+		TableEntry entry = new TableEntry();
+		entry.name = name;
+		entry.type = TableEntry.doubleType;
+		entry.kind = TableEntry.Property;
+		table.insert(entry);
+		
 		Expect(semicolon_Sym);
 	}
 
 	static void TypeSpec() {
+		int value = 0;
+		table.pushScope();
+		
 		Expect(type_Sym);
 		Expect(identifier_Sym);
 		Expect(colon_Sym);
-		Expect(number_Sym);
+		value  = IntConst();
 		Expect(lbrace_Sym);
 		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
+		table.popScope();
 	}
 
 	static void PropertySpec() {
@@ -203,13 +226,29 @@ static enum PostOpE{INC, DEC, UN};
 		Expect(rbrace_Sym);
 	}
 
+	static String Ident() {
+		String name;
+		name = "";
+		Expect(identifier_Sym);
+		name = token.val;
+		return name;
+	}
+
 	static void RangeSet() {
-		Expect(number_Sym);
-		Expect(pointpoint_Sym);
-		Expect(number_Sym);
+		int value1, value2;
+		value1  = IntConst();
+		Expect(to_Sym);
+		value2  = IntConst();
 		Expect(colon_Sym);
 		Colour();
 		Expect(semicolon_Sym);
+	}
+
+	static int IntConst() {
+		int value;
+		Expect(number_Sym);
+		try{value = Integer.parseInt(token.val);} catch(NumberFormatException e){value =  0;}
+		return value;
 	}
 
 	static void Colour() {
@@ -226,7 +265,7 @@ static enum PostOpE{INC, DEC, UN};
 	static double DoubleConst() {
 		double value;
 		Expect(double_Sym);
-		value = Double.parseDouble(token.val);
+		try { value = Double.parseDouble(token.val); } catch(NumberFormatException e){value = 0;}
 		return value;
 	}
 
@@ -244,32 +283,57 @@ static enum PostOpE{INC, DEC, UN};
 
 	static void Block() {
 		Expect(lbrace_Sym);
+		table.pushScope();
 		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
+		table.popScope();
 	}
 
 	static void AssignCall() {
-		Designator();
+		TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;
+		entry  = Designator();
 		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
 			Get();
-			Expression();
-		} else if (la.kind == plusplus_Sym || la.kind == minusminus_Sym) {
+			type  = Expression();
+		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
+			if(!TableEntry.isArith(entry.type)) SemError("Cannot perform a post operation on a boolan type.");
 		} else if (la.kind == lparen_Sym) {
 			Get();
-			Arguments();
+			typeA  = Arguments();
+			if(!TableEntry.isFunction(entry.kind))
+			{
+			SemError("Arguments can only be given to a function.");
+			}
+			
+			if(entry.kind == TableEntry.aFunction)
+			{
+			if(!TableEntry.isArray(typeA))
+			{
+			SemError("Invalid argument. Argument must be an array");
+			}
+			}
+			else
+			{
+			if(TableEntry.isArray(typeA))
+			{
+			SemError("Invalid argument. Argument must be a scalar type");
+			}
+			}
+			
 			Expect(rparen_Sym);
 		} else SynErr(41);
 		Expect(semicolon_Sym);
 	}
 
 	static void IfStatement() {
+		int type = TableEntry.noType;
 		Expect(if_Sym);
 		Expect(lparen_Sym);
-		Expression();
+		type  = Expression();
 		Expect(rparen_Sym);
 		Statement();
 		if (la.kind == else_Sym) {
@@ -288,205 +352,357 @@ static enum PostOpE{INC, DEC, UN};
 		Expect(semicolon_Sym);
 	}
 
-	static void Designator() {
-		Expect(identifier_Sym);
-		if (la.kind == point_Sym || la.kind == lbrack_Sym) {
-			if (la.kind == point_Sym) {
-				Get();
-				Attribute();
-			} else {
-				Get();
-				Expression();
-				Expect(rbrack_Sym);
+	static TableEntry Designator() {
+		TableEntry entry;
+		int type = TableEntry.noType;
+		int typeE = TableEntry.noType;
+		String name = "";
+		TableEntry entryA = null;
+		
+		name  = Ident();
+		entry = table.find(name);
+		if(entry.type == TableEntry.noType)
+			SemError("Undeclared identifier \"" + name + "\"");
+		else
+			type = entry.type;
+		
+		if (la.kind == lbrack_Sym) {
+			Get();
+			if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
+			if(!TableEntry.isArith(typeE))
+			{
+			SemError("Index must be arithmetic");
 			}
+			
+			typeE  = Expression();
+			Expect(rbrack_Sym);
+			if(!TableEntry.isArray(type))
+			{
+				SemError("Can only index arrays");
+			}
+			TableEntry entryS = new TableEntry();
+			entryS.name = entry.name;
+			entryS.kind = entry.kind;
+			entryS.type = entry.type - 1;
+			entry = entryS;
+			
 		}
+		if (la.kind == point_Sym) {
+			Get();
+			entryA  = Attribute();
+			if(entry.kind != TableEntry.Cell) SemError("Only cells have attributes.");
+			if(entryA.kind != TableEntry.Property) SemError("Only declared properties can be used as cell attributes.");
+			TableEntry entryAA = new TableEntry();
+			entryAA.name = entryA.name;
+			entryAA.kind = entryA.kind;
+			if(TableEntry.isArray(type))
+			{
+				entryAA.type = entryA.type + 1;
+			}
+			else
+			{
+				entryAA.type = entryA.type;
+			}
+			
+			entry = entryAA;
+			
+		}
+		return entry;
 	}
 
-	static void Expression() {
-		AddExp();
-		RelOpE T = RelOpE.UN;
+	static int Expression() {
+		int type;
+		int type1, type2;
+		type = TableEntry.noType;
+		
+		type1  = AddExp();
+		RelOpE op = RelOpE.UN;
+		type = type1;
+		
 		if (StartOf(2)) {
-			T  = RelOp();
-			AddExp();
+			op  = RelOp();
+			type2  = AddExp();
+			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
+			{
+				SemError("Type mismatch");
+				type = TableEntry.noType;
+			}
+				
+			type = TableEntry.boolType;  												
+			
 		}
-	}
-
-	static PostOpE PostOp() {
-		PostOpE type;
-		type = PostOpE.UN;	
-		if (la.kind == plusplus_Sym) {
-			Get();
-			type = PostOpE.INC;	
-		} else if (la.kind == minusminus_Sym) {
-			Get();
-			type = PostOpE.DEC;	
-		} else SynErr(42);
 		return type;
 	}
 
-	static void Arguments() {
-		if (StartOf(3)) {
-			Expression();
-			while (la.kind == comma_Sym) {
-				Get();
-				Expression();
-			}
-		}
+	static PostOpE PostOp() {
+		PostOpE op;
+		op = PostOpE.UN;	
+		if (la.kind == postInc_Sym) {
+			Get();
+			op = PostOpE.INC;	
+		} else if (la.kind == postDec_Sym) {
+			Get();
+			op = PostOpE.DEC;	
+		} else SynErr(42);
+		return op;
 	}
 
-	static void Attribute() {
-		Designator();
+	static int Arguments() {
+		int type;
+		type = TableEntry.noType;
+		if (StartOf(3)) {
+			type  = Expression();
+		}
+		return type;
+	}
+
+	static TableEntry Attribute() {
+		TableEntry entry;
+		entry  = Designator();
+		return entry;
 	}
 
 	static void OneVar() {
-		Expect(identifier_Sym);
+		int type = TableEntry.noType; String name = "";
+		name  = Ident();
+		TableEntry entry = new TableEntry();
+		entry.name = "__new__";
+		if(table.find(name).type != TableEntry.noType)
+			SemError("Identifier \"" + name + "\" already declared.");
+		else
+			entry.name = name;
+		
 		if (la.kind == equal_Sym) {
 			Get();
-			Expression();
+			type  = Expression();
+			if(!entry.name.equals("__new__"))
+			{
+				entry.kind = TableEntry.Variable;
+				entry.type = type;
+			}
+			
 		}
+		if(!entry.name.equals("__new__"))
+			table.insert(entry);
+		
 	}
 
-	static void AddExp() {
+	static int AddExp() {
+		int type;
+		int type1, type2;
+		type = TableEntry.noType;
+		boolean negative = false;
+		
 		if (la.kind == plus_Sym || la.kind == minus_Sym) {
 			if (la.kind == plus_Sym) {
 				Get();
 			} else {
 				Get();
+				negative = true;
 			}
 		}
-		Term();
-		AddOpE T = AddOpE.UN;
+		type1  = Term();
+		AddOpE op = AddOpE.UN;
+		type = type1;
+		
 		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
-			T  = AddOp();
-			Term();
+			op  = AddOp();
+			type2  = Term();
+			switch(op)
+			{
+				case OR:
+					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
+						SemError("Boolean Types Required");
+					type = TableEntry.boolType;
+					break;
+				default:
+					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
+						SemError("Numeric Types Required");
+					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
+						type = TableEntry.intType;
+					else
+						type = TableEntry.doubleType;
+			}
+			
 		}
+		return type;
 	}
 
 	static RelOpE RelOp() {
-		RelOpE type;
-		type = RelOpE.UN;	
+		RelOpE op;
+		op = RelOpE.UN;	
 		switch (la.kind) {
 		case equalequal_Sym: {
 			Get();
-			type = RelOpE.EQ;	
+			op = RelOpE.EQ;	
 			break;
 		}
 		case bangequal_Sym: {
 			Get();
-			type = RelOpE.NE;	
+			op = RelOpE.NE;	
 			break;
 		}
 		case greater_Sym: {
 			Get();
-			type = RelOpE.GT;	
+			op = RelOpE.GT;	
 			break;
 		}
 		case less_Sym: {
 			Get();
-			type = RelOpE.LT;	
+			op = RelOpE.LT;	
 			break;
 		}
 		case greaterequal_Sym: {
 			Get();
-			type = RelOpE.GE;	
+			op = RelOpE.GE;	
 			break;
 		}
 		case lessequal_Sym: {
 			Get();
-			type = RelOpE.LE;	
+			op = RelOpE.LE;	
 			break;
 		}
 		default: SynErr(43); break;
 		}
-		return type;
+		return op;
 	}
 
-	static void Term() {
-		double val1, val2;
-		val1  = Factor();
-		MulOpE T = MulOpE.UN;
+	static int Term() {
+		int type;
+		int type1, type2;
+		type = TableEntry.noType;
+		
+		type1  = Factor();
+		MulOpE op = MulOpE.UN;
+		type = type1;
+		
 		while (StartOf(4)) {
-			T  = MulOp();
-			val2  = Factor();
+			op  = MulOp();
+			type2  = Factor();
+			switch(op)
+			{
+				case AND:
+					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
+						SemError("Boolean Types Required");
+					type = TableEntry.boolType;
+					break;
+				default:
+					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
+						SemError("Numeric Types Required");
+					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
+						type = TableEntry.intType;
+					else
+						type = TableEntry.doubleType;  														
+			}
+			
 		}
+		return type;
 	}
 
 	static AddOpE AddOp() {
-		AddOpE type;
-		type = AddOpE.UN;	
+		AddOpE op;
+		op = AddOpE.UN;	
 		if (la.kind == plus_Sym) {
 			Get();
-			type = AddOpE.ADD;	
+			op = AddOpE.ADD;	
 		} else if (la.kind == minus_Sym) {
 			Get();
-			type = AddOpE.SUB;	
+			op = AddOpE.SUB;	
 		} else if (la.kind == barbar_Sym) {
 			Get();
-			type = AddOpE.OR;	
+			op = AddOpE.OR;	
 		} else SynErr(44);
+		return op;
+	}
+
+	static int Factor() {
+		int type;
+		PostOpE T = PostOpE.UN;
+		type  = Primary();
+		if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
+			T  = PostOp();
+			if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type.");
+		}
 		return type;
 	}
 
-	static double Factor() {
-		double value;
-		value = 0;	
+	static MulOpE MulOp() {
+		MulOpE op;
+		op = MulOpE.UN;	
+		if (la.kind == star_Sym) {
+			Get();
+			op = MulOpE.MUL;	
+		} else if (la.kind == slash_Sym) {
+			Get();
+			op = MulOpE.DIV;	
+		} else if (la.kind == percent_Sym) {
+			Get();
+			op = MulOpE.MOD;	
+		} else if (la.kind == andand_Sym) {
+			Get();
+			op = MulOpE.AND;	
+		} else SynErr(45);
+		return op;
+	}
+
+	static int Primary() {
+		int type;
+		type = TableEntry.noType;
+		int typeA = TableEntry.noType;
+		ConstantRecord con;
+		TableEntry entry = null;
+		
 		if (la.kind == identifier_Sym) {
-			Designator();
+			entry  = Designator();
+			type = entry.type;
 			if (la.kind == lparen_Sym) {
 				Get();
-				Arguments();
+				typeA  = Arguments();
+				if(!TableEntry.isFunction(entry.kind))
+				{
+				SemError("Arguments can only be given to a function.");
+				}
+				
+				if(entry.kind == TableEntry.aFunction)
+				{
+				if(!TableEntry.isArray(typeA))
+				{
+				SemError("Invalid argument. Argument must be an array");
+				}
+				}
+				else
+				{
+				if(TableEntry.isArray(typeA))
+				{
+				SemError("Invalid argument. Argument must be a scalar type");
+				}
+				}
+				
 				Expect(rparen_Sym);
 			}
 		} else if (la.kind == number_Sym || la.kind == double_Sym) {
-			value  = Constant();
+			con  = Constant();
+			type = con.type;
 		} else if (la.kind == lparen_Sym) {
 			Get();
-			Expression();
+			type  = Expression();
 			Expect(rparen_Sym);
-		} else SynErr(45);
-		return value;
-	}
-
-	static MulOpE MulOp() {
-		MulOpE type;
-		type = MulOpE.UN;	
-		if (la.kind == star_Sym) {
-			Get();
-			type = MulOpE.MUL;	
-		} else if (la.kind == slash_Sym) {
-			Get();
-			type = MulOpE.DIV;	
-		} else if (la.kind == percent_Sym) {
-			Get();
-			type = MulOpE.MOD;	
-		} else if (la.kind == andand_Sym) {
-			Get();
-			type = MulOpE.AND;	
 		} else SynErr(46);
 		return type;
 	}
 
-	static double Constant() {
-		double value;
-		value = 0;
-		int iValue = 0;
-		double dValue = 0;
+	static ConstantRecord Constant() {
+		ConstantRecord con;
+		con = new ConstantRecord();
 		
 		if (la.kind == double_Sym) {
-			dValue  = DoubleConst();
-			value = dValue;
+			con.value  = DoubleConst();
+			con.type = TableEntry.doubleType;	
 		} else if (la.kind == number_Sym) {
-			iValue  = IntConst();
-			value = iValue;
+			con.value  = IntConst();
+			con.type = TableEntry.intType;		
 		} else SynErr(47);
-		return value;
-	}
-
-	static int IntConst() {
-		int value;
-		Expect(number_Sym);
-		value = Integer.parseInt(token.val);
-		return value;
+		return con;
 	}
 
 
@@ -502,10 +718,10 @@ static enum PostOpE{INC, DEC, UN};
 
 	private static boolean[][] set = {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x},
-		{x,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x,x, x}
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}
 
 	};
 
@@ -626,50 +842,50 @@ class Errors {
 			case 0: s = "EOF expected"; break;
 			case 1: s = "number expected"; break;
 			case 2: s = "double expected"; break;
-			case 3: s = "identifier expected"; break;
-			case 4: s = "\"ruleset\" expected"; break;
-			case 5: s = "\"{\" expected"; break;
-			case 6: s = "\"}\" expected"; break;
-			case 7: s = "\"colourset\" expected"; break;
-			case 8: s = "\"property\" expected"; break;
-			case 9: s = "\";\" expected"; break;
-			case 10: s = "\"..\" expected"; break;
-			case 11: s = "\":\" expected"; break;
-			case 12: s = "\"rgb(\" expected"; break;
-			case 13: s = "\",\" expected"; break;
-			case 14: s = "\")\" expected"; break;
-			case 15: s = "\"type\" expected"; break;
-			case 16: s = "\"=\" expected"; break;
-			case 17: s = "\"(\" expected"; break;
-			case 18: s = "\".\" expected"; break;
-			case 19: s = "\"[\" expected"; break;
-			case 20: s = "\"]\" expected"; break;
-			case 21: s = "\"if\" expected"; break;
-			case 22: s = "\"else\" expected"; break;
-			case 23: s = "\"var\" expected"; break;
-			case 24: s = "\"+\" expected"; break;
-			case 25: s = "\"-\" expected"; break;
-			case 26: s = "\"==\" expected"; break;
-			case 27: s = "\"!=\" expected"; break;
-			case 28: s = "\">\" expected"; break;
-			case 29: s = "\"<\" expected"; break;
-			case 30: s = "\">=\" expected"; break;
-			case 31: s = "\"<=\" expected"; break;
-			case 32: s = "\"||\" expected"; break;
-			case 33: s = "\"*\" expected"; break;
-			case 34: s = "\"/\" expected"; break;
-			case 35: s = "\"%\" expected"; break;
-			case 36: s = "\"&&\" expected"; break;
-			case 37: s = "\"++\" expected"; break;
-			case 38: s = "\"--\" expected"; break;
+			case 3: s = "postInc expected"; break;
+			case 4: s = "postDec expected"; break;
+			case 5: s = "identifier expected"; break;
+			case 6: s = "\"ruleset\" expected"; break;
+			case 7: s = "\"{\" expected"; break;
+			case 8: s = "\"}\" expected"; break;
+			case 9: s = "\"colourset\" expected"; break;
+			case 10: s = "\"property\" expected"; break;
+			case 11: s = "\";\" expected"; break;
+			case 12: s = "\"to\" expected"; break;
+			case 13: s = "\":\" expected"; break;
+			case 14: s = "\"rgb(\" expected"; break;
+			case 15: s = "\",\" expected"; break;
+			case 16: s = "\")\" expected"; break;
+			case 17: s = "\"type\" expected"; break;
+			case 18: s = "\"=\" expected"; break;
+			case 19: s = "\"(\" expected"; break;
+			case 20: s = "\"[\" expected"; break;
+			case 21: s = "\"]\" expected"; break;
+			case 22: s = "\".\" expected"; break;
+			case 23: s = "\"if\" expected"; break;
+			case 24: s = "\"else\" expected"; break;
+			case 25: s = "\"var\" expected"; break;
+			case 26: s = "\"+\" expected"; break;
+			case 27: s = "\"-\" expected"; break;
+			case 28: s = "\"==\" expected"; break;
+			case 29: s = "\"!=\" expected"; break;
+			case 30: s = "\">\" expected"; break;
+			case 31: s = "\"<\" expected"; break;
+			case 32: s = "\">=\" expected"; break;
+			case 33: s = "\"<=\" expected"; break;
+			case 34: s = "\"||\" expected"; break;
+			case 35: s = "\"*\" expected"; break;
+			case 36: s = "\"/\" expected"; break;
+			case 37: s = "\"%\" expected"; break;
+			case 38: s = "\"&&\" expected"; break;
 			case 39: s = "??? expected"; break;
 			case 40: s = "invalid Statement"; break;
 			case 41: s = "invalid AssignCall"; break;
 			case 42: s = "invalid PostOp"; break;
 			case 43: s = "invalid RelOp"; break;
 			case 44: s = "invalid AddOp"; break;
-			case 45: s = "invalid Factor"; break;
-			case 46: s = "invalid MulOp"; break;
+			case 45: s = "invalid MulOp"; break;
+			case 46: s = "invalid Primary"; break;
 			case 47: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
