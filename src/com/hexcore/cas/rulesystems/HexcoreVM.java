@@ -24,7 +24,7 @@ public class HexcoreVM
 	int 				r2;			//Temp Register 2
 	boolean				end;		//End flag
 	
-	private enum OpCodes{	LDC, LDA, LDV, STO, DSP,
+	public enum OpCodes{	LDC, LDA, LDV, STO, DSP,
 							ADD, SUB, MUL, DIV, REM,
 							CEQ, CNE, CGT, CLT, CLE, CGE,
 							AND, OR, NOT,
@@ -42,16 +42,16 @@ public class HexcoreVM
 		end = false;
 	}
 	
-	public void loadRules(String fileName)
+	public static void loadRules(String fileName)
 	{
 		//TODO: Need to convert to text stream.
-		/*
+		
 			Scanner.Init(fileName);
 			Errors.Init(fileName, "/", false);
 			Parser.Parse();
 			Errors.Summarize();
-		*/
-		System.out.print("Parsed correctly");
+		
+		//System.out.print("Parsed correctly");
 	}
 	
 	public void run(Cell cell, Cell[] neighbours)
