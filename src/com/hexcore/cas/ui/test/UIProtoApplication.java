@@ -660,11 +660,13 @@ public class UIProtoApplication implements WindowEventListener
 		//SLIDER
 		
 		LinearLayout sliderLayout = new LinearLayout(new Vector2i(40, 60), LinearLayout.Direction.VERTICAL);
+		sliderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		sliderLayout.setFlag(Widget.FILL_HORIZONTAL);
 		masterSimulationLayout.add(sliderLayout);
 		
 		SliderWidget slider = new SliderWidget(100);
 		slider.setFlag(Widget.FILL_HORIZONTAL);
+		slider.setFlag(Widget.CENTER_VERTICAL);
 		sliderLayout.add(slider);
 		
 		
@@ -703,9 +705,9 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		// PLAY BACK CONTROLS
-		LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 1), LinearLayout.Direction.VERTICAL);
+		LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
 		playbackLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-		playbackLayout.setFlag(Widget.FILL_VERTICAL);
+		//playbackLayout.setFlag(Widget.FILL_VERTICAL);
 		simulationControlsLayout.add(playbackLayout);
 		
 		LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 25), LinearLayout.Direction.HORIZONTAL);
@@ -714,17 +716,20 @@ public class UIProtoApplication implements WindowEventListener
 		
 		LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(180,35), LinearLayout.Direction.HORIZONTAL);
 		innerPlaybackLayout2.setFlag(Widget.CENTER_HORIZONTAL);
-		//innerPlaybackLayout2.setFlag(Widget.FILL_HORIZONTAL);
+
 		
 		playbackLayout.add(innerPlaybackLayout2);
 		
 		Button stepBackwardButton = new Button(new Image("data/step_backward_icon.png"));
+		stepBackwardButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(stepBackwardButton);
 		
 		Button playButton = new Button(new Image("data/play_icon.png"));
+		playButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(playButton);
 		
 		Button pauseButton = new Button(new Image("data/pause_icon.png"));
+		pauseButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(pauseButton);
 		
 		
@@ -732,6 +737,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		Button stepForwardButton = new Button(new Image("data/step_forward_icon.png"));
+		stepForwardButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(stepForwardButton);
 		
 		
@@ -751,14 +757,40 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		// CAMERA CONTROLS
-		LinearLayout cameraLayout = new LinearLayout(new Vector2i(250, 1), LinearLayout.Direction.VERTICAL);
+		LinearLayout cameraLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
 		cameraLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-		cameraLayout.setFlag(Widget.FILL_VERTICAL);
+		//cameraLayout.setFlag(Widget.FILL_VERTICAL);
 		simulationControlsLayout.add(cameraLayout);
 		
-		LinearLayout innerCameraLayout = new LinearLayout(new Vector2i(205, 55), LinearLayout.Direction.HORIZONTAL);
+		LinearLayout innerCameraLayout = new LinearLayout(new Vector2i(205, 25), LinearLayout.Direction.HORIZONTAL);
 		innerCameraLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		cameraLayout.add(innerCameraLayout);
+		
+		LinearLayout innerCameraLayout2 = new LinearLayout(new Vector2i(205,40), LinearLayout.Direction.HORIZONTAL);
+		innerCameraLayout2.setFlag(Widget.CENTER_HORIZONTAL);
+		cameraLayout.add(innerCameraLayout2);
+		
+		
+		Button zoomInButton = new Button(new Image("data/zoom_in_icon.png"));
+		zoomInButton.setMargin(new Vector2i(5,0));
+		innerCameraLayout2.add(zoomInButton);
+		
+		Button zoomOutButton = new Button(new Image("data/zoom_out_icon.png"));
+		zoomOutButton.setMargin(new Vector2i(5,0));
+		innerCameraLayout2.add(zoomOutButton);
+		
+		Button moveUpButton = new Button(new Image("data/up_icon.png"));
+		moveUpButton.setMargin(new Vector2i(5,0));
+		innerCameraLayout2.add(moveUpButton);
+		
+		Button moveDownButton = new Button(new Image("data/down_icon.png"));
+		moveDownButton.setMargin(new Vector2i(5,0));
+		innerCameraLayout2.add(moveDownButton);
+		
+		
+		Button moveLeftButton = new Button(new Image("data/left_icon.png"));
+		moveLeftButton.setMargin(new Vector2i(5,0));
+		innerCameraLayout2.add(moveLeftButton);
 		
 		
 
