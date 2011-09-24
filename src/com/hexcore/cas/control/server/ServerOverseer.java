@@ -357,7 +357,7 @@ public class ServerOverseer extends Overseer
 	{
 		isFinishedWork = false;
 		informationProcessor.setClientWork(clientWork, currGen);
-		informationProcessor.sendGrids();
+		informationProcessor.sendInitialGrids();
 	}
 
 	//Called from CAPIPServer to pass up work done
@@ -436,9 +436,11 @@ public class ServerOverseer extends Overseer
 				break;
 
 			send();
+			
 			while(!isFinishedWork)
 			{
 			}
+			
 			System.out.println("Finished a gen! " + i);
 		}
 		isFinishedGenerations = true;

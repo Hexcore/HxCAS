@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import com.hexcore.cas.control.protocol.ByteNode;
-import com.hexcore.cas.control.protocol.CAPInformationProcessor;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
 import com.hexcore.cas.control.protocol.DoubleNode;
@@ -15,7 +14,6 @@ import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
 import com.hexcore.cas.control.protocol.Overseer;
-import com.hexcore.cas.control.server.CAPIPServer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -25,9 +23,10 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.utilities.Log;
 
-public class CAPIPClient extends CAPInformationProcessor
+public class CAPIPClient extends Thread
 {
 	private static final String TAG = "CAPIPClient";
+	public final static int PROTOCOL_VERSION = 1;
 	
 	private boolean sentAccept = false;
 	private boolean valid = false;
@@ -58,13 +57,19 @@ public class CAPIPClient extends CAPInformationProcessor
 		return valid;
 	}
 	
-	@Override
+	protected DictNode makeHeader(String type)
+	{
+		DictNode header = new DictNode();
+		header.addToDict("TYPE", new ByteNode(type));
+		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+		return header;
+	}
+	
 	public void disconnect()
 	{
 		Log.information(TAG, "Disconnecting...");
 		
 		valid = false;
-		super.disconnect();
 				
 		try
 		{
@@ -338,7 +343,6 @@ public class CAPIPClient extends CAPInformationProcessor
 	public void start()
 	{
 		setup();
-		running = true;
 		super.start();
 	}
 	
@@ -351,7 +355,6 @@ public class CAPIPClient extends CAPInformationProcessor
 			Socket clientSocket = sock.accept();
 			Log.information(TAG, "Server connected");
 			protocol = new CAPMessageProtocol(clientSocket);
-			connected = true;
 		}
 		catch(IOException e)
 		{
@@ -367,7 +370,7 @@ public class CAPIPClient extends CAPInformationProcessor
 		
 		protocol.start();
 		
-		while (running && protocol.isRunning())
+		while (protocol.isRunning())
 		{
 			Message message = protocol.waitForMessage();
 			if (message == null) continue; 

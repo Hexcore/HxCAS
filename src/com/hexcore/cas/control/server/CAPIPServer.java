@@ -10,7 +10,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.hexcore.cas.control.protocol.ByteNode;
-import com.hexcore.cas.control.protocol.CAPInformationProcessor;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
 import com.hexcore.cas.control.protocol.DoubleNode;
@@ -25,9 +24,14 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.utilities.Log;
 
-public class CAPIPServer extends CAPInformationProcessor
+public class CAPIPServer
 {
+	private static final String TAG = "Server";
+	private final static int PROTOCOL_VERSION = 1;
+	
 	private ArrayList<ClientInfo> clients = null;
+	
+	private boolean running = false;
 	
 	private int currGen = 0;
 	private int gridsDone = 0;
@@ -35,10 +39,8 @@ public class CAPIPServer extends CAPInformationProcessor
 	private LinkedBlockingQueue<ThreadWork> workForClients = null;
 	
 	private Lock workLock;
-	private Lock generationLock;
 	
 	private ServerOverseer parent = null;
-	private static final String TAG = "Server";
 	private ThreadWork[] workDoneByClients = null;
 	private ThreadWork[] workSentToClients = null;
 		
@@ -55,7 +57,14 @@ public class CAPIPServer extends CAPInformationProcessor
 		parent = (ServerOverseer)o;
 		
 		workLock = new ReentrantLock();
-		generationLock = new ReentrantLock();
+	}
+	
+	protected DictNode makeHeader(String type)
+	{
+		DictNode header = new DictNode();
+		header.addToDict("TYPE", new ByteNode(type));
+		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+		return header;
 	}
 	
 	public void disconnect()
@@ -123,7 +132,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				if(currGen != 0 && currGen != -1)
 				{
 					for(int i = 0; i < fromClient.cores; i++)
-						sendAGrid(fromClient);
+						sendGrid(fromClient);
 				}
 			}
 			else if(map.get("TYPE").toString().compareTo("REJECT") == 0)
@@ -257,7 +266,7 @@ public class CAPIPServer extends CAPInformationProcessor
 				{
 					int more = ((IntNode)gi.get("MORE")).getIntValue();
 					
-					for (int i = 0; i < more; i++) sendAGrid(fromClient);
+					for (int i = 0; i < more; i++) sendGrid(fromClient);
 				}
 			}
 			else
@@ -272,8 +281,23 @@ public class CAPIPServer extends CAPInformationProcessor
 			return;
 		}
 	}
+	
+	public void sendInitialGrids()
+	{
+		Log.information(TAG, "Sending grids - initial procedure");
+		
+		int target = getTotalCoreAmount();
+		int sent = 0;
+		
+		while (!workForClients.isEmpty() && target > sent)
+			for (ClientInfo client : clients)
+			{
+				sent++;
+				sendGrid(client);
+			}
+	}
 
-	public void sendAGrid(ClientInfo client)
+	public void sendGrid(ClientInfo client)
 	{
 		Log.information(TAG, "Sending grids - follow-up procedure");
 		ThreadWork work = null;
@@ -304,12 +328,13 @@ public class CAPIPServer extends CAPInformationProcessor
 		
 		workLock.unlock();
 		
-		if (work == null)
-		{
-			Log.information(TAG, "No more grid work is available to be sent to clients");
-			return;
-		}
+		if (work == null) return;
 		
+		sendWork(work, client);
+	}
+	
+	public void sendWork(ThreadWork work, ClientInfo client)
+	{
 		DictNode header = makeHeader("GRID");
 		
 		DictNode grid = new DictNode();
@@ -359,29 +384,7 @@ public class CAPIPServer extends CAPInformationProcessor
 		
 		workSentToClients[work.getID()] = work;
 	}
-	
-	public void sendGrids()
-	{
-		Log.information(TAG, "Sending grids - initial procedure");
 		
-		int numOfAllCores = getTotalCoreAmount();
-		
-		boolean sendToAllCores = false;
-		if(workForClients.size() >= numOfAllCores)
-			sendToAllCores = true;
-		
-		for (ClientInfo client : clients)
-		{
-			if(sendToAllCores)
-			{
-				for(int j = 0; j < client.cores; j++)
-					sendAGrid(client);
-			}
-			else
-				sendAGrid(client);
-		}
-	}
-	
 	public void updateClientStatus()
 	{
 		for (ClientInfo client : clients)
@@ -443,27 +446,32 @@ public class CAPIPServer extends CAPInformationProcessor
 		gridsDone = 0;
 	}
 
-	@Override
-	public void run()
+	public void start()
 	{	
 		Log.information(TAG, "Running...");
 		running = true;
-		while(running)
+		
+		for (ClientInfo client : clients)
+			client.start();
+				
+		try
 		{
 			for (ClientInfo client : clients)
-			{
-				Message message = client.protocol.waitForMessage();
-				if(message != null) interpretInput(message, client.protocol.getSocket().getInetAddress().getHostName());
-			}
+				client.join();
+		}
+		catch(InterruptedException e)
+		{
+			
 		}
 	}
 	
-	private class ClientInfo
+	private class ClientInfo extends Thread
 	{
 		String name = null;
 		CAPMessageProtocol protocol = null;
 		int	status = 0;
 		boolean accepted = false;
+		boolean running = false;
 		int cores = 0;
 		
 		public ClientInfo(String name)
@@ -472,6 +480,17 @@ public class CAPIPServer extends CAPInformationProcessor
 			this.protocol = null;
 			this.accepted = false;
 			this.cores = 0;
+		}
+		
+		@Override
+		public void run()
+		{
+			running = true;
+			while (running)
+			{
+				Message message = protocol.waitForMessage();
+				if (message != null) interpretInput(message, protocol.getSocket().getInetAddress().getHostName());
+			}
 		}
 		
 		public void connect()
@@ -494,6 +513,8 @@ public class CAPIPServer extends CAPInformationProcessor
 		
 		public void disconnect()
 		{
+			running = false;
+			
 			DictNode header = makeHeader("DISCONNECT");
 			Message msg = new Message(header);
 			protocol.sendMessage(msg);
