@@ -136,6 +136,10 @@ public class Layout extends Widget
 	{
 		components.add(component); 
 		component.setParent(this);
-		relayout();
+		
+		if (window == null)
+			relayout();
+		else
+			window.relayout();
 	}
 }
