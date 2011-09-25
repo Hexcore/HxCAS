@@ -155,6 +155,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		return animator.getCurrentTime();
 	}
 	
+	@Deprecated
 	public String askUserForFile(String title)
 	{
 		return askUserForFileToSave(title).filename;
