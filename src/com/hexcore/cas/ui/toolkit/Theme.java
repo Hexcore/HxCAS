@@ -398,7 +398,7 @@ public class Theme
 			text = "" + (int)value; 
 		
 		Vector2i textSize = calculateTextSize(text, Text.Size.SMALL);
-		textPos = textPos.subtract(textSize.x / 2, textSize.y + 8);
+		textPos = textPos.add(-textSize.x / 2, textSize.y + 8);
 		
 		Graphics.renderRectangle(gl, textPos.subtract(4, 4), textSize.add(8, 8), new Colour(0.0f, 0.0f, 0.0f, 0.7f));
 		renderText(gl, text, textPos, textSize, Colour.WHITE, Text.Size.SMALL);
