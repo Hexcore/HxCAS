@@ -104,7 +104,7 @@ public class Server implements LobbyListener
 						
 						System.out.println(event.address);
 						
-						if (str.equals("127.0.0.1")) break; // Ignore the local PC
+						if (str.equals("127.0.0.1")) break; // Ignore localhost
 						names.add(str);
 						break;
 					}
@@ -173,7 +173,7 @@ public class Server implements LobbyListener
 			{
 				do
 				{
-					Thread.sleep(10000);
+					Thread.sleep(4000);
 					eventQueue.put(new ServerEvent(ServerEvent.Type.SIMULATE));
 				}
 				while (names.size() == 0);

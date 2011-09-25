@@ -43,6 +43,7 @@ public class Lobby extends Thread
 			channel.socket().setBroadcast(true);
 			channel.socket().setReuseAddress(true);
 			channel.socket().bind(address);
+			channel.socket().setSoTimeout(2000);
 		}
 		catch (IOException e)
 		{

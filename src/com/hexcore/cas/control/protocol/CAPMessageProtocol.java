@@ -1,6 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -47,7 +48,7 @@ public class CAPMessageProtocol extends Thread
 		return running;
 	}
 	
-	private Node readNode() throws ProtocolErrorException
+	private Node readNode() throws ProtocolErrorException, ProtocolCloseException
 	{
 		Node node = null;
 		byte b = peakByte();
@@ -84,7 +85,7 @@ public class CAPMessageProtocol extends Thread
 		return node;
 	}
 		
-	private ByteNode byteString() throws ProtocolErrorException
+	private ByteNode byteString() throws ProtocolErrorException, ProtocolCloseException
 	{		
 		int num = 0;
 		while(peakByte() != ':') num = num * 10 + (nextByte() - '0');
@@ -105,7 +106,7 @@ public class CAPMessageProtocol extends Thread
 		return new ByteNode(b);
 	}
 	
-	private DictNode dictionary() throws ProtocolErrorException
+	private DictNode dictionary() throws ProtocolErrorException, ProtocolCloseException
 	{		
 		DictNode d = new DictNode();
 		
@@ -159,7 +160,7 @@ public class CAPMessageProtocol extends Thread
 		running = false;
 	}
 	
-	private DoubleNode doubleValue() throws ProtocolErrorException
+	private DoubleNode doubleValue() throws ProtocolErrorException, ProtocolCloseException
 	{
 		ByteBuffer buf = ByteBuffer.allocate(8);
 		
@@ -176,7 +177,7 @@ public class CAPMessageProtocol extends Thread
 		return socket;
 	}
 	
-	private IntNode intValue() throws ProtocolErrorException
+	private IntNode intValue() throws ProtocolErrorException, ProtocolCloseException
 	{
 		int value = 0;
 		expect('i');
@@ -185,7 +186,7 @@ public class CAPMessageProtocol extends Thread
 		return new IntNode(value);
 	}
 	
-	private ListNode list() throws ProtocolErrorException
+	private ListNode list() throws ProtocolErrorException, ProtocolCloseException
 	{
 		expect('l');
 		
@@ -203,11 +204,19 @@ public class CAPMessageProtocol extends Thread
 		return list;
 	}
 	
-	private void receiveMessage() throws ProtocolErrorException
+	private void receiveMessage() throws ProtocolErrorException, ProtocolCloseException
 	{
 		Node body = null;
-				
-		expect('#');
+			
+		try
+		{
+			expect('#');
+		}
+		catch (ProtocolCloseException e)
+		{
+			disconnect();
+			return;
+		}
 		
 		DictNode header = dictionary();
 				
@@ -234,7 +243,12 @@ public class CAPMessageProtocol extends Thread
 
 	public void sendMessage(Message message)
 	{
-		//System.out.println(message.toString());
+		if (!running) 
+		{
+			Log.warning(TAG, "Message not sent, protocol is not running");
+			return;
+		}
+		
 		lock.lock();
 		try
 		{
@@ -244,7 +258,7 @@ public class CAPMessageProtocol extends Thread
 		}
 		catch(IOException e)
 		{
-			Log.error(TAG, "Error: Could not send message, OutputStream raised a IOException");
+			Log.error(TAG, "Could not send message, OutputStream raised a IOException");
 		}
 		finally
 		{
@@ -277,25 +291,25 @@ public class CAPMessageProtocol extends Thread
 		}
 	}
 	
-	private void expect(char c) throws ProtocolErrorException
+	private void expect(char c) throws ProtocolErrorException, ProtocolCloseException
 	{
 		expect((byte)c);
 	}
 	
-	private void expect(byte b) throws ProtocolErrorException
+	private void expect(byte b) throws ProtocolErrorException, ProtocolCloseException
 	{
 		byte g = nextByte(); 
 		if (g != b) Log.error(TAG, "Protocol Stream Error: Expected '" + (char)b + "', got '" + (char)g + "'");
 	}
 	
-	private void forwardUntil(char c) throws ProtocolErrorException
+	private void forwardUntil(char c) throws ProtocolErrorException, ProtocolCloseException
 	{
 		byte b = (byte)c, g;
 		
 		do { g = nextByte(); } while (g != b);
 	}
 	
-	private byte nextByte() throws ProtocolErrorException
+	private byte nextByte() throws ProtocolErrorException, ProtocolCloseException
 	{
 		byte b = 0;
 		
@@ -308,14 +322,14 @@ public class CAPMessageProtocol extends Thread
 				if (i == -1)
 				{
 					Log.error(TAG, "Unexpected end of stream");
-					throw new ProtocolErrorException("Unexpected end of stream");
+					throw new ProtocolCloseException("End of stream");
 				}
 								
 				b = (byte)i;
 			}
-			catch (IOException e1)
+			catch (IOException e)
 			{
-				throw new ProtocolErrorException("Unexpected end of stream - " + e1.getMessage());
+				throw new ProtocolCloseException("End of stream - " + e.getMessage());
 			}
 		}
 		else
@@ -327,7 +341,7 @@ public class CAPMessageProtocol extends Thread
 		return b;
 	}	
 	
-	private byte peakByte() throws ProtocolErrorException
+	private byte peakByte() throws ProtocolErrorException, ProtocolCloseException
 	{
 		if (currentByte == NO_BYTE)
 		{
@@ -338,12 +352,12 @@ public class CAPMessageProtocol extends Thread
 				if (currentByte == -1)
 				{
 					Log.error(TAG, "Unexpected end of stream");
-					throw new ProtocolErrorException("Unexpected end of stream");
+					throw new ProtocolCloseException("End of stream");
 				}
 			}
-			catch (IOException e1)
+			catch (IOException e)
 			{
-				throw new ProtocolErrorException("Unexpected end of stream - " + e1.getMessage());
+				throw new ProtocolCloseException("End of stream - " + e.getMessage());
 			}
 		}
 		
@@ -374,11 +388,21 @@ public class CAPMessageProtocol extends Thread
 				{
 					forwardUntil('#');
 				}
+				catch(ProtocolCloseException e1)
+				{
+					Log.error(TAG, e1.getMessage());
+					disconnect();
+				}			
 				catch (ProtocolErrorException e2)
 				{
 					Log.error(TAG, e.getMessage());
 					disconnect();
 				}
+			}
+			catch(ProtocolCloseException e)
+			{
+				Log.error(TAG, e.getMessage());
+				disconnect();
 			}
 		}
 		
