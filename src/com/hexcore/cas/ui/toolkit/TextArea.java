@@ -10,6 +10,7 @@ public class TextArea extends TextBox
 {	
 	private	int		rows;
 	private boolean lineNumbers;
+	private int		maxHeight = 0;
 
 	public TextArea(int width, int rows)
 	{
@@ -55,6 +56,7 @@ public class TextArea extends TextBox
 	public void	setText(String text) 
 	{
 		this.text = text; 
+		
 		relayout();
 		
 		cursorIndex = cursorIndex >= text.length() ? text.length() - 1 : cursorIndex;
@@ -75,11 +77,11 @@ public class TextArea extends TextBox
 		{
 			reflowText();
 			
-			if (!isSet(Widget.FILL_VERTICAL))
-			{
-				int	boxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
-				super.setHeight(boxHeight);
-			}
+			if (isSet(Widget.FILL_VERTICAL) && flowedText != null) rows = flowedText.getNumLines();
+			
+			maxHeight = padding.y * 2 + window.getTheme().calculateTextHeight(textSize) * rows;
+			
+			if (!isSet(Widget.FILL_VERTICAL)) super.setHeight(maxHeight);
 		}
 	}
 	
@@ -89,8 +91,13 @@ public class TextArea extends TextBox
 		Vector2i pos = this.position.add(position);
 		
 		window.setClipping(gl, pos, size);
+		
 		if (flowedText != null) 
-			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash);
+			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash, textOffset.y);
+		
+		if (maxHeight > size.y)
+			window.getTheme().renderVerticalScrollbar(gl, pos, size, textOffset.y, maxHeight, size.y);
+
 		window.resetView(gl);
 	}
 	
@@ -126,6 +133,8 @@ public class TextArea extends TextBox
 				else
 					cursorIndex++;
 			}
+			else if (event.type == Event.Type.MOUSE_SCROLL)
+				textOffset.y = Math.max(Math.min(textOffset.y + event.amount, maxHeight - size.y), 0);
 			else
 				handled = false;
 			

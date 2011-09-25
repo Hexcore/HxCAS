@@ -16,23 +16,27 @@ public class TextBox extends Widget
 	protected int		selectIndex = 0;
 	protected boolean	selecting = false;
 	protected float		cursorFlash = 0.0f;
+	protected Vector2i	textOffset;
 
 	public TextBox(int width)
 	{
 		super(new Vector2i(width, 10));
 		padding = new Vector2i(2, 2);
+		textOffset = new Vector2i(0, 0);
 	}
 
 	public TextBox(Vector2i position, Vector2i size)
 	{
 		super(position, size);
 		padding = new Vector2i(2, 2);
+		textOffset = new Vector2i(0, 0);
 	}
 	
 	public TextBox(Vector2i position, int width)
 	{
 		super(position, new Vector2i(width, 10));
 		padding = new Vector2i(2, 2);
+		textOffset = new Vector2i(0, 0);
 	}
 
 	public boolean	canGetFocus() {return true;}
@@ -113,7 +117,7 @@ public class TextBox extends Widget
 		{	
 			if (selecting)
 			{
-				Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset());
+				Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset()).add(textOffset);
 				int index = flowedText.getCursorIndex(window.getTheme(), textPos);
 				
 				if (index > -1) cursorIndex = index;
@@ -125,7 +129,7 @@ public class TextBox extends Widget
 		{	
 			selecting = event.pressed;
 			
-			Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset());
+			Vector2i textPos = event.position.subtract(position).subtract(getInnerOffset()).add(textOffset);
 			int index = flowedText.getCursorIndex(window.getTheme(), textPos);
 			
 			if (event.pressed)
