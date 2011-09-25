@@ -46,6 +46,7 @@ public class HexcoreVM
 	{
 		//TODO: Need to convert to text stream.
 		
+			Parser.reset();
 			Scanner.Init(fileName);
 			Errors.Init(fileName, "./", true);
 			Parser.Parse();

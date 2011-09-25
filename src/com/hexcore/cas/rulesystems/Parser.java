@@ -106,6 +106,15 @@ static ArrayList<String> getErrorList()
 	return results;
 }
 
+static public void reset()
+{
+	errDist = minErrDist;
+	Errors.count = 0;
+	Errors.first = null;
+	Errors.last = null;
+	Errors.eof = false;
+}
+
 
 
 	static void SynErr (int n) {
