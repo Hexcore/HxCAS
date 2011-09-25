@@ -136,7 +136,10 @@ public class TextArea extends TextBox
 					cursorIndex++;
 			}
 			else if (event.type == Event.Type.MOUSE_SCROLL)
+			{
 				textOffset.y = Math.max(Math.min(textOffset.y + event.amount, maxHeight - size.y), 0);
+				handled = false;
+			}
 			else
 				handled = false;
 			

@@ -6,7 +6,6 @@ import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
