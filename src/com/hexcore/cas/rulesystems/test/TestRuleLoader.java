@@ -1,7 +1,6 @@
 package com.hexcore.cas.rulesystems.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -11,9 +10,10 @@ import java.io.InputStream;
 import org.junit.Test;
 
 import com.hexcore.cas.model.Cell;
-import com.hexcore.cas.rulesystems.RuleProgram;
+import com.hexcore.cas.rulesystems.Rule;
+import com.hexcore.cas.rulesystems.RuleLoader;
 
-public class TestRuleProgram
+public class TestRuleLoader
 {
 	@Test
 	public void test()
@@ -22,11 +22,9 @@ public class TestRuleProgram
 		{
 			byte[] bytes = readBytes("Test Data/bytecode/GameOfLifeRule.class");
 			
-			RuleProgram program = new RuleProgram();
-			program.loadBytecode(bytes);
-			
-			assertTrue(program.isValid());
-			
+			RuleLoader program = new RuleLoader();
+			Rule rule = program.loadRule(bytes);
+						
 			Cell target = new Cell(new double[] {0.0f});
 			Cell[] neighbours = new Cell[4];
 			
@@ -35,7 +33,7 @@ public class TestRuleProgram
 			neighbours[2] = new Cell(new double[] {1.0f});
 			neighbours[3] = new Cell(new double[] {1.0f});
 			
-			program.run(target, neighbours);
+			rule.run(target, neighbours);
 			assertEquals(0.0f, target.getValue(0), 0.1f);
 			
 			neighbours[0] = new Cell(new double[] {0.0f});
@@ -43,7 +41,7 @@ public class TestRuleProgram
 			neighbours[2] = new Cell(new double[] {1.0f});
 			neighbours[3] = new Cell(new double[] {1.0f});
 			
-			program.run(target, neighbours);
+			rule.run(target, neighbours);
 			assertEquals(1.0f, target.getValue(0), 0.1f);	
 						
 			neighbours[0] = new Cell(new double[] {0.0f});
@@ -51,7 +49,7 @@ public class TestRuleProgram
 			neighbours[2] = new Cell(new double[] {1.0f});
 			neighbours[3] = new Cell(new double[] {0.0f});
 			
-			program.run(target, neighbours);
+			rule.run(target, neighbours);
 			assertEquals(1.0f, target.getValue(0), 0.1f);
 			
 			neighbours[0] = new Cell(new double[] {0.0f});
@@ -59,7 +57,7 @@ public class TestRuleProgram
 			neighbours[2] = new Cell(new double[] {0.0f});
 			neighbours[3] = new Cell(new double[] {0.0f});
 			
-			program.run(target, neighbours);
+			rule.run(target, neighbours);
 			assertEquals(0.0f, target.getValue(0), 0.1f);			
 		}
 		catch (Exception e)
