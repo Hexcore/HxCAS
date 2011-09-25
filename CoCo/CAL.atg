@@ -13,6 +13,38 @@ static enum PostOpE{INC, DEC, UN};
 
 static SymbolTable table;
 
+static public int getErrorCount()
+{
+	return Errors.count;
+}
+
+
+static public String getResult()
+{
+	if(Parser.getErrorCount() == 0)
+		return "Compiled Successfully";
+	else
+		return Parser.getErrorList();
+}
+
+
+static String getErrorList()
+{
+	if(Errors.first == null)
+		return "";
+		
+	ErrorRec current = Errors.first;
+	String str = "";
+	
+	while(current != null)
+	{
+		str += "Error at line " + current.line + ": " + current.str + '\n';
+		current = current.next;
+	}
+	
+	return str;
+}
+
 CHARACTERS
   digit      = "0123456789" .
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
