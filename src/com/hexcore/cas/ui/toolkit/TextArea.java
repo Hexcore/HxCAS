@@ -16,12 +16,14 @@ public class TextArea extends TextBox
 	{
 		super(width);
 		this.rows = rows;
+		this.textSize = Text.Size.CODE;
 	}
 
 	public TextArea(Vector2i position, int width, int rows)
 	{
 		super(position, width);
 		this.rows = rows;
+		this.textSize = Text.Size.CODE;
 	}
 	
 	public void setLineNumbers(boolean state)
@@ -35,7 +37,7 @@ public class TextArea extends TextBox
 		int sideMargin = 0;
 		
 		if (window != null && lineNumbers) 
-			sideMargin = padding.x + window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), Text.Size.SMALL);
+			sideMargin = padding.x + window.getTheme().calculateTextWidth("1"+flowedText.getNumLines(), textSize);
 		
 		return sideMargin + padding.x;
 	}
