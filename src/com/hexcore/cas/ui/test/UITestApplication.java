@@ -450,7 +450,7 @@ public class UITestApplication implements WindowEventListener
 			}
 			else if (event.target == loadWorldButton)
 			{
-				System.out.println(window.askUserForFile("Load a world"));
+				System.out.println(window.askUserForFileToSave("Load a world", "txt"));
 			}
 			else if (event.target == optionsButton)
 			{

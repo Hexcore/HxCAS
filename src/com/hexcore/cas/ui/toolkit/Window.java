@@ -18,6 +18,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -152,13 +154,45 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		return animator.getCurrentTime();
 	}
-		
+	
 	public String askUserForFile(String title)
 	{
+		return askUserForFileToSave(title).filename;
+	}	
+		
+	public FileSelectResult askUserForFileToSave(String title)
+	{
 		FileDialog dialog = new FileDialog(frame, title);
+		dialog.setMode(FileDialog.SAVE);
 		dialog.setVisible(true);
-		return dialog.getFile();
+		return new FileSelectResult(dialog.getFile(), dialog.getDirectory());
 	}
+	
+	public FileSelectResult askUserForFileToSave(String title, String extension)
+	{
+		FileDialog dialog = new FileDialog(frame, title);
+		dialog.setMode(FileDialog.SAVE);
+		dialog.setFilenameFilter(new ExtensionFilter(extension));
+		dialog.setVisible(true);
+		return new FileSelectResult(dialog.getFile(), dialog.getDirectory());
+	}
+	
+	public FileSelectResult askUserForFileToLoad(String title)
+	{
+		FileDialog dialog = new FileDialog(frame, title);
+		dialog.setMode(FileDialog.LOAD);
+		dialog.setVisible(true);
+		return new FileSelectResult(dialog.getFile(), dialog.getDirectory());
+	}
+	
+	public FileSelectResult askUserForFileToLoad(String title, String extension)
+	{
+		FileDialog dialog = new FileDialog(frame, title);
+		dialog.setMode(FileDialog.LOAD);
+		dialog.setFilenameFilter(new ExtensionFilter(extension));
+		dialog.setVisible(true);
+		return new FileSelectResult(dialog.getFile(), dialog.getDirectory());
+	}	
 	
 	public float getAspectRatio()
 	{
@@ -546,6 +580,46 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.button = (int)e.getKeyChar();
 		event.setModifiers(e);
 		sendEvent(event);
+	}
+	
+	class ExtensionFilter implements FilenameFilter
+	{
+		private String extension;
+		
+		public ExtensionFilter(String extension)
+		{
+			this.extension = extension;
+		}
+		
+		@Override
+		public boolean accept(File dir, String name)
+		{
+			return name.endsWith("." + extension);
+		}
+	}
+	
+	class FileSelectResult
+	{
+		public String filename;
+		public String directory;
+		
+		public FileSelectResult(String filename, String directory)
+		{
+			this.filename = filename;
+			this.directory = directory;
+		}
+		
+		public boolean isValid()
+		{
+			return filename != null;
+		}
+		
+		@Override 
+		public String toString()
+		{
+			if (filename == null) return "<None>";
+			return (directory != null ? directory : "") + filename;
+		}
 	}
 	
 	class KeyRepeatFilter extends TimerTask
