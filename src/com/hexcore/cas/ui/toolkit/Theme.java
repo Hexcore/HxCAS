@@ -472,7 +472,7 @@ public class Theme
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 	}
 	
-	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int selectIndex, int cursorIndex, boolean focus, boolean lineNumbers, float time)
+	public void renderTextArea(GL gl, Vector2i position, Vector2i size, FlowedText text, int selectIndex, int cursorIndex, boolean focus, boolean lineNumbers, float time, int scroll)
 	{
 		String stateName = "normal";
 		if (focus) stateName = "focus";
@@ -484,7 +484,9 @@ public class Theme
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
-		int			sideMargin = 0;
+		Vector2i	scrolledPosition = position.subtract(0, scroll);
+		
+		int	sideMargin = 0;
 		if (lineNumbers)
 		{
 			sideMargin = calculateTextWidth("1"+text.getNumLines(), Text.Size.SMALL) + padding.x;
@@ -498,7 +500,7 @@ public class Theme
 			
 			for (int i = 1; i <= text.getNumLines(); i++)
 			{
-				Vector2i linePos = position.add(0, (i-1) * text.lineHeight).add(padding);
+				Vector2i linePos = scrolledPosition.add(0, (i-1) * text.lineHeight).add(padding);
 				renderText(gl, ""+i, linePos, sideMarginText, Text.Size.SMALL);
 			}
 		}
@@ -518,7 +520,8 @@ public class Theme
 				Vector2i startPos = text.getCursorPosition(this, new Vector2i(start, y)).add(sideMargin, 0);
 				Vector2i endPos = text.getCursorPosition(this, new Vector2i(end, y)).add(sideMargin, 0);
 				
-				Graphics.renderRectangle(gl, position.add(padding).add(startPos), endPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
+				Graphics.renderRectangle(gl, scrolledPosition.add(padding).add(startPos), 
+						endPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
 			}
 			else
 			{
@@ -538,7 +541,7 @@ public class Theme
 				Vector2i	startPos = text.getCursorPosition(this, start);
 				Vector2i	startFinPos = text.getCursorPosition(this, text.getLineEndCursorPosition(start));
 				
-				Graphics.renderRectangle(gl, position.add(padding).add(startPos).add(sideMargin, 0), 
+				Graphics.renderRectangle(gl, scrolledPosition.add(padding).add(startPos).add(sideMargin, 0), 
 						startFinPos.subtract(startPos).add(0, text.lineHeight), selectedColour);
 				
 				int sy = Math.min(cursorLocation.y, selectLocation.y);
@@ -549,25 +552,26 @@ public class Theme
 					Vector2i	bPos = text.getCursorPosition(this, text.getLineBeginningCursorPositionFromLine(i));
 					Vector2i	ePos = text.getCursorPosition(this, text.getLineEndCursorPositionFromLine(i));
 					
-					Graphics.renderRectangle(gl, position.add(padding).add(bPos).add(sideMargin, 0), 
+					Graphics.renderRectangle(gl, scrolledPosition.add(padding).add(bPos).add(sideMargin, 0), 
 							ePos.subtract(bPos).add(0, text.lineHeight), selectedColour);		
 				}
 				
 				Vector2i	endFinPos = text.getCursorPosition(this, end);
 				Vector2i	endPos = text.getCursorPosition(this, text.getLineBeginningCursorPosition(end));
 				
-				Graphics.renderRectangle(gl, position.add(padding).add(endPos).add(sideMargin, 0), 
+				Graphics.renderRectangle(gl, scrolledPosition.add(padding).add(endPos).add(sideMargin, 0), 
 						endFinPos.subtract(endPos).add(0, text.lineHeight), selectedColour);			
 			}
 			
 			if (time % 2.0f < 1.0f)
 			{
 				Vector2i cursorPos = text.getCursorPosition(this, cursorLocation).add(sideMargin, 0);
-				Graphics.renderRectangle(gl, position.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);
+				Graphics.renderRectangle(gl, scrolledPosition.add(padding).add(cursorPos), new Vector2i(1, textHeight), textColour);
 			}
 		}
 		
-		renderFlowedText(gl, position.add(padding).add(sideMargin, 0), text, textColour);
+		renderFlowedText(gl, scrolledPosition.add(padding).add(sideMargin, 0), text, textColour);
+		
 		Graphics.renderBorder(gl, position, size, borderRadius, getFill("TextBox", stateName, "border"));
 	}
 	
