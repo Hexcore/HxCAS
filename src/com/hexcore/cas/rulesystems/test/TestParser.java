@@ -23,6 +23,10 @@ public class TestParser extends TestCase
 		HexcoreVM.loadRules("Test Data/testRules.cal");
 		
 		System.out.print(Parser.getResult());
+		
+		HexcoreVM.loadRules("Test Data/testRules.cal");
+		
+		System.out.print(Parser.getResult());
 	}
 
 	

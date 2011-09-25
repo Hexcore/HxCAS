@@ -44,6 +44,15 @@ static ArrayList<String> getErrorList()
 	return results;
 }
 
+static public void reset()
+{
+	errDist = minErrDist;
+	Errors.count = 0;
+	Errors.first = null;
+	Errors.last = null;
+	Errors.eof = false;
+}
+
 CHARACTERS
   digit      = "0123456789" .
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
