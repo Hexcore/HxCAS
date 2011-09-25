@@ -7,24 +7,36 @@ public class TriangleGrid extends Grid
 	public TriangleGrid(Vector2i size) 
 	{
 		super(size);
-		gridType = 'T';
+	}
+	
+	public TriangleGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
 	}
 	
 	public TriangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		gridType = 'T';
 	}
 	
 	public TriangleGrid(Grid g)
 	{
 		super(g);
-		gridType = 'T';
+	}
+	
+	public GridType getType()
+	{
+		return GridType.TRIANGLE;
 	}
 	
 	public Grid clone()
 	{
 		return new TriangleGrid(this);
+	}
+	
+	public Vector2i getNeighbourhoodRange()
+	{
+		return new Vector2i(2, 1);
 	}
 	
 	@Override

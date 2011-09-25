@@ -4,28 +4,39 @@ import com.hexcore.cas.math.Vector2i;
 
 public class RectangleGrid extends Grid
 {
-
 	public RectangleGrid(Vector2i size) 
 	{
 		super(size);
-		gridType = 'R';
-	}//end constructor
+	}
+	
+	public RectangleGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
+	}
 	
 	public RectangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		gridType = 'R';
 	}
 	
 	public RectangleGrid(Grid g)
 	{
 		super(g);
-		gridType = 'R';
+	}
+	
+	public GridType getType()
+	{
+		return GridType.RECTANGLE;
 	}
 	
 	public Grid clone()
 	{
 		return new RectangleGrid(this);
+	}
+	
+	public Vector2i getNeighbourhoodRange()
+	{
+		return new Vector2i(1, 1);
 	}
 	
 	@Override

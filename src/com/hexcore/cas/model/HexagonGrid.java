@@ -7,24 +7,36 @@ public class HexagonGrid extends Grid
 	public HexagonGrid(Vector2i size) 
 	{
 		super(size);
-		gridType = 'H';
+	}
+	
+	public HexagonGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
 	}
 	
 	public HexagonGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
-		gridType = 'H';
 	}
 	
 	public HexagonGrid(Grid g)
 	{
 		super(g);
-		gridType = 'H';
+	}
+	
+	public GridType getType()
+	{
+		return GridType.HEXAGON;
 	}
 	
 	public Grid clone()
 	{
 		return new HexagonGrid(this);
+	}
+	
+	public Vector2i getNeighbourhoodRange()
+	{
+		return new Vector2i(1, 1);
 	}
 	
 	@Override

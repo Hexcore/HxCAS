@@ -323,7 +323,6 @@ public class CAPIPClient extends Thread
 				}
 			}
 
-			Log.information(TAG, "Got work from server");
 			parent.addGrid(grid, area, id, gen);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)

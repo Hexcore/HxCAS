@@ -90,7 +90,7 @@ public class GameOfLife
 	public void generateNextGeneration()
 	{
 		//make a new copy of the grid.
-		char c = grid.getType();
+		char c = grid.getTypeSymbol();
 		Grid temp = grid.clone();
 		
 		for(int y = 0; y < grid.getHeight(); y++)

@@ -144,7 +144,7 @@ public class TestServerControl extends TestCase
 	{
 		Log.information(TAG, "Testing grid was calculated and set correctly");
 			
-		assertEquals('R', grid.getType());
+		assertEquals('R', grid.getTypeSymbol());
 		assertEquals(4, grid.getWidth());
 		assertEquals(4, grid.getHeight());
 		assertEquals(1.0, grid.getCell(0, 0).getValue(0));

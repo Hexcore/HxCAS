@@ -40,7 +40,7 @@ public class World
 		if(worldGenerations.size() == 0)
 			return null;
 		
-		char type = worldGenerations.get(0).getType();
+		char type = worldGenerations.get(0).getTypeSymbol();
 		int len = worldGenerations.size();
 		switch(type)
 		{
@@ -98,7 +98,7 @@ public class World
 
 	public void setWorldGenerations(Grid[] w)
 	{
-		char type = w[0].getType();
+		char type = w[0].getTypeSymbol();
 		int len = w.length;
 		switch(type)
 		{
@@ -139,7 +139,7 @@ public class World
 		throws IOException
 	{
 		WorldSaver ws = new WorldSaver();
-		char type = worldGenerations.get(0).getType();
+		char type = worldGenerations.get(0).getTypeSymbol();
 		int len = worldGenerations.size();
 		switch(type)
 		{

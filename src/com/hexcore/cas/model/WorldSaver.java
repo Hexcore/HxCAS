@@ -15,7 +15,7 @@ public class WorldSaver
 	public void saveWorld(String worldFileName, Grid[] world, String rulesAndColours)
 		throws IOException
 	{
-		char type = world[0].getType();
+		char type = world[0].getTypeSymbol();
 		int y = world[0].getHeight();
 		int x = world[0].getWidth();
 		int n = world[0].getCell(0, 0).getValueCount();

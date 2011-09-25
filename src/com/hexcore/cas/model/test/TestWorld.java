@@ -32,7 +32,7 @@ public class TestWorld extends TestCase
 		assertTrue(RAC.equals("I AM RULES!"));
 		
 		//Generation 1
-		assertEquals('T', grids[0].getType());
+		assertEquals('T', grids[0].getTypeSymbol());
 		assertEquals(2, grids[0].getWidth());
 		assertEquals(3, grids[0].getHeight());
 		assertEquals(0.0, grids[0].getCell(0, 0).getValue(0));
@@ -49,7 +49,7 @@ public class TestWorld extends TestCase
 		assertEquals(11.0, grids[0].getCell(1, 2).getValue(1));
 		
 		//Generation 2
-		assertEquals('T', grids[1].getType());
+		assertEquals('T', grids[1].getTypeSymbol());
 		assertEquals(2, grids[1].getWidth());
 		assertEquals(3, grids[1].getHeight());
 		assertEquals(1.0, grids[1].getCell(0, 0).getValue(0));
@@ -66,7 +66,7 @@ public class TestWorld extends TestCase
 		assertEquals(12.0, grids[1].getCell(1, 2).getValue(1));
 		
 		//Generation 3
-		assertEquals('T', grids[2].getType());
+		assertEquals('T', grids[2].getTypeSymbol());
 		assertEquals(2, grids[2].getWidth());
 		assertEquals(3, grids[2].getHeight());
 		assertEquals(2.0, grids[2].getCell(0, 0).getValue(0));
@@ -166,7 +166,7 @@ public class TestWorld extends TestCase
 		assertTrue(RAC.equals("No rules set.\r\nNo colours set."));
 
 		//Generation 1
-		assertEquals('H', grids[0].getType());
+		assertEquals('H', grids[0].getTypeSymbol());
 		assertEquals(2, grids[0].getWidth());
 		assertEquals(3, grids[0].getHeight());
 		assertEquals(0.0, grids[0].getCell(0, 0).getValue(0));
@@ -183,7 +183,7 @@ public class TestWorld extends TestCase
 		assertEquals(11.0, grids[0].getCell(1, 2).getValue(1));
 
 		//Generation 2
-		assertEquals('H', grids[1].getType());
+		assertEquals('H', grids[1].getTypeSymbol());
 		assertEquals(2, grids[1].getWidth());
 		assertEquals(3, grids[1].getHeight());
 		assertEquals(1.0, grids[1].getCell(0, 0).getValue(0));
@@ -200,7 +200,7 @@ public class TestWorld extends TestCase
 		assertEquals(12.0, grids[1].getCell(1, 2).getValue(1));
 
 		//Generation 3
-		assertEquals('H', grids[2].getType());
+		assertEquals('H', grids[2].getTypeSymbol());
 		assertEquals(2, grids[2].getWidth());
 		assertEquals(3, grids[2].getHeight());
 		assertEquals(2.0, grids[2].getCell(0, 0).getValue(0));

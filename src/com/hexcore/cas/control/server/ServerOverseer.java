@@ -1,6 +1,7 @@
 package com.hexcore.cas.control.server;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
@@ -160,122 +161,85 @@ public class ServerOverseer extends Overseer
 		return isFinishedGenerations;
 	}
 	
-	public void makeNonwrappableGrids()
+	public void calculateSplits()
+	{
+		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 2);
+		clientWorkables = new Recti[splits.length];
+		
+		for(int i = 0; i < splits.length; i++)
+			clientWorkables[i] = new Recti(splits[i].getPosition(), splits[i].getSize());
+	}
+	
+	public void splitGrids()
+	{
+		if(grid.getWrappable())
+			splitWrappableGrids();
+		else
+			splitNonwrappableGrids();
+	}
+	
+	private void splitNonwrappableGrids()
 	{
 		int numOfClientWorks = clientWorkables.length;
 		clientWork = new ThreadWork[numOfClientWorks];
 		
 		for(int i = 0; i < numOfClientWorks; i++)
 		{
-			Grid workingGrid = null;
-			int left = 1;
-			int right = 1;
-			int top = 1;
-			int bot = 1;
+			Vector2i borderSize = grid.getNeighbourhoodRange();
+			
+			int left = borderSize.x;
+			int right = borderSize.x;
+			int top = borderSize.y;
+			int bottom = borderSize.y;
 
-			Recti w = clientWorkables[i];
-			if(w.getPosition().x == 0)
-				left--;
-			if(w.getPosition().y == 0)
-				top--;
-			if(w.getSize().x + w.getPosition().x == grid.getWidth())
-				right--;
-			if(w.getSize().y + w.getPosition().y == grid.getHeight())
-				bot--;
-			Vector2i size = new Vector2i(w.getSize().x + left + right, w.getSize().y + top + bot);
-			Cell cell = new Cell(grid.getNumProperties());
-
-			switch(grid.getType())
-			{
-				case 'h':
-				case 'H':
-					workingGrid = new HexagonGrid(size, cell);
-					break;
-				case 'r':
-				case 'R':
-					workingGrid = new RectangleGrid(size, cell);
-					break;
-				case 't':
-				case 'T':
-					left++;
-					right++;
-					if(w.getPosition().x - 1 < 0)
-						left--;
-					if(w.getSize().x + w.getPosition().x + right >= grid.getWidth())
-						right--;
-					size = new Vector2i(w.getSize().x + left + right, w.getSize().y + top + bot);
-					workingGrid = new TriangleGrid(size, cell);
-					break;
-			}
+			Recti workArea = clientWorkables[i];
+			
+			if(workArea.getPosition().x - left < 0)
+				left = workArea.getPosition().x;
+			if(workArea.getPosition().y - top < 0)
+				top = workArea.getPosition().y;
+			if(workArea.getSize().x + workArea.getPosition().x >= grid.getWidth())
+				right = workArea.getSize().x + workArea.getPosition().x - grid.getWidth() - 1;
+			if(workArea.getSize().y + workArea.getPosition().y >= grid.getHeight())
+				bottom = workArea.getSize().y + workArea.getPosition().y - grid.getHeight() - 1;
+			
+			Vector2i size = new Vector2i(workArea.getSize().x + left + right, workArea.getSize().y + top + bottom);
+			Grid workingGrid = grid.getType().create(size, grid.getNumProperties());
 	
 			int gYPos = 0;
 			int gXPos = 0;
-			for(int y = w.getPosition().y - top; y < w.getPosition().y + w.getSize().y + bot; y++)
-			{
-				for(int x = w.getPosition().x - left; x < w.getPosition().x + w.getSize().x + right; x++)
+			
+			for(int y = workArea.getPosition().y - top; y < workArea.getPosition().y + workArea.getSize().y + bottom; y++, gYPos++)
+				for(int x = workArea.getPosition().x - left; x < workArea.getPosition().x + workArea.getSize().x + right; x++)
 				{
 					workingGrid.setCell(gXPos, gYPos, grid.getCell(x, y));
 					gXPos++;
-					if(gXPos >= w.getSize().x + right)
-						gXPos = 0;
+					if(gXPos >= workArea.getSize().x) gXPos = 0;
 				}
-				gYPos++;
-			}
 			
-			int x = (w.getPosition().x != 0) ? 1 : 0;
-			int y = (w.getPosition().y != 0) ? 1 : 0;
-			Recti aw = new Recti(new Vector2i(x, y), w.getSize());
-			switch(workingGrid.getType())
-			{
-				case 't':
-				case 'T':
-					x += (w.getPosition().x != 0 && w.getPosition().x != 1) ? 1 : 0;
-					aw.setPosition(new Vector2i(x, y));
-					break;
-			}
-
-			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++, currGen);
+			Recti aw = new Recti(new Vector2i(left, top), workArea.getSize());
+			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
 		}
 	}
 	
-	public void makeWrappableGrids()
+	private void splitWrappableGrids()
 	{
 		int numOfClientWorks = clientWorkables.length;
 		clientWork = new ThreadWork[numOfClientWorks];
 		
 		for(int i = 0; i < numOfClientWorks; i++)
 		{
-			Grid workingGrid = null;
-			int width = 1;
-			int height = 1;
-
-			Recti w = clientWorkables[i];
-			Vector2i size = new Vector2i(w.getSize().x + (2 * width), w.getSize().y + (2 * height));
-			Cell cell = new Cell(grid.getCell(0, 0).getValueCount());
-
-			switch(grid.getType())
-			{
-				case 'h':
-				case 'H':
-					workingGrid = new HexagonGrid(size, cell);
-					break;
-				case 'r':
-				case 'R':
-					workingGrid = new RectangleGrid(size, cell);
-					break;
-				case 't':
-				case 'T':
-					width += 1;
-					size = new Vector2i(w.getSize().x + (2 * width), w.getSize().y + (2 * height));
-					workingGrid = new TriangleGrid(size, cell);
-					break;
-			}
+			Vector2i borderSize = grid.getNeighbourhoodRange();
+			Recti workArea = clientWorkables[i];
+			Vector2i size = new Vector2i(workArea.getSize().x + (2 * borderSize.x), workArea.getSize().y + (2 * borderSize.y));
+			
+			Grid workingGrid = grid.getType().create(size, grid.getNumProperties());
 	
 			int gYPos = 0;
 			int gXPos = 0;
-			for(int y = w.getPosition().y - height; y < w.getPosition().y + w.getSize().y + height; y++)
+			for(int y = workArea.getPosition().y - borderSize.y; y < workArea.getPosition().y + workArea.getSize().y + borderSize.y; y++)
 			{
-				for(int x = w.getPosition().x - width; x < w.getPosition().x + w.getSize().x + width; x++)
+				for(int x = workArea.getPosition().x - borderSize.x; x < workArea.getPosition().x + workArea.getSize().x + borderSize.x; x++)
 				{
 					int xx = (grid.getWidth() + x) % grid.getWidth();
 					int yy = (grid.getHeight() + y) % grid.getHeight();
@@ -284,22 +248,14 @@ public class ServerOverseer extends Overseer
 						workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
 					}
 					gXPos++;
-					if(gXPos >= w.getSize().x + (width * 2))
+					if(gXPos >= workArea.getSize().x + (borderSize.x * 2))
 						gXPos = 0;
 				}
 				gYPos++;
 			}
 			
-			Recti aw = new Recti(new Vector2i(1, 1), w.getSize());
-			switch(workingGrid.getType())
-			{
-				case 't':
-				case 'T':
-					aw.setPosition(new Vector2i(2, 1));
-					break;
-			}
-
-			clientWork[i] = new ThreadWork(workingGrid, aw, threadWorkID++, currGen);
+			Recti aw = new Recti(borderSize, workArea.getSize());
+			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
 		}
 	}
 	
@@ -315,22 +271,15 @@ public class ServerOverseer extends Overseer
 	
 	public void rebuildGrid()
 	{
+		Log.debug(TAG, "Merging work done by clients");
 		for(int i = 0; i < clientWorkables.length; i++)
 		{
 			Grid g = clientWork[i].getGrid();
 			Recti aw = clientWork[i].getWorkableArea();
 			Recti uw = clientWorkables[i];
-			for(int y = uw.getPosition().y, yy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, yy++)
-			{
-				for(int x = uw.getPosition().x, xx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, xx++)
-				{
-					for(int index = 0; index < grid.getCell(x, y).getValueCount(); index++)
-					{
-						Cell c = g.getCell(xx, yy);
-						grid.getCell(x, y).setValue(index, c.getValue(index));
-					}
-				}
-			}
+			for(int y = uw.getPosition().y, cy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, cy++)
+				for(int x = uw.getPosition().x, cx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, cx++)
+					grid.setCell(x, y, g.getCell(cx, cy));
 		}
 	}
 	
@@ -361,24 +310,17 @@ public class ServerOverseer extends Overseer
 	}
 
 	//Called from CAPIPServer to pass up work done
-	public void setClientWork(ArrayList<ThreadWork> CW)
+	public void setClientWork(List<ThreadWork> completedWork)
 	{
-		int size = CW.size();
-		clientWork = new ThreadWork[size];
-		for(int i = 0; i < size; i++)
-			clientWork[i] = CW.get(i).clone();
+		clientWork = completedWork.toArray(clientWork);
 		threadWorkID = 0;
-		CW.clear();
 		
 		rebuildGrid();
 		world.addGeneration(grid);
 		
-		if(grid.getWrappable())
-			makeWrappableGrids();
-		else
-			makeNonwrappableGrids();
-		isFinishedWork = true;
+		splitGrids();
 		
+		isFinishedWork = true;
 	}
 
 	public void setClientNames(ArrayList<String> names)
@@ -388,19 +330,7 @@ public class ServerOverseer extends Overseer
 		names.toArray(clientNames);
 		numOfClients = size;
 	}
-	
-	public void setClientWorkables()
-	{
-		Recti[] split = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 2);
-		clientWorkables = new Recti[split.length];
-		for(int i = 0; i < split.length; i++)
-			clientWorkables[i] = new Recti(split[i].getPosition(), split[i].getSize());
-		if(grid.getWrappable())
-			makeWrappableGrids();
-		else
-			makeNonwrappableGrids();
-	}
-	
+		
 	public void simulate(Grid g, int gN)
 	{
 		Log.information(TAG, "Waiting for clients to send connect...");
@@ -410,21 +340,24 @@ public class ServerOverseer extends Overseer
 		super.setGrid(g);
 		world.addGeneration(g);
 		numOfGenerations = gN;
-		setClientWorkables();
+		
+		calculateSplits();
+		splitGrids();
 		
 		isFinishedGenerations = false;
 		for(int i = 1; ; i++)
 		{
 			currGen = i;
-			System.out.println("Starting a gen! " + i);
-			
-			if(reset)
+
+			if (reset)
 			{
 				System.out.println("NEEDS TO RESET!");
 				reset = false;
 				i = 1;
 				super.setGrid(world.getGenerationZero());
-				setClientWorkables();
+				
+				calculateSplits();
+				splitGrids();
 			}
 			
 			while(paused)
@@ -435,13 +368,15 @@ public class ServerOverseer extends Overseer
 			if(numOfGenerations == 0 || (numOfGenerations != -1 && i > numOfGenerations))
 				break;
 
+			Log.information(TAG, "Starting generation: " + i);
+			
 			send();
 			
 			while(!isFinishedWork)
 			{
 			}
 			
-			System.out.println("Finished a gen! " + i);
+			Log.information(TAG, "Finished generation: " + i);
 		}
 		isFinishedGenerations = true;
 	}

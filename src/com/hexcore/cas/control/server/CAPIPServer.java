@@ -3,6 +3,9 @@ package com.hexcore.cas.control.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,16 +36,15 @@ public class CAPIPServer
 	
 	private boolean running = false;
 	
+	private ServerOverseer parent = null;
 	private int currGen = 0;
 	private int gridsDone = 0;
 	private int totalGrids = -1;
 	private LinkedBlockingQueue<ThreadWork> workForClients = null;
+	private Map<Integer, ThreadWork> sentWork;
+	private List<ThreadWork> completedWork;
 	
 	private Lock workLock;
-	
-	private ServerOverseer parent = null;
-	private ThreadWork[] workDoneByClients = null;
-	private ThreadWork[] workSentToClients = null;
 		
 	private int clientPort;
 
@@ -52,8 +54,11 @@ public class CAPIPServer
 		this.clientPort = clientPort;
 		
 		this.clients = new ArrayList<ClientInfo>();
-		
+				
 		workForClients = new LinkedBlockingQueue<ThreadWork>();
+		sentWork = new HashMap<Integer, ThreadWork>();
+		completedWork = new LinkedList<ThreadWork>();
+		
 		parent = (ServerOverseer)o;
 		
 		workLock = new ReentrantLock();
@@ -212,7 +217,7 @@ public class CAPIPServer
 				
 				ID = ((IntNode)gi.get("ID")).getIntValue();
 				
-				ThreadWork orig = workSentToClients[ID];
+				ThreadWork orig = sentWork.get(ID);
 				
 				if(orig == null)
 				{
@@ -247,19 +252,19 @@ public class CAPIPServer
 					}
 				}
 				
-				workDoneByClients[ID] = new ThreadWork(grid, area, ID, gen);
-				workSentToClients[ID] = null;
+				workLock.lock();
+				
+				completedWork.add(new ThreadWork(ID, grid, area, gen));
+				sentWork.remove(ID);
+				
+				workLock.unlock();
 
 				gridsDone++;
 				if(gridsDone == totalGrids)
 				{
 					Log.debug(TAG, "Sending work done by clients");
-					ArrayList<ThreadWork> workTmp = new ArrayList<ThreadWork>();
-					
-					for(int i = 0; i < workDoneByClients.length; i++)
-						workTmp.add(workDoneByClients[i].clone());
-					
-					parent.setClientWork(workTmp);
+					parent.setClientWork(completedWork);
+					completedWork.clear();
 					gridsDone = 0;
 				}
 				else
@@ -306,22 +311,17 @@ public class CAPIPServer
 		
 		if (workForClients.isEmpty())
 		{			
-			boolean uncompleteWork = false;
-			for(int i = 0; i < workSentToClients.length; i++)
-				if(workSentToClients[i] != null && workDoneByClients[i] == null)
+			// Resend work that hasn't been completed yet
+			for (ThreadWork curWork : sentWork.values())
+			{
+				long diff = System.nanoTime() - curWork.getStartTime();
+				
+				if (diff > 30 * 1000 * 1000 * 1000) // Resend if the result hasn't returned in 10 seconds
 				{
-					uncompleteWork = true;
+					work = curWork;
 					break;
 				}
-			
-			if (uncompleteWork)
-				for(int i = workSentToClients.length - 1; i >= 0; i--)
-					if(workSentToClients[i] != null)
-					{
-						work = workSentToClients[i];
-						workSentToClients[i] = null;
-						break;
-					}
+			}
 		}
 		else
 			work = workForClients.poll();
@@ -353,7 +353,7 @@ public class CAPIPServer
 		grid.addToDict("PROPERTIES", new IntNode(work.getGrid().getCell(0, 0).getValueCount()));
 		
 		char[] c = new char[1];
-		c[0] = work.getGrid().getType();
+		c[0] = work.getGrid().getTypeSymbol();
 		grid.addToDict("GRIDTYPE", new ByteNode(new String(c)));
 		
 		ListNode rows = new ListNode();
@@ -382,7 +382,8 @@ public class CAPIPServer
 		Message msg = new Message(header, grid);
 		client.protocol.sendMessage(msg);
 		
-		workSentToClients[work.getID()] = work;
+		work.setStartTime(System.nanoTime());
+		sentWork.put(work.getID(), work);
 	}
 		
 	public void updateClientStatus()
@@ -424,19 +425,16 @@ public class CAPIPServer
 	public void setClientWork(ThreadWork[] TW, int cG)
 	{
 		workLock.lock();
+		
 		workForClients.clear();
+		sentWork.clear();
+		
 		currGen = cG;
 		gridsDone = 0;
 		for(int i = 0; i < TW.length; i++)
 			workForClients.add(TW[i]);
 		totalGrids = TW.length;
-		workDoneByClients = new ThreadWork[TW.length];
-		workSentToClients = new ThreadWork[TW.length];
-		for(int i = 0; i < TW.length; i++)
-		{
-			workDoneByClients[i] = null;
-			workSentToClients[i] = null;
-		}
+				
 		workLock.unlock();
 	}
 	

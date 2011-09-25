@@ -6,7 +6,6 @@ public abstract class Grid
 {
 	protected boolean		wrap = true;
 	protected Cell[][] 		cells = null;
-	protected char 			gridType = 'x';
 	protected int			numProperties = 0;
 	protected Vector2i 		size = null;
 
@@ -55,7 +54,10 @@ public abstract class Grid
 			}
 	}
 	
-	public abstract Grid 	clone();
+	public abstract GridType getType();
+	public abstract Grid clone();
+	public abstract Vector2i getNeighbourhoodRange();
+	public abstract Cell[] getNeighbours(Vector2i pos);
 	
 	public Cell getCell(int x, int y)
 	{
@@ -71,9 +73,7 @@ public abstract class Grid
 	{
 		return size.y;
 	}
-	
-	public abstract Cell[] 	getNeighbours(Vector2i pos);
-	
+		
 	public int getNumProperties()
 	{
 		return numProperties;
@@ -84,9 +84,9 @@ public abstract class Grid
 		return size;
 	}
 	
-	public char getType()
+	public char getTypeSymbol()
 	{
-		return gridType;
+		return getType().symbol;
 	}
 	
 	public int getWidth()

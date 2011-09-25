@@ -5,6 +5,7 @@ import org.junit.Test;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.GridType;
 
 import junit.framework.TestCase;
 
@@ -42,6 +43,18 @@ public class TestGrid extends TestCase
 		public Cell[] getNeighbours(Vector2i pos)
 		{
 			return null;
+		}
+
+		@Override
+		public Vector2i getNeighbourhoodRange()
+		{
+			return new Vector2i(1, 1);
+		}
+
+		@Override
+		public GridType getType()
+		{
+			return GridType.RECTANGLE;
 		}
 	}
 	
