@@ -19,5 +19,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="jar/cocolibs.jar"/>
+	<classpathentry kind="lib" path="jar/asm-3.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
