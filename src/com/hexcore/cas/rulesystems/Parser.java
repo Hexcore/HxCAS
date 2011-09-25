@@ -81,30 +81,29 @@ static public int getErrorCount()
 }
 
 
-static public String getResult()
+static public ArrayList<String> getResult()
 {
+	ArrayList<String> results = Parser.getErrorList();
 	if(Parser.getErrorCount() == 0)
-		return "Compiled Successfully";
-	else
-		return Parser.getErrorList();
+		results.add("Compiled Successfully");
+	
+	return results;
 }
 
 
-static String getErrorList()
+static ArrayList<String> getErrorList()
 {
-	if(Errors.first == null)
-		return "";
+	ArrayList<String> results = new ArrayList<String>();
 		
 	ErrorRec current = Errors.first;
-	String str = "";
 	
 	while(current != null)
 	{
-		str += "Error at line " + current.line + ": " + current.str + '\n';
+		results.add("Error at line " + current.line + ": " + current.str);
 		current = current.next;
 	}
 	
-	return str;
+	return results;
 }
 
 
