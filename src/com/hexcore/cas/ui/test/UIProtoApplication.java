@@ -547,7 +547,7 @@ public class UIProtoApplication implements WindowEventListener
 		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		worldLayout.add(buttonHeaderLayout);
 			
-			backButton = new Button(new Vector2i(100, 50), "Back to Main Menu");
+			backButton = new Button(new Vector2i(100, 50), "Main Menu");
 			backButton.setWidth(165);
 			backButton.setHeight(35);
 			buttonHeaderLayout.add(backButton);
