@@ -2,6 +2,9 @@ package com.hexcore.cas;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +29,11 @@ public class Server implements LobbyListener
 	private Configuration config = null;
 	private Lobby lobby = null;
 	private ServerOverseer overseer = null;
-	
+		
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
+	
+	// Temp
+	private Set<String> names = new TreeSet<String>();
 	
 	public static void main(String[] args)
 	{
@@ -71,13 +77,15 @@ public class Server implements LobbyListener
 		try
 		{
 			Thread.sleep(1000);
-		} catch (InterruptedException e1)
+		} 
+		catch (InterruptedException e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
 		lobby.ping();
+		
+		(new DelayedSimulate()).start();
 		
 		running = true;
 		while (running)
@@ -87,17 +95,24 @@ public class Server implements LobbyListener
 				ServerEvent event = eventQueue.poll(1, TimeUnit.SECONDS);
 				if (event == null) continue;
 				
-				switch (event) 
+				switch (event.type) 
 				{
 					case FOUND_CLIENT:
 					{
 						String str = event.address.toString();
 						str = str.substring(1, str.length() - 5);
 						
-						System.out.println(str);
+						System.out.println(event.address);
 						
-						ArrayList<String> names = new ArrayList<String>();
+						if (str.equals("127.0.0.1")) break; // Ignore localhost
 						names.add(str);
+						break;
+					}
+					
+					case SIMULATE:
+					{
+						ArrayList<String> clientList = new ArrayList<String>();
+						clientList.addAll(names);
 						
 						World world = new World();
 						
@@ -107,13 +122,12 @@ public class Server implements LobbyListener
 								grid.getCell(x, y).setValue(0, 1.0);
 						
 						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
-						overseer.setClientNames(names);
+						overseer.setClientNames(clientList);
 						overseer.start();
 						
 						Thread.sleep(100);
 						
 						overseer.simulate(grid, 100);
-						break;
 					}
 					
 					case SHUTDOWN:
@@ -137,7 +151,7 @@ public class Server implements LobbyListener
 	@Override
 	public void foundClient(SocketAddress address) 
 	{
-		ServerEvent event = ServerEvent.FOUND_CLIENT;
+		ServerEvent event = new ServerEvent(ServerEvent.Type.FOUND_CLIENT);
 		event.address = address;
 		
 		try 
@@ -147,6 +161,27 @@ public class Server implements LobbyListener
 		catch (InterruptedException e) 
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	public class DelayedSimulate extends Thread
+	{
+		@Override
+		public void run()
+		{
+			try
+			{
+				do
+				{
+					Thread.sleep(4000);
+					eventQueue.put(new ServerEvent(ServerEvent.Type.SIMULATE));
+				}
+				while (names.size() == 0);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -152,11 +154,12 @@ public class Theme
 	public Theme()
 	{
 		textRenderers = new HashMap<Text.Size, TextRenderer>();
-		textRenderers.put(Text.Size.HUGE, new TextRenderer(new Font("Helvetica", Font.PLAIN, 36), true, false));
-		textRenderers.put(Text.Size.LARGE, new TextRenderer(new Font("Helvetica", Font.PLAIN, 24), true, false));
-		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(new Font("Helvetica", Font.PLAIN, 18), true, false));
-		textRenderers.put(Text.Size.SMALL, new TextRenderer(new Font("Helvetica", Font.PLAIN, 14), true, false));
-		textRenderers.put(Text.Size.TINY, new TextRenderer(new Font("Helvetica", Font.PLAIN, 12), true, false));
+		textRenderers.put(Text.Size.HUGE, new TextRenderer(getFont("DejaVuSans", Font.PLAIN, 36), true, false));
+		textRenderers.put(Text.Size.LARGE, new TextRenderer(getFont("DejaVuSans", Font.PLAIN, 24), true, false));
+		textRenderers.put(Text.Size.MEDIUM, new TextRenderer(getFont("DejaVuSans", Font.PLAIN, 18), true, false));
+		textRenderers.put(Text.Size.SMALL, new TextRenderer(getFont("DejaVuSans", Font.PLAIN, 14), true, false));
+		textRenderers.put(Text.Size.TINY, new TextRenderer(getFont("DejaVuSans", Font.PLAIN, 12), true, false));
+		textRenderers.put(Text.Size.CODE, new TextRenderer(getFont("DejaVuSansMono", Font.PLAIN, 12), true, false));
 		
 		typeProperties = new HashMap<String, Type>();
 	}
@@ -296,6 +299,32 @@ public class Theme
 		return new Image("data/themes/" + getName() + "/images/" + category + "/" + name);
 	}	
 	
+	private Font getFont(String name, int style, int size) 
+	{
+		Font font = null;
+		String filename = "data/fonts/" + name + ".ttf";
+		File file = new File(filename);
+		
+		if (!file.exists())
+		{
+			System.err.println("Could not load: " + filename + ", doesn't exist - Using serif font");
+			return new Font("serif", style, size);
+		}
+		
+		try 
+		{
+			font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(file));
+			font = font.deriveFont(style, size);
+		} 
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+			System.err.println("Could not load: " + filename + " - Using serif font");
+			font = new Font("serif", style, size);
+		}
+		return font;
+	}
+	
 	public void loadTheme(String name)
 	{
 		this.name = name;
@@ -305,7 +334,7 @@ public class Theme
 
 		System.out.println("Theme " + getName() + ": <Name: " + getDisplayName() + " - Author: " + getAuthor() + ">");
 	}	
-	
+		
 	/*
 	 * 
 	 * These functions (all starting with render*) should actually go in their respective widget
@@ -477,10 +506,12 @@ public class Theme
 		String stateName = "normal";
 		if (focus) stateName = "focus";
 		
+		Text.Size textSize = Text.Size.CODE;
+		
 		int borderRadius = getInteger("TextBox", stateName, "border-radius", 0);
 		Graphics.renderRectangle(gl, position, size, borderRadius, getFill("TextBox", stateName, "background"));
 		
-		int			textHeight = calculateTextHeight(Text.Size.SMALL);
+		int			textHeight = calculateTextHeight(textSize);
 		Vector2i 	padding = getVector2i("TextBox", stateName, "padding", new Vector2i(3, 3));
 		Colour		textColour = getColour("TextBox", stateName, "text-colour", Colour.BLACK);
 		
@@ -489,7 +520,7 @@ public class Theme
 		int	sideMargin = 0;
 		if (lineNumbers)
 		{
-			sideMargin = calculateTextWidth("1"+text.getNumLines(), Text.Size.SMALL) + padding.x;
+			sideMargin = calculateTextWidth("1"+text.getNumLines(), textSize) + padding.x;
 			
 			Fill	sideMarginBackground = getFill("TextBoxLineNumbers", stateName, "background");
 			Colour	sideMarginBorder = getColour("TextBoxLineNumbers", stateName, "border");
@@ -501,7 +532,7 @@ public class Theme
 			for (int i = 1; i <= text.getNumLines(); i++)
 			{
 				Vector2i linePos = scrolledPosition.add(0, (i-1) * text.lineHeight).add(padding);
-				renderText(gl, ""+i, linePos, sideMarginText, Text.Size.SMALL);
+				renderText(gl, ""+i, linePos, sideMarginText, textSize);
 			}
 		}
 		
@@ -735,6 +766,8 @@ public class Theme
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
+		text = text.replace("\t", "    ");
+		
 		return (int)font.getStringBounds(text, context).getWidth();
 	}	
 	
@@ -743,6 +776,8 @@ public class Theme
 		TextRenderer textRenderer = textRenderers.get(textSize);
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
+		
+		text = text.replace("\t", "    ");
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		return new Vector2i((int)font.getStringBounds(text, context).getWidth(), (int)(metrics.getAscent() + metrics.getDescent()));
@@ -759,6 +794,8 @@ public class Theme
 		TextRenderer textRenderer = textRenderers.get(textSize);
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
+		
+		text = text.replace("\t", "    ");
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		
@@ -864,6 +901,8 @@ public class Theme
 		TextRenderer textRenderer = textRenderers.get(textSize);
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
+		
+		text = text.replace("\t", "    ");
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		int			textHeight = (int)(metrics.getAscent() + metrics.getDescent());

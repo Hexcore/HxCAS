@@ -75,6 +75,7 @@ public class CAPIPServer
 	public void disconnect()
 	{
 		Log.information(TAG, "Disconnecting clients");
+		running = false;
 		for (ClientInfo client : clients) client.disconnect();
 	}
 	
@@ -217,7 +218,11 @@ public class CAPIPServer
 				
 				ID = ((IntNode)gi.get("ID")).getIntValue();
 				
+				workLock.lock();
+				
 				ThreadWork orig = sentWork.get(ID);
+				
+				workLock.unlock();
 				
 				if(orig == null)
 				{
@@ -305,32 +310,29 @@ public class CAPIPServer
 	public void sendGrid(ClientInfo client)
 	{
 		Log.information(TAG, "Sending grids - follow-up procedure");
-		ThreadWork work = null;
 		
 		workLock.lock();
+		
+		ThreadWork work = null;
 		
 		if (workForClients.isEmpty())
 		{			
 			// Resend work that hasn't been completed yet
+			long now = System.nanoTime();
 			for (ThreadWork curWork : sentWork.values())
-			{
-				long diff = System.nanoTime() - curWork.getStartTime();
-				
-				if (diff > 30 * 1000 * 1000 * 1000) // Resend if the result hasn't returned in 10 seconds
+				if (now > 30L * 1000000000L + curWork.getStartTime()) // Resend if the result hasn't returned in 10 seconds
 				{
+					Log.warning(TAG, "Work had to be resent : " + now + " " + curWork.getStartTime());
 					work = curWork;
 					break;
 				}
-			}
 		}
 		else
 			work = workForClients.poll();
+				
+		if (work != null) sendWork(work, client);
 		
 		workLock.unlock();
-		
-		if (work == null) return;
-		
-		sendWork(work, client);
 	}
 	
 	public void sendWork(ThreadWork work, ClientInfo client)
@@ -382,8 +384,12 @@ public class CAPIPServer
 		Message msg = new Message(header, grid);
 		client.protocol.sendMessage(msg);
 		
+		workLock.lock();
+		
 		work.setStartTime(System.nanoTime());
 		sentWork.put(work.getID(), work);
+		
+		workLock.unlock();
 	}
 		
 	public void updateClientStatus()
@@ -474,6 +480,8 @@ public class CAPIPServer
 		
 		public ClientInfo(String name)
 		{
+			super("ClientThread-" + name);
+			
 			this.name = name;
 			this.protocol = null;
 			this.accepted = false;
@@ -487,6 +495,7 @@ public class CAPIPServer
 			while (running)
 			{
 				Message message = protocol.waitForMessage();
+				if (!protocol.isRunning()) disconnect();
 				if (message != null) interpretInput(message, protocol.getSocket().getInetAddress().getHostName());
 			}
 		}

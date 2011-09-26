@@ -523,7 +523,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		Event event = new Event(Event.Type.MOUSE_SCROLL);
 		event.position = new Vector2i(e.getX(), e.getY());
-		event.amount = e.getWheelRotation() * e.getScrollAmount() * 10;
+		event.amount = e.getWheelRotation() * e.getScrollAmount() * 20;
 		sendEvent(event);	
 	}
 
