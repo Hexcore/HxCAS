@@ -1,6 +1,16 @@
 package com.hexcore.cas.ui.test;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -9,6 +19,8 @@ import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.test.WaterFlow;
 import com.hexcore.cas.ui.toolkit.Button;
@@ -41,6 +53,7 @@ import com.hexcore.cas.ui.toolkit.TriangleGridWidget;
 import com.hexcore.cas.ui.toolkit.View;
 import com.hexcore.cas.ui.toolkit.Widget;
 import com.hexcore.cas.ui.toolkit.Window;
+import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.ui.toolkit.Text.Size;
 
@@ -108,8 +121,22 @@ public class UIProtoApplication implements WindowEventListener
 		
 		public Button clearRulesButton;
 		public Button submitRulesButton;
+		public Button openCALFileButton;
+		public Button saveCALFileButton;
 		
-		TextArea CALTextArea;
+		public TextArea CALTextArea;
+		public ScrollableContainer outputContainer;
+		public LinearLayout outputLayout;
+		
+		public File calFile;
+		public FileSelectResult selectedFile;
+		
+		public Dialog dialogCAL; 
+		public LinearLayout dialogCALLayout;
+		public	TextWidget dialogCALTitle;
+		public TextWidget	dialogCALMessage;
+		public Button dialogCALOKButton;
+		
 	
 	
 	public Container distributionContainer;
@@ -175,6 +202,10 @@ public class UIProtoApplication implements WindowEventListener
 	
 	UIProtoApplication()
 	{
+		
+		//Compiler Integration
+		
+		
 		
 		waterFlowGrid = new HexagonGrid(new Vector2i(100, 100));
 		waterFlowGrid.setWrappable(false);
@@ -249,7 +280,7 @@ public class UIProtoApplication implements WindowEventListener
 		headerLayout.setMargin(new Vector2i(0, 0));
 		mainMenuLayout.add(headerLayout);
 						
-		headingImage = new ImageWidget("data/logo2.png");
+		headingImage = new ImageWidget(window.getTheme().getImage("headers" , "logo.png"));
 		headingImage.setFlag(Widget.CENTER);
 		headerLayout.add(headingImage);		
 		
@@ -320,7 +351,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		
-		headingImage = new ImageWidget("data/logo3.png");
+		headingImage = new ImageWidget(window.getTheme().getImage("headers" , "logo.png"));
 		
 		headingImage.setFlag(Widget.CENTER_HORIZONTAL);
 	worldHeaderLayout.add(headingImage);
@@ -549,7 +580,64 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		//
-		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(355, 50), LinearLayout.Direction.HORIZONTAL);
+		
+		
+		//
+		
+		
+		
+			
+		LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		CALLayout.setFlag(Widget.FILL);
+		masterRulesLayout.add(CALLayout);
+		
+		LinearLayout leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		leftLayout.setFlag(Widget.FILL);
+		CALLayout.add(leftLayout);
+		
+		LinearLayout rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		rightLayout.setFlag(Widget.FILL);
+		CALLayout.add(rightLayout);
+		
+		
+		ImageWidget calEditorHeader = new ImageWidget(window.getTheme().getImage("headers","cal_editor_header.png"));
+		calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
+		leftLayout.add(calEditorHeader);	
+		
+		 CALTextArea = new TextArea(100, 20);
+		 CALTextArea.setMargin(new Vector2i(0,0));
+		 CALTextArea.setFlag(Widget.FILL);
+		 CALTextArea.setLineNumbers(true);
+	
+		
+		ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
+		textAreaContainer.setFlag(Widget.FILL);
+	
+		textAreaContainer.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		leftLayout.add(textAreaContainer);
+		
+		textAreaContainer.setContents(CALTextArea);
+		
+		
+		ImageWidget compilerOutputHeader = new ImageWidget(window.getTheme().getImage("headers","compiler_output_header.png"));
+		compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
+		rightLayout.add(compilerOutputHeader);	
+		
+		
+		/** A list **/		
+		outputContainer = new ScrollableContainer(new Vector2i(350, 100));
+		outputContainer.setFlag(Widget.FILL_VERTICAL);
+		outputContainer.setFlag(Widget.CENTER_HORIZONTAL);
+		outputContainer.setThemeClass("List");
+		rightLayout.add(outputContainer);
+		
+		outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		outputLayout.setMargin(new Vector2i(0, 0));
+		outputLayout.setFlag(Widget.WRAP);
+		outputContainer.setContents(outputLayout);
+		
+/**********/
+		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
 		//buttonRulesLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
@@ -565,23 +653,17 @@ public class UIProtoApplication implements WindowEventListener
 			submitRulesButton.setHeight(35);
 			buttonRulesLayout.add(submitRulesButton);
 			
+			openCALFileButton = new Button(new Vector2i(100, 50), "Open CAL File");
+			openCALFileButton.setWidth(165);
+			openCALFileButton.setHeight(35);
+			buttonRulesLayout.add(openCALFileButton);
+			
+			saveCALFileButton = new Button(new Vector2i(100, 50), "Save CAL File");
+			saveCALFileButton.setWidth(165);
+			saveCALFileButton.setHeight(35);
+			buttonRulesLayout.add(saveCALFileButton);
+			
 		
-		
-		//
-		
-		
-		
-		
-		 CALTextArea = new TextArea(100, 20);
-		 CALTextArea.setFlag(Widget.FILL);
-		 CALTextArea.setLineNumbers(true);
-		
-		
-		ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
-		textAreaContainer.setFlag(Widget.FILL);
-		masterRulesLayout.add(textAreaContainer);
-		
-		textAreaContainer.setContents(CALTextArea);
 		
 		
 		distributionContainer = new Container(new Vector2i(100, 100));
@@ -631,6 +713,29 @@ public class UIProtoApplication implements WindowEventListener
 		dialogOKButton.setFlag(Widget.CENTER_HORIZONTAL);
 		dialogLayout.add(dialogOKButton);
 		
+		// Dialog CAL
+		
+		dialogCAL = new Dialog(window, new Vector2i(400, 200));
+		
+		dialogCALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		dialogCALLayout.setFlag(Widget.FILL);
+		dialogCAL.setContents(dialogCALLayout);
+		
+		dialogCALTitle = new TextWidget("CAL Rules Error", Text.Size.LARGE);
+		dialogCALTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogCALLayout.add(dialogCALTitle);
+		
+		dialogCALMessage = new TextWidget("Invalid .cal File");
+		dialogCALMessage.setFlag(Widget.FILL_HORIZONTAL);
+		dialogCALMessage.setFlag(Widget.FILL_VERTICAL); // This pushes the OK button down because it fills the space in between
+		dialogCALMessage.setFlowed(true);
+		dialogCALMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogCALLayout.add(dialogCALMessage);
+		
+		dialogCALOKButton = new Button(new Vector2i(120, 30), "OK");
+		dialogCALOKButton.setFlag(Widget.CENTER_HORIZONTAL);
+		dialogCALLayout.add(dialogCALOKButton);
+		
 		
 		
 		////Simulation
@@ -659,14 +764,16 @@ public class UIProtoApplication implements WindowEventListener
 
 		//SLIDER
 		
-		LinearLayout sliderLayout = new LinearLayout(new Vector2i(40, 60), LinearLayout.Direction.VERTICAL);
+		LinearLayout sliderLayout = new LinearLayout(new Vector2i(40, 80), LinearLayout.Direction.HORIZONTAL);
 		sliderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		sliderLayout.setFlag(Widget.FILL_HORIZONTAL);
 		masterSimulationLayout.add(sliderLayout);
 		
 		SliderWidget slider = new SliderWidget(100);
+		slider.setFlag(Widget.CENTER);
 		slider.setFlag(Widget.FILL_HORIZONTAL);
-		slider.setFlag(Widget.CENTER_VERTICAL);
+	
+		slider.setShowValue(true);
 		sliderLayout.add(slider);
 		
 		
@@ -699,7 +806,7 @@ public class UIProtoApplication implements WindowEventListener
 
 		
 		
-		ImageWidget detailsImage = new ImageWidget("data/details_header.png");
+		ImageWidget detailsImage = new ImageWidget(window.getTheme().getImage("headers" , "details_header.png"));
 		detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerDetailsLayout.add(detailsImage);
 		
@@ -720,15 +827,15 @@ public class UIProtoApplication implements WindowEventListener
 		
 		playbackLayout.add(innerPlaybackLayout2);
 		
-		Button stepBackwardButton = new Button(new Image("data/step_backward_icon.png"));
+		Button stepBackwardButton = new Button(window.getTheme().getImage("icons", "step_backward_icon.png"));
 		stepBackwardButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(stepBackwardButton);
 		
-		Button playButton = new Button(new Image("data/play_icon.png"));
+		Button playButton = new Button(window.getTheme().getImage("icons","play_icon.png"));
 		playButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(playButton);
 		
-		Button pauseButton = new Button(new Image("data/pause_icon.png"));
+		Button pauseButton = new Button(window.getTheme().getImage("icons", "pause_icon.png"));
 		pauseButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(pauseButton);
 		
@@ -736,7 +843,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		
 		
-		Button stepForwardButton = new Button(new Image("data/step_forward_icon.png"));
+		Button stepForwardButton = new Button(window.getTheme().getImage("icons","step_forward_icon.png"));
 		stepForwardButton.setMargin(new Vector2i(5,0));
 		innerPlaybackLayout2.add(stepForwardButton);
 		
@@ -751,7 +858,7 @@ public class UIProtoApplication implements WindowEventListener
 
 		
 		
-		ImageWidget playbackImage = new ImageWidget("data/playback_header.png");
+		ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers","playback_header.png"));
 		playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerPlaybackLayout.add(playbackImage);
 		
@@ -771,24 +878,24 @@ public class UIProtoApplication implements WindowEventListener
 		cameraLayout.add(innerCameraLayout2);
 		
 		
-		Button zoomInButton = new Button(new Image("data/zoom_in_icon.png"));
+		Button zoomInButton = new Button(window.getTheme().getImage("icons","zoom_in_icon.png"));
 		zoomInButton.setMargin(new Vector2i(5,0));
 		innerCameraLayout2.add(zoomInButton);
 		
-		Button zoomOutButton = new Button(new Image("data/zoom_out_icon.png"));
+		Button zoomOutButton = new Button(window.getTheme().getImage("icons", "zoom_out_icon.png"));
 		zoomOutButton.setMargin(new Vector2i(5,0));
 		innerCameraLayout2.add(zoomOutButton);
 		
-		Button moveUpButton = new Button(new Image("data/up_icon.png"));
+		Button moveUpButton = new Button(window.getTheme().getImage("icons","up_icon.png"));
 		moveUpButton.setMargin(new Vector2i(5,0));
 		innerCameraLayout2.add(moveUpButton);
 		
-		Button moveDownButton = new Button(new Image("data/down_icon.png"));
+		Button moveDownButton = new Button(window.getTheme().getImage("icons", "down_icon.png"));
 		moveDownButton.setMargin(new Vector2i(5,0));
 		innerCameraLayout2.add(moveDownButton);
 		
 		
-		Button moveLeftButton = new Button(new Image("data/left_icon.png"));
+		Button moveLeftButton = new Button(window.getTheme().getImage("icons","left_icon.png"));
 		moveLeftButton.setMargin(new Vector2i(5,0));
 		innerCameraLayout2.add(moveLeftButton);
 		
@@ -796,7 +903,7 @@ public class UIProtoApplication implements WindowEventListener
 
 		
 		
-		ImageWidget cameraImage = new ImageWidget("data/camera_header.png");
+		ImageWidget cameraImage = new ImageWidget(window.getTheme().getImage("headers","camera_header.png"));
 		cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerCameraLayout.add(cameraImage);	
 		
@@ -866,7 +973,7 @@ public class UIProtoApplication implements WindowEventListener
 					
 			
 			}
-			else if (event.target == dialogOKButton)
+			else if ((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
 			{
 				window.closeModalDialog();
 			}
@@ -962,6 +1069,93 @@ public class UIProtoApplication implements WindowEventListener
 			{
 				CALTextArea.setText(" ");
 	
+			}
+			else if (event.target ==submitRulesButton)
+			{
+				
+					
+				if (selectedFile == null)
+					calFile = new File("rules/rules.cal");
+				else
+					calFile = new File(selectedFile.directory + "/" + selectedFile.filename);
+				
+				try {
+					             FileWriter outFile = new FileWriter(calFile);
+					             PrintWriter out = new PrintWriter(outFile);
+						 
+						              out.println(CALTextArea.getText());
+						              out.close();
+					              
+					          } catch (IOException e){
+					              e.printStackTrace();
+					          }
+				
+			    System.out.println("THE PATH:" + calFile.getAbsolutePath());
+		
+			    HexcoreVM.loadRules(calFile.getAbsolutePath());
+			    
+			    TextWidget text = new TextWidget("Compiler Report:");
+				outputLayout.add(text);
+			
+			    
+			    ArrayList<String> parserResults  = Parser.getResult();
+			    
+			    Iterator<String> iterator = parserResults.iterator();
+			    outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+				outputLayout.setMargin(new Vector2i(0, 0));
+				outputLayout.setFlag(Widget.WRAP);
+				outputContainer.setContents(outputLayout);
+				
+			    while(iterator.hasNext()) {
+			          TextWidget t = new TextWidget((String) iterator.next());
+			          outputLayout.add(t);
+			          window.relayout();
+			    }
+			    
+			    
+			    
+			    
+				
+			}
+			else if (event.target == openCALFileButton)
+			{
+			
+			
+				
+				selectedFile = window.askUserForFileToLoad("Select CAL File", "cal");
+				
+				System.out.println(selectedFile.directory);
+				System.out.println(selectedFile.filename);
+				
+				if (selectedFile.filename.contains(".cal"))
+				{
+					 try
+					 	{
+						  
+						  FileInputStream fstream = new FileInputStream(selectedFile.directory + selectedFile.filename);
+						  DataInputStream in = new DataInputStream(fstream);
+						  BufferedReader br = new BufferedReader(new InputStreamReader(in));
+						  String strLine;
+						  String output = "";
+						  
+						  while ((strLine = br.readLine()) != null)
+						  	{
+							  output += strLine + "\n";
+						  	}
+						  
+						  in.close();
+						 
+						  CALTextArea.setText(output);
+						  
+						  
+					 	} catch (Exception e) { window.showModalDialog(dialogCAL);}
+					
+					
+				}
+				
+			
+				
+				 
 			}
 			
 			else if (event.target == simulateButton)

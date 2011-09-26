@@ -599,7 +599,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		}
 	}
 	
-	class FileSelectResult
+	public class FileSelectResult
 	{
 		public String filename;
 		public String directory;

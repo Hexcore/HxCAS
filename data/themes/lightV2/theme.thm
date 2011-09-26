@@ -257,3 +257,33 @@ SliderHandle : active
 	background: rgb(0.4, 0.63, 0.91) rgb(0.64, 0.76, 0.94);
 	border: rgb(0.72, 0.78, 0.87) rgb(0.45, 0.52, 0.7);
 }
+
+Scrollbar
+{
+	background: rgba(0.8, 0.8, 0.8, 0.9);
+	size: 16;
+}
+
+ScrollbarHandle
+{
+	background: rgb(0.5, 0.5, 0.5);
+	border-radius: 6;
+	size: 12;
+}
+
+ScrollbarHandle : horizontal
+{
+	background: rgb(0.5, 0.5, 0.5);
+	border-radius: 6;
+}
+
+ScrollbarFill
+{
+	background: rgba(0.7, 0.7, 0.7, 0.9);
+}
+
+.List
+{
+	background: rgb(1.0, 1.0, 1.0);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+}
