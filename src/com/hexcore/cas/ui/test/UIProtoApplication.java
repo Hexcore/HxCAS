@@ -547,7 +547,7 @@ public class UIProtoApplication implements WindowEventListener
 		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		worldLayout.add(buttonHeaderLayout);
 			
-			backButton = new Button(new Vector2i(100, 50), "Back to Main Menu");
+			backButton = new Button(new Vector2i(100, 50), "Main Menu");
 			backButton.setWidth(165);
 			backButton.setHeight(35);
 			buttonHeaderLayout.add(backButton);
@@ -626,7 +626,7 @@ public class UIProtoApplication implements WindowEventListener
 		
 		/** A list **/		
 		outputContainer = new ScrollableContainer(new Vector2i(350, 100));
-		outputContainer.setFlag(Widget.FILL_VERTICAL);
+		outputContainer.setFlag(Widget.FILL);
 		outputContainer.setFlag(Widget.CENTER_HORIZONTAL);
 		outputContainer.setThemeClass("List");
 		rightLayout.add(outputContainer);
@@ -634,6 +634,7 @@ public class UIProtoApplication implements WindowEventListener
 		outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		outputLayout.setMargin(new Vector2i(0, 0));
 		outputLayout.setFlag(Widget.WRAP);
+		
 		outputContainer.setContents(outputLayout);
 		
 /**********/
@@ -1108,6 +1109,7 @@ public class UIProtoApplication implements WindowEventListener
 				
 			    while(iterator.hasNext()) {
 			          TextWidget t = new TextWidget((String) iterator.next());
+			         
 			          outputLayout.add(t);
 			          window.relayout();
 			    }
