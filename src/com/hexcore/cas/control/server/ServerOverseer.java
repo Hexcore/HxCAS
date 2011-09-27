@@ -21,7 +21,6 @@ public class ServerOverseer extends Overseer
 	
 	private String[] clientNames = null;
 	private volatile boolean isFinishedGenerations = false;
-	private volatile boolean isFinishedWork = false;
 	private volatile boolean paused = false;
 	private volatile boolean reset = false;
 	private volatile int currGen = 0;
@@ -304,7 +303,6 @@ public class ServerOverseer extends Overseer
 	
 	public void send()
 	{
-		isFinishedWork = false;
 		informationProcessor.setClientWork(clientWork, currGen);
 		informationProcessor.sendInitialGrids();
 	}
@@ -320,7 +318,8 @@ public class ServerOverseer extends Overseer
 		
 		splitGrids();
 		
-		isFinishedWork = true;
+		Log.information(TAG, "Finished generation: " + currGen);
+		startGeneration();
 	}
 
 	public void setClientNames(ArrayList<String> names)
@@ -345,40 +344,18 @@ public class ServerOverseer extends Overseer
 		splitGrids();
 		
 		isFinishedGenerations = false;
-		for(int i = 1; ; i++)
-		{
-			currGen = i;
-
-			if (reset)
-			{
-				System.out.println("NEEDS TO RESET!");
-				reset = false;
-				i = 1;
-				super.setGrid(world.getGenerationZero());
-				
-				calculateSplits();
-				splitGrids();
-			}
-			
-			while(paused)
-			{
-				System.out.println("IS PAUSED!");
-			}
-			
-			if(numOfGenerations == 0 || (numOfGenerations != -1 && i > numOfGenerations))
-				break;
-
-			Log.information(TAG, "Starting generation: " + i);
-			
-			send();
-			
-			while(!isFinishedWork)
-			{
-			}
-			
-			Log.information(TAG, "Finished generation: " + i);
-		}
-		isFinishedGenerations = true;
+		currGen = 0;
+		
+		startGeneration();
+		
+		Log.information(TAG, "Finished starting first generation");
+	}
+	
+	public void startGeneration()
+	{
+		currGen++;
+		GenerationThread generationThread = new GenerationThread();
+		generationThread.start();		
 	}
 	
 	public void disconnect()
@@ -392,5 +369,40 @@ public class ServerOverseer extends Overseer
 		informationProcessor = new CAPIPServer(this, clientPort);
 		informationProcessor.connectClients(clientNames);
 		informationProcessor.start();
+	}
+	
+	class GenerationThread extends Thread
+	{
+		@Override
+		public void run()
+		{
+			if (reset)
+			{
+				System.out.println("NEEDS TO RESET!");
+				reset = false;
+				setGrid(world.getGenerationZero());
+				
+				calculateSplits();
+				splitGrids();
+			}
+			
+			while(paused)
+			{
+				System.out.println("IS PAUSED!");
+			}
+			
+			System.out.println(currGen + " " + numOfGenerations);
+			
+			if(numOfGenerations == 0 || (numOfGenerations != -1 && currGen > numOfGenerations))
+			{
+				System.out.println("Finished!");
+				isFinishedGenerations = true;
+				return;
+			}
+
+			Log.information(TAG, "Starting generation: " + currGen);
+			
+			send();
+		}
 	}
 }
