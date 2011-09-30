@@ -760,13 +760,32 @@ public class Theme
 		return (int)(metrics.getAscent() + metrics.getDescent());
 	}
 	
+	private String convertTabsToSpaces(String text)
+	{
+		String n = "";
+		for (int i = 0; i < text.length(); i++)
+		{
+			char c = text.charAt(i);
+			if (c == '\t')
+			{
+				if ((n.length() & 3) == 0) n += "    ";
+				if ((n.length() & 1) != 0) n += " ";
+				if ((n.length() & 2) != 0) n += "  ";
+			}
+			else
+				n += c;
+		}
+		
+		return n;
+	}
+	
 	public int calculateTextWidth(String text, Text.Size textSize)
 	{
 		TextRenderer textRenderer = textRenderers.get(textSize);	
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
-		text = text.replace("\t", "    ");
+		text = convertTabsToSpaces(text);
 		
 		return (int)font.getStringBounds(text, context).getWidth();
 	}	
@@ -777,7 +796,7 @@ public class Theme
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
-		text = text.replace("\t", "    ");
+		text = convertTabsToSpaces(text);
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		return new Vector2i((int)font.getStringBounds(text, context).getWidth(), (int)(metrics.getAscent() + metrics.getDescent()));
@@ -795,7 +814,7 @@ public class Theme
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
-		text = text.replace("\t", "    ");
+		text = convertTabsToSpaces(text);
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		
@@ -902,7 +921,7 @@ public class Theme
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
-		text = text.replace("\t", "    ");
+		text = convertTabsToSpaces(text);
 		
 		LineMetrics metrics = font.getLineMetrics(text, context);
 		int			textHeight = (int)(metrics.getAscent() + metrics.getDescent());
