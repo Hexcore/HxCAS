@@ -2,7 +2,6 @@ package com.hexcore.cas;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -128,9 +127,11 @@ public class Server implements LobbyListener
 						Thread.sleep(100);
 						
 						overseer.simulate(grid, 100);
+						break;
 					}
 					
 					case SHUTDOWN:
+						Log.information(TAG, "Got shutdown message");
 						running = false;
 						break;
 				}
@@ -141,11 +142,9 @@ public class Server implements LobbyListener
 			}		
 		}
 		
-		lobby.disconnect();
-		
-		if (overseer != null) overseer.disconnect();
-		
 		Log.information(TAG, "Shutting down...");
+		lobby.disconnect();
+		if (overseer != null) overseer.disconnect();
 	}
 	
 	@Override
