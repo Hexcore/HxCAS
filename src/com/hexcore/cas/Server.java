@@ -115,9 +115,9 @@ public class Server implements LobbyListener
 						
 						World world = new World();
 						
-						Grid grid = new RectangleGrid(new Vector2i(200, 200));
-						for(int y = 0; y < 200; y++)
-							for(int x = 0; x < 200; x++)
+						Grid grid = new RectangleGrid(new Vector2i(65, 65));
+						for(int y = 0; y < 65; y++)
+							for(int x = 0; x < 65; x++)
 								grid.getCell(x, y).setValue(0, 1.0);
 						
 						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
@@ -145,6 +145,17 @@ public class Server implements LobbyListener
 		Log.information(TAG, "Shutting down...");
 		lobby.disconnect();
 		if (overseer != null) overseer.disconnect();
+		
+		try
+		{
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
+		System.exit(0);
 	}
 	
 	@Override

@@ -103,7 +103,7 @@ public class ClientOverseer extends Overseer
 		
 		WorkerThread[] thread = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread();
+		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread(i);
 
 		informationProcessor.start();
 				
@@ -172,6 +172,11 @@ public class ClientOverseer extends Overseer
 	{
 		boolean running = false;
 		
+		public WorkerThread(int id)
+		{
+			super("Worker - " + id);
+		}
+		
 		public void quit()
 		{
 			running = false;
@@ -179,7 +184,7 @@ public class ClientOverseer extends Overseer
 				
 		@Override
 		public void run()
-		{
+		{			
 			running = true;
 			while (running)
 			{
@@ -201,7 +206,7 @@ public class ClientOverseer extends Overseer
 							calculateCell(cell, neighbours);
 						}
 					
-					completedQueue.put(work);
+					completedQueue.put(work);				
 				}
 				catch (InterruptedException e)
 				{

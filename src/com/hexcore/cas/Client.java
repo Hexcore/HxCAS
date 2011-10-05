@@ -61,5 +61,16 @@ public class Client
 		Log.information(TAG, "Shutting down...");
 		beacon.disconnect();
 		overseer.disconnect();
+		
+		try
+		{
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
+		System.exit(0);
 	}
 }

@@ -33,7 +33,7 @@ public class CAPIPClient extends Thread
 	private CAPMessageProtocol protocol = null;
 	private ClientOverseer parent = null;
 	private ServerSocket sock = null;
-	
+
 	public CAPIPClient(Overseer o, int port)
 		throws IOException
 	{
@@ -370,12 +370,13 @@ public class CAPIPClient extends Thread
 		protocol.start();
 		
 		while (protocol.isRunning())
-		{
+		{			
 			Message message = protocol.waitForMessage();
 			if (message == null) continue; 
-				
+
 			interpretInput(message);
 		}
+		long endTime = System.nanoTime();
 
 		Log.information(TAG, "Stopping client...");
 		protocol.disconnect();

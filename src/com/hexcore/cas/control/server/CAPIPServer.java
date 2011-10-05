@@ -296,7 +296,7 @@ public class CAPIPServer
 	{
 		Log.information(TAG, "Sending grids - initial procedure");
 		
-		int target = getTotalCoreAmount();
+		int target = getTotalCoreAmount() + 1;
 		int sent = 0;
 		
 		while (!workForClients.isEmpty() && target > sent)

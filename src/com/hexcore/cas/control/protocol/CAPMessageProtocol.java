@@ -1,7 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
 import java.io.BufferedInputStream;
-import java.io.EOFException;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -25,10 +25,13 @@ public class CAPMessageProtocol extends Thread
 	private ReentrantLock lock = null;
 
 	private BufferedInputStream inputStream;
+	private BufferedOutputStream outputStream;	
 	private int currentByte = NO_BYTE;
 	
 	public CAPMessageProtocol(Socket socket)
 	{
+		super("Message Protocol - " + socket.toString());
+		
 		this.socket = socket;
 		this.messageQueue = new LinkedBlockingQueue<Message>();
 		this.lock = new ReentrantLock();
@@ -36,6 +39,7 @@ public class CAPMessageProtocol extends Thread
 		try
 		{
 			inputStream = new BufferedInputStream(socket.getInputStream());
+			outputStream = new BufferedOutputStream(socket.getOutputStream());
 		}
 		catch (IOException e)
 		{
@@ -252,9 +256,8 @@ public class CAPMessageProtocol extends Thread
 		lock.lock();
 		try
 		{
-			OutputStream out = socket.getOutputStream();	
-			message.write(out);
-			out.flush();
+			message.write(outputStream);
+			outputStream.flush();
 		}
 		catch(IOException e)
 		{

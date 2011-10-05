@@ -756,7 +756,7 @@ public class Theme
 		FontRenderContext context = textRenderer.getFontRenderContext();
 		Font font = textRenderer.getFont();
 		
-		LineMetrics metrics = font.getLineMetrics("test", context);
+		LineMetrics metrics = font.getLineMetrics("tlegy", context);
 		return (int)(metrics.getAscent() + metrics.getDescent());
 	}
 	
