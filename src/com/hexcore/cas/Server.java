@@ -14,6 +14,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.World;
+import com.hexcore.cas.ui.test.UIProtoApplication;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
 
@@ -21,13 +22,12 @@ public class Server implements LobbyListener
 {
 	private final static String TAG = "Server";
 	public final static String VERSION = "v0.1";
-	
-	private static Server instance = null;
-	
+		
 	private volatile boolean running = false;
 	private Configuration config = null;
 	private Lobby lobby = null;
 	private ServerOverseer overseer = null;
+	private UIProtoApplication ui = null;
 		
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
 	
@@ -36,27 +36,9 @@ public class Server implements LobbyListener
 	
 	public static void main(String[] args)
 	{
-		instance = new Server();
+		 new Server();
 	}
-	
-	public static void sendEvent(ServerEvent event)
-	{
-		if (instance == null)
-		{
-			Log.error(TAG, "No instance for Server yet");
-			return;
-		}
 		
-		try 
-		{
-			instance.eventQueue.put(event);
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	public Server()
 	{
 		System.out.println("== Hexcore CAS Server - " + VERSION + " ==");
@@ -73,6 +55,9 @@ public class Server implements LobbyListener
 		lobby.start();
 		lobby.addListener(this);
 		
+		Log.information(TAG, "Starting user interface...");
+		ui = new UIProtoApplication(this);
+		
 		try
 		{
 			Thread.sleep(1000);
@@ -83,9 +68,7 @@ public class Server implements LobbyListener
 		}
 		
 		lobby.ping();
-		
-		(new DelayedSimulate()).start();
-		
+				
 		running = true;
 		while (running)
 		{
@@ -158,6 +141,18 @@ public class Server implements LobbyListener
 		System.exit(0);
 	}
 	
+	public void sendEvent(ServerEvent event)
+	{
+		try 
+		{
+			eventQueue.put(event);
+		} 
+		catch (InterruptedException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void foundClient(SocketAddress address) 
 	{
@@ -171,27 +166,6 @@ public class Server implements LobbyListener
 		catch (InterruptedException e) 
 		{
 			e.printStackTrace();
-		}
-	}
-	
-	public class DelayedSimulate extends Thread
-	{
-		@Override
-		public void run()
-		{
-			try
-			{
-				do
-				{
-					Thread.sleep(4000);
-					eventQueue.put(new ServerEvent(ServerEvent.Type.SIMULATE));
-				}
-				while (names.size() == 0);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
 		}
 	}
 }

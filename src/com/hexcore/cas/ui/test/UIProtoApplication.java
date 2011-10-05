@@ -12,6 +12,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.hexcore.cas.Server;
+import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
@@ -61,6 +63,7 @@ public class UIProtoApplication implements WindowEventListener
 {
 	public Theme	theme;
 	public Window	window;
+	public Server	server;
 	
 	
 	public View masterView;
@@ -200,12 +203,9 @@ public class UIProtoApplication implements WindowEventListener
 	public WaterFlow				waterFlow;
 	public HexagonGrid3DWidget		waterGrid3DViewer;
 	
-	UIProtoApplication()
+	public UIProtoApplication(Server server)
 	{
-		
-		//Compiler Integration
-		
-		
+		this.server = server;
 		
 		waterFlowGrid = new HexagonGrid(new Vector2i(100, 100));
 		waterFlowGrid.setWrappable(false);
@@ -918,7 +918,7 @@ public class UIProtoApplication implements WindowEventListener
 	
 	static public void main(String args[])
 	{
-		new UIProtoApplication();
+		new UIProtoApplication(null);
 	}
 	
 	@Override
@@ -1163,6 +1163,9 @@ public class UIProtoApplication implements WindowEventListener
 			else if (event.target == simulateButton)
 			{
 				masterView.setIndex(2);
+				
+				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SIMULATE);
+				server.sendEvent(serverEvent);
 			}
 			
 			

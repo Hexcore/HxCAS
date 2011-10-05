@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 
 public class ServerEvent 
 {	
-	enum Type
+	public enum Type
 	{
 		FOUND_CLIENT, SHUTDOWN, SIMULATE;
 	}
@@ -12,7 +12,7 @@ public class ServerEvent
 	public Type			 type;
 	public SocketAddress address = null;
 	
-	ServerEvent(Type type)
+	public ServerEvent(Type type)
 	{
 		this.type = type;
 	}
