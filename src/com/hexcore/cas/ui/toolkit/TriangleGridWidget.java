@@ -7,18 +7,18 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
 
-public class TriangleGridWidget extends GridWidget<TriangleGrid>
+public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 {
-	public TriangleGridWidget(TriangleGrid grid, int tileSize)
+	public TriangleGridWidget(TriangleGrid grid, int cellSize)
 	{
-		this(new Vector2i(0, 0), grid, tileSize);
+		this(new Vector2i(0, 0), grid, cellSize);
 	}
 
-	public TriangleGridWidget(Vector2i position, TriangleGrid grid, int tileSize)
+	public TriangleGridWidget(Vector2i position, TriangleGrid grid, int cellSize)
 	{
-		super(position, new Vector2i((grid.getWidth() * tileSize) / 2 + tileSize / 2, 
-								      grid.getHeight() * (int)(tileSize * Math.sqrt(2) * 0.5)),
-								      grid, tileSize);
+		super(position, new Vector2i((grid.getWidth() * cellSize) / 2 + cellSize / 2, 
+								      grid.getHeight() * (int)(cellSize * Math.sqrt(2) * 0.5)),
+								      grid, cellSize);
 	}
 	
 	@Override
@@ -27,8 +27,9 @@ public class TriangleGridWidget extends GridWidget<TriangleGrid>
 		Vector2i pos = this.position.add(position);
 		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		
-		int r = tileSize / 2;
-		int h = (int)(tileSize * Math.sqrt(2) * 0.5);
+		int s = (int)(cellSize * zoom);
+		int r = s / 2;
+		int h = (int)(s * Math.sqrt(2) * 0.5);
 		
 		Vector2f[]	downTriangle = new Vector2f[3];
 		downTriangle[0] = new Vector2f(0.0f, 	0.0f);

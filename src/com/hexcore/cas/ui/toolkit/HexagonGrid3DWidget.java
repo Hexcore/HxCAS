@@ -9,17 +9,17 @@ import com.hexcore.cas.model.HexagonGrid;
 
 public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
 {
-	public HexagonGrid3DWidget(Vector2i size, HexagonGrid grid, int tileSize)
+	public HexagonGrid3DWidget(Vector2i size, HexagonGrid grid, int cellSize)
 	{
-		super(size, grid, tileSize);
+		super(size, grid, cellSize);
 	}
 
 	@Override
 	public void loadGeometry(GL gl)
 	{        
-		float	s = tileSize;
-		float	h = tileSize / 2;
-		float	r = tileSize * (float)Math.cos(30.0 * Math.PI / 180.0);
+		float	s = cellSize;
+		float	h = cellSize / 2;
+		float	r = cellSize * (float)Math.cos(30.0 * Math.PI / 180.0);
 			
 		Vector2f[]	hexagon = new Vector2f[6];
 		hexagon[0] = new Vector2f(0.0f,	r);

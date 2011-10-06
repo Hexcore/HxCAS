@@ -9,16 +9,16 @@ import com.hexcore.cas.model.TriangleGrid;
 
 public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
 {
-	public TriangleGrid3DWidget(Vector2i size, TriangleGrid grid, int tileSize)
+	public TriangleGrid3DWidget(Vector2i size, TriangleGrid grid, int cellSize)
 	{
-		super(size, grid, tileSize);
+		super(size, grid, cellSize);
 	}
 
 	@Override
 	public void loadGeometry(GL gl)
 	{        
-		float 	r = tileSize / 2.0f;
-		float 	h = tileSize * (float)Math.sqrt(2) * 0.5f;
+		float 	r = cellSize / 2.0f;
+		float 	h = cellSize * (float)Math.sqrt(2) * 0.5f;
 		
 		Vector2f[]	downTriangle = new Vector2f[3];
 		downTriangle[0] = new Vector2f(0.0f,	0.0f);

@@ -26,10 +26,10 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		public int		heightProperty;
 		public float	scale;
 		
-		public Slice(int heightProperty, float scale) 
+		public Slice(int property, float scale) 
 		{
-			this.colourProperty = -1;
-			this.heightProperty = heightProperty;
+			this.colourProperty = property;
+			this.heightProperty = property;
 			this.scale = scale;
 		}		
 		
@@ -62,29 +62,80 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	protected FloatBuffer	lineBufferData = null;
 	protected boolean		dirty = true;
 	
-	public Grid3DWidget(Vector2i size, T grid, int tileSize)
+	public Grid3DWidget(Vector2i size, T grid, int cellSize)
 	{
-		this(new Vector2i(), size, grid, tileSize);
+		this(new Vector2i(), size, grid, cellSize);
 	}
 
-	public Grid3DWidget(Vector2i position, Vector2i size, T grid, int tileSize)
+	public Grid3DWidget(Vector2i position, Vector2i size, T grid, int cellSize)
 	{
-		super(position, size, grid, tileSize);
-		cameraPosition = new Vector3f(grid.getWidth() * tileSize / 2.0f, grid.getHeight() * tileSize / 2.0f, 200);
+		super(position, size, grid, cellSize);
+		cameraPosition = new Vector3f(grid.getWidth() * cellSize / 2.0f, grid.getHeight() * cellSize / 2.0f + 100, 200);
 		slices = new ArrayList<Slice>();
 		
 		buffers = IntBuffer.allocate(4);
 	}
 	
-	@Override
-	public boolean canGetFocus() {return true;}
+	public void setPosition(Vector3f position)
+	{
+		cameraPosition.set(position);
+	}
+	
+	/* 
+	 * Moves the exact amount specified by amount 
+	 */
+	public void shiftCamera(Vector3f amount)
+	{
+		cameraPosition.inc(amount);
+	}	
+	
+	/* 
+	 * Moves the exact amount specified by amount 
+	 */
+	public void shiftCamera(float x, float y, float z)
+	{
+		cameraPosition.inc(x, y, z);
+	}		
+	
+	/*
+	 * Moves by amount scaled by speed
+	 */
+	public void move(Vector3f amount)
+	{
+		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
+		if (speed < 10.0f) speed = 10.0f;
+		
+		cameraPosition.inc(amount.x * speed, amount.y * speed, amount.z * speed);
+	}
+	
+	/*
+	 * Moves by amount scaled by speed
+	 */
+	public void move(float x, float y, float z)
+	{
+		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
+		if (speed < 10.0f) speed = 10.0f;
+		
+		cameraPosition.inc(x * speed, y * speed, z * speed);
+	}	
+	
+	public void setDirection(float yaw, float pitch)
+	{
+		this.yaw = yaw;
+		this.pitch = pitch;
+	}
+	
+	public void setYaw(float yaw) { this.yaw = yaw; }
+	public void setPitch(float pitch) { this.pitch = pitch; }
+	public void changeYaw(float amount) { yaw += amount; }
+	
+	public void changePitch(float amount)
+	{
+		pitch = Math.max(Math.min(pitch + amount, 180.0f), 0.0f);
+	}
 	
 	@Override
-	public void setColourProperty(int propertyIndex)
-	{
-		colourProperty = propertyIndex;
-		dirty = true;
-	}
+	public boolean canGetFocus() {return true;}
 
 	@Override
 	public void setGrid(T grid)
@@ -127,9 +178,6 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	@Override
 	public void update(Vector2i position, float delta)
 	{
-		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
-		if (speed < 10.0f) speed = 10.0f;
-		
 		Vector2f posDelta = new Vector2f(0.0f, 0.0f);
 		float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
 		float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
@@ -158,7 +206,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
 		{
 			posDelta.normalise();
-			cameraPosition.inc(posDelta.x * speed * delta, posDelta.y * speed * delta, 0.0f);
+			move(new Vector3f(posDelta.x * delta, posDelta.y * delta, 0.0f));
 		}
 	}
 	
@@ -463,100 +511,19 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		
 		for (Slice slice : slices)
 		{
-			Colour		colour = Colour.DARK_GREY;
-			int			colProperty = (slice.colourProperty < 0) ? colourProperty : slice.colourProperty;
-			float		height = (float)cell.getValue(slice.heightProperty) * slice.scale;
+			Colour	colour = Colour.DARK_GREY;
+			int		colourProperty = slice.colourProperty;
+			float	height = (float)cell.getValue(slice.heightProperty) * slice.scale;
 			
 			if ((height <= 0.0f) && !bottom) continue;
 			bottom = false;
 			
 			if (colourRules != null)
-				colour = colourRules.getColour(cell, colProperty);
-			else if (cell.getValue(colourProperty) > 0) 
+				colour = colourRules.getColour(cell, colourProperty);
+			else if (cell.getValue(colourProperty) > 0)
 				colour = Colour.LIGHT_GREY;
 											
 			add3DPolygon(position, shape, startHeight, height, colour);
-			startHeight += height;
-		}
-	}
-	
-	protected void render3DPolygon(GL gl, Vector2f pos, Vector2f[] polygon, float startHeight, float height, Colour colour)
-	{
-		GL2 gl2 = gl.getGL2();
-		height += startHeight;
-		
-		Graphics.applyColour(gl2, colour);
-				
-		if (drawGrid)
-		{
-			gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
-			gl2.glPolygonOffset(0.5f, 0.5f);
-		}
-		
-		gl2.glBegin(GL.GL_TRIANGLE_FAN);
-			gl2.glNormal3f(0.0f, 0.0f, 1.0f);
-			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
-		gl2.glEnd();			
-		
-		for (int i = 0; i < polygon.length; i++)
-		{
-			Vector2f f = polygon[i];
-			Vector2f s = polygon[(i == polygon.length - 1) ? 0 : i + 1];
-			Vector2f normal = (f.subtract(s)).getPerpendicular().getNormalised();
-			gl2.glBegin(GL.GL_TRIANGLE_STRIP);
-				gl2.glNormal3f(normal.x, normal.y, 0.0f);
-				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, startHeight);
-				gl2.glVertex3f(pos.x+f.x, pos.y+f.y, height);
-				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, startHeight);
-				gl2.glVertex3f(pos.x+s.x, pos.y+s.y, height);
-			gl2.glEnd();
-		}
-		
-		if (drawGrid) 
-		{
-			gl2.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
-
-			Graphics.applyColour(gl2, Colour.BLACK);
-						
-			gl2.glBegin(GL.GL_LINE_LOOP);
-			for (Vector2f v : polygon) gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);
-			gl2.glEnd();	
-			
-			if (height > startHeight)
-			{
-				gl2.glBegin(GL.GL_LINES);
-				for (Vector2f v : polygon)
-				{
-					gl2.glVertex3f(pos.x+v.x, pos.y+v.y, startHeight);
-					gl2.glVertex3f(pos.x+v.x, pos.y+v.y, height);	
-				}
-				gl2.glEnd();
-			}
-			
-			gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
-		}
-	}
-	
-	protected void renderColumn(GL gl, Vector2f position, Cell cell, Vector2f[] shape)
-	{
-		float		startHeight = 0.0f;
-		boolean		bottom = true;
-		
-		for (Slice slice : slices)
-		{
-			Colour		colour = Colour.DARK_GREY;
-			int			colProperty = (slice.colourProperty < 0) ? colourProperty : slice.colourProperty;
-			float		height = (float)cell.getValue(slice.heightProperty) * slice.scale;
-			
-			if ((height <= 0.0f) && !bottom) continue;
-			bottom = false;
-			
-			if (colourRules != null)
-				colour = colourRules.getColour(cell, colProperty);
-			else if (cell.getValue(colourProperty) > 0) 
-				colour = Colour.LIGHT_GREY;
-											
-			render3DPolygon(gl, position, shape, startHeight, height, colour);
 			startHeight += height;
 		}
 	}

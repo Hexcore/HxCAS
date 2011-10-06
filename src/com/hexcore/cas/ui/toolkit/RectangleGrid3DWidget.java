@@ -9,15 +9,15 @@ import com.hexcore.cas.model.RectangleGrid;
 
 public class RectangleGrid3DWidget extends Grid3DWidget<RectangleGrid>
 {
-	public RectangleGrid3DWidget(Vector2i size, RectangleGrid grid, int tileSize)
+	public RectangleGrid3DWidget(Vector2i size, RectangleGrid grid, int cellSize)
 	{
-		super(size, grid, tileSize);
+		super(size, grid, cellSize);
 	}
 	
 	@Override
 	public void loadGeometry(GL gl)
 	{
-		float	s = tileSize;
+		float	s = cellSize;
 		
 		Vector2f[]	rect = new Vector2f[4];
 		rect[0] = new Vector2f(0.0f, 0.0f);
@@ -31,7 +31,7 @@ public class RectangleGrid3DWidget extends Grid3DWidget<RectangleGrid>
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell 		cell = grid.getCell(x, y);
-				Vector2f	p = new Vector2f(x * tileSize, y * tileSize);
+				Vector2f	p = new Vector2f(x * cellSize, y * cellSize);
 				
 				addColumn(p, cell, rect);
 			}

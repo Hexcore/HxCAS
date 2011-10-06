@@ -7,18 +7,18 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.HexagonGrid;
 
-public class HexagonGridWidget extends GridWidget<HexagonGrid>
+public class HexagonGridWidget extends Grid2DWidget<HexagonGrid>
 {
-	public HexagonGridWidget(HexagonGrid grid, int tileSize)
+	public HexagonGridWidget(HexagonGrid grid, int cellSize)
 	{
-		this(new Vector2i(0, 0), grid, tileSize);
+		this(new Vector2i(0, 0), grid, cellSize);
 	}
 
-	public HexagonGridWidget(Vector2i position, HexagonGrid grid, int tileSize)
+	public HexagonGridWidget(Vector2i position, HexagonGrid grid, int cellSize)
 	{
-		super(new Vector2i(grid.getWidth() * (tileSize + tileSize / 2) + tileSize / 2, 
-						   grid.getHeight() * 2 * (int)(tileSize * 0.866f) + (int)(tileSize * 0.866f)),
-						   grid, tileSize);
+		super(new Vector2i(grid.getWidth() * (cellSize + cellSize / 2) + cellSize / 2, 
+						   grid.getHeight() * 2 * (int)(cellSize * 0.866f) + (int)(cellSize * 0.866f)),
+						   grid, cellSize);
 	}
 
 	@Override
@@ -27,9 +27,9 @@ public class HexagonGridWidget extends GridWidget<HexagonGrid>
 		Vector2i pos = this.position.add(position);
 		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		
-		int s = tileSize;
-		int	h = tileSize / 2;
-		int r = (int)(tileSize * Math.cos(30.0 * Math.PI / 180.0));
+		int s = (int)(cellSize * zoom);
+		int	h = s / 2;
+		int r = (int)(s * Math.cos(30.0 * Math.PI / 180.0));
 		
 		Vector2f[]	hexagon = new Vector2f[6];
 		hexagon[0] = new Vector2f(0.0f,	r);
