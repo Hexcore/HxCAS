@@ -15,8 +15,8 @@ public class ImageWidget extends Widget
 
 	public ImageWidget(Vector2i position, Image image)
 	{
-		super(position, image.getSize());
-		this.image = image;
+		super(position, new Vector2i());
+		setImage(image);
 	}
 		
 	public ImageWidget(String imageFilename)
@@ -29,10 +29,29 @@ public class ImageWidget extends Widget
 		this(position, new Image(imageFilename));
 	}	
 	
+	public void setImage(Image image)
+	{
+		this.image = image;
+		setSize(image.getSize().add(padding).add(padding));
+	}
+	
+	@Override
+	public void relayout()
+	{
+		if (image != null) 
+			setSize(image.getSize().add(padding).add(padding));		
+	}
+	
 	@Override
 	public void render(GL gl, Vector2i position)
 	{
 		Vector2i pos = this.position.add(position);
-		Graphics.renderRectangle(gl, pos, image);
+		Graphics.renderRectangle(gl, pos.add(padding), image);
+		
+		if (window.isDebugLayout()) 
+		{
+			Graphics.renderBorder(gl, pos.add(padding), size.subtract(padding).subtract(padding), new Colour(0.0f, 0.5f, 0.5f));
+			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
+		}
 	}
 }

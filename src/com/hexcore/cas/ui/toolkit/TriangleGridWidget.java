@@ -36,21 +36,30 @@ public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 		downTriangle[1] = new Vector2f(r+r, 	0.0f);
 		downTriangle[2] = new Vector2f(r,		h);
 		
+		Vector2f[]	downTriangleBorder = new Vector2f[3];
+		downTriangleBorder[0] = new Vector2f(0.5f, 		0.5f);
+		downTriangleBorder[1] = new Vector2f(r+r+0.5f, 	0.5f);
+		downTriangleBorder[2] = new Vector2f(r+0.5f,	h+0.5f);		
+		
 		Vector2f[]	upTriangle = new Vector2f[3];
 		upTriangle[0] = new Vector2f(r, 	0.0f);
 		upTriangle[1] = new Vector2f(r+r, 	h);
 		upTriangle[2] = new Vector2f(0.0f,	h);
 		
+		Vector2f[]	upTriangleBorder = new Vector2f[3];
+		upTriangleBorder[0] = new Vector2f(r+0.5f, 		0.5f);
+		upTriangleBorder[1] = new Vector2f(r+r+0.5f, 	h+0.5f);
+		upTriangleBorder[2] = new Vector2f(0.5f,		h+0.5f);		
+		
 		for (Vector2f v : downTriangle) v.inc(0.5f, 0.5f);
 		for (Vector2f v : upTriangle) v.inc(0.5f, 0.5f);
 		
-		Vector2f cpos = new Vector2f(pos);
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell		cell = grid.getCell(x, y);
 				Colour		colour = Colour.DARK_GREY;
-				Vector2i 	p = new Vector2i(cpos.add(x * r, y * h));
+				Vector2i 	p = pos.add((int)(x * r), (int)(y * h));
 				
 				if (colourRules != null)
 					colour = colourRules.getColour(cell, colourProperty);
@@ -60,12 +69,12 @@ public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 				if ((x & 1) == (y & 1)) // Checker-board pattern
 				{
 					Graphics.renderPolygon(gl, p, downTriangle, false, colour);
-					Graphics.renderPolygon(gl, p, downTriangle, true, cellBorderColour);
+					Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellBorderColour);
 				}
 				else
 				{
 					Graphics.renderPolygon(gl, p, upTriangle, false, colour);
-					Graphics.renderPolygon(gl, p, upTriangle, true, cellBorderColour);
+					Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellBorderColour);
 				}
 		
 			}

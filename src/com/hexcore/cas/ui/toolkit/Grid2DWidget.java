@@ -32,8 +32,8 @@ public class Grid2DWidget<T extends Grid> extends GridWidget<T>
 	{
 		if (event.type == Event.Type.MOUSE_SCROLL)
 		{
-			zoom -= event.amount * 0.001f;
-			if (zoom < 0.001f) zoom = 0.001f;
+			zoom *= (1.0f - event.amount * 0.002f);
+			if (zoom < 0.01f) zoom = 0.01f;
 			return true;
 		}
 		

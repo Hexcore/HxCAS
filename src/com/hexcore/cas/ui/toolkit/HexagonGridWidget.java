@@ -39,25 +39,32 @@ public class HexagonGridWidget extends Grid2DWidget<HexagonGrid>
 		hexagon[4] = new Vector2f(h+s,	0.0f);
 		hexagon[5] = new Vector2f(h,	0.0f);
 		
+		Vector2f[]	hexagonBorder = new Vector2f[6];
+		hexagonBorder[0] = new Vector2f(0.5f,       r+0.5f);
+		hexagonBorder[1] = new Vector2f(h+0.5f,     r+r+0.5f);
+		hexagonBorder[2] = new Vector2f(h+s+0.5f,   r+r+0.5f);
+		hexagonBorder[3] = new Vector2f(h+s+h+0.5f, r+0.5f);
+		hexagonBorder[4] = new Vector2f(h+s+0.5f,   0.5f);
+		hexagonBorder[5] = new Vector2f(h+0.5f,     0.5f);		
+		
 		for (Vector2f v : hexagon) v.inc(0.5f, 0.5f);
 		
-		Vector2f cpos = new Vector2f(pos); 
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell 		cell = grid.getCell(x, y);
 				Colour		colour = Colour.DARK_GREY;
-				Vector2f	p = cpos.add(x*(s+h), y*r*2);
+				Vector2i	p = pos.add((int)(x*(s+h)), (int)(y*r*2));
 				
-				if ((x & 1) == 1) p.inc(0, r);
+				if ((x & 1) == 1) p.inc(0, (int)r);
 				
 				if (colourRules != null)
 					colour = colourRules.getColour(cell, colourProperty);
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
-				Graphics.renderPolygon(gl, new Vector2i(p), hexagon, false, colour);
-				Graphics.renderPolygon(gl, new Vector2i(p), hexagon, true, cellBorderColour);
+				Graphics.renderPolygon(gl, p, hexagon, false, colour);
+				Graphics.renderPolygon(gl, p, hexagonBorder, true, cellBorderColour);
 			}
 	}	
 }

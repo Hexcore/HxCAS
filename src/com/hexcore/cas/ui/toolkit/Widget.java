@@ -76,11 +76,13 @@ public abstract class Widget
 	public void setMargin(Vector2i margin)
 	{
 		this.margin = margin;
+		relayout();
 	}
 	
 	public void setPadding(Vector2i padding)
 	{
 		this.padding = padding;
+		relayout();
 	}
 	
 	public void setParent(Widget parent)

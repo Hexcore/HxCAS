@@ -28,12 +28,17 @@ public class RectangleGridWidget extends Grid2DWidget<RectangleGrid>
 		float s = cellSize * zoom;
 		
 		Vector2f[]	rectangle = new Vector2f[4];
-		rectangle[0] = new Vector2f(0.0f,	0.0f);
-		rectangle[1] = new Vector2f(0.0f,	s);
-		rectangle[2] = new Vector2f(s,	s);
-		rectangle[3] = new Vector2f(s,	0.0f);
+		rectangle[0] = new Vector2f(0.0f, 0.0f);
+		rectangle[1] = new Vector2f(0.0f, s);
+		rectangle[2] = new Vector2f(s,	  s);
+		rectangle[3] = new Vector2f(s,	  0.0f);
 		
-		Vector2f cpos = new Vector2f(pos);
+		Vector2f[]	rectangleBorder = new Vector2f[4];
+		rectangleBorder[0] = new Vector2f(0.5f,	0.5f);
+		rectangleBorder[1] = new Vector2f(0.5f,	s+0.5f);
+		rectangleBorder[2] = new Vector2f(s+0.5f,	s+0.5f);
+		rectangleBorder[3] = new Vector2f(s+0.5f,	0.5f);		
+		
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
@@ -45,9 +50,9 @@ public class RectangleGridWidget extends Grid2DWidget<RectangleGrid>
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
-				Vector2i p = new Vector2i(cpos.add(x * s, y * s));
+				Vector2i p = pos.add((int)(x * s), (int)(y * s));
 				Graphics.renderPolygon(gl, p, rectangle, false, colour);
-				Graphics.renderPolygon(gl, p, rectangle, true, cellBorderColour);
+				Graphics.renderPolygon(gl, p, rectangleBorder, true, cellBorderColour);
 			}
 	}	
 }
