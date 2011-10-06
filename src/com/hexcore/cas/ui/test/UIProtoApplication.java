@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.hexcore.cas.Server;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
@@ -202,9 +203,11 @@ public class UIProtoApplication implements WindowEventListener
     public WaterFlow                waterFlow;
     public HexagonGrid3DWidget        waterGrid3DViewer;
     
-    UIProtoApplication()
+    public static Server s;
+    
+    public UIProtoApplication(Server _s)
     {
-        
+        s=_s;
         //Compiler Integration
         
         
@@ -955,7 +958,7 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
     
     static public void main(String args[])
     {
-        new UIProtoApplication();
+        new UIProtoApplication(s);
     }
     
     @Override
