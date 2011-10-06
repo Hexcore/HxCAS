@@ -2,6 +2,7 @@ package com.hexcore.cas.ui.toolkit;
 
 import javax.media.opengl.GL;
 
+import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.RectangleGrid;
@@ -24,8 +25,15 @@ public class RectangleGridWidget extends Grid2DWidget<RectangleGrid>
 		Vector2i pos = this.position.add(position);
 		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		
-		int s = (int)(cellSize * zoom);
+		float s = cellSize * zoom;
 		
+		Vector2f[]	rectangle = new Vector2f[4];
+		rectangle[0] = new Vector2f(0.0f,	0.0f);
+		rectangle[1] = new Vector2f(0.0f,	s);
+		rectangle[2] = new Vector2f(s,	s);
+		rectangle[3] = new Vector2f(s,	0.0f);
+		
+		Vector2f cpos = new Vector2f(pos);
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
@@ -37,8 +45,9 @@ public class RectangleGridWidget extends Grid2DWidget<RectangleGrid>
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 					
-				Graphics.renderRectangle(gl, pos.add(x * s, y * s), new Vector2i(s, s), colour);
-				Graphics.renderBorder(gl, pos.add(x * s, y * s), new Vector2i(s, s), Colour.WHITE);
+				Vector2i p = new Vector2i(cpos.add(x * s, y * s));
+				Graphics.renderPolygon(gl, p, rectangle, false, colour);
+				Graphics.renderPolygon(gl, p, rectangle, true, cellBorderColour);
 			}
 	}	
 }

@@ -27,9 +27,9 @@ public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 		Vector2i pos = this.position.add(position);
 		Graphics.renderRectangle(gl, pos, size, backgroundColour);
 		
-		int s = (int)(cellSize * zoom);
-		int r = s / 2;
-		int h = (int)(s * Math.sqrt(2) * 0.5);
+		float s = cellSize * zoom;
+		float r = s / 2;
+		float h = (float)(s * Math.sqrt(2) * 0.5);
 		
 		Vector2f[]	downTriangle = new Vector2f[3];
 		downTriangle[0] = new Vector2f(0.0f, 	0.0f);
@@ -44,12 +44,13 @@ public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 		for (Vector2f v : downTriangle) v.inc(0.5f, 0.5f);
 		for (Vector2f v : upTriangle) v.inc(0.5f, 0.5f);
 		
+		Vector2f cpos = new Vector2f(pos);
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
 				Cell		cell = grid.getCell(x, y);
 				Colour		colour = Colour.DARK_GREY;
-				Vector2i 	p = new Vector2i(x * r, y * h);
+				Vector2i 	p = new Vector2i(cpos.add(x * r, y * h));
 				
 				if (colourRules != null)
 					colour = colourRules.getColour(cell, colourProperty);
@@ -58,13 +59,13 @@ public class TriangleGridWidget extends Grid2DWidget<TriangleGrid>
 				
 				if ((x & 1) == (y & 1)) // Checker-board pattern
 				{
-					Graphics.renderPolygon(gl, pos.add(p), downTriangle, false, colour);
-					Graphics.renderPolygon(gl, pos.add(p), downTriangle, true, Colour.WHITE);
+					Graphics.renderPolygon(gl, p, downTriangle, false, colour);
+					Graphics.renderPolygon(gl, p, downTriangle, true, cellBorderColour);
 				}
 				else
 				{
-					Graphics.renderPolygon(gl, pos.add(p), upTriangle, false, colour);
-					Graphics.renderPolygon(gl, pos.add(p), upTriangle, true, Colour.WHITE);
+					Graphics.renderPolygon(gl, p, upTriangle, false, colour);
+					Graphics.renderPolygon(gl, p, upTriangle, true, cellBorderColour);
 				}
 		
 			}

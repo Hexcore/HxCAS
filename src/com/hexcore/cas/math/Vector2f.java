@@ -26,6 +26,12 @@ public class Vector2f
 		this.y = v.y;
 	}
 
+	public Vector2f(Vector2i v)
+	{
+		this.x = v.x;
+		this.y = v.y;		
+	}
+
 	public void set(float x, float y) 
 	{
 		this.x = x;
