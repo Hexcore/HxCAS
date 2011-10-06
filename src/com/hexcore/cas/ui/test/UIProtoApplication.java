@@ -1,5 +1,3 @@
-//v1.0
-
 package com.hexcore.cas.ui.test;
 
 import java.awt.Color;
