@@ -4,19 +4,19 @@ import java.util.Stack;
 
 import junit.framework.TestCase;
 
-import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.test.PrivateAccessor;
 
 @SuppressWarnings("unchecked")
 public class TestVM extends TestCase
 {
-	HexcoreVM 			vm;
+	CALCompiler 			vm;
 	PrivateAccessor		pa;
 	
 	@Override
 	public void setUp()
 	{
-		vm = new HexcoreVM();
+		vm = new CALCompiler();
 		pa = new PrivateAccessor(vm);
 	}
 	

@@ -5,7 +5,7 @@ import java.util.Stack;
 
 import com.hexcore.cas.model.Cell;
 
-public class HexcoreVM
+public class CALCompiler
 {
 	//CPU Functional Registers
 	int					PC;
@@ -34,7 +34,7 @@ public class HexcoreVM
 	
 	
 	
-	public HexcoreVM()
+	public CALCompiler()
 	{
 		oStack = new Stack<Integer>();
 		SP = 0;

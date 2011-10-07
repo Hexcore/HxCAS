@@ -4,7 +4,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Parser;
 
 public class TestParser extends TestCase
@@ -20,7 +20,7 @@ public class TestParser extends TestCase
 	
 	public void testParsing()
 	{
-		HexcoreVM.loadRules("Test Data/testRules.cal");
+		CALCompiler.loadRules("Test Data/testRules.cal");
 		
 		assertTrue(Parser.getErrorCount() == 0);
 	}

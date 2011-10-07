@@ -2,7 +2,7 @@ package com.hexcore.cas.rulesystems.test;
 
 import java.io.File;
 
-import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.rulesystems.RuleLoader;
 
@@ -19,7 +19,7 @@ public class TestByteCode extends TestCase
 	
 	public void testPropertyAssignment()
 	{
-		HexcoreVM.loadRules("Test Data/testRules.cal");
+		CALCompiler.loadRules("Test Data/testRules.cal");
 		RuleLoader rl = new RuleLoader();
 		
 		//rl.loadRule(b);
