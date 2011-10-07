@@ -115,6 +115,11 @@ static ArrayList<String> getErrorList()
 	return results;
 }
 
+static byte[] getCode()
+{
+	return CodeGen.getCode();
+}
+
 static public void reset()
 {
 	errDist = minErrDist;

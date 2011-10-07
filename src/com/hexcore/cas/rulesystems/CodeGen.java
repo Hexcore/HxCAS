@@ -34,7 +34,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	
 	
-	public static void initClass(String ruleset)
+	static void initClass(String ruleset)
 	{
 		varIndex = 3;
 		currentFrameworkIndex = 0;
@@ -252,6 +252,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		toFile(name);
 		RuleLoader rl = new RuleLoader();
 		rl.loadRule(cw.toByteArray());
+	}
+	
+	public static byte[] getCode()
+	{
+		return cw.toByteArray();
 	}
 	
 	public static void toFile(String fileName)

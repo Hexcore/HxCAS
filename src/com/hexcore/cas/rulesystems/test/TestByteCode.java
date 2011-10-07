@@ -19,7 +19,8 @@ public class TestByteCode extends TestCase
 	
 	public void testPropertyAssignment()
 	{
-		CALCompiler.loadRules("Test Data/testRules.cal");
+		CALCompiler compiler = new CALCompiler();
+		compiler.loadRules("Test Data/testRules.cal");
 		RuleLoader rl = new RuleLoader();
 		
 		//rl.loadRule(b);

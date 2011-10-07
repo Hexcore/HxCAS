@@ -20,7 +20,8 @@ public class TestParser extends TestCase
 	
 	public void testParsing()
 	{
-		CALCompiler.loadRules("Test Data/testRules.cal");
+		CALCompiler compiler = new CALCompiler();
+		compiler.loadRules("Test Data/testRules.cal");
 		
 		assertTrue(Parser.getErrorCount() == 0);
 	}
