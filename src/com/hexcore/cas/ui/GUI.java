@@ -24,7 +24,6 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
-import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
@@ -62,7 +61,62 @@ import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener
-{
+{	
+	public static class Viewport
+	{
+		enum Type {TWO_D, THREE_D};
+		
+		public Container	container;
+		public GridWidget	gridWidget;
+		public Type 		type;
+		
+		public Viewport(Container container, Type type)
+		{
+			this.container = container;
+			this.type = type;
+		}
+		
+		public void recreate(Grid grid)
+		{
+	    	switch (grid.getType())
+			{
+				case RECTANGLE:
+					if (type == Viewport.Type.THREE_D)
+					{
+						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+						temp3DWidget.addSlice(0, 10.0f);
+						gridWidget = temp3DWidget;
+					}
+					else 
+						gridWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+					break;
+				case HEXAGON:
+					if (type == Viewport.Type.THREE_D)
+					{
+						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+						temp3DWidget.addSlice(0, 10.0f);
+						gridWidget = temp3DWidget;
+					}
+					else 
+						gridWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+					break;
+				case TRIANGLE:
+					if (type == Viewport.Type.THREE_D)
+					{
+						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+						temp3DWidget.addSlice(0, 10.0f);
+						gridWidget = temp3DWidget;
+					}
+					else 
+						gridWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+					break;
+    			
+			}
+	    	
+	    	gridWidget.setFlag(Widget.FILL);
+	    	container.setContents(gridWidget);
+		}
+	}
 	
 	//OUR WORLD///
     public World world;
@@ -70,7 +124,7 @@ public class GUI implements WindowEventListener
     
     
     //OUR VIEWPORTS//
-   public ArrayList<Container> viewports;
+   public ArrayList<Viewport> viewports;
     ////////////////
 	
 	public static final String TAG = "GUI";
@@ -182,7 +236,6 @@ public class GUI implements WindowEventListener
     public TriangleGrid		triGrid;
 
     // SIMULATION SCREEN
-    private Container 	simulationContainer;
     private Button 		simulateButton;
     
     private LinearLayout viewportsLayout;
@@ -197,9 +250,6 @@ public class GUI implements WindowEventListener
     private SliderWidget 	generationSlider;
     
     private Grid			currentGrid;
-    private Container 		simulationWindowContainer;
-    private Grid3DWidget	simulationGridViewer;
-    
     private Server 			server;
     
     public GUI(Server server)
@@ -264,27 +314,20 @@ public class GUI implements WindowEventListener
         window.add(masterView);
         
         mainMenuLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        mainMenuLayout.setFlag(Widget.FILL);
+        mainMenuLayout.setFlag(Widget.CENTER | Widget.WRAP);
         mainMenuLayout.setMargin(new Vector2i(0, 0));
         masterView.add(mainMenuLayout);
-        
-    
-        
-        
         
         mainLayout = new LinearLayout(new Vector2i(1000, 600), LinearLayout.Direction.HORIZONTAL);
         mainLayout.setFlag(Widget.CENTER);
         mainMenuLayout.add(mainLayout);
-        
-        
+                
         ImageWidget mainLogo = new ImageWidget(theme.getImage("backgrounds", "main_bg.png"));
         mainLogo.setFlag(Widget.CENTER_VERTICAL);
-        mainLayout.add(mainLogo);
-        
-        
+        mainLayout.add(mainLogo);        
         
         buttonBarLayout = new LinearLayout(new Vector2i(340, 350), LinearLayout.Direction.VERTICAL);
-        buttonBarLayout.setFlag(Widget.CENTER_VERTICAL);
+        buttonBarLayout.setFlag(Widget.CENTER_VERTICAL | Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
 
         mainLayout.add(buttonBarLayout);
         
@@ -292,38 +335,31 @@ public class GUI implements WindowEventListener
         
         createWorldButton.setIcon(theme.getImage("icons", "create_icon.png"), theme.getImage("icons", "create_icon-white.png"));
         createWorldButton.setFlag(Widget.CENTER_HORIZONTAL);
-        createWorldButton.setFlag(Widget.CENTER_VERTICAL);
         buttonBarLayout.add(createWorldButton);
         
         loadWorldButton = new Button(new Vector2i(300, 50), "Load World");
         
         loadWorldButton.setIcon(theme.getImage("icons", "load_icon.png"), theme.getImage("icons", "load_icon-white.png"));
         loadWorldButton.setFlag(Widget.CENTER_HORIZONTAL);
-        loadWorldButton.setFlag(Widget.CENTER_VERTICAL);
         buttonBarLayout.add(loadWorldButton);
         
         optionsButton = new Button(new Vector2i(300, 50), "Options");
         
         optionsButton.setIcon(theme.getImage("icons", "options_icon.png"), theme.getImage("icons", "options_icon-white.png"));
         optionsButton.setFlag(Widget.CENTER_HORIZONTAL);
-        optionsButton.setFlag(Widget.CENTER_VERTICAL);
         buttonBarLayout.add(optionsButton);
         
         helpButton = new Button(new Vector2i(300, 50), "Help");
         
         helpButton.setIcon(theme.getImage("icons", "help_icon.png"), theme.getImage("icons", "help_icon-white.png"));
         helpButton.setFlag(Widget.CENTER_HORIZONTAL);
-        helpButton.setFlag(Widget.CENTER_VERTICAL);
         buttonBarLayout.add(helpButton);
         
         quitButton = new Button(new Vector2i(300, 50), "Quit");
         
         quitButton.setIcon(theme.getImage("icons", "on-off_icon.png"), theme.getImage("icons", "on-off_icon-white.png"));
         quitButton.setFlag(Widget.CENTER_HORIZONTAL);
-        quitButton.setFlag(Widget.CENTER_VERTICAL);
         buttonBarLayout.add(quitButton);
-        
-
         
         /// Main WORLD BUILDER
         
@@ -635,16 +671,17 @@ public class GUI implements WindowEventListener
         viewportsLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(viewportsLayout);
    
-               
+         
         
-        simulationWindowContainer = new Container(new Vector2i(500,300));
+        Container simulationWindowContainer = new Container(new Vector2i(500,300));
         simulationWindowContainer.setFlag(Widget.FILL);
         simulationWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
-        viewportsLayout.add(simulationWindowContainer);
-      
         
-        viewports = new ArrayList<Container>();
-        viewports.add(simulationWindowContainer);
+        Viewport v = new Viewport(simulationWindowContainer, Viewport.Type.THREE_D);    
+        viewportsLayout.add(v.container);
+      
+        viewports = new ArrayList<Viewport>();
+        viewports.add(v);
        
 
         //SLIDER
@@ -870,53 +907,17 @@ public class GUI implements WindowEventListener
     	if (world != null)
     	{
     		Grid grid = world.getLastGeneration();
-    		
-    		
-    		
-			
-    		
+
     		if ((currentGrid == null) || (currentGrid.getType() != grid.getType()))
-    		{
-    		
-    			//ITERATE THROUGH VIEWPORTS
-    			
-   			 Iterator<Container> vi = viewports.iterator();
-   			    while (vi.hasNext()) {
-   			    System.out.println("WE");
-    			    	
-    			    	switch (grid.getType())
-    	    			{
-    	    				case RECTANGLE:
-    	    					simulationGridViewer = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-    	    					break;
-    	    				case HEXAGON:
-    	    					simulationGridViewer = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-    	    					break;
-    	    				case TRIANGLE:
-    	    					simulationGridViewer = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-    	    					break;
-    	    			}
-    	    			
-    	    			simulationGridViewer.addSlice(0, 10.0f);
-    	    			simulationGridViewer.setFlag(Widget.FILL);
-    	    			vi.next().setContents(simulationGridViewer);
-    			    	
-    			    	
-    			    	
-    			    
-    			    }
-    			
-    			//// END ITERATIONS
-    			
-    			
-    		
-    		}
-    		
-    		if (currentGrid != grid)
+   				for (Viewport viewport : viewports) 
+   					viewport.recreate(grid);
+
+    		//if (currentGrid != grid)
     		{
     			currentGrid = grid;
-    			
-    			simulationGridViewer.setGrid(currentGrid);
+    			  			
+    			for (Viewport viewport : viewports)
+    				viewport.gridWidget.setGrid(currentGrid);
     			
 	    		generationSlider.setMaximum(world.getNumGenerations());
 	    		
@@ -1201,15 +1202,14 @@ public class GUI implements WindowEventListener
             }        
             else if (event.target == addViewportButton)
             {
-            	Container tempContainer = new Container(new Vector2i(100,300));
-            	tempContainer.setFlag(Widget.FILL);
-            	tempContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
-            	//tempContainer.setContents(simulationGridViewer);
-                viewportsLayout.add(tempContainer);
-                viewports.add(tempContainer);
+            	Container container = new Container(new Vector2i(100,300));
+            	container.setFlag(Widget.FILL);
+            	container.setBackground(new Fill(new Colour(0f,0f,0f)));
+            	viewportsLayout.add(container);
             	
+            	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D);
+            	viewport.recreate(currentGrid);
             }
-            
         }
         else if (event.type == Event.Type.CHANGE)
         {
