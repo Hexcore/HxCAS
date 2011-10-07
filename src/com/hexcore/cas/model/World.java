@@ -34,6 +34,7 @@ public class World
 	
 	public Grid getLastGeneration()
 	{
+		if (worldGenerations.isEmpty()) return null;
 		return worldGenerations.get(worldGenerations.size() - 1);
 	}
 	

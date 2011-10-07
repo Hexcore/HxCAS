@@ -135,7 +135,7 @@ public class Container extends Widget
 	public void setContents(Widget component) 
 	{
 		this.contents = component;
-		component.setParent(this);
+		if (component != null) component.setParent(this);
 		relayout();
 	}
 }

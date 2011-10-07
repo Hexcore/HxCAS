@@ -305,7 +305,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 		
 		int	bufferSize = calculateBufferRequirement(sides);
 		
-		if (bufferSize > 0)
+		if (bufferSize >= 0)
 		{
 			try
 			{

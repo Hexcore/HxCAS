@@ -18,6 +18,7 @@ import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
+import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
@@ -34,6 +35,8 @@ import com.hexcore.cas.ui.toolkit.Dialog;
 import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
+import com.hexcore.cas.ui.toolkit.Grid3DWidget;
+import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
@@ -196,23 +199,15 @@ public class GUI implements WindowEventListener
     public Button 		pauseButton;
     public Button 		resetButton;
     
-    
-    public HexagonGrid			waterFlowGrid;
-    public WaterFlow			waterFlow;
-    public HexagonGrid3DWidget	waterGrid3DViewer;
-   
+    public Grid				currentGrid;
+    public Container 		simulationWindowContainer;
+    public Grid3DWidget		simulationGridViewer;
     
     public Server server;
     
     public GUI(Server server)
     {
-        this.server = server;
-     
-        waterFlowGrid = new HexagonGrid(new Vector2i(100, 100));
-        waterFlowGrid.setWrappable(false);
-
-        waterFlow = new WaterFlow(waterFlowGrid);
-        
+        this.server = server;        
         
         grid = new HexagonGrid(new Vector2i(12, 12));
         grid.getCell(6, 5).setValue(0, 1);
@@ -400,14 +395,7 @@ public class GUI implements WindowEventListener
         hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
         hexGrid3DViewer.setFlag(Widget.FILL);
         hexGrid3DViewer.addSlice(0, 16.0f);
-               
-        waterGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)waterFlow.getGrid(), 24);
-        waterGrid3DViewer.setFlag(Widget.FILL);
-        waterGrid3DViewer.setBackgroundColour(new Colour(0.6f, 0.85f, 1.0f));
-        waterGrid3DViewer.setColourRuleSet(colourRules);
-        waterGrid3DViewer.addSlice(2, 2, 15.0f);
-        waterGrid3DViewer.addSlice(1, 1, 15.0f);
-               
+                              
         propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertiesLayout.setFlag(Widget.FILL);
         propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
@@ -667,16 +655,10 @@ public class GUI implements WindowEventListener
         
         masterSimulationLayout.add(worldHeaderLayout);
         
-        Container simulationWindowContainer = new Container(new Vector2i(100,300));
+        simulationWindowContainer = new Container(new Vector2i(100,300));
         simulationWindowContainer.setFlag(Widget.FILL);
         simulationWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         masterSimulationLayout.add(simulationWindowContainer);
-        simulationWindowContainer.setContents(waterGrid3DViewer);
-        
-        
-        
-        
-        
 
         //SLIDER
         
@@ -885,18 +867,44 @@ public class GUI implements WindowEventListener
     
     public void startSimulation(World world)
     {
-    	Log.information(TAG, "Switched to simulation screen");
     	this.world = world;
+    	
     	masterView.setIndex(2);
+    	Log.information(TAG, "Switched to simulation screen");
     }
    
     @Override
     public void update(float delta)
     {
-    	
     	if (world != null)
-    	
-    	
+    	{
+    		Grid grid = world.getLastGeneration();
+
+    		if (currentGrid != grid)
+    		{
+    			currentGrid = grid;
+
+	    		if (grid != null)
+	    		{
+	    			switch (grid.getType())
+	    			{
+	    				case RECTANGLE:
+	    					simulationGridViewer = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+	    					break;
+	    				case HEXAGON:
+	    					simulationGridViewer = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+	    					break;
+	    				case TRIANGLE:
+	    					simulationGridViewer = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+	    					break;
+	    			}
+	    			
+	    			simulationGridViewer.addSlice(0, 10.0f);
+	    			simulationGridViewer.setFlag(Widget.FILL);
+	    			simulationWindowContainer.setContents(simulationGridViewer);
+	    		}
+    		}
+    	}
     	
         if (!themeName.equals(currentThemeName))
         {
@@ -960,18 +968,14 @@ public class GUI implements WindowEventListener
             }
             else if (event.target == submitButton)
             {
-                
-                
                 if(( worldSizeXNumberBox.getValue(5) < 5) || ( worldSizeYNumberBox.getValue(5) < 5))
                 {
                     window.showModalDialog(dialog);
                     return;
                 }
             
-            String shape = cellShapeDropDownBox.getSelectedText();
-                
-                
-            
+                String shape = cellShapeDropDownBox.getSelectedText();
+
                 if (shape == "Square")
                 {
                     // 3D Rectangle Grid
