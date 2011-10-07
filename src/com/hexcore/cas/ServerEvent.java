@@ -8,16 +8,19 @@ public class ServerEvent
 {	
 	public enum Type
 	{
-		FOUND_CLIENT, SHUTDOWN, CREATE_WORLD, START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION;
+		FOUND_CLIENT, SHUTDOWN, CREATE_WORLD, LOAD_WORLD, START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION;
 	}
 	
 	public Type			 type;
 	public SocketAddress address = null;
-	
+		
 	// CREATE_WORLD
 	public Vector2i		size;
 	public char			gridType;
 	public boolean		wrappable;
+	
+	// LOAD_WORLD
+	public String		filename;
 	
 	public ServerEvent(Type type)
 	{

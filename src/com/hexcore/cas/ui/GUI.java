@@ -905,7 +905,17 @@ public class GUI implements WindowEventListener
             }
             else if (event.target == loadWorldButton)
             {
-                System.out.println(window.askUserForFile("Load a world"));
+                FileSelectResult result = window.askUserForFileToLoad("Load a world");
+                
+                if (result.isValid())
+                {
+                    ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.LOAD_WORLD);
+                    serverEvent.filename = result.getFullName();
+                    server.sendEvent(serverEvent);
+                	
+                    masterView.setIndex(1 - masterView.getIndex());
+                    window.relayout();	
+                }
             }
             else if (event.target == helpButton)
             {

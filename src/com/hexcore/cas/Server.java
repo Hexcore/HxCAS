@@ -1,5 +1,6 @@
 package com.hexcore.cas;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Set;
@@ -17,6 +18,7 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
+import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
@@ -132,7 +134,24 @@ public class Server implements LobbyListener
 						world.addGeneration(grid);
 						
 						break;
-					}	
+					}
+					
+					case LOAD_WORLD:
+					{
+						world = new World();
+						WorldReader reader = new WorldReader(world);
+						
+						try
+						{
+							reader.readWorld(event.filename);
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+						
+						break;
+					}
 					
 					case START_SIMULATION:
 					{
