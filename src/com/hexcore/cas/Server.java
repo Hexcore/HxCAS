@@ -14,7 +14,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.World;
-import com.hexcore.cas.ui.test.UIProtoApplication;
+import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
 
@@ -27,7 +27,7 @@ public class Server implements LobbyListener
 	private Configuration config = null;
 	private Lobby lobby = null;
 	private ServerOverseer overseer = null;
-	private UIProtoApplication ui = null;
+	private GUI ui = null;
 	
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
 	
@@ -59,7 +59,7 @@ public class Server implements LobbyListener
 		lobby.addListener(this);
 		
 		Log.information(TAG, "Starting user interface...");
-		ui = new UIProtoApplication(instance);
+		ui = new GUI(instance);
 		
 		try
 		{

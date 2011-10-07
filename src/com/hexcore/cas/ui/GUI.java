@@ -1,6 +1,6 @@
 //v1.0
 
-package com.hexcore.cas.ui.test;
+package com.hexcore.cas.ui;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -61,7 +61,7 @@ import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.ui.toolkit.Text.Size;
 
-public class UIProtoApplication implements WindowEventListener
+public class GUI implements WindowEventListener
 {
     public Theme    theme;
     public Window    window;
@@ -206,7 +206,7 @@ public class UIProtoApplication implements WindowEventListener
     
     public Server server;
     
-    public UIProtoApplication(Server server)
+    public GUI(Server server)
     {
         this.server = server;
         
@@ -962,7 +962,7 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
     
     static public void main(String args[])
     {
-        new UIProtoApplication(null);
+        new GUI(null);
     }
     
     @Override
