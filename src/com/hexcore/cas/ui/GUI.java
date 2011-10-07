@@ -61,8 +61,30 @@ import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.utilities.Log;
 
+
+
+
 public class GUI implements WindowEventListener
 {
+	
+	
+	public class Viewport
+	{
+		public Container container;
+		public GridWidget gridWidget;
+		public String type;
+		
+		public Viewport(Container container, String type)
+		{
+			this.container = container;
+			this.type = type;
+					
+		}
+		
+		
+		
+		
+	}
 	
 	//OUR WORLD///
     public World world;
@@ -70,7 +92,7 @@ public class GUI implements WindowEventListener
     
     
     //OUR VIEWPORTS//
-   public ArrayList<Container> viewports;
+   public ArrayList<Viewport> viewports;
     ////////////////
 	
 	public static final String TAG = "GUI";
@@ -197,7 +219,7 @@ public class GUI implements WindowEventListener
     private SliderWidget 	generationSlider;
     
     private Grid			currentGrid;
-    private Container 		simulationWindowContainer;
+  //  private Container 		simulationWindowContainer;
     private Grid3DWidget	simulationGridViewer;
     
     private Server 			server;
@@ -635,16 +657,18 @@ public class GUI implements WindowEventListener
         viewportsLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(viewportsLayout);
    
-               
+         
         
-        simulationWindowContainer = new Container(new Vector2i(500,300));
+        Container simulationWindowContainer = new Container(new Vector2i(500,300));
         simulationWindowContainer.setFlag(Widget.FILL);
         simulationWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
-        viewportsLayout.add(simulationWindowContainer);
+        
+        Viewport v = new Viewport(simulationWindowContainer, "3D" );    
+        viewportsLayout.add(v.container);
       
         
-        viewports = new ArrayList<Container>();
-        viewports.add(simulationWindowContainer);
+        viewports = new ArrayList<Viewport>();
+        viewports.add(v);
        
 
         //SLIDER
@@ -880,26 +904,54 @@ public class GUI implements WindowEventListener
     		
     			//ITERATE THROUGH VIEWPORTS
     			
-   			 Iterator<Container> vi = viewports.iterator();
+   			 Iterator<Viewport> vi = viewports.iterator();
    			    while (vi.hasNext()) {
    			    System.out.println("WE");
     			    	
+   			    
+   			 Grid3DWidget temp3DWidget;
+   			    
     			    	switch (grid.getType())
     	    			{
-    	    				case RECTANGLE:
-    	    					simulationGridViewer = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-    	    					break;
-    	    				case HEXAGON:
-    	    					simulationGridViewer = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-    	    					break;
-    	    				case TRIANGLE:
-    	    					simulationGridViewer = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-    	    					break;
+    			    	
+	    			    	
+	    	    				case RECTANGLE:
+	    	    					if (vi.next().type == "3D")
+	    	    					{
+	    	    						temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+	    	    						temp3DWidget.addSlice(0, 10.0f);
+	    	    						vi.next().gridWidget = temp3DWidget;
+	    	    					}
+	    	    					else 
+	    	    						vi.next().gridWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+	    	    					break;
+	    	    				case HEXAGON:
+	    	    					if (vi.next().type == "3D")
+	    	    						{
+	    	    						temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+	    	    						temp3DWidget.addSlice(0, 10.0f);
+	    	    						vi.next().gridWidget = temp3DWidget;
+	    	    						}
+	    	    					else 
+	    	    						vi.next().gridWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+	    	    					break;
+	    	    				case TRIANGLE:
+	    	    					if (vi.next().type == "3D")
+	    	    					{
+	    	    						temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+	    	    						temp3DWidget.addSlice(0, 10.0f);
+	    	    						vi.next().gridWidget = temp3DWidget;
+	    	    					}
+	    	    						
+	    	    					else 
+	    	    						vi.next().gridWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+	    	    					break;
+	    	    			
     	    			}
+    			    	
     	    			
-    	    			simulationGridViewer.addSlice(0, 10.0f);
-    	    			simulationGridViewer.setFlag(Widget.FILL);
-    	    			vi.next().setContents(simulationGridViewer);
+    			       	vi.next().gridWidget.setFlag(Widget.FILL);
+    	    			vi.next().container.setContents(vi.next().gridWidget);
     			    	
     			    	
     			    	
@@ -915,14 +967,20 @@ public class GUI implements WindowEventListener
     		if (currentGrid != grid)
     		{
     			currentGrid = grid;
+    			  			
+    			Iterator<Viewport> vi = viewports.iterator();
+   		
+    			while (vi.hasNext()) {
     			
-    			simulationGridViewer.setGrid(currentGrid);
+    			vi.next().gridWidget.setGrid(currentGrid);
     			
 	    		generationSlider.setMaximum(world.getNumGenerations());
 	    		
 	    		if (generationSlider.getValue() == generationSlider.getMaximum())
 	    			generationSlider.setValue(world.getNumGenerations());
     		}
+    	}   
+   			    
     	}
     	
         if (!themeName.equals(currentThemeName))
@@ -1203,9 +1261,11 @@ public class GUI implements WindowEventListener
             	Container tempContainer = new Container(new Vector2i(100,300));
             	tempContainer.setFlag(Widget.FILL);
             	tempContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
-            	//tempContainer.setContents(simulationGridViewer);
-                viewportsLayout.add(tempContainer);
-                viewports.add(tempContainer);
+            	
+            	Viewport v = new Viewport(tempContainer, "3D");
+            	
+            	viewportsLayout.add(v.container);
+                viewports.add(v);
             	
             }
             
