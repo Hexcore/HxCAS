@@ -34,6 +34,7 @@ public class Server implements LobbyListener
 	private Lobby 			lobby = null;
 	private GUI 			ui = null;
 	
+	private ClientThread	client = null;
 	private ServerOverseer 	overseer = null;
 	private World			world = null;
 	
@@ -158,13 +159,27 @@ public class Server implements LobbyListener
 						ArrayList<String> clientList = new ArrayList<String>();
 						clientList.addAll(names);
 						
+						if (clientList.isEmpty())
+						{
+							Log.information(TAG, "No network clients found, starting local client");
+							
+							client = new ClientThread();
+							client.start();
+							
+							Thread.sleep(1000);
+							
+							clientList.add("127.0.0.1");
+						}
+						
+						Log.information(TAG, "Starting overseer...");
+						
 						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
 						overseer.setClientNames(clientList);
 						overseer.start();
 						
 						Thread.sleep(100);
 						
-						overseer.simulate(100);
+						overseer.simulate(-1);
 						
 						break;
 					}					
@@ -228,6 +243,18 @@ public class Server implements LobbyListener
 		catch (InterruptedException e) 
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	class ClientThread extends Thread
+	{
+		Client client;
+		
+		@Override
+		public void run()
+		{
+			client = new Client();
+			client.start(false);
 		}
 	}
 }
