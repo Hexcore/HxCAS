@@ -2,6 +2,7 @@ package com.hexcore.cas.control.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
@@ -20,8 +21,10 @@ public class ServerOverseer extends Overseer
 	private static final String TAG = "Server";
 	
 	private String[] clientNames = null;
-	private volatile boolean isFinishedGenerations = false;
-	private volatile boolean paused = false;
+	
+	private volatile AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
+	private volatile AtomicBoolean paused = new AtomicBoolean(false);
+	
 	private volatile boolean reset = false;
 	private volatile int currGen = 0;
 	private volatile int numOfClients = 0;
@@ -157,7 +160,7 @@ public class ServerOverseer extends Overseer
 	
 	public boolean isFinished()
 	{
-		return isFinishedGenerations;
+		return isFinishedGenerations.get();
 	}
 	
 	public void calculateSplits()
@@ -260,12 +263,12 @@ public class ServerOverseer extends Overseer
 	
 	public void pause()
 	{
-		paused = true;
+		paused.set(true);
 	}
 	
 	public void play()
 	{
-		paused = false;
+		if (paused.getAndSet(false)) startGeneration();
 	}
 	
 	public void rebuildGrid()
@@ -319,7 +322,8 @@ public class ServerOverseer extends Overseer
 		splitGrids();
 		
 		Log.information(TAG, "Finished generation: " + currGen);
-		startGeneration();
+		
+		if (!paused.get()) startGeneration();
 	}
 
 	public void setClientNames(ArrayList<String> names)
@@ -342,7 +346,7 @@ public class ServerOverseer extends Overseer
 		calculateSplits();
 		splitGrids();
 		
-		isFinishedGenerations = false;
+		isFinishedGenerations.set(false);
 		currGen = 0;
 		
 		startGeneration();
@@ -385,17 +389,12 @@ public class ServerOverseer extends Overseer
 				splitGrids();
 			}
 			
-			while(paused)
-			{
-				System.out.println("IS PAUSED!");
-			}
-			
 			System.out.println(currGen + " " + numOfGenerations);
 			
 			if(numOfGenerations == 0 || (numOfGenerations != -1 && currGen > numOfGenerations))
 			{
 				System.out.println("Finished!");
-				isFinishedGenerations = true;
+				isFinishedGenerations.set(true);
 				return;
 			}
 

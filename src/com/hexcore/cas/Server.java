@@ -29,6 +29,7 @@ public class Server implements LobbyListener
 	public final static String VERSION = "v0.1";
 		
 	private AtomicBoolean 	running = new AtomicBoolean(false);
+	private AtomicBoolean	activeSimulation = new AtomicBoolean(false);
 	
 	private Configuration 	config = null;
 	private Lobby 			lobby = null;
@@ -159,32 +160,11 @@ public class Server implements LobbyListener
 					}
 					
 					case START_SIMULATION:
+					case RESUME_SIMULATION:
 					{
-						ArrayList<String> clientList = new ArrayList<String>();
-						clientList.addAll(names);
+						if (!activeSimulation.getAndSet(true)) initSimulation();
 						
-						if (clientList.isEmpty())
-						{
-							Log.information(TAG, "No network clients found, starting local client");
-							
-							client = new ClientThread();
-							client.start();
-							
-							Thread.sleep(1000);
-							
-							clientList.add("127.0.0.1");
-						}
-						
-						Log.information(TAG, "Starting overseer...");
-						
-						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
-						overseer.setClientNames(clientList);
-						overseer.start();
-						
-						Thread.sleep(100);
-						
-						overseer.simulate(-1);
-						
+						overseer.play();
 						break;
 					}					
 					
@@ -194,10 +174,21 @@ public class Server implements LobbyListener
 						break;
 					}
 					
+					case STOP_SIMULATION:
+					{
+						activeSimulation.set(false);
+						
+						overseer.disconnect();
+						overseer = null;
+						break;
+					}
+					
 					case SHUTDOWN:
+					{
 						Log.information(TAG, "Got shutdown message");
 						running.set(false);
 						break;
+					}
 				}
 			}
 			catch (InterruptedException e)
@@ -220,6 +211,34 @@ public class Server implements LobbyListener
 		}
 		
 		System.exit(0);
+	}
+	
+	private void initSimulation() throws InterruptedException
+	{
+		ArrayList<String> clientList = new ArrayList<String>();
+		clientList.addAll(names);
+		
+		if (clientList.isEmpty())
+		{
+			Log.information(TAG, "No network clients found, starting local client");
+			
+			client = new ClientThread();
+			client.start();
+			
+			Thread.sleep(1000);
+			
+			clientList.add("127.0.0.1");
+		}
+		
+		Log.information(TAG, "Starting overseer...");
+		
+		overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
+		overseer.setClientNames(clientList);
+		overseer.start();
+		overseer.pause();
+		Thread.sleep(100);
+		
+		overseer.simulate(-1);
 	}
 	
 	public void sendEvent(ServerEvent event)
