@@ -2,7 +2,6 @@
 
 package com.hexcore.cas.ui;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -17,12 +16,12 @@ import java.util.Iterator;
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
-import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.HexcoreVM;
 import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.test.GameOfLife;
@@ -37,9 +36,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
-import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
-import com.hexcore.cas.ui.toolkit.Layout;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
 import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
@@ -49,8 +46,8 @@ import com.hexcore.cas.ui.toolkit.ScrollableContainer;
 import com.hexcore.cas.ui.toolkit.SliderWidget;
 import com.hexcore.cas.ui.toolkit.TabbedView;
 import com.hexcore.cas.ui.toolkit.Text;
+import com.hexcore.cas.ui.toolkit.Text.Size;
 import com.hexcore.cas.ui.toolkit.TextArea;
-import com.hexcore.cas.ui.toolkit.TextBox;
 import com.hexcore.cas.ui.toolkit.TextWidget;
 import com.hexcore.cas.ui.toolkit.Theme;
 import com.hexcore.cas.ui.toolkit.TriangleGrid3DWidget;
@@ -60,10 +57,12 @@ import com.hexcore.cas.ui.toolkit.Widget;
 import com.hexcore.cas.ui.toolkit.Window;
 import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
-import com.hexcore.cas.ui.toolkit.Text.Size;
+import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener
 {
+	public static final String TAG = "GUI";
+	
     public Theme    theme;
     public Window    window;
     public View masterView;
@@ -876,8 +875,10 @@ public class GUI implements WindowEventListener
     	
     }
     
-    public void startSimulation()
+    public void startSimulation(World world)
     {
+    	Log.information(TAG, "Switched to simulation screen");
+    	
     	masterView.setIndex(2);
     }
    
@@ -1125,8 +1126,7 @@ public class GUI implements WindowEventListener
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
                 serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
-                
-                
+
                 if (cellShapeDropDownBox.getSelectedText() == "Triangle")
                 	serverEvent.gridType = 'T';
                 else if (cellShapeDropDownBox.getSelectedText() == "Hexagon")
@@ -1134,16 +1134,9 @@ public class GUI implements WindowEventListener
                 else
                 	serverEvent.gridType = 'R';
                 
-                
-                if (wrapCheckBox.isChecked())
-                	serverEvent.wrappable = true;
-                else
-                	serverEvent.wrappable = false;
-                
+                serverEvent.wrappable = wrapCheckBox.isChecked();               
                 
                 server.sendEvent(serverEvent);
-            	
-                
             }
             else if (event.target == playButton)
             {

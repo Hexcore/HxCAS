@@ -134,6 +134,8 @@ public class Server implements LobbyListener
 						
 						world.addGeneration(grid);
 						
+						ui.startSimulation(world);
+						
 						break;
 					}
 					
@@ -150,6 +152,8 @@ public class Server implements LobbyListener
 						{
 							e.printStackTrace();
 						}
+						
+						ui.startSimulation(world);
 						
 						break;
 					}
