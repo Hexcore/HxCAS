@@ -164,7 +164,7 @@ public class Server implements LobbyListener
 						
 						Thread.sleep(100);
 						
-						overseer.simulate(100);
+						overseer.simulate(-1);
 						
 						break;
 					}					

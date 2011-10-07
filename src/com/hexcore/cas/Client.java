@@ -1,6 +1,7 @@
 package com.hexcore.cas;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.hexcore.cas.control.client.ClientOverseer;
 import com.hexcore.cas.control.discovery.Beacon;
@@ -12,18 +13,25 @@ public class Client
 	public final static String TAG = "Client";
 	public final static String VERSION = "v0.1";
 	
-	private Beacon beacon = null;
-	private Configuration config = null;
-	private ClientOverseer overseer = null;
+	private Beacon 			beacon = null;
+	private Configuration 	config = null;
+	private ClientOverseer 	overseer = null;
+	private AtomicBoolean	running = new AtomicBoolean();
 	
 	public static void main(String[] args)
 	{
-		new Client();
+		Client instance = new Client();
+		instance.start(true);
 	}
 	
-	public Client()
+	public void stop()
 	{
-		System.out.println("== Hexcore CAS Client - " + VERSION + " ==");
+		running.set(false);
+	}
+	
+	public void start(boolean textUserInterface)
+	{
+		if (textUserInterface) System.out.println("== Hexcore CAS Client - " + VERSION + " ==");
 		
 		Log.information(TAG, "Loading configuration...");
 		config = new Configuration("data/config.txt");
@@ -38,23 +46,41 @@ public class Client
 		
 		if (overseer.isValid())
 		{
-			System.out.println("\nCAS Client ready");
-			System.out.println(" * Press 'q' to shutdown\n");
-			
-			while (true)
+			if (textUserInterface)
 			{
-				int c = ' ';
-				
-				try
+				System.out.println("\nCAS Client ready");
+				System.out.println(" * Press 'q' to shutdown\n");
+			}
+			
+			running.set(true);
+			while (running.get())
+			{
+				if (textUserInterface)
 				{
-					c = System.in.read();
+					int c = ' ';
+					
+					try
+					{
+						c = System.in.read();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					
+					if (c == 'q') running.set(false);
 				}
-				catch (IOException e)
+				else
 				{
-					e.printStackTrace();
+					try
+					{
+						Thread.sleep(1000);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
 				}
-				
-				if (c == 'q') break;
 			}
 		}
 		
