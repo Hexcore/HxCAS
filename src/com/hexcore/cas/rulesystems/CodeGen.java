@@ -248,10 +248,8 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		//End class
 		cw.visitEnd();
 		
-		//TODO: Remove loading code
+		//TODO: Remove file saving
 		toFile(name);
-		RuleLoader rl = new RuleLoader();
-		rl.loadRule(cw.toByteArray());
 	}
 	
 	public static byte[] getCode()
