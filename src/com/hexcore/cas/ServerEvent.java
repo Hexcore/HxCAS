@@ -2,6 +2,8 @@ package com.hexcore.cas;
 
 import java.net.SocketAddress;
 
+import com.hexcore.cas.math.Vector2i;
+
 public class ServerEvent 
 {	
 	public enum Type
@@ -11,6 +13,11 @@ public class ServerEvent
 	
 	public Type			 type;
 	public SocketAddress address = null;
+	
+	// CREATE_WORLD
+	public Vector2i		size;
+	public char			gridType;
+	public boolean		wrappable;
 	
 	public ServerEvent(Type type)
 	{

@@ -898,10 +898,7 @@ public class GUI implements WindowEventListener
         if (event.type == Event.Type.ACTION)
         {
             if (event.target == createWorldButton)
-            {
-                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
-                server.sendEvent(serverEvent);
-            	
+            {            	
                 masterView.setIndex(1 - masterView.getIndex());
                 //buttonBarLayout.toggleVisibility();
                 window.relayout();
@@ -1107,6 +1104,12 @@ public class GUI implements WindowEventListener
             
             else if (event.target == simulateButton)
             {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
+                serverEvent.size = new Vector2i(200, 200);
+                serverEvent.gridType = 'R';
+                serverEvent.wrappable = true;
+                server.sendEvent(serverEvent);
+            	
                 masterView.setIndex(2);
             }
             else if (event.target == playButton)
