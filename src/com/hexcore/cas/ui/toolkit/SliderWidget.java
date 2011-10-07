@@ -80,10 +80,14 @@ public class SliderWidget extends ClickableWidget
 	public boolean receiveEventExtras(Event event, Vector2i position)
 	{
 		if ((event.type == Event.Type.MOUSE_MOTION || event.type == Event.Type.MOUSE_CLICK) && active)
-		{
+		{			
 			int width = window.getTheme().getSliderHandleSize().x;
 			value = (float)(event.position.x - position.x - width / 2) * maximum / (size.x - width) + minimum;
 			value = Math.max(Math.min(value, maximum), minimum);
+			
+			Event windowEvent = new Event(Event.Type.CHANGE);
+			windowEvent.target = this;
+			window.sendWindowEvent(windowEvent);
 		}
 		
 		return super.receiveEventExtras(event, position);

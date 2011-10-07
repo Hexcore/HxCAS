@@ -161,13 +161,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		return animator.getCurrentTime();
 	}
-	
-	@Deprecated
-	public String askUserForFile(String title)
-	{
-		return askUserForFileToSave(title).filename;
-	}	
-		
+
 	public FileSelectResult askUserForFileToSave(String title)
 	{
 		FileDialog dialog = new FileDialog(frame, title);
@@ -418,7 +412,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		if (updateComponents)
 		{
-	        for (Widget component : components) component.relayout();
+	        relayout();
 	        updateComponents = false;
 		}
 		

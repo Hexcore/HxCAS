@@ -918,10 +918,12 @@ public class GUI implements WindowEventListener
     			  			
     			for (Viewport viewport : viewports)
     				viewport.gridWidget.setGrid(currentGrid);
+    					
+    			double origMaximum = generationSlider.getMaximum();
     			
-	    		generationSlider.setMaximum(world.getNumGenerations());
-	    		
-	    		if (generationSlider.getValue() == generationSlider.getMaximum())
+    			generationSlider.setMaximum(world.getNumGenerations());
+    					
+	    		if (generationSlider.getValue() >= origMaximum)
 	    			generationSlider.setValue(world.getNumGenerations());
     		}
     	}
@@ -1213,8 +1215,11 @@ public class GUI implements WindowEventListener
         }
         else if (event.type == Event.Type.CHANGE)
         {
-            
-            
+            if (event.target == generationSlider)
+            {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
+                server.sendEvent(serverEvent);
+            }
         }
     }
 }
