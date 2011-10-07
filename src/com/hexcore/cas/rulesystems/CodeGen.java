@@ -36,7 +36,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	static void initClass(String ruleset)
 	{
-		varIndex = 3;
+		varIndex = 4;
 		currentFrameworkIndex = 0;
 		propertyIndex = 1;
 
@@ -130,6 +130,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void storeVariable(int index)
 	{
+		System.out.println("Storing at: " + index);
 		executeVisitor.visitVarInsn(DSTORE, index);
 	}
 	
@@ -149,7 +150,10 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void performPostOp(int index, int delta)
 	{
-		executeVisitor.visitIincInsn(index, delta);
+		executeVisitor.visitVarInsn(DLOAD, index);
+		executeVisitor.visitLdcInsn(new Double(delta));
+		executeVisitor.visitInsn(DADD);
+		executeVisitor.visitVarInsn(DSTORE, index);
 	}
 	
 	

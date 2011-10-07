@@ -619,6 +619,7 @@ static public void reset()
 			SemError("Identifier \"" + name + "\" already declared.");
 		else
 		{
+			entry.kind = TableEntry.Variable;
 			entry.name = name;
 			entry.offset = CodeGen.declareLocalVariable(name);
 		}
