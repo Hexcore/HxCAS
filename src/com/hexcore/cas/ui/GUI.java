@@ -868,6 +868,18 @@ public class GUI implements WindowEventListener
         window.relayout();
     }
     
+    
+    
+    
+    public void setWorld()
+    {
+    	
+    }
+    
+    public void startSimulation()
+    {
+    	masterView.setIndex(2);
+    }
    
     @Override
     public void update(float delta)
@@ -1112,8 +1124,7 @@ public class GUI implements WindowEventListener
             else if (event.target == simulateButton)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
-                
-               serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
+                serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
                 
                 
                 if (cellShapeDropDownBox.getSelectedText() == "Triangle")
@@ -1132,7 +1143,7 @@ public class GUI implements WindowEventListener
                 
                 server.sendEvent(serverEvent);
             	
-                masterView.setIndex(2);
+                
             }
             else if (event.target == playButton)
             {
