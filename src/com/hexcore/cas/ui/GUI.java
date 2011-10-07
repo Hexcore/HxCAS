@@ -901,7 +901,16 @@ public class GUI implements WindowEventListener
     @Override
     public void render()
     {
-
+    	
+    }
+    
+    @Override
+    public boolean close()
+    {
+    	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SHUTDOWN);  
+    	server.sendEvent(serverEvent);
+    	
+    	return false;
     }
 
     @Override

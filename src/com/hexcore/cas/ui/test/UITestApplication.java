@@ -437,7 +437,13 @@ public class UITestApplication implements WindowEventListener
 	{
 
 	}
-
+	
+	@Override
+	public boolean close()
+	{
+		return true;
+	}
+	
 	@Override
 	public void handleWindowEvent(Event event)
 	{
