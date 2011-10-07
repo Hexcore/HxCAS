@@ -65,26 +65,19 @@ public class GUI implements WindowEventListener
 {
     public Theme    theme;
     public Window    window;
-    
-    
     public View masterView;
-    
-    
     public TabbedView tabbedWorldView;
     
     public LinearLayout    mainMenuLayout;
     public LinearLayout worldLayout;
     
-    
-    public TextWidget worldEditorLabel;
-    
-    public Button simulateButton;
-    
-    //1st,2,3,4 ...tab
-    
+   
+       
     public Button backButton;
+    
+    // WORLD PROPERTIES TAB
     public Container propertiesContainer;
-        
+       	
         public LinearLayout masterPropertiesLayout;
         public Container widgetPreviewContainer;
         public Container widget3DPreviewContainer;
@@ -105,7 +98,6 @@ public class GUI implements WindowEventListener
         public TextBox    worldSizeXTextBox;
         public TextBox    worldSizeYTextBox;
     
-        
         public CheckBox wrapCheckBox;
         public DropDownBox cellShapeDropDownBox;
         
@@ -119,7 +111,9 @@ public class GUI implements WindowEventListener
         public RectangleGridWidget rectGridViewer;
         public TriangleGridWidget triGridViewer;
         
+    
         
+    // RULES TAB    
     public Container rulesContainer;
         public LinearLayout rulesLayout;
         
@@ -142,24 +136,23 @@ public class GUI implements WindowEventListener
         public Button dialogCALOKButton;
         
     
-    
+    // DISTRIBUTION TAB
     public Container distributionContainer;
+    
+    
+    // INITIAL STATE TAB
     public Container worldPreviewContainer;
     
     
     
     
+    
+    // MAIN MENU
     public LinearLayout    headerLayout;
     public LinearLayout    mainLayout;
     public LinearLayout    buttonBarLayout;
     public LinearLayout    innerLayout;
     
-    public TextBox        nameTextBox;
-    public CheckBox        checkBox;
-    public DropDownBox    dropDownBox;
-    public ImageWidget    headingImage;
-    public Container    headingContainer;
-    public TextWidget    headingLabel;
     public View            mainView;
     
     public Button        createWorldButton;
@@ -170,18 +163,14 @@ public class GUI implements WindowEventListener
         
     public Panel        mainPanel;
     
-    public LinearLayout            gridViewLayout;
-
-
-    public Button                nextIterationButton;
-    
+   
     public ColourRuleSet        colourRules;
     
     public String    currentThemeName = "lightV2";
     public String    themeName = currentThemeName;
     
     public Dialog        dialog;
-    public LinearLayout    dialogLayout;
+    public LinearLayout  dialogLayout;
     public TextWidget    dialogTitle;
     public TextWidget    dialogMessage;
     public Button        dialogOKButton;
@@ -194,10 +183,10 @@ public class GUI implements WindowEventListener
     
     
     
-    //Simulation Screen
+    // SIMULATION SCREEN
     
     public Container simulationContainer;
-    
+    	public Button simulateButton;
     
     
     public HexagonGrid                waterFlowGrid;
@@ -209,13 +198,7 @@ public class GUI implements WindowEventListener
     public GUI(Server server)
     {
         this.server = server;
-        
-        
-        
-        //Compiler Integration
-        
-        
-        
+     
         waterFlowGrid = new HexagonGrid(new Vector2i(100, 100));
         waterFlowGrid.setWrappable(false);
 
@@ -359,29 +342,10 @@ public class GUI implements WindowEventListener
         worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
         worldLayout.add(worldHeaderLayout);
         
+           
         
-        
-    
-        
-        
-    
-    //    worldHeaderLayout.add(minimizeImage);
-    //    worldHeaderLayout.add(fullscreenImage);
-    //    worldHeaderLayout.add(quitImage);
-        
-        
-        
-    
-        
-        
-//        worldEditorLabel = new TextWidget("World Editor Menu", Text.Size.LARGE);
-        
-        
-    //    worldEditorLabel.setFlag(Widget.CENTER_HORIZONTAL);
-        //worldLayout.add(worldEditorLabel);
+   
         worldLayout.add(tabbedWorldView);
-        
-        // OUR WORLD EDITOR Containers
         
         
         propertiesContainer = new Container(new Vector2i(100, 100));    
@@ -395,45 +359,27 @@ public class GUI implements WindowEventListener
     
         
        LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-       //instructionsLayout.setBackground(new Fill(new Colour(0.4f, 0.63f, 0.91f)));
-
        instructionsLayout.setHeight(35);
-
        instructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-              masterPropertiesLayout.add(instructionsLayout);
+       instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+       masterPropertiesLayout.add(instructionsLayout);
        
-    instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-    
-   
-    
-    TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
-    instructionsLayout.add(propertiesInstructions);
-        
+       TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
+       instructionsLayout.add(propertiesInstructions);
        instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
         
        
        
-           //2d
-
+             
+	    gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
+	    gridViewer.setColourRuleSet(colourRules);
+	
+	    rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
+	    rectGridViewer.setColourRuleSet(colourRules);
+	    
+	    triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
+	    triGridViewer.setColourRuleSet(colourRules);
     
-    gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
-    gridViewer.setColourRuleSet(colourRules);
-
-    
-
-    
-    rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
-    rectGridViewer.setColourRuleSet(colourRules);
-    
-
-
-
-    triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
-    triGridViewer.setColourRuleSet(colourRules);
-    
-       
-           //
-        
         rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
         rectGrid3DViewer.setFlag(Widget.FILL);
         rectGrid3DViewer.addSlice(0, 16.0f);
@@ -445,26 +391,19 @@ public class GUI implements WindowEventListener
         hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
         hexGrid3DViewer.setFlag(Widget.FILL);
         hexGrid3DViewer.addSlice(0, 16.0f);
-        
-        
-     // Water Flow
+               
         waterGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)waterFlow.getGrid(), 24);
         waterGrid3DViewer.setFlag(Widget.FILL);
         waterGrid3DViewer.setBackgroundColour(new Colour(0.6f, 0.85f, 1.0f));
         waterGrid3DViewer.setColourRuleSet(colourRules);
         waterGrid3DViewer.addSlice(2, 2, 15.0f);
         waterGrid3DViewer.addSlice(1, 1, 15.0f);
-        
-        
-        
+               
         propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertiesLayout.setFlag(Widget.FILL);
         propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
         masterPropertiesLayout.add(propertiesLayout);
-        
-        
-        
-        
+       
         worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         worldSizeLayout.setHeight(50);
         worldSizeLayout.setFlag(Widget.FILL_HORIZONTAL);
@@ -491,24 +430,16 @@ public class GUI implements WindowEventListener
         wrapCheckBox.setFlag(Widget.CENTER_VERTICAL);
         wrapCheckBox.setMargin(new Vector2i(50,0));
         worldSizeLayout.add(wrapCheckBox);
-        
-    
+            
         cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
         cellShapeLayout.setHeight(65);
 
-        
         propertiesLayout.add(cellShapeLayout);
         
         cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
         cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
         cellShapeLayout.add(cellShapeLabel);
-        
-        
-        
-        
-        
-        
         
         cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
         cellShapeDropDownBox.setFlag(Widget.CENTER_VERTICAL);
@@ -516,12 +447,6 @@ public class GUI implements WindowEventListener
         cellShapeDropDownBox.addItem("Triangle");
         cellShapeDropDownBox.addItem("Hexagon");
         cellShapeDropDownBox.setSelected(0);
-        
-        
-        
-        
-        
-    
         
         cellShapeLayout.add(cellShapeDropDownBox);
                 
@@ -532,9 +457,7 @@ public class GUI implements WindowEventListener
         widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
         widgetPreviewLayout.setFlag(Widget.FILL);
         propertiesLayout.add(widgetPreviewLayout);
-        
-        
-        
+      
         widgetPreviewContainer = new Container(new Vector2i(200,100));
         widgetPreviewContainer.setFlag(Widget.FILL);
         widgetPreviewLayout.add(widgetPreviewContainer);
@@ -546,7 +469,6 @@ public class GUI implements WindowEventListener
         widget3DPreviewContainer.setContents(rectGrid3DViewer);
         widgetPreviewContainer.setContents(rectGridViewer);
         
-
         LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(525, 50), LinearLayout.Direction.HORIZONTAL);
         buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
@@ -583,16 +505,6 @@ public class GUI implements WindowEventListener
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
         
-        
-        
-        //
-        
-        
-        //
-        
-        
-        
-            
         LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         CALLayout.setFlag(Widget.FILL);
         masterRulesLayout.add(CALLayout);
@@ -610,10 +522,10 @@ public class GUI implements WindowEventListener
         calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
         leftLayout.add(calEditorHeader);    
         
-         CALTextArea = new TextArea(100, 20);
-         CALTextArea.setMargin(new Vector2i(0,0));
-         CALTextArea.setFlag(Widget.FILL);
-         CALTextArea.setLineNumbers(true);
+        CALTextArea = new TextArea(100, 20);
+        CALTextArea.setMargin(new Vector2i(0,0));
+        CALTextArea.setFlag(Widget.FILL);
+        CALTextArea.setLineNumbers(true);
     
         
         ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
@@ -630,7 +542,7 @@ public class GUI implements WindowEventListener
         rightLayout.add(compilerOutputHeader);    
         
         
-        /** A list **/        
+        
         outputContainer = new ScrollableContainer(new Vector2i(350, 100));
         outputContainer.setFlag(Widget.FILL);
         outputContainer.setFlag(Widget.CENTER_HORIZONTAL);
@@ -643,9 +555,8 @@ public class GUI implements WindowEventListener
         
         outputContainer.setContents(outputLayout);
         
-/**********/
+
         LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
-        //buttonRulesLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
         masterRulesLayout.add(buttonRulesLayout);
@@ -687,18 +598,7 @@ public class GUI implements WindowEventListener
         
         
         
-        
-        
-        
-     
-        headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.WHITE);
-        headingLabel.setFlag(Widget.CENTER);
-        
-        
-        ////
-        
-        
-        // Dialog
+
         dialog = new Dialog(window, new Vector2i(400, 200));
         
         dialogLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -922,41 +822,45 @@ public class GUI implements WindowEventListener
         LinearLayout viewSettingsLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
         viewSettingsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(viewSettingsLayout);
+        
         LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(148, 25), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout.setFlag(8);
         viewSettingsLayout.add(innerViewSettingsLayout);
+        
         LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(218, 40), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout2.setFlag(8);
         viewSettingsLayout.add(innerViewSettingsLayout2);
+        
         Button toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
         toggleHideButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleHideButton);
+        
         Button toggle3DButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
         toggle3DButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggle3DButton);
+        
         Button toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
         toggleWireframeButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleWireframeButton);
+        
         Button addViewportButton = new Button(this.window.getTheme().getImage("icons", "add_viewport_icon.png"));
         addViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(addViewportButton);
+        
         Button removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
-removeViewportButton.setMargin(new Vector2i(5, 0));
+        removeViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(removeViewportButton);
+        
         ImageWidget viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
         cameraImage.setFlag(8);
         innerViewSettingsLayout.add(viewSettingsHeader);
+        
         Button toggleShowButton = new Button(new Vector2i(10, 15), "");
         toggleShowButton.setFlag(2);
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
-
         
-        
-        
-        
-        
-        ///
+       
         window.relayout();
     }
     
@@ -1011,12 +915,7 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
             {
                 window.exit();
             }
-            else if (event.target == nextIterationButton)
-            {
-                
-                    
-            
-            }
+           
             else if ((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
             {
                 window.closeModalDialog();
@@ -1215,19 +1114,7 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
         }
         else if (event.type == Event.Type.CHANGE)
         {
-            if (event.target == checkBox)
-            {
-                if (checkBox.isChecked())
-                    nameTextBox.setText("Flying Dutchmen");
-                else
-                    nameTextBox.setText("Ostrich");
-            }
-            else if (event.target == cellShapeDropDownBox)
-            {
-    
-                
-                
-            }
+            
             
         }
     }
