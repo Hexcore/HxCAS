@@ -868,11 +868,7 @@ public class GUI implements WindowEventListener
         window.relayout();
     }
     
-    static public void main(String args[])
-    {
-        new GUI(null);
-    }
-    
+   
     @Override
     public void update(float delta)
     {
