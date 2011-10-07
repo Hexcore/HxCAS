@@ -184,14 +184,17 @@ public class GUI implements WindowEventListener
     
     
     // SIMULATION SCREEN
+    public Container 	simulationContainer;
+    public Button 		simulateButton;
     
-    public Container simulationContainer;
-    	public Button simulateButton;
+    public Button 		playButton;
+    public Button 		pauseButton;
+    public Button 		resetButton;
     
     
-    public HexagonGrid                waterFlowGrid;
-    public WaterFlow                waterFlow;
-    public HexagonGrid3DWidget        waterGrid3DViewer;
+    public HexagonGrid			waterFlowGrid;
+    public WaterFlow			waterFlow;
+    public HexagonGrid3DWidget	waterGrid3DViewer;
     
     public Server server;
     
@@ -733,13 +736,13 @@ public class GUI implements WindowEventListener
         Button stepBackwardButton = new Button(this.window.getTheme().getImage("icons", "step_backward_icon.png"));
         stepBackwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepBackwardButton);
-        Button playButton = new Button(this.window.getTheme().getImage("icons", "play_icon.png"));
+        playButton = new Button(this.window.getTheme().getImage("icons", "play_icon.png"));
         playButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(playButton);
-        Button pauseButton = new Button(this.window.getTheme().getImage("icons", "pause_icon.png"));
+        pauseButton = new Button(this.window.getTheme().getImage("icons", "pause_icon.png"));
         pauseButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(pauseButton);
-        Button resetButton = new Button(this.window.getTheme().getImage("icons", "reset_icon.png"));
+        resetButton = new Button(this.window.getTheme().getImage("icons", "reset_icon.png"));
         resetButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(resetButton);
         Button stepForwardButton = new Button(window.getTheme().getImage("icons", "step_forward_icon.png"));
@@ -896,13 +899,13 @@ public class GUI implements WindowEventListener
         {
             if (event.target == createWorldButton)
             {
-                
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
+                server.sendEvent(serverEvent);
+            	
                 masterView.setIndex(1 - masterView.getIndex());
                 //buttonBarLayout.toggleVisibility();
                 window.relayout();
-                
-                
-                            }
+            }
             else if (event.target == loadWorldButton)
             {
                 System.out.println(window.askUserForFile("Load a world"));
@@ -1105,12 +1108,22 @@ public class GUI implements WindowEventListener
             else if (event.target == simulateButton)
             {
                 masterView.setIndex(2);
-                
-                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SIMULATE);
+            }
+            else if (event.target == playButton)
+            {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.START_SIMULATION);
                 server.sendEvent(serverEvent);
             }
-            
-            
+            else if (event.target == pauseButton)
+            {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
+                server.sendEvent(serverEvent);
+            }            
+            else if (event.target == resetButton)
+            {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.RESET_SIMULATION);
+                server.sendEvent(serverEvent);
+            }          
         }
         else if (event.type == Event.Type.CHANGE)
         {

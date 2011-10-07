@@ -294,7 +294,8 @@ public class TestServerControl extends TestCase
 		}
 		
 		Log.debug(TAG, " -- Simulate");
-		server.simulate(g, genNum);
+		theWorld.addGeneration(g);
+		server.simulate(genNum);
 		
 		while(!server.isFinished())
 		{

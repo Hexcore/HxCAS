@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.hexcore.cas.control.discovery.Lobby;
 import com.hexcore.cas.control.discovery.LobbyListener;
@@ -23,11 +24,14 @@ public class Server implements LobbyListener
 	private final static String TAG = "Server";
 	public final static String VERSION = "v0.1";
 		
-	private volatile boolean running = false;
-	private Configuration config = null;
-	private Lobby lobby = null;
-	private ServerOverseer overseer = null;
-	private GUI ui = null;
+	private AtomicBoolean 	running = new AtomicBoolean(false);
+	
+	private Configuration 	config = null;
+	private Lobby 			lobby = null;
+	private GUI 			ui = null;
+	
+	private ServerOverseer 	overseer = null;
+	private World			world = null;
 	
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
 	
@@ -72,8 +76,8 @@ public class Server implements LobbyListener
 		
 		lobby.ping();
 				
-		running = true;
-		while (running)
+		running.set(true);
+		while (running.get())
 		{
 			try
 			{
@@ -93,18 +97,25 @@ public class Server implements LobbyListener
 						names.add(str);
 						break;
 					}
-					
-					case SIMULATE:
-					{
-						ArrayList<String> clientList = new ArrayList<String>();
-						clientList.addAll(names);
-						
-						World world = new World();
+										
+					case CREATE_WORLD:
+					{						
+						world = new World();
 						
 						Grid grid = new RectangleGrid(new Vector2i(200, 200));
 						for(int y = 0; y < 200; y++)
 							for(int x = 0; x < 200; x++)
 								grid.getCell(x, y).setValue(0, 1.0);
+						
+						world.addGeneration(grid);
+						
+						break;
+					}	
+					
+					case START_SIMULATION:
+					{
+						ArrayList<String> clientList = new ArrayList<String>();
+						clientList.addAll(names);
 						
 						overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
 						overseer.setClientNames(clientList);
@@ -112,13 +123,20 @@ public class Server implements LobbyListener
 						
 						Thread.sleep(100);
 						
-						overseer.simulate(grid, 100);
+						overseer.simulate(100);
+						
+						break;
+					}					
+					
+					case PAUSE_SIMULATION:
+					{
+						overseer.pause();
 						break;
 					}
 					
 					case SHUTDOWN:
 						Log.information(TAG, "Got shutdown message");
-						running = false;
+						running.set(false);
 						break;
 				}
 			}

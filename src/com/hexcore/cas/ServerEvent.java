@@ -6,7 +6,7 @@ public class ServerEvent
 {	
 	public enum Type
 	{
-		FOUND_CLIENT, SHUTDOWN, SIMULATE;
+		FOUND_CLIENT, SHUTDOWN, CREATE_WORLD, START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION;
 	}
 	
 	public Type			 type;

@@ -22,6 +22,21 @@ public class World
 		worldGenerations.add(gen);
 	}
 	
+	public int getNumGenerations()
+	{
+		return worldGenerations.size();
+	}
+	
+	public Grid getGeneration(int index)
+	{
+		return worldGenerations.get(index);
+	}
+	
+	public Grid getLastGeneration()
+	{
+		return worldGenerations.get(worldGenerations.size() - 1);
+	}
+	
 	public String getRulesAndColours()
 	{
 		return rulesAndColours;

@@ -330,14 +330,13 @@ public class ServerOverseer extends Overseer
 		numOfClients = size;
 	}
 		
-	public void simulate(Grid g, int gN)
+	public void simulate(int gN)
 	{
 		Log.information(TAG, "Waiting for clients to send connect...");
 		while (informationProcessor.getConnectedAmount() != clientNames.length) {}
 
 		Log.information(TAG, "Starting simulation...");
-		super.setGrid(g);
-		world.addGeneration(g);
+		super.setGrid(world.getLastGeneration());
 		numOfGenerations = gN;
 		
 		calculateSplits();
