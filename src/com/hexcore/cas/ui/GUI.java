@@ -61,6 +61,11 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener
 {
+	
+	//OUR WORLD///
+    public World world;
+	//////////////
+	
 	public static final String TAG = "GUI";
 	
     public Theme    theme;
@@ -195,6 +200,7 @@ public class GUI implements WindowEventListener
     public HexagonGrid			waterFlowGrid;
     public WaterFlow			waterFlow;
     public HexagonGrid3DWidget	waterGrid3DViewer;
+   
     
     public Server server;
     
@@ -875,16 +881,23 @@ public class GUI implements WindowEventListener
     	
     }
     
+
+    
     public void startSimulation(World world)
     {
     	Log.information(TAG, "Switched to simulation screen");
-    	
+    	this.world = world;
     	masterView.setIndex(2);
     }
    
     @Override
     public void update(float delta)
     {
+    	
+    	if (world != null)
+    	
+    	
+    	
         if (!themeName.equals(currentThemeName))
         {
             System.out.println("Changing theme to "+themeName);
