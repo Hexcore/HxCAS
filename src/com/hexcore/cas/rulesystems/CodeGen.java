@@ -40,9 +40,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		currentFrameworkIndex = 0;
 		propertyIndex = 1;
 
-		
-		
-		System.out.println("CAL Compiler: Creating class.");
 		name = ruleset;
 		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		
@@ -68,7 +65,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initExecute()
 	{
-		System.out.println("CAL Compiler: Creating default method.");
 		executeVisitor = cw.visitMethod(ACC_PUBLIC, "execute", "(Lcom/hexcore/cas/model/Cell;[Lcom/hexcore/cas/model/Cell;)V", null, null);
 		executeVisitor.visitCode();
 		executeBegin = new Label();
@@ -77,7 +73,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initFramework(int numTypes)
 	{
-		System.out.println("CAL Compiler: Creating framework.");
 		currentFrameworkIndex = 0;
 		frameworkIndices = new int[numTypes];
 		frameworkLabels = new Label[numTypes];
@@ -94,7 +89,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initType()
 	{
-		System.out.println("CAL Compiler: Creating Type.");
 		IndexOutOfBoundsException ex = new IndexOutOfBoundsException();
 		
 		try
@@ -222,13 +216,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void endType()
 	{
-		System.out.println("CAL Compiler: Finialising type.");
 		executeVisitor.visitJumpInsn(GOTO, defaultLabel);
 	}
 	
 	public static void endExecute()
 	{
-		System.out.println("CAL Compiler: Finialising default method.");
 		executeVisitor.visitLabel(defaultLabel);
 		executeVisitor.visitInsn(RETURN);
 		executeEnd = new Label();
@@ -244,7 +236,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void endClass()
 	{
-		System.out.println("CAL Compiler: Finialising class.");
 		//End class
 		cw.visitEnd();
 		
