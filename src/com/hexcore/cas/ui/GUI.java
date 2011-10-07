@@ -41,6 +41,7 @@ import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.Layout;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
+import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
 import com.hexcore.cas.ui.toolkit.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.RectangleGridWidget;
@@ -95,8 +96,8 @@ public class GUI implements WindowEventListener
         public TextWidget cellShapeLabel;
     
         
-        public TextBox    worldSizeXTextBox;
-        public TextBox    worldSizeYTextBox;
+        public NumberBox    worldSizeXNumberBox;
+        public NumberBox    worldSizeYNumberBox;
     
         public CheckBox wrapCheckBox;
         public DropDownBox cellShapeDropDownBox;
@@ -417,17 +418,17 @@ public class GUI implements WindowEventListener
         worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeLabel);
         
-        worldSizeXTextBox = new TextBox(35);
-        worldSizeXTextBox.setFlag(Widget.CENTER_VERTICAL);
-        worldSizeLayout.add(worldSizeXTextBox);
+        worldSizeXNumberBox = new NumberBox(35);
+        worldSizeXNumberBox.setFlag(Widget.CENTER_VERTICAL);
+        worldSizeLayout.add(worldSizeXNumberBox);
         
         worldSizeXLabel = new TextWidget("X", Size.LARGE);
         worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeXLabel);
         
-        worldSizeYTextBox = new TextBox(35);
-        worldSizeYTextBox.setFlag(Widget.CENTER_VERTICAL);
-        worldSizeLayout.add(worldSizeYTextBox);
+        worldSizeYNumberBox = new NumberBox(35);
+        worldSizeYNumberBox.setFlag(Widget.CENTER_VERTICAL);
+        worldSizeLayout.add(worldSizeYNumberBox);
         
         wrapCheckBox = new CheckBox(new Vector2i(100,50), "Wrappable");
         wrapCheckBox.setFlag(Widget.CENTER_VERTICAL);
@@ -939,7 +940,7 @@ public class GUI implements WindowEventListener
             {
                 
                 
-                if(( Integer.parseInt(worldSizeXTextBox.getText()) < 5) || ( Integer.parseInt(worldSizeYTextBox.getText()) < 5))
+                if(( worldSizeXNumberBox.getValue(5) < 5) || ( worldSizeYNumberBox.getValue(5) < 5))
                 {
                     window.showModalDialog(dialog);
                     return;
@@ -953,7 +954,7 @@ public class GUI implements WindowEventListener
                 {
                     // 3D Rectangle Grid
                     
-                    rectGrid = new RectangleGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+                    rectGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)));
                     rectGrid.getCell(2, 4).setValue(0, 1);
                     rectGrid.getCell(3, 4).setValue(0, 1);
                     rectGrid.getCell(4, 4).setValue(0, 1);
@@ -976,7 +977,7 @@ public class GUI implements WindowEventListener
                 {
                     // 3D Triangle Grid
                     
-                    triGrid = new TriangleGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+                    triGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
                     triGrid.getCell(7, 6).setValue(0, 1);
                     triGrid.getCell(7, 7).setValue(0, 1);
                     triGrid.getCell(7, 8).setValue(0, 1);
@@ -1001,7 +1002,7 @@ public class GUI implements WindowEventListener
                 }
                 else
                 {
-                    grid = new HexagonGrid(new Vector2i(Integer.parseInt(worldSizeXTextBox.getText()), Integer.parseInt(worldSizeYTextBox.getText())));
+                    grid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
                     grid.getCell(6, 5).setValue(0, 1);
                     grid.getCell(6, 6).setValue(0, 1);
                     grid.getCell(6, 7).setValue(0, 1);        
@@ -1116,10 +1117,7 @@ public class GUI implements WindowEventListener
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
                 
-                int x = Integer.parseInt(worldSizeXTextBox.getText());
-                int y = Integer.parseInt(worldSizeYTextBox.getText());
-                
-                serverEvent.size = new Vector2i(x, y);
+               serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
                 
                 
                 if (cellShapeDropDownBox.getSelectedText() == "Triangle")
