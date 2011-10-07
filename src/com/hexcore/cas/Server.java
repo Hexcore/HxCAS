@@ -28,18 +28,21 @@ public class Server implements LobbyListener
 	private Lobby lobby = null;
 	private ServerOverseer overseer = null;
 	private UIProtoApplication ui = null;
-		
+	
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
+	
+	private static Server instance = null;
 	
 	// Temp
 	private Set<String> names = new TreeSet<String>();
 	
 	public static void main(String[] args)
 	{
-		 new Server();
+		 instance = new Server();
+		 instance.start();
 	}
-		
-	public Server()
+	
+	public void start()
 	{
 		System.out.println("== Hexcore CAS Server - " + VERSION + " ==");
 		
@@ -56,7 +59,7 @@ public class Server implements LobbyListener
 		lobby.addListener(this);
 		
 		Log.information(TAG, "Starting user interface...");
-		ui = new UIProtoApplication(this);
+		ui = new UIProtoApplication(instance);
 		
 		try
 		{

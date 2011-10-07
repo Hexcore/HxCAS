@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.hexcore.cas.Server;
+import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
@@ -203,11 +204,14 @@ public class UIProtoApplication implements WindowEventListener
     public WaterFlow                waterFlow;
     public HexagonGrid3DWidget        waterGrid3DViewer;
     
-    public static Server s;
+    public Server server;
     
-    public UIProtoApplication(Server _s)
+    public UIProtoApplication(Server server)
     {
-        s=_s;
+        this.server = server;
+        
+        
+        
         //Compiler Integration
         
         
@@ -958,7 +962,7 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
     
     static public void main(String args[])
     {
-        new UIProtoApplication(s);
+        new UIProtoApplication(null);
     }
     
     @Override
@@ -1202,6 +1206,9 @@ removeViewportButton.setMargin(new Vector2i(5, 0));
             else if (event.target == simulateButton)
             {
                 masterView.setIndex(2);
+                
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SIMULATE);
+                server.sendEvent(serverEvent);
             }
             
             
