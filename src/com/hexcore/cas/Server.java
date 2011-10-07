@@ -13,7 +13,9 @@ import com.hexcore.cas.control.discovery.LobbyListener;
 import com.hexcore.cas.control.server.ServerOverseer;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
@@ -102,9 +104,29 @@ public class Server implements LobbyListener
 					{						
 						world = new World();
 						
-						Grid grid = new RectangleGrid(new Vector2i(200, 200));
-						for(int y = 0; y < 200; y++)
-							for(int x = 0; x < 200; x++)
+						Grid grid = null;
+						
+						switch (event.gridType)
+						{
+							case 'R':
+							case 'r':
+								grid = new RectangleGrid(event.size);
+								break;
+							case 'H':
+							case 'h':
+								grid = new HexagonGrid(event.size);
+								break;								
+							case 'T':
+							case 't':
+								grid = new TriangleGrid(event.size);
+								break;
+							default:
+								Log.error(TAG, "Unknown grid type: " + event.gridType);
+								break;
+						}
+						
+						for(int y = 0; y < event.size.y; y++)
+							for(int x = 0; x < event.size.x; x++)
 								grid.getCell(x, y).setValue(0, 1.0);
 						
 						world.addGeneration(grid);
