@@ -23,7 +23,7 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
-import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.toolkit.Button;
@@ -1157,14 +1157,15 @@ public class GUI implements WindowEventListener
                               }
                 
                 System.out.println("THE PATH:" + calFile.getAbsolutePath());
-        
-                HexcoreVM.loadRules(calFile.getAbsolutePath());
+                
+                CALCompiler compiler = new CALCompiler();
+                compiler.loadRules(calFile.getAbsolutePath());
                 
                 TextWidget text = new TextWidget("Compiler Report:");
                 outputLayout.add(text);
             
                 
-                ArrayList<String> parserResults  = Parser.getResult();
+                ArrayList<String> parserResults  = compiler.getResult();
                 
                 Iterator<String> iterator = parserResults.iterator();
                 outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);

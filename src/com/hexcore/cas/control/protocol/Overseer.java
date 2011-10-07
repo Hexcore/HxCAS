@@ -1,7 +1,7 @@
 package com.hexcore.cas.control.protocol;
 
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.rulesystems.HexcoreVM;
+import com.hexcore.cas.rulesystems.CALCompiler;
 
 public abstract class Overseer extends Thread
 {

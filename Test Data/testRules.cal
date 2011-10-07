@@ -1,36 +1,14 @@
 ruleset Flood
 {
+	typecount 1;
+	
 	property land;
 	property water;
+	
 
 	type Land : 0
 	{
-		if (self.water < 0)
-		{
-			var most = max(neighbours.water);
-			var least = min(neighbours.water);
-			
-			
-			if ((most < self.water) && (0 < 2))
-			{
-				most = max(neighbours.water);
-				self.water--;
-				most = self.land--;
-			}
-			else if (most == least)
-			{
-				self.water = most;
-			}
-			else
-			{
-				self.water = most - 1;
-			}
-		}
-	}
-	
-	type WaterSource : 1
-	{
-		self.water = 100;
+		//self.land = self.land + 1;
 	}
 }
 
@@ -65,3 +43,6 @@ colourset colours2
 		5 to 10 : rgb(0.3, 0.1, 0.2);
 	}
 }*/
+
+
+

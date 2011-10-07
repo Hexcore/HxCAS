@@ -2,9 +2,11 @@ package com.hexcore.cas.rulesystems;
 
 import library.*;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
+import com.hexcore.cas.rulesystems.PrimaryPair;
 
 import java.io.*;
 
@@ -25,40 +27,41 @@ public class Parser {
 	static final int ruleset_Sym = 6;
 	static final int lbrace_Sym = 7;
 	static final int rbrace_Sym = 8;
-	static final int colourset_Sym = 9;
-	static final int property_Sym = 10;
-	static final int semicolon_Sym = 11;
-	static final int to_Sym = 12;
-	static final int colon_Sym = 13;
-	static final int rgblparen_Sym = 14;
-	static final int comma_Sym = 15;
-	static final int rparen_Sym = 16;
-	static final int type_Sym = 17;
-	static final int equal_Sym = 18;
-	static final int lparen_Sym = 19;
-	static final int lbrack_Sym = 20;
-	static final int rbrack_Sym = 21;
-	static final int point_Sym = 22;
-	static final int if_Sym = 23;
-	static final int else_Sym = 24;
-	static final int var_Sym = 25;
-	static final int plus_Sym = 26;
-	static final int minus_Sym = 27;
-	static final int equalequal_Sym = 28;
-	static final int bangequal_Sym = 29;
-	static final int greater_Sym = 30;
-	static final int less_Sym = 31;
-	static final int greaterequal_Sym = 32;
-	static final int lessequal_Sym = 33;
-	static final int barbar_Sym = 34;
-	static final int star_Sym = 35;
-	static final int slash_Sym = 36;
-	static final int percent_Sym = 37;
-	static final int andand_Sym = 38;
-	static final int NOT_SYM = 39;
+	static final int typecount_Sym = 9;
+	static final int semicolon_Sym = 10;
+	static final int colourset_Sym = 11;
+	static final int property_Sym = 12;
+	static final int to_Sym = 13;
+	static final int colon_Sym = 14;
+	static final int rgblparen_Sym = 15;
+	static final int comma_Sym = 16;
+	static final int rparen_Sym = 17;
+	static final int type_Sym = 18;
+	static final int equal_Sym = 19;
+	static final int lparen_Sym = 20;
+	static final int lbrack_Sym = 21;
+	static final int rbrack_Sym = 22;
+	static final int point_Sym = 23;
+	static final int if_Sym = 24;
+	static final int else_Sym = 25;
+	static final int var_Sym = 26;
+	static final int plus_Sym = 27;
+	static final int minus_Sym = 28;
+	static final int equalequal_Sym = 29;
+	static final int bangequal_Sym = 30;
+	static final int greater_Sym = 31;
+	static final int less_Sym = 32;
+	static final int greaterequal_Sym = 33;
+	static final int lessequal_Sym = 34;
+	static final int barbar_Sym = 35;
+	static final int star_Sym = 36;
+	static final int slash_Sym = 37;
+	static final int percent_Sym = 38;
+	static final int andand_Sym = 39;
+	static final int NOT_SYM = 40;
 	// pragmas
 
-	static final int maxT = 39;
+	static final int maxT = 40;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -74,6 +77,12 @@ static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
 
 static SymbolTable table;
+static int typeCountExpected = 0;
+static int typeCountActual = 0;
+static boolean postOpQueued = false;
+static PostOpE postOpType;
+
+static TreeSet<Integer> typeIndices = new TreeSet<Integer>();
 
 static public int getErrorCount()
 {
@@ -104,6 +113,11 @@ static ArrayList<String> getErrorList()
 	}
 	
 	return results;
+}
+
+static byte[] getCode()
+{
+	return CodeGen.getCode();
 }
 
 static public void reset()
@@ -191,19 +205,33 @@ static public void reset()
 
 	static void CAL() {
 		table = new SymbolTable();
+		typeIndices.clear();
+		
 		RuleSet();
+		if(typeIndices.size() != typeCountExpected)
+		{
+			SemError("Mismatch between declared and actual type count");
+		}
+		CodeGen.endExecute();
+		CodeGen.endClass();
+		
 		if (la.kind == colourset_Sym) {
 			ColourSet();
 		}
 	}
 
 	static void RuleSet() {
+		String name = "";
 		table.pushScope();
 		table.prepare();
 		
 		Expect(ruleset_Sym);
-		Expect(identifier_Sym);
+		name  = Ident();
+		CodeGen.initClass(name);
+		CodeGen.initExecute();
+		
 		Expect(lbrace_Sym);
+		TypeCount();
 		Property();
 		while (la.kind == property_Sym) {
 			Property();
@@ -225,6 +253,30 @@ static public void reset()
 		Expect(rbrace_Sym);
 	}
 
+	static String Ident() {
+		String name;
+		name = "";
+		
+		Expect(identifier_Sym);
+		name = token.val;
+		
+		return name;
+	}
+
+	static void TypeCount() {
+		int value = 0;
+		Expect(typecount_Sym);
+		value  = IntConst();
+		if(value < 1)
+		{
+			SemError("At least one type of cell must be declared");
+		}
+		typeCountExpected = value;
+		CodeGen.initFramework(typeCountExpected);
+		
+		Expect(semicolon_Sym);
+	}
+
 	static void Property() {
 		String name = "";
 		Expect(property_Sym);
@@ -234,6 +286,7 @@ static public void reset()
 		entry.name = name;
 		entry.type = TableEntry.doubleType;
 		entry.kind = TableEntry.Property;
+		entry.offset = CodeGen.declareProperty();
 		table.insert(entry);
 		
 		Expect(semicolon_Sym);
@@ -241,18 +294,44 @@ static public void reset()
 
 	static void TypeSpec() {
 		int value = 0;
-		table.pushScope();
+		table.pushScope();  												
 		
 		Expect(type_Sym);
 		Expect(identifier_Sym);
 		Expect(colon_Sym);
 		value  = IntConst();
+		if(typeIndices.contains(new Integer(value)))
+		{
+			SemError("Duplicate type ID");
+		}
+		if(typeIndices.size() >= typeCountExpected)
+		{
+			SemError("Too many types");
+		}
+		typeIndices.add(new Integer(value));
+		CodeGen.initType();
+		
 		Expect(lbrace_Sym);
 		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
-		table.popScope();
+		table.popScope(); CodeGen.endType();
+	}
+
+	static int IntConst() {
+		int value;
+		Expect(number_Sym);
+		try
+		{
+			value = Integer.parseInt(token.val);
+		}
+		catch(NumberFormatException e)
+		{
+			value =  0;
+		}
+		
+		return value;
 	}
 
 	static void PropertySpec() {
@@ -266,14 +345,6 @@ static public void reset()
 		Expect(rbrace_Sym);
 	}
 
-	static String Ident() {
-		String name;
-		name = "";
-		Expect(identifier_Sym);
-		name = token.val;
-		return name;
-	}
-
 	static void RangeSet() {
 		int value1, value2;
 		value1  = IntConst();
@@ -282,13 +353,6 @@ static public void reset()
 		Expect(colon_Sym);
 		Colour();
 		Expect(semicolon_Sym);
-	}
-
-	static int IntConst() {
-		int value;
-		Expect(number_Sym);
-		try{value = Integer.parseInt(token.val);} catch(NumberFormatException e){value =  0;}
-		return value;
 	}
 
 	static void Colour() {
@@ -305,7 +369,15 @@ static public void reset()
 	static double DoubleConst() {
 		double value;
 		Expect(double_Sym);
-		try { value = Double.parseDouble(token.val); } catch(NumberFormatException e){value = 0;}
+		try
+		{
+			value = Double.parseDouble(token.val);
+		} catch(NumberFormatException e)
+		{
+			value = 0;
+		}
+		
+		
 		return value;
 	}
 
@@ -318,7 +390,7 @@ static public void reset()
 			IfStatement();
 		} else if (la.kind == var_Sym) {
 			VarDeclaration();
-		} else SynErr(40);
+		} else SynErr(41);
 	}
 
 	static void Block() {
@@ -338,9 +410,41 @@ static public void reset()
 		if (la.kind == equal_Sym) {
 			Get();
 			type  = Expression();
+			if(!(TableEntry.isArith(entry.type) && TableEntry.isArith(type)) && !(TableEntry.isBool(entry.type) && TableEntry.isBool(type)))
+			{
+				SemError("Incompatable Types");
+			}
+			else if(!(TableEntry.isArray(entry.type) && TableEntry.isArray(type)) && !(!TableEntry.isArray(entry.type) && !TableEntry.isArray(type)))
+			{
+				SemError("Cannot mix scalar and array types in assignment");
+			}
+			
+			if(entry.kind == TableEntry.Variable)
+			{
+				CodeGen.storeVariable(entry.offset);
+			}
+			else if(entry.kind == TableEntry.Property)
+			{
+				CodeGen.storeProperty(entry.offset);
+			}
+			
 		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
-			if(!TableEntry.isArith(entry.type)) SemError("Cannot perform a post operation on a boolan type.");
+			if(!TableEntry.isArith(entry.type))
+				SemError("Cannot perform a post operation on a boolan type.");
+				
+			if(entry.kind != TableEntry.Variable)
+			{
+				SemError("Can only perform post operation on a variable.");
+			}
+			else
+			{
+				if(T == PostOpE.INC)
+					CodeGen.performPostOp(entry.offset, 1);
+				else
+					CodeGen.performPostOp(entry.offset, -1);
+			}
+			
 		} else if (la.kind == lparen_Sym) {
 			Get();
 			typeA  = Arguments();
@@ -365,7 +469,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(41);
+		} else SynErr(42);
 		Expect(semicolon_Sym);
 	}
 
@@ -408,13 +512,13 @@ static public void reset()
 		
 		if (la.kind == lbrack_Sym) {
 			Get();
+			typeE  = Expression();
 			if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
 			if(!TableEntry.isArith(typeE))
 			{
 			SemError("Index must be arithmetic");
 			}
 			
-			typeE  = Expression();
 			Expect(rbrack_Sym);
 			if(!TableEntry.isArray(type))
 			{
@@ -435,7 +539,7 @@ static public void reset()
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
 			entryAA.kind = entryA.kind;
-			if(TableEntry.isArray(type))
+			if(TableEntry.isArray(entry.type))
 			{
 				entryAA.type = entryA.type + 1;
 			}
@@ -468,7 +572,9 @@ static public void reset()
 				type = TableEntry.noType;
 			}
 				
-			type = TableEntry.boolType;  												
+			type = TableEntry.boolType;
+			
+			CodeGen.performRelationalOp(op);										
 			
 		}
 		return type;
@@ -483,7 +589,7 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(42);
+		} else SynErr(43);
 		return op;
 	}
 
@@ -507,10 +613,14 @@ static public void reset()
 		name  = Ident();
 		TableEntry entry = new TableEntry();
 		entry.name = "__new__";
+		
 		if(table.find(name).type != TableEntry.noType)
 			SemError("Identifier \"" + name + "\" already declared.");
 		else
+		{
 			entry.name = name;
+			entry.offset = CodeGen.declareLocalVariable(name);
+		}
 		
 		if (la.kind == equal_Sym) {
 			Get();
@@ -520,6 +630,8 @@ static public void reset()
 				entry.kind = TableEntry.Variable;
 				entry.type = type;
 			}
+			
+			CodeGen.storeVariable(entry.offset);
 			
 		}
 		if(!entry.name.equals("__new__"))
@@ -545,6 +657,14 @@ static public void reset()
 		AddOpE op = AddOpE.UN;
 		type = type1;
 		
+		if(negative)
+		{
+			if(!TableEntry.isArith(type1))
+				SemError("Cannot negate a boolean type");
+			else
+				CodeGen.negate();
+		}
+		
 		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
 			op  = AddOp();
 			type2  = Term();
@@ -563,6 +683,8 @@ static public void reset()
 					else
 						type = TableEntry.doubleType;
 			}
+			
+			CodeGen.performAddOp(op);
 			
 		}
 		return type;
@@ -602,7 +724,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(43); break;
+		default: SynErr(44); break;
 		}
 		return op;
 	}
@@ -635,6 +757,8 @@ static public void reset()
 						type = TableEntry.doubleType;  														
 			}
 			
+			CodeGen.performMulOp(op);
+			
 		}
 		return type;
 	}
@@ -651,17 +775,36 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(44);
+		} else SynErr(45);
 		return op;
 	}
 
 	static int Factor() {
 		int type;
 		PostOpE T = PostOpE.UN;
-		type  = Primary();
+		PrimaryPair p = new PrimaryPair();
+		
+		p  = Primary();
+		type = p.type;
 		if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
 			if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type.");
+			if(p.kind != TableEntry.Variable)
+			{
+				SemError("Can only perform post operations on a variable.");
+			}
+			else
+			{
+			if(T == PostOpE.INC)
+			{
+			CodeGen.performPostOp(p.offset, 1);
+			}
+			else
+			{
+			CodeGen.performPostOp(p.offset, -1);
+			}
+			}
+			
 		}
 		return type;
 	}
@@ -681,20 +824,34 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(45);
+		} else SynErr(46);
 		return op;
 	}
 
-	static int Primary() {
-		int type;
-		type = TableEntry.noType;
+	static PrimaryPair Primary() {
+		PrimaryPair p;
+		p = new PrimaryPair();
+		p.type = TableEntry.noType;
+		
 		int typeA = TableEntry.noType;
+		int typeE = TableEntry.noType;
+		
 		ConstantRecord con;
 		TableEntry entry = null;
 		
 		if (la.kind == identifier_Sym) {
 			entry  = Designator();
-			type = entry.type;
+			p.type = entry.type;
+			p.kind = TableEntry.Variable;
+			p.offset = entry.offset;
+			
+			if(entry.kind == TableEntry.Variable)
+				CodeGen.derefVariable(entry.offset);
+			else if(entry.kind == TableEntry.Cell)
+				CodeGen.derefRef(entry.offset);
+			else if(entry.kind == TableEntry.Property)
+				CodeGen.derefProperty(entry.offset);						
+			
 			if (la.kind == lparen_Sym) {
 				Get();
 				typeA  = Arguments();
@@ -707,28 +864,35 @@ static public void reset()
 				{
 				if(!TableEntry.isArray(typeA))
 				{
-				SemError("Invalid argument. Argument must be an array");
+					SemError("Invalid argument. Argument must be an array");
 				}
 				}
 				else
 				{
 				if(TableEntry.isArray(typeA))
 				{
-				SemError("Invalid argument. Argument must be a scalar type");
+					SemError("Invalid argument. Argument must be a scalar type");
 				}
 				}
+				p.kind = TableEntry.Constant;
 				
 				Expect(rparen_Sym);
 			}
 		} else if (la.kind == number_Sym || la.kind == double_Sym) {
 			con  = Constant();
-			type = con.type;
+			p.type = con.type;
+			p.kind = TableEntry.Constant;
+			CodeGen.loadConstant((double)con.value);
+			
 		} else if (la.kind == lparen_Sym) {
 			Get();
-			type  = Expression();
+			typeE  = Expression();
+			p.type = typeE;
+			p.kind = TableEntry.Constant;
+			
 			Expect(rparen_Sym);
-		} else SynErr(46);
-		return type;
+		} else SynErr(47);
+		return p;
 	}
 
 	static ConstantRecord Constant() {
@@ -741,7 +905,7 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.intType;		
-		} else SynErr(47);
+		} else SynErr(48);
 		return con;
 	}
 
@@ -757,11 +921,11 @@ static public void reset()
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x}
 
 	};
 
@@ -888,45 +1052,46 @@ class Errors {
 			case 6: s = "\"ruleset\" expected"; break;
 			case 7: s = "\"{\" expected"; break;
 			case 8: s = "\"}\" expected"; break;
-			case 9: s = "\"colourset\" expected"; break;
-			case 10: s = "\"property\" expected"; break;
-			case 11: s = "\";\" expected"; break;
-			case 12: s = "\"to\" expected"; break;
-			case 13: s = "\":\" expected"; break;
-			case 14: s = "\"rgb(\" expected"; break;
-			case 15: s = "\",\" expected"; break;
-			case 16: s = "\")\" expected"; break;
-			case 17: s = "\"type\" expected"; break;
-			case 18: s = "\"=\" expected"; break;
-			case 19: s = "\"(\" expected"; break;
-			case 20: s = "\"[\" expected"; break;
-			case 21: s = "\"]\" expected"; break;
-			case 22: s = "\".\" expected"; break;
-			case 23: s = "\"if\" expected"; break;
-			case 24: s = "\"else\" expected"; break;
-			case 25: s = "\"var\" expected"; break;
-			case 26: s = "\"+\" expected"; break;
-			case 27: s = "\"-\" expected"; break;
-			case 28: s = "\"==\" expected"; break;
-			case 29: s = "\"!=\" expected"; break;
-			case 30: s = "\">\" expected"; break;
-			case 31: s = "\"<\" expected"; break;
-			case 32: s = "\">=\" expected"; break;
-			case 33: s = "\"<=\" expected"; break;
-			case 34: s = "\"||\" expected"; break;
-			case 35: s = "\"*\" expected"; break;
-			case 36: s = "\"/\" expected"; break;
-			case 37: s = "\"%\" expected"; break;
-			case 38: s = "\"&&\" expected"; break;
-			case 39: s = "??? expected"; break;
-			case 40: s = "invalid Statement"; break;
-			case 41: s = "invalid AssignCall"; break;
-			case 42: s = "invalid PostOp"; break;
-			case 43: s = "invalid RelOp"; break;
-			case 44: s = "invalid AddOp"; break;
-			case 45: s = "invalid MulOp"; break;
-			case 46: s = "invalid Primary"; break;
-			case 47: s = "invalid Constant"; break;
+			case 9: s = "\"typecount\" expected"; break;
+			case 10: s = "\";\" expected"; break;
+			case 11: s = "\"colourset\" expected"; break;
+			case 12: s = "\"property\" expected"; break;
+			case 13: s = "\"to\" expected"; break;
+			case 14: s = "\":\" expected"; break;
+			case 15: s = "\"rgb(\" expected"; break;
+			case 16: s = "\",\" expected"; break;
+			case 17: s = "\")\" expected"; break;
+			case 18: s = "\"type\" expected"; break;
+			case 19: s = "\"=\" expected"; break;
+			case 20: s = "\"(\" expected"; break;
+			case 21: s = "\"[\" expected"; break;
+			case 22: s = "\"]\" expected"; break;
+			case 23: s = "\".\" expected"; break;
+			case 24: s = "\"if\" expected"; break;
+			case 25: s = "\"else\" expected"; break;
+			case 26: s = "\"var\" expected"; break;
+			case 27: s = "\"+\" expected"; break;
+			case 28: s = "\"-\" expected"; break;
+			case 29: s = "\"==\" expected"; break;
+			case 30: s = "\"!=\" expected"; break;
+			case 31: s = "\">\" expected"; break;
+			case 32: s = "\"<\" expected"; break;
+			case 33: s = "\">=\" expected"; break;
+			case 34: s = "\"<=\" expected"; break;
+			case 35: s = "\"||\" expected"; break;
+			case 36: s = "\"*\" expected"; break;
+			case 37: s = "\"/\" expected"; break;
+			case 38: s = "\"%\" expected"; break;
+			case 39: s = "\"&&\" expected"; break;
+			case 40: s = "??? expected"; break;
+			case 41: s = "invalid Statement"; break;
+			case 42: s = "invalid AssignCall"; break;
+			case 43: s = "invalid PostOp"; break;
+			case 44: s = "invalid RelOp"; break;
+			case 45: s = "invalid AddOp"; break;
+			case 46: s = "invalid MulOp"; break;
+			case 47: s = "invalid Primary"; break;
+			case 48: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

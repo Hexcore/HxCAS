@@ -58,7 +58,15 @@ public class SymbolTable
 		selfEntry.type = TableEntry.cellType;
 		selfEntry.kind = TableEntry.Cell;
 		selfEntry.name = "self";
+		selfEntry.offset = 0;
 		insert(selfEntry);
+		
+		TableEntry typeEntry = new TableEntry();
+		typeEntry.type = TableEntry.intType;
+		typeEntry.kind = TableEntry.Property;
+		typeEntry.name = "type";
+		typeEntry.offset = 0;
+		insert(typeEntry);
 		
 		TableEntry maxEntry = new TableEntry();
 		maxEntry.type = TableEntry.doubleType;
@@ -100,6 +108,7 @@ public class SymbolTable
 		neighboursEntry.type = TableEntry.cellType + 1;
 		neighboursEntry.kind = TableEntry.Cell;
 		neighboursEntry.name = "neighbours";
+		neighboursEntry.offset = 1;
 		insert(neighboursEntry);
 	}
 	

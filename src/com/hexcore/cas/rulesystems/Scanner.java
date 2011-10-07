@@ -67,8 +67,8 @@ public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
-	static final int maxT = 39;
-	static final int noSym = 39;
+	static final int maxT = 40;
+	static final int noSym = 40;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
@@ -79,37 +79,38 @@ public class Scanner {
 	static final int ruleset_Sym = 6;
 	static final int lbrace_Sym = 7;
 	static final int rbrace_Sym = 8;
-	static final int colourset_Sym = 9;
-	static final int property_Sym = 10;
-	static final int semicolon_Sym = 11;
-	static final int to_Sym = 12;
-	static final int colon_Sym = 13;
-	static final int rgblparen_Sym = 14;
-	static final int comma_Sym = 15;
-	static final int rparen_Sym = 16;
-	static final int type_Sym = 17;
-	static final int equal_Sym = 18;
-	static final int lparen_Sym = 19;
-	static final int lbrack_Sym = 20;
-	static final int rbrack_Sym = 21;
-	static final int point_Sym = 22;
-	static final int if_Sym = 23;
-	static final int else_Sym = 24;
-	static final int var_Sym = 25;
-	static final int plus_Sym = 26;
-	static final int minus_Sym = 27;
-	static final int equalequal_Sym = 28;
-	static final int bangequal_Sym = 29;
-	static final int greater_Sym = 30;
-	static final int less_Sym = 31;
-	static final int greaterequal_Sym = 32;
-	static final int lessequal_Sym = 33;
-	static final int barbar_Sym = 34;
-	static final int star_Sym = 35;
-	static final int slash_Sym = 36;
-	static final int percent_Sym = 37;
-	static final int andand_Sym = 38;
-	static final int NOT_SYM = 39;
+	static final int typecount_Sym = 9;
+	static final int semicolon_Sym = 10;
+	static final int colourset_Sym = 11;
+	static final int property_Sym = 12;
+	static final int to_Sym = 13;
+	static final int colon_Sym = 14;
+	static final int rgblparen_Sym = 15;
+	static final int comma_Sym = 16;
+	static final int rparen_Sym = 17;
+	static final int type_Sym = 18;
+	static final int equal_Sym = 19;
+	static final int lparen_Sym = 20;
+	static final int lbrack_Sym = 21;
+	static final int rbrack_Sym = 22;
+	static final int point_Sym = 23;
+	static final int if_Sym = 24;
+	static final int else_Sym = 25;
+	static final int var_Sym = 26;
+	static final int plus_Sym = 27;
+	static final int minus_Sym = 28;
+	static final int equalequal_Sym = 29;
+	static final int bangequal_Sym = 30;
+	static final int greater_Sym = 31;
+	static final int less_Sym = 32;
+	static final int greaterequal_Sym = 33;
+	static final int lessequal_Sym = 34;
+	static final int barbar_Sym = 35;
+	static final int star_Sym = 36;
+	static final int slash_Sym = 37;
+	static final int percent_Sym = 38;
+	static final int andand_Sym = 39;
+	static final int NOT_SYM = 40;
 	// pragmas
 
 	static short[] start = {
@@ -208,6 +209,26 @@ public class Scanner {
 	static boolean Comment0() {
 		int level = 1, line0 = line, lineStart0 = lineStart;
 		NextCh();
+		if (ch == '/') {
+			NextCh();
+			for(;;) {
+				if (ch == 10) {
+					level--;
+					if (level == 0) { oldEols = line - line0; NextCh(); return true; }
+					NextCh();
+				} else if (ch == Buffer.EOF) return false;
+				else NextCh();
+			}
+		} else {
+			if (ch == EOL) { line--; lineStart = lineStart0; }
+			pos = pos - 2; Buffer.setPos(pos+1); NextCh();
+		}
+		return false;
+	}
+
+	static boolean Comment1() {
+		int level = 1, line0 = line, lineStart0 = lineStart;
+		NextCh();
 		if (ch == '*') {
 			NextCh();
 			for(;;) {
@@ -232,6 +253,7 @@ public class Scanner {
 	static void CheckLiteral() {
 		String lit = t.val;
 		if (lit.compareTo("ruleset") == 0) t.kind = ruleset_Sym;
+		else if (lit.compareTo("typecount") == 0) t.kind = typecount_Sym;
 		else if (lit.compareTo("colourset") == 0) t.kind = colourset_Sym;
 		else if (lit.compareTo("property") == 0) t.kind = property_Sym;
 		else if (lit.compareTo("to") == 0) t.kind = to_Sym;
@@ -244,7 +266,7 @@ public class Scanner {
 	/* AW Scan() renamed to NextToken() */
 	static Token NextToken() {
 		while (ignore.get(ch)) NextCh();
-		if (ch == '/' && Comment0()) return NextToken();
+		if (ch == '/' && Comment0() ||ch == '/' && Comment1()) return NextToken();
 		t = new Token();
 		t.pos = pos; t.col = pos - lineStart + 1; t.line = line;
 		int state = start[ch];

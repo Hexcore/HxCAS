@@ -1,1 +1,19 @@
+ruleset rules
+{
+	typecount 2;
+	
+	property p1;
+	
+
+	type t1 : 0
+	{
+	}
+
+	type t2 : 1
+	{
+	}
+	
+}
+
+
 
