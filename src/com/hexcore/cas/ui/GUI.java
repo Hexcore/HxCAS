@@ -1105,9 +1105,27 @@ public class GUI implements WindowEventListener
             else if (event.target == simulateButton)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
-                serverEvent.size = new Vector2i(200, 200);
-                serverEvent.gridType = 'R';
-                serverEvent.wrappable = true;
+                
+                int x = Integer.parseInt(worldSizeXTextBox.getText());
+                int y = Integer.parseInt(worldSizeYTextBox.getText());
+                
+                serverEvent.size = new Vector2i(x, y);
+                
+                
+                if (cellShapeDropDownBox.getSelectedText() == "Triangle")
+                	serverEvent.gridType = 'T';
+                else if (cellShapeDropDownBox.getSelectedText() == "Hexagon")
+                	serverEvent.gridType = 'H';
+                else
+                	serverEvent.gridType = 'R';
+                
+                
+                if (wrapCheckBox.isChecked())
+                	serverEvent.wrappable = true;
+                else
+                	serverEvent.wrappable = false;
+                
+                
                 server.sendEvent(serverEvent);
             	
                 masterView.setIndex(2);
