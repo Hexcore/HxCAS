@@ -7,7 +7,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.RectangleGrid;
 
-public class RectangleGrid3DWidget extends Grid3DWidget<RectangleGrid>
+public class RectangleGrid3DWidget extends Grid3DWidget
 {
 	public RectangleGrid3DWidget(Vector2i size, RectangleGrid grid, int cellSize)
 	{

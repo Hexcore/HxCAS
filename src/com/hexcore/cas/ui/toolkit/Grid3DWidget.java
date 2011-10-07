@@ -18,7 +18,7 @@ import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
 import com.jogamp.common.nio.Buffers;
 
-public class Grid3DWidget<T extends Grid> extends GridWidget<T>
+public class Grid3DWidget extends GridWidget
 {
 	public class Slice
 	{
@@ -62,12 +62,12 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	protected FloatBuffer	lineBufferData = null;
 	protected boolean		dirty = true;
 	
-	public Grid3DWidget(Vector2i size, T grid, int cellSize)
+	public Grid3DWidget(Vector2i size, Grid grid, int cellSize)
 	{
 		this(new Vector2i(), size, grid, cellSize);
 	}
 
-	public Grid3DWidget(Vector2i position, Vector2i size, T grid, int cellSize)
+	public Grid3DWidget(Vector2i position, Vector2i size, Grid grid, int cellSize)
 	{
 		super(position, size, grid, cellSize);
 		cameraPosition = new Vector3f(grid.getWidth() * cellSize / 2.0f, grid.getHeight() * cellSize / 2.0f + 100, 200);
@@ -138,7 +138,7 @@ public class Grid3DWidget<T extends Grid> extends GridWidget<T>
 	public boolean canGetFocus() {return true;}
 
 	@Override
-	public void setGrid(T grid)
+	public void setGrid(Grid grid)
 	{
 		this.grid = grid;
 		dirty = true;

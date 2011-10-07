@@ -7,7 +7,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.HexagonGrid;
 
-public class HexagonGrid3DWidget extends Grid3DWidget<HexagonGrid>
+public class HexagonGrid3DWidget extends Grid3DWidget
 {
 	public HexagonGrid3DWidget(Vector2i size, HexagonGrid grid, int cellSize)
 	{

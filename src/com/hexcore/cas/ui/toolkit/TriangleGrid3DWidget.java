@@ -7,7 +7,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
 
-public class TriangleGrid3DWidget extends Grid3DWidget<TriangleGrid>
+public class TriangleGrid3DWidget extends Grid3DWidget
 {
 	public TriangleGrid3DWidget(Vector2i size, TriangleGrid grid, int cellSize)
 	{

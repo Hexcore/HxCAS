@@ -26,7 +26,6 @@ import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.HexcoreVM;
 import com.hexcore.cas.rulesystems.Parser;
 import com.hexcore.cas.test.GameOfLife;
-import com.hexcore.cas.test.WaterFlow;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -36,7 +35,6 @@ import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
-import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
@@ -72,104 +70,94 @@ public class GUI implements WindowEventListener
 	public static final String TAG = "GUI";
 	
     public Theme    theme;
-    public Window    window;
-    public View masterView;
+    public Window	window;
+    public View		masterView;
     public TabbedView tabbedWorldView;
     
-    public LinearLayout    mainMenuLayout;
-    public LinearLayout worldLayout;
-    
-   
-       
-    public Button backButton;
+    public LinearLayout	mainMenuLayout;
+    public LinearLayout	worldLayout;
+
+    public Button 	backButton;
     
     // WORLD PROPERTIES TAB
     public Container propertiesContainer;
-       	
-        public LinearLayout masterPropertiesLayout;
-        public Container widgetPreviewContainer;
-        public Container widget3DPreviewContainer;
-        public LinearLayout widgetPreviewLayout;
-        public LinearLayout cellShapeLayout;
-        
-        public GameOfLife            rectGameOfLife;
-        public GameOfLife            triGameOfLife;
-        public GameOfLife            hexGameOfLife;
-        public LinearLayout propertiesLayout;
-        public LinearLayout worldSizeLayout;
+   	
+    public LinearLayout	masterPropertiesLayout;
+    public Container 	widgetPreviewContainer;
+    public Container 	widget3DPreviewContainer;
+    public LinearLayout widgetPreviewLayout;
+    public LinearLayout cellShapeLayout;
     
-        public TextWidget worldSizeLabel;
-        public TextWidget worldSizeXLabel;
-        public TextWidget cellShapeLabel;
+    public GameOfLife	rectGameOfLife;
+    public GameOfLife	triGameOfLife;
+    public GameOfLife	hexGameOfLife;
+    public LinearLayout propertiesLayout;
+    public LinearLayout worldSizeLayout;
+
+    public TextWidget	worldSizeLabel;
+    public TextWidget	worldSizeXLabel;
+    public TextWidget	cellShapeLabel;
+
     
-        
-        public NumberBox    worldSizeXNumberBox;
-        public NumberBox    worldSizeYNumberBox;
+    public NumberBox    worldSizeXNumberBox;
+    public NumberBox    worldSizeYNumberBox;
+
+    public CheckBox		wrapCheckBox;
+    public DropDownBox	cellShapeDropDownBox;
     
-        public CheckBox wrapCheckBox;
-        public DropDownBox cellShapeDropDownBox;
-        
-        public Button submitButton;
-        
-        public RectangleGrid3DWidget    rectGrid3DViewer;
-        public HexagonGrid3DWidget        hexGrid3DViewer;
-        public TriangleGrid3DWidget        triGrid3DViewer;
-        
-        public HexagonGridWidget gridViewer;
-        public RectangleGridWidget rectGridViewer;
-        public TriangleGridWidget triGridViewer;
-        
+    public Button		submitButton;
     
-        
+    public RectangleGrid3DWidget	rectGrid3DViewer;
+    public HexagonGrid3DWidget		hexGrid3DViewer;
+    public TriangleGrid3DWidget		triGrid3DViewer;
+    
+    public HexagonGridWidget	gridViewer;
+    public RectangleGridWidget	rectGridViewer;
+    public TriangleGridWidget	triGridViewer;
+
     // RULES TAB    
     public Container rulesContainer;
-        public LinearLayout rulesLayout;
-        
-        public Button clearRulesButton;
-        public Button submitRulesButton;
-        public Button openCALFileButton;
-        public Button saveCALFileButton;
-        
-        public TextArea CALTextArea;
-        public ScrollableContainer outputContainer;
-        public LinearLayout outputLayout;
-        
-        public File calFile;
-        public FileSelectResult selectedFile;
-        
-        public Dialog dialogCAL; 
-        public LinearLayout dialogCALLayout;
-        public    TextWidget dialogCALTitle;
-        public TextWidget    dialogCALMessage;
-        public Button dialogCALOKButton;
-        
+    public LinearLayout rulesLayout;
     
+    public Button clearRulesButton;
+    public Button submitRulesButton;
+    public Button openCALFileButton;
+    public Button saveCALFileButton;
+    
+    public TextArea CALTextArea;
+    public ScrollableContainer outputContainer;
+    public LinearLayout outputLayout;
+    
+    public File calFile;
+    public FileSelectResult selectedFile;
+    
+    public Dialog		dialogCAL; 
+    public LinearLayout dialogCALLayout;
+    public TextWidget	dialogCALTitle;
+    public TextWidget	dialogCALMessage;
+    public Button		dialogCALOKButton;
+ 
     // DISTRIBUTION TAB
-    public Container distributionContainer;
-    
-    
+    public Container 	distributionContainer;
+
     // INITIAL STATE TAB
-    public Container worldPreviewContainer;
-    
-    
-    
-    
-    
+    public Container 	worldPreviewContainer;
+
     // MAIN MENU
     public LinearLayout    headerLayout;
     public LinearLayout    mainLayout;
     public LinearLayout    buttonBarLayout;
     public LinearLayout    innerLayout;
     
-    public View            mainView;
+    public View		mainView;
     
-    public Button        createWorldButton;
-    public Button        loadWorldButton;
-    public Button        optionsButton;
-    public Button        helpButton;
-    public Button        quitButton;
+    public Button	createWorldButton;
+    public Button	loadWorldButton;
+    public Button	optionsButton;
+    public Button	helpButton;
+    public Button	quitButton;
         
-    public Panel        mainPanel;
+    public Panel	mainPanel;
     
    
     public ColourRuleSet        colourRules;
@@ -183,27 +171,25 @@ public class GUI implements WindowEventListener
     public TextWidget    dialogMessage;
     public Button        dialogOKButton;
     
-    
-    public HexagonGrid grid;
-    public RectangleGrid rectGrid;
-    public TriangleGrid triGrid;
-    
-    
-    
-    
+    public HexagonGrid		grid;
+    public RectangleGrid	rectGrid;
+    public TriangleGrid		triGrid;
+
     // SIMULATION SCREEN
-    public Container 	simulationContainer;
-    public Button 		simulateButton;
+    private Container 	simulationContainer;
+    private Button 		simulateButton;
     
-    public Button 		playButton;
-    public Button 		pauseButton;
-    public Button 		resetButton;
+    private Button 	playButton;
+    private Button 	pauseButton;
+    private Button 	resetButton;
     
-    public Grid				currentGrid;
-    public Container 		simulationWindowContainer;
-    public Grid3DWidget		simulationGridViewer;
+    private SliderWidget 	generationSlider;
     
-    public Server server;
+    private Grid			currentGrid;
+    private Container 		simulationWindowContainer;
+    private Grid3DWidget	simulationGridViewer;
+    
+    private Server 			server;
     
     public GUI(Server server)
     {
@@ -345,36 +331,27 @@ public class GUI implements WindowEventListener
         LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(100, 30), LinearLayout.Direction.HORIZONTAL);
         worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
         worldLayout.add(worldHeaderLayout);
-        
-           
-        
-   
-        worldLayout.add(tabbedWorldView);
-        
-        
-        propertiesContainer = new Container(new Vector2i(100, 100));    
-        propertiesContainer.setFlag(Widget.FILL);
-        tabbedWorldView.add(propertiesContainer, "World Properties");
-        
-        masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        masterPropertiesLayout.setFlag(Widget.FILL);
-        propertiesContainer.setContents(masterPropertiesLayout);
-        
-    
-        
-       LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-       instructionsLayout.setHeight(35);
-       instructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-       instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-       masterPropertiesLayout.add(instructionsLayout);
-       
-       TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
-       instructionsLayout.add(propertiesInstructions);
-       instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
-        
-       
-       
-             
+
+		worldLayout.add(tabbedWorldView);
+		
+		propertiesContainer = new Container(new Vector2i(100, 100));    
+		propertiesContainer.setFlag(Widget.FILL);
+		tabbedWorldView.add(propertiesContainer, "World Properties");
+		
+		masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		masterPropertiesLayout.setFlag(Widget.FILL);
+		propertiesContainer.setContents(masterPropertiesLayout);
+
+		LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		instructionsLayout.setHeight(35);
+		instructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+		masterPropertiesLayout.add(instructionsLayout);
+		   
+		TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
+		instructionsLayout.add(propertiesInstructions);
+		instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
+	  
 	    gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
 	    gridViewer.setColourRuleSet(colourRules);
 	
@@ -486,18 +463,11 @@ public class GUI implements WindowEventListener
             simulateButton.setWidth(165);
             simulateButton.setHeight(35);
             buttonHeaderLayout.add(simulateButton);
-            
-        
-        
-        
-        
+
         rulesContainer = new Container(new Vector2i(100, 100));
         tabbedWorldView.add(rulesContainer, "CAL Rules");
         rulesContainer.setFlag(Widget.FILL);
-        
-        
-        
-        
+
         LinearLayout masterRulesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
@@ -664,14 +634,14 @@ public class GUI implements WindowEventListener
         
         LinearLayout sliderLayout = new LinearLayout(new Vector2i(40, 55), LinearLayout.Direction.HORIZONTAL);
         sliderLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-        sliderLayout.setFlag(2);
+        sliderLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         masterSimulationLayout.add(sliderLayout);
         
-        SliderWidget slider = new SliderWidget(100);
-        slider.setMargin(new Vector2i(5, 5));
-        slider.setFlag(2);
-        slider.setShowValue(true);
-        sliderLayout.add(slider);
+        generationSlider = new SliderWidget(100);
+        generationSlider.setMargin(new Vector2i(5, 5));
+        generationSlider.setFlag(Widget.FILL_HORIZONTAL);
+        generationSlider.setShowValue(true);
+        sliderLayout.add(generationSlider);
         
         LinearLayout simulationControlsLayout = new LinearLayout(new Vector2i(100, 150), LinearLayout.Direction.HORIZONTAL);
         simulationControlsLayout.setFlag(Widget.FILL_HORIZONTAL);
@@ -683,11 +653,11 @@ public class GUI implements WindowEventListener
         simulationControlsLayout.add(detailsLayout);
         
         LinearLayout innerDetailsLayout = new LinearLayout(new Vector2i(160, 25), LinearLayout.Direction.HORIZONTAL);
-        innerDetailsLayout.setFlag(8);
+        innerDetailsLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP_VERTICAL);
         detailsLayout.add(innerDetailsLayout);
         
         LinearLayout innerDetailsLayout2 = new LinearLayout(new Vector2i(205, 40), LinearLayout.Direction.VERTICAL);
-       // innerDetailsLayout2.setFlag(8);
+        innerDetailsLayout2.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP_VERTICAL);
         detailsLayout.add(innerDetailsLayout2);
         
         TextWidget iterationsText = new TextWidget("Iteration: 255");
@@ -701,7 +671,7 @@ public class GUI implements WindowEventListener
         
         
         ImageWidget detailsImage = new ImageWidget(this.window.getTheme().getImage("headers", "details_header.png"));
-        detailsImage.setFlag(8);
+        detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerDetailsLayout.add(detailsImage);
         
         LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 150), LinearLayout.Direction.VERTICAL);
@@ -709,15 +679,15 @@ public class GUI implements WindowEventListener
         simulationControlsLayout.add(playbackLayout);
         
         LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 25), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout.setFlag(8);
+        innerPlaybackLayout.setFlag(Widget.CENTER_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout);
         
         LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(205, 40), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout2.setFlag(8);
+        innerPlaybackLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout2);
         
         LinearLayout innerPlaybackLayout3 = new LinearLayout(new Vector2i(225, 35), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout3.setFlag(8);
+        innerPlaybackLayout3.setFlag(Widget.CENTER_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout3);
         
         
@@ -738,12 +708,12 @@ public class GUI implements WindowEventListener
         innerPlaybackLayout2.add(stepForwardButton);
         TextWidget playbackSpeedHeader = new TextWidget("Playback Speed:");
         innerPlaybackLayout3.add(playbackSpeedHeader);
-        SliderWidget playbackSpeedSlider = new SliderWidget(100);
-        playbackSpeedSlider.setFlag(12);
+        SliderWidget playbackSpeedSlider = new SliderWidget(1);
+        playbackSpeedSlider.setFlag(Widget.CENTER);
         playbackSpeedSlider.setShowValue(true);
         innerPlaybackLayout3.add(playbackSpeedSlider);
         ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
-        playbackImage.setFlag(8);
+        playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerPlaybackLayout.add(playbackImage);
         
         
@@ -752,15 +722,15 @@ public class GUI implements WindowEventListener
         cameraLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(cameraLayout);
         LinearLayout innerCameraLayout = new LinearLayout(new Vector2i(190, 25), LinearLayout.Direction.HORIZONTAL);
-        innerCameraLayout.setFlag(8);
+        innerCameraLayout.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout);
         
         LinearLayout innerCameraLayout2 = new LinearLayout(new Vector2i(245, 40), LinearLayout.Direction.HORIZONTAL);
-        innerCameraLayout2.setFlag(8);
+        innerCameraLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout2);
         
         LinearLayout innerCameraLayout3 = new LinearLayout(new Vector2i(160, 40), LinearLayout.Direction.HORIZONTAL);
-        innerCameraLayout3.setFlag(8);
+        innerCameraLayout3.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout3);
         
         Button zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
@@ -802,7 +772,7 @@ public class GUI implements WindowEventListener
         
         
         ImageWidget cameraImage = new ImageWidget(window.getTheme().getImage("headers", "camera_header.png"));
-        cameraImage.setFlag(8);
+        cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerCameraLayout.add(cameraImage);
         
         
@@ -815,11 +785,11 @@ public class GUI implements WindowEventListener
         simulationControlsLayout.add(viewSettingsLayout);
         
         LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(148, 25), LinearLayout.Direction.HORIZONTAL);
-        innerViewSettingsLayout.setFlag(8);
+        innerViewSettingsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout);
         
         LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(218, 40), LinearLayout.Direction.HORIZONTAL);
-        innerViewSettingsLayout2.setFlag(8);
+        innerViewSettingsLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout2);
         
         Button toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
@@ -843,11 +813,11 @@ public class GUI implements WindowEventListener
         innerViewSettingsLayout2.add(removeViewportButton);
         
         ImageWidget viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
-        cameraImage.setFlag(8);
+        cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerViewSettingsLayout.add(viewSettingsHeader);
         
         Button toggleShowButton = new Button(new Vector2i(10, 15), "");
-        toggleShowButton.setFlag(2);
+        toggleShowButton.setFlag(Widget.FILL_HORIZONTAL);
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
         
@@ -871,6 +841,10 @@ public class GUI implements WindowEventListener
     	
     	masterView.setIndex(2);
     	Log.information(TAG, "Switched to simulation screen");
+    	
+    	generationSlider.setMaximum(world.getNumGenerations());
+    	generationSlider.setMinimum(0.0f);
+    	generationSlider.setValue(world.getNumGenerations());
     }
    
     @Override
@@ -879,30 +853,37 @@ public class GUI implements WindowEventListener
     	if (world != null)
     	{
     		Grid grid = world.getLastGeneration();
-
+    		
+    		if ((currentGrid == null) || (currentGrid.getType() != grid.getType()))
+    		{
+    			switch (grid.getType())
+    			{
+    				case RECTANGLE:
+    					simulationGridViewer = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+    					break;
+    				case HEXAGON:
+    					simulationGridViewer = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+    					break;
+    				case TRIANGLE:
+    					simulationGridViewer = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+    					break;
+    			}
+    			
+    			simulationGridViewer.addSlice(0, 10.0f);
+    			simulationGridViewer.setFlag(Widget.FILL);
+    			simulationWindowContainer.setContents(simulationGridViewer);
+    		}
+    		
     		if (currentGrid != grid)
     		{
     			currentGrid = grid;
-
-	    		if (grid != null)
-	    		{
-	    			switch (grid.getType())
-	    			{
-	    				case RECTANGLE:
-	    					simulationGridViewer = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-	    					break;
-	    				case HEXAGON:
-	    					simulationGridViewer = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-	    					break;
-	    				case TRIANGLE:
-	    					simulationGridViewer = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-	    					break;
-	    			}
-	    			
-	    			simulationGridViewer.addSlice(0, 10.0f);
-	    			simulationGridViewer.setFlag(Widget.FILL);
-	    			simulationWindowContainer.setContents(simulationGridViewer);
-	    		}
+    			
+    			simulationGridViewer.setGrid(currentGrid);
+    			
+	    		generationSlider.setMaximum(world.getNumGenerations());
+	    		
+	    		if (generationSlider.getValue() == generationSlider.getMaximum())
+	    			generationSlider.setValue(world.getNumGenerations());
     		}
     	}
     	

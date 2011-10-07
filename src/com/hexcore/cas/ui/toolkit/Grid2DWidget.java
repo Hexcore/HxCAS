@@ -3,19 +3,19 @@ package com.hexcore.cas.ui.toolkit;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 
-public class Grid2DWidget<T extends Grid> extends GridWidget<T>
+public class Grid2DWidget extends GridWidget
 {
 	protected int	colourProperty = 0; //< The property that is used to determine the colour to use
 	protected float	zoom = 1.0f;
 	
 	protected Colour cellBorderColour = Colour.WHITE;
 	
-	public Grid2DWidget(Vector2i size, T grid, int cellSize)
+	public Grid2DWidget(Vector2i size, Grid grid, int cellSize)
 	{
 		super(size, grid, cellSize);
 	}
 
-	public Grid2DWidget(Vector2i position, Vector2i size, T grid, int cellSize)
+	public Grid2DWidget(Vector2i position, Vector2i size, Grid grid, int cellSize)
 	{
 		super(position, size, grid, cellSize);
 	}	

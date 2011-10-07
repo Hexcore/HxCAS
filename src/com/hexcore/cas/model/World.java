@@ -2,19 +2,21 @@ package com.hexcore.cas.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.hexcore.cas.math.Vector2i;
 
 public class World
 {
-	private ArrayList<Grid> worldGenerations = null;
+	private List<Grid> worldGenerations = null;
 	private Grid[] world = null;
 	private String worldFileName = null;
 	private String rulesAndColours = null;
 	
 	public World()
 	{
-		worldGenerations = new ArrayList<Grid>();
+		worldGenerations = Collections.synchronizedList(new ArrayList<Grid>());
 	}
 	
 	public void addGeneration(Grid gen)
