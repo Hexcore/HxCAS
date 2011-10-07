@@ -55,6 +55,11 @@ public class HexcoreVM
 		//System.out.print("Parsed correctly");
 	}
 	
+	public byte[] getCode()
+	{
+		return null;
+	}
+	
 	public void run(Cell cell, Cell[] neighbours)
 	{
 		PC = 0;

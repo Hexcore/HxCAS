@@ -1,8 +1,10 @@
 import library.*;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
+import com.hexcore.cas.rulesystems.PrimaryPair;
 
 COMPILER CAL $NC
 
@@ -12,6 +14,12 @@ static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
 
 static SymbolTable table;
+static int typeCountExpected = 0;
+static int typeCountActual = 0;
+static boolean postOpQueued = false;
+static PostOpE postOpType;
+
+static TreeSet<Integer> typeIndices = new TreeSet<Integer>();
 
 static public int getErrorCount()
 {
@@ -56,6 +64,7 @@ static public void reset()
 CHARACTERS
   digit      = "0123456789" .
   letter     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
+  lf = CHR(10) .
 
 TOKENS
   number	= digit { digit } .
@@ -66,29 +75,59 @@ TOKENS
   identifier = letter { letter | digit } .
   
 COMMENTS FROM "/*" TO "*/"
+COMMENTS FROM "//" TO lf
 
 IGNORE CHR(0) .. CHR(31)
 
 
 PRODUCTIONS
-	CAL										(. table = new SymbolTable(); .)
+	/***** File Root *****/
+	CAL										(. 	
+												table = new SymbolTable();
+												typeIndices.clear();
+											.)				
   	=
-  	RuleSet
+  	RuleSet									(. 	
+  												if(typeIndices.size() != typeCountExpected)
+  												{
+  													SemError("Mismatch between declared and actual type count");
+  												}
+  												CodeGen.endExecute();
+  												CodeGen.endClass();
+  											.)						
   	[ColourSet]
   	.
   	
   	
-
+	/***** RuleSet *****/
   	RuleSet									(.
+  												String name = "";
   												table.pushScope();
   												table.prepare();
   											.)
   	=
-  	"ruleset" identifier
+  	"ruleset" Ident< out name >				(. 	CodeGen.initClass(name);
+  												CodeGen.initExecute();
+  											.)
   	"{"
+  	TypeCount
   	Property {Property}
   	TypeSpec {TypeSpec}
   	"}"
+  	.
+  	
+  	
+  	TypeCount								(. int value = 0; .)
+  	=
+  	"typecount" IntConst< out value >		(.
+  												if(value < 1)
+  												{
+  													SemError("At least one type of cell must be declared");
+  												}
+  												typeCountExpected = value;
+  												CodeGen.initFramework(typeCountExpected);
+  											.)
+  	";"
   	.
   	
   	ColourSet
@@ -100,7 +139,7 @@ PRODUCTIONS
   	.
   	
   	
-  	
+  	/********** Cell Property **********/
   	Property								(. String name = ""; .)
   	=
   	"property" Ident< out name >			(.
@@ -109,10 +148,12 @@ PRODUCTIONS
   												entry.name = name;
   												entry.type = TableEntry.doubleType;
   												entry.kind = TableEntry.Property;
+  												entry.offset = CodeGen.declareProperty();
   												table.insert(entry);
   											.)  
   	";"
   	.
+  	/***********************************/
   	
   
   	PropertySpec
@@ -146,14 +187,25 @@ PRODUCTIONS
   	
   	TypeSpec								(.
   												int value = 0;
-  												table.pushScope();
+  												table.pushScope();  												
   											.)
   	=
   	"type" identifier ":"
-  	IntConst< out value >
+  	IntConst< out value >					(.
+  												if(typeIndices.contains(new Integer(value)))
+  												{
+  													SemError("Duplicate type ID");
+  												}
+  												if(typeIndices.size() >= typeCountExpected)
+  												{
+  													SemError("Too many types");
+  												}
+  												typeIndices.add(new Integer(value));
+  												CodeGen.initType();
+  											.)
   	"{"
   		{Statement}
-  	"}"										(. table.popScope(); .)
+  	"}"										(. table.popScope(); CodeGen.endType(); .)
   	.
   	
   	
@@ -166,7 +218,7 @@ PRODUCTIONS
   	.
   	
   	
-  	/***** STATEMENT *****/
+  	/********** STATEMENT **********/
   	Statement
   	=
   	 Block
@@ -174,15 +226,49 @@ PRODUCTIONS
   	 | IfStatement
   	 | VarDeclaration 
   	.
+  	/*******************************/
   	
   	
-  	
+  	/********** Assignment or function call *********/
   	AssignCall									(. TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;.)
   	=
   	Designator< out entry >						(. PostOpE T = PostOpE.UN; .)
   	(
-  		"=" Expression< out type >
-  		| PostOp< out T >						(. if(!TableEntry.isArith(entry.type)) SemError("Cannot perform a post operation on a boolan type."); .)
+  		"=" Expression< out type >				(. 	
+  													if(!(TableEntry.isArith(entry.type) && TableEntry.isArith(type)) && !(TableEntry.isBool(entry.type) && TableEntry.isBool(type)))
+  													{
+  														SemError("Incompatable Types");
+  													}
+  													else if(!(TableEntry.isArray(entry.type) && TableEntry.isArray(type)) && !(!TableEntry.isArray(entry.type) && !TableEntry.isArray(type)))
+  													{
+  														SemError("Cannot mix scalar and array types in assignment");
+  													}
+  													
+  													if(entry.kind == TableEntry.Variable)
+  													{
+  														CodeGen.storeVariable(entry.offset);
+  													}
+  													else if(entry.kind == TableEntry.Property)
+  													{
+  														CodeGen.storeProperty(entry.offset);
+  													}
+  												.)
+  		| PostOp< out T >						(. 
+  													if(!TableEntry.isArith(entry.type))
+  														SemError("Cannot perform a post operation on a boolan type.");
+  														
+  													if(entry.kind != TableEntry.Variable)
+  													{
+  														SemError("Can only perform post operation on a variable.");
+  													}
+  													else
+  													{
+  														if(T == PostOpE.INC)
+  															CodeGen.performPostOp(entry.offset, 1);
+  														else
+  															CodeGen.performPostOp(entry.offset, -1);
+  													}
+  												.)
   		| "(" Arguments< out typeA >			(.	if(!TableEntry.isFunction(entry.kind))
   												{
   													SemError("Arguments can only be given to a function.");
@@ -208,7 +294,7 @@ PRODUCTIONS
   	)
   	";"
   	.
-  	
+  	/*************************************************/
   	
   	
   	Designator<. out TableEntry entry .>		(.
@@ -228,13 +314,15 @@ PRODUCTIONS
   												.)
   													 
   	[
-  		"["										(. if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
+  		"["												
+  			Expression< out typeE >				(. if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
   													if(!TableEntry.isArith(typeE))
   													{
   														SemError("Index must be arithmetic");
   													}
-  												.)		
-  			Expression< out typeE >				
+  												.)
+  												
+  												
   		"]"										(.
   													if(!TableEntry.isArray(type))
   													{
@@ -254,7 +342,7 @@ PRODUCTIONS
   														TableEntry entryAA = new TableEntry();
   														entryAA.name = entryA.name;
   														entryAA.kind = entryA.kind;
-  														if(TableEntry.isArray(type))
+  														if(TableEntry.isArray(entry.type))
   														{
   															entryAA.type = entryA.type + 1;
   														}
@@ -301,7 +389,7 @@ PRODUCTIONS
 	.
   	
   	
-  	
+  	/********** Expression **********/
   	Expression<. out int type .>			(. 	int type1, type2;
   												type = TableEntry.noType;
   											.)
@@ -319,13 +407,17 @@ PRODUCTIONS
   													type = TableEntry.noType;
   												}
   													
-  												type = TableEntry.boolType;  												
+  												type = TableEntry.boolType;
+  												
+  												CodeGen.performRelationalOp(op);										
   											.)
   	]
   	.
+  	/********************************/
   	
   	
   	
+  	/********** Add-Based Expression **********/
   	AddExp<. out int type .>				(.
   												int type1, type2;
   												type = TableEntry.noType;
@@ -337,6 +429,14 @@ PRODUCTIONS
   	Term< out type1 >						(.
   												AddOpE op = AddOpE.UN;
   												type = type1;
+  												
+  												if(negative)
+  												{
+	  												if(!TableEntry.isArith(type1))
+	  													SemError("Cannot negate a boolean type");
+	  												else
+	  													CodeGen.negate();
+  												}
   											.)
   	{
   	AddOp< out op > 
@@ -356,12 +456,15 @@ PRODUCTIONS
   														else
   															type = TableEntry.doubleType;
   												}
+  												
+  												CodeGen.performAddOp(op);
   											.)
   	}
   	.
+  	/******************************************/
   	
   	
-  	
+  	/********** Terms **********/
   	Term<. out int type .>					(.
   												int type1, type2;
   												type = TableEntry.noType; 
@@ -389,32 +492,75 @@ PRODUCTIONS
   														else
   															type = TableEntry.doubleType;  														
   												}
+  												
+  												CodeGen.performMulOp(op);
   											.)
   	}
   	.
+  	/**********************************/
   	
   	
-  	Factor<. out int type .>				(. PostOpE T = PostOpE.UN; .)
+  	
+  	/********** Factors **********/
+  	Factor<. out int type .>				(.
+  												PostOpE T = PostOpE.UN;
+  												PrimaryPair p = new PrimaryPair();
+  											.)
   	=
-  	Primary< out type >
+  	Primary< out p >						(. type = p.type; .)
   	[
-  	PostOp< out T >							(. if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type."); .)
+  	PostOp< out T >							(.
+  												if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type.");
+  												if(p.kind != TableEntry.Variable)
+  												{
+  													SemError("Can only perform post operations on a variable.");
+  												}
+												else
+												{
+													if(T == PostOpE.INC)
+													{
+														CodeGen.performPostOp(p.offset, 1);
+													}
+													else
+													{
+														CodeGen.performPostOp(p.offset, -1);
+													}
+												}
+  											.)
   	]
   	.
+  	/*****************************/
   	
   	
   	
-  	Primary<. out int type .>				(.
-  												type = TableEntry.noType;
+  	/********** PRIMARY ELEMENT **********/
+  	Primary<. out PrimaryPair p .>			(.
+  												p = new PrimaryPair();
+  												p.type = TableEntry.noType;
+  												
   												int typeA = TableEntry.noType;
+  												int typeE = TableEntry.noType;
+  												
   												ConstantRecord con;
   												TableEntry entry = null;
   											.)
   	=
-  	Designator< out entry >					(.	type = entry.type; .)
+  	Designator< out entry >					(.
+  												p.type = entry.type;
+  												p.kind = TableEntry.Variable;
+  												p.offset = entry.offset;
+  												
+  												if(entry.kind == TableEntry.Variable)
+  													CodeGen.derefVariable(entry.offset);
+  												else if(entry.kind == TableEntry.Cell)
+  													CodeGen.derefRef(entry.offset);
+  												else if(entry.kind == TableEntry.Property)
+  													CodeGen.derefProperty(entry.offset);						
+  											.)
   	[
   	"("		
-  		Arguments< out typeA >				(.	if(!TableEntry.isFunction(entry.kind))
+  		Arguments< out typeA >				(.	
+   												if(!TableEntry.isFunction(entry.kind))
   												{
   													SemError("Arguments can only be given to a function.");
   												}
@@ -433,18 +579,29 @@ PRODUCTIONS
   														SemError("Invalid argument. Argument must be a scalar type");
   													}
   												}
+  												p.kind = TableEntry.Constant;
   											.)
   	")"
-  	]
+  	]										
   	|
-  	Constant< out con >						(. type = con.type;  .)
+  	Constant< out con >						(.
+  												p.type = con.type;
+  												p.kind = TableEntry.Constant;
+  												CodeGen.loadConstant((double)con.value);
+  											.)
   	|
-  	"(" Expression< out type >				
-  	")"
+  	"(" Expression< out typeE >				(.
+  												p.type = typeE;
+  												p.kind = TableEntry.Constant;
+  											.)
+  	")"										
   	.
+  	/*************************************/
   	
   	
   	
+  	
+  	/********** Contant **********/
   	Constant<. out ConstantRecord con .>	(. 	
   												con = new ConstantRecord();
   											.)
@@ -452,10 +609,13 @@ PRODUCTIONS
   	DoubleConst< out con.value >			(.	con.type = TableEntry.doubleType;	.)
 	| IntConst< out con.value >				(.	con.type = TableEntry.intType;		.)
   	.
+  	/*****************************/
   	
   	
   	
-  	Arguments<. out int type .>								(. type = TableEntry.noType; .)
+  	
+  	/********** ARGUMENTS **********/
+  	Arguments<. out int type .>				(. type = TableEntry.noType; .)
   	=
   	[
   		Expression< out type >
@@ -466,9 +626,12 @@ PRODUCTIONS
   		}*/
   	]
   	.
+  	/*******************************/
   	
   	
   	
+  	
+  	/********** Operators **********/
   	RelOp<. out RelOpE op .>				(. op = RelOpE.UN;	.)
   	=
   	"=="									(. op = RelOpE.EQ;	.)
@@ -506,18 +669,26 @@ PRODUCTIONS
   	| 
   	postDec									(. op = PostOpE.DEC;	.)
   	.
+  	/*******************************/
   	
   	
   	
+  	
+  	
+  	/********** Single Variable **********/
   	OneVar									(. int type = TableEntry.noType; String name = ""; .)
   	=
   	Ident< out name >						(.
   												TableEntry entry = new TableEntry();
   												entry.name = "__new__";
+  												
   												if(table.find(name).type != TableEntry.noType) 
   													SemError("Identifier \"" + name + "\" already declared.");
   												else
+  												{
   													entry.name = name;
+  													entry.offset = CodeGen.declareLocalVariable(name);
+  												}
   											.)
   	[
   	"=" Expression< out type >				(.
@@ -526,6 +697,8 @@ PRODUCTIONS
   													entry.kind = TableEntry.Variable;
   													entry.type = type;
   												}
+  												
+  												CodeGen.storeVariable(entry.offset);
   											.)
   											
   	]										(.
@@ -533,25 +706,57 @@ PRODUCTIONS
   													table.insert(entry);
   											.)
   	.
+  	/*************************************/
   	
   	
   	
+  	
+  	/********** Double Constant **********/
   	DoubleConst<. out double value .>		
   	=
-	double									(. try { value = Double.parseDouble(token.val); } catch(NumberFormatException e){value = 0;} .)
+	double									(.
+												try
+												{
+													value = Double.parseDouble(token.val);
+												} catch(NumberFormatException e)
+												{
+													value = 0;
+												}
+												
+											.)
   	.
+  	/*************************************/
   	
+  	
+  	
+  	/********** Integer Constant **********/
   	IntConst<. out int value .>
   	=
-  	number									(. try{value = Integer.parseInt(token.val);} catch(NumberFormatException e){value =  0;} .)
+  	number									(.
+  												try
+  												{
+  													value = Integer.parseInt(token.val);
+  												}
+  												catch(NumberFormatException e)
+  												{
+  													value =  0;
+  												} 
+  											.)
   	.
-  	
-  
-  	Ident<. out String name .>				(. name = ""; .)
+  	/**************************************/
+	
+	
+	
+	/********** Identifier **********/
+  	Ident<. out String name .>				(.
+  												name = "";
+  											.)
   	=
-  	identifier								(. name = token.val; .)
+  	identifier								(.
+  												name = token.val;
+  											.)
   	.
-  
+	/********************************/
   	
 
 END CAL.

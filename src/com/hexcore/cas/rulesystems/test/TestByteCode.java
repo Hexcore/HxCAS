@@ -2,15 +2,14 @@ package com.hexcore.cas.rulesystems.test;
 
 import java.io.File;
 
-import junit.framework.TestCase;
-
 import com.hexcore.cas.rulesystems.HexcoreVM;
 import com.hexcore.cas.rulesystems.Parser;
+import com.hexcore.cas.rulesystems.RuleLoader;
 
-public class TestParser extends TestCase
+import junit.framework.TestCase;
+
+public class TestByteCode extends TestCase
 {
-
-	
 	public void testPreconditions()
 	{
 		File in = new File("Test Data/testRules.cal");
@@ -18,13 +17,12 @@ public class TestParser extends TestCase
 	}
 
 	
-	public void testParsing()
+	public void testPropertyAssignment()
 	{
 		HexcoreVM.loadRules("Test Data/testRules.cal");
+		RuleLoader rl = new RuleLoader();
 		
-		assertTrue(Parser.getErrorCount() == 0);
+		//rl.loadRule(b);
+	
 	}
-
-	
-	
 }

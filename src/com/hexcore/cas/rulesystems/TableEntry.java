@@ -18,6 +18,7 @@ public class TableEntry
 	public int 				type;
 	public int 				kind;				
 	public int 				value;				//Constant value
+	public int 				offset;
 	public String			name;
 	
 	public TableEntry 		nextEntry;
@@ -31,7 +32,7 @@ public class TableEntry
 	
 	public static boolean isArith(int type)
 	{
-		if(type == 0 || type == 2)
+		if(type <= 3)
 			return true;
 		else
 			return false;
@@ -39,7 +40,7 @@ public class TableEntry
 	
 	public static boolean isBool(int type)
 	{
-		if(type == 6)
+		if(type == 6 || type == 7)
 			return true;
 		else
 			return false;
