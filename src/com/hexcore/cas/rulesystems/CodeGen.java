@@ -24,7 +24,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static Label executeBegin;
 	private static Label executeEnd;
 	private static MethodVisitor executeVisitor;
-	private static int varIndex = 3;
+	private static int varIndex = 4;
 	private static int propertyIndex = 1;
 	
 	private static Label[] frameworkLabels;
@@ -65,7 +65,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initExecute()
 	{
-		executeVisitor = cw.visitMethod(ACC_PUBLIC, "execute", "(Lcom/hexcore/cas/model/Cell;[Lcom/hexcore/cas/model/Cell;)V", null, null);
+		executeVisitor = cw.visitMethod(ACC_PUBLIC, "run", "(Lcom/hexcore/cas/model/Cell;[Lcom/hexcore/cas/model/Cell;)V", null, null);
 		executeVisitor.visitCode();
 		executeBegin = new Label();
 		executeVisitor.visitLabel(executeBegin);
@@ -114,7 +114,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	public static int declareLocalVariable(String name)
 	{
 		//executeVisitor.visitLocalVariable(name, "D", null, executeBegin, executeEnd, varIndex);
-		return varIndex++;
+		return varIndex+=2;
 	}
 	
 	public static int declareProperty()
@@ -135,11 +135,15 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void storeProperty(int index)
 	{
+		//Store result in temp variable in preparation for function call.
+		executeVisitor.visitVarInsn(DSTORE, 3);
 		executeVisitor.visitVarInsn(ALOAD, 1);
-		executeVisitor.visitInsn(SWAP);
 		executeVisitor.visitLdcInsn(new Integer(index));
-		executeVisitor.visitInsn(SWAP);
-		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "Cell", "setValue", "(ID)V");
+		
+		//Restore value
+		executeVisitor.visitVarInsn(DLOAD, 3);
+		
+		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "setValue", "(ID)V");
 	}
 	
 	
@@ -228,6 +232,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitLocalVariable("this", "Lcom/hexcore/cas/rulesystems/"+name+"Rule;", null, executeBegin, executeEnd, 0);
 		executeVisitor.visitLocalVariable("self", "Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 1);
 		executeVisitor.visitLocalVariable("neighbours", "[Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 2);
+		executeVisitor.visitLocalVariable("temp", "D", null, executeBegin, executeEnd, 3);
 		executeVisitor.visitMaxs(0, 0);
 		executeVisitor.visitEnd();
 	}

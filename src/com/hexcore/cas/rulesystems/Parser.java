@@ -539,6 +539,7 @@ static public void reset()
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
 			entryAA.kind = entryA.kind;
+			entryAA.offset = entryA.offset;
 			if(TableEntry.isArray(entry.type))
 			{
 				entryAA.type = entryA.type + 1;
