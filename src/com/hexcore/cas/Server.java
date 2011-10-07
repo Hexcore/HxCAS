@@ -87,7 +87,7 @@ public class Server implements LobbyListener
 		{
 			try
 			{
-				ServerEvent event = eventQueue.poll(1, TimeUnit.SECONDS);
+				ServerEvent event = eventQueue.poll(3, TimeUnit.SECONDS);
 				if (event == null) continue;
 				
 				switch (event.type) 
@@ -180,6 +180,10 @@ public class Server implements LobbyListener
 						
 						overseer.disconnect();
 						overseer = null;
+						
+						client.client.stop();
+						client = null;
+						
 						break;
 					}
 					
@@ -203,7 +207,7 @@ public class Server implements LobbyListener
 		
 		try
 		{
-			Thread.sleep(1000);
+			Thread.sleep(300);
 		}
 		catch (InterruptedException e)
 		{
@@ -271,7 +275,7 @@ public class Server implements LobbyListener
 	
 	class ClientThread extends Thread
 	{
-		Client client;
+		public Client client;
 		
 		@Override
 		public void run()

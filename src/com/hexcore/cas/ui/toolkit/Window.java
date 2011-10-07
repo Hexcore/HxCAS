@@ -136,8 +136,15 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void exit() 
 	{
+		System.out.println(eventListeners.size());
+		
+      	for (WindowEventListener listener : eventListeners)
+      		if (!listener.close())
+      			return;
+		
 		frame.dispose();
-		System.exit(0);
+      			
+      	System.exit(0);
 	}
 	
 	public Vector2i getDefaultMargin()
@@ -447,7 +454,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 	private class WindowListener extends WindowAdapter
 	{
-		public void windowClosing(WindowEvent we) {exit();}
+		public void windowClosing(WindowEvent we) { exit(); }
 	}
 	
 	////
