@@ -8,7 +8,7 @@ ruleset Flood
 
 	type Land : 0
 	{
-		//self.land = self.land + 1;
+		self.land = self.land + 1;
 	}
 }
 

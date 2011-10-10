@@ -1,0 +1,14 @@
+ruleset set1
+{
+	typecount 1;
+	
+	property land;
+	property water;
+	
+
+	type Land : 0
+	{
+		self.land = self.land + 1;
+		self.water = self.land + 1;
+	}
+}

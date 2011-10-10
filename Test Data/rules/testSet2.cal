@@ -1,0 +1,18 @@
+ruleset set2
+{
+	typecount 1;
+	
+	property land;
+	property water;
+	
+
+	type Land : 0
+	{
+		var num;
+		
+		num = self.land;
+		num++;
+		self.land = num;
+		self.water = num + 10;
+	}
+}

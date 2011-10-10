@@ -539,6 +539,7 @@ static public void reset()
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
 			entryAA.kind = entryA.kind;
+			entryAA.offset = entryA.offset;
 			if(TableEntry.isArray(entry.type))
 			{
 				entryAA.type = entryA.type + 1;
@@ -618,6 +619,7 @@ static public void reset()
 			SemError("Identifier \"" + name + "\" already declared.");
 		else
 		{
+			entry.kind = TableEntry.Variable;
 			entry.name = name;
 			entry.offset = CodeGen.declareLocalVariable(name);
 		}
