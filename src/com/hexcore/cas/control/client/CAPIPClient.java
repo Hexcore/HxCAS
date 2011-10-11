@@ -341,12 +341,6 @@ public class CAPIPClient extends Thread
 	@Override
 	public void start()
 	{
-		setup();
-		super.start();
-	}
-	
-	public void setup()
-	{
 		Log.information(TAG, "Waiting for server...");
 		
 		try
@@ -360,6 +354,8 @@ public class CAPIPClient extends Thread
 			Log.error(TAG, "Error starting protocol");
 			e.printStackTrace();
 		}
+		
+		super.start();
 	}
 		
 	@Override

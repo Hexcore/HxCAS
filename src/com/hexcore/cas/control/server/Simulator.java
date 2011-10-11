@@ -11,7 +11,6 @@ import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
@@ -285,11 +284,12 @@ public class Simulator extends Overseer
 	public void rebuildGrid()
 	{
 		Log.debug(TAG, "Merging work done by clients");
-		for(int i = 0; i < clientWorkables.length; i++)
+		for(int i = 0; i < clientWork.length; i++)
 		{
+			int	id = clientWork[i].getID();
 			Grid g = clientWork[i].getGrid();
 			Recti aw = clientWork[i].getWorkableArea();
-			Recti uw = clientWorkables[i];
+			Recti uw = clientWorkables[id];
 			for(int y = uw.getPosition().y, cy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, cy++)
 				for(int x = uw.getPosition().x, cx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, cx++)
 					grid.setCell(x, y, g.getCell(cx, cy));
