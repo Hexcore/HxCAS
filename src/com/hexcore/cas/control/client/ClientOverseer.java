@@ -9,6 +9,7 @@ import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.utilities.Log;
 
 public class ClientOverseer extends Overseer
@@ -17,6 +18,8 @@ public class ClientOverseer extends Overseer
 	
 	private LinkedBlockingQueue<Work> workQueue;
 	private LinkedBlockingQueue<Work> completedQueue;
+	
+	private Rule	rule;
 	
 	private CAPIPClient informationProcessor;
 	
@@ -30,6 +33,8 @@ public class ClientOverseer extends Overseer
 		
 		workQueue = new LinkedBlockingQueue<Work>();
 		completedQueue = new LinkedBlockingQueue<Work>();
+		
+		rule = new GameOfLifeRule();
 		
 		try
 		{
@@ -146,19 +151,29 @@ public class ClientOverseer extends Overseer
 			e.printStackTrace();
 		}
 	}
-	
-	private void calculateCell(Cell cell, Cell[] neighbours)
+
+	class GameOfLifeRule implements Rule
 	{
-		// Game of Life implementation for testing
-		int sum = 0;
-		
-		for (Cell neighbour : neighbours)
-			sum += neighbour.getValue(0);
-		
-		if(sum < 2 || sum > 3)
-			cell.setValue(0, 0);
-		else if(sum == 3)
-			cell.setValue(0, 1);			
+		@Override
+		public void run(Cell cell, Cell[] neighbours)
+		{
+			// Game of Life implementation for testing
+			int sum = 0;
+			
+			for (Cell neighbour : neighbours)
+				sum += neighbour.getValue(0);
+			
+			if (cell.getValue(0) == 1)
+			{
+				if (sum < 2 || sum > 3) 
+					cell.setValue(0, 0);
+			}
+			else
+			{
+				if (sum == 3)
+					cell.setValue(0, 1);
+			}
+		}
 	}
 	
 	class Work
@@ -191,21 +206,22 @@ public class ClientOverseer extends Overseer
 				try
 				{
 					Work work = workQueue.poll(3, TimeUnit.SECONDS);
-				
 					if (work == null) continue;
-					
-					Log.information(TAG, "Doing work");
+										
+					Grid	newGrid = work.grid.clone();
 					
 					Vector2i end = work.workArea.position.add(work.workArea.size);
 					
 					for (int y = work.workArea.position.y; y < end.y; y++)
 						for (int x = work.workArea.position.x; x < end.x; x++)
 						{
-							Cell cell = work.grid.getCell(x, y);
+							Cell cell = new Cell(work.grid.getCell(x, y));
 							Cell[] neighbours = work.grid.getNeighbours(new Vector2i(x, y));
-							calculateCell(cell, neighbours);
+							rule.run(cell, neighbours);
+							newGrid.setCell(new Vector2i(x, y), cell);
 						}
 					
+					work.grid = newGrid;
 					completedQueue.put(work);				
 				}
 				catch (InterruptedException e)

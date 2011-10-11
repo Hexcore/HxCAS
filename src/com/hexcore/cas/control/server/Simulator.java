@@ -16,7 +16,7 @@ import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
-public class ServerOverseer extends Overseer
+public class Simulator extends Overseer
 {
 	private static final String TAG = "Server";
 	
@@ -38,7 +38,7 @@ public class ServerOverseer extends Overseer
 	private CAPIPServer informationProcessor = null;
 	private int clientPort;
 	
-	public ServerOverseer(World world, int clientPort)
+	public Simulator(World world, int clientPort)
 	{
 		this.clientPort = clientPort;
 		this.world = world;
@@ -267,9 +267,20 @@ public class ServerOverseer extends Overseer
 	}
 	
 	public void play()
-	{
-		if (paused.getAndSet(false)) startGeneration();
+	{		
+		numOfGenerations = -1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
 	}
+	
+	public void step()
+	{		
+		numOfGenerations = 1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
+	}	
 	
 	public void rebuildGrid()
 	{
@@ -302,12 +313,6 @@ public class ServerOverseer extends Overseer
 		numOfGenerations = 0;
 		world.reset();
 		informationProcessor.setGeneration(currGen);
-	}
-	
-	public void send()
-	{
-		informationProcessor.setClientWork(clientWork, currGen);
-		informationProcessor.sendInitialGrids();
 	}
 
 	//Called from CAPIPServer to pass up work done
@@ -363,6 +368,8 @@ public class ServerOverseer extends Overseer
 	
 	public void startGeneration()
 	{
+		isFinishedGenerations.set(false);
+		
 		currGen++;
 		GenerationThread generationThread = new GenerationThread();
 		generationThread.start();		
@@ -386,14 +393,18 @@ public class ServerOverseer extends Overseer
 		@Override
 		public void run()
 		{			
-			if(numOfGenerations == 0 || (numOfGenerations != -1 && currGen > numOfGenerations))
+			if (numOfGenerations == 0)
 			{
 				System.out.println("Finished!");
 				isFinishedGenerations.set(true);
+				paused.set(true);
 				return;
 			}
 			
-			send();
+			if (numOfGenerations > 0) numOfGenerations--;
+			
+			informationProcessor.setClientWork(clientWork, currGen);
+			informationProcessor.sendInitialGrids();
 		}
 	}
 }

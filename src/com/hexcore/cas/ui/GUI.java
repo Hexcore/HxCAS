@@ -19,6 +19,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.GridType;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
@@ -149,9 +150,6 @@ public class GUI implements WindowEventListener
     public LinearLayout widgetPreviewLayout;
     public LinearLayout cellShapeLayout;
     
-    public GameOfLife	rectGameOfLife;
-    public GameOfLife	triGameOfLife;
-    public GameOfLife	hexGameOfLife;
     public LinearLayout propertiesLayout;
     public LinearLayout worldSizeLayout;
 
@@ -168,13 +166,8 @@ public class GUI implements WindowEventListener
     
     public Button		submitButton;
     
-    public RectangleGrid3DWidget	rectGrid3DViewer;
-    public HexagonGrid3DWidget		hexGrid3DViewer;
-    public TriangleGrid3DWidget		triGrid3DViewer;
-    
-    public HexagonGridWidget	gridViewer;
-    public RectangleGridWidget	rectGridViewer;
-    public TriangleGridWidget	triGridViewer;
+    public Grid3DWidget	grid3DViewer = null;
+    public GridWidget	gridViewer = null;
 
     // RULES TAB    
     public Container rulesContainer;
@@ -232,10 +225,6 @@ public class GUI implements WindowEventListener
     public TextWidget    dialogMessage;
     public Button        dialogOKButton;
     
-    public HexagonGrid		grid;
-    public RectangleGrid	rectGrid;
-    public TriangleGrid		triGrid;
-
     // SIMULATION SCREEN
     private Button 		simulateButton;
     
@@ -245,45 +234,24 @@ public class GUI implements WindowEventListener
     private Button 	playButton;
     private Button 	pauseButton;
     private Button 	resetButton;
+    private Button	stepForwardButton;
     
     private Button addViewportButton;
     
+    private TextWidget	iterationsText;
+    private TextWidget	timeText;
+    private TextWidget	numCellsText;
+    
     private DiscreteSliderWidget 	generationSlider;
-    
-    
-    
+        
     private int		currentGeneration = 0;
     private Grid	currentGrid;
     
-    private Server 			server;
+    private Server 	server;
     
     public GUI(Server server)
     {
-        this.server = server;        
-        
-        grid = new HexagonGrid(new Vector2i(12, 12));
-        grid.getCell(6, 5).setValue(0, 1);
-        grid.getCell(6, 6).setValue(0, 1);
-        grid.getCell(6, 7).setValue(0, 1);        
-        hexGameOfLife = new GameOfLife(grid);
-        
-        rectGrid = new RectangleGrid(new Vector2i(12, 12));
-        rectGrid.getCell(2, 4).setValue(0, 1);
-        rectGrid.getCell(3, 4).setValue(0, 1);
-        rectGrid.getCell(4, 4).setValue(0, 1);
-        rectGrid.getCell(4, 3).setValue(0, 1);
-        rectGrid.getCell(3, 2).setValue(0, 1);
-        rectGameOfLife = new GameOfLife(rectGrid);
-        
-        triGrid = new TriangleGrid(new Vector2i(12, 12));
-        triGrid.getCell(7, 6).setValue(0, 1);
-        triGrid.getCell(7, 7).setValue(0, 1);
-        triGrid.getCell(7, 8).setValue(0, 1);
-        triGrid.getCell(6, 6).setValue(0, 1);
-        triGrid.getCell(6, 7).setValue(0, 1);
-        triGrid.getCell(6, 8).setValue(0, 1);
-        triGameOfLife = new GameOfLife(triGrid);
-        
+        this.server = server;               
         
         colourRules = new ColourRuleSet(3);
         ColourRule    colourRule;
@@ -403,28 +371,7 @@ public class GUI implements WindowEventListener
 		TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
 		instructionsLayout.add(propertiesInstructions);
 		instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
-	  
-	    gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
-	    gridViewer.setColourRuleSet(colourRules);
-	
-	    rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
-	    rectGridViewer.setColourRuleSet(colourRules);
-	    
-	    triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
-	    triGridViewer.setColourRuleSet(colourRules);
-    
-        rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
-        rectGrid3DViewer.setFlag(Widget.FILL);
-        rectGrid3DViewer.addSlice(0, 16.0f);
-        
-        triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
-        triGrid3DViewer.setFlag(Widget.FILL);
-        triGrid3DViewer.addSlice(0, 16.0f);
-        
-        hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
-        hexGrid3DViewer.setFlag(Widget.FILL);
-        hexGrid3DViewer.addSlice(0, 16.0f);
-                              
+	                                
         propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertiesLayout.setFlag(Widget.FILL);
         propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
@@ -441,6 +388,7 @@ public class GUI implements WindowEventListener
         worldSizeLayout.add(worldSizeLabel);
         
         worldSizeXNumberBox = new NumberBox(35);
+        worldSizeXNumberBox.setValue(10);
         worldSizeXNumberBox.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeXNumberBox);
         
@@ -449,6 +397,7 @@ public class GUI implements WindowEventListener
         worldSizeLayout.add(worldSizeXLabel);
         
         worldSizeYNumberBox = new NumberBox(35);
+        worldSizeYNumberBox.setValue(10);
         worldSizeYNumberBox.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeYNumberBox);
         
@@ -492,8 +441,8 @@ public class GUI implements WindowEventListener
         widget3DPreviewContainer.setFlag(Widget.FILL);
         widgetPreviewLayout.add(widget3DPreviewContainer);
         
-        widget3DPreviewContainer.setContents(rectGrid3DViewer);
-        widgetPreviewContainer.setContents(rectGridViewer);
+        widget3DPreviewContainer.setContents(grid3DViewer);
+        widgetPreviewContainer.setContents(gridViewer);
         
         LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(525, 50), LinearLayout.Direction.HORIZONTAL);
         buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
@@ -668,6 +617,7 @@ public class GUI implements WindowEventListener
         
         masterSimulationLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         masterSimulationLayout.setFlag(Widget.FILL);
+        masterSimulationLayout.setMargin(new Vector2i(0, 0));
         masterView.add(masterSimulationLayout);
         masterSimulationLayout.add(worldHeaderLayout);
         
@@ -703,7 +653,7 @@ public class GUI implements WindowEventListener
         sliderLayout.add(generationSlider);
         
         LinearLayout simulationControlsLayout = new LinearLayout(new Vector2i(100, 150), LinearLayout.Direction.HORIZONTAL);
-        simulationControlsLayout.setFlag(Widget.FILL_HORIZONTAL);
+        simulationControlsLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         
         masterSimulationLayout.add(simulationControlsLayout);
         
@@ -719,15 +669,14 @@ public class GUI implements WindowEventListener
         innerDetailsLayout2.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP_VERTICAL);
         detailsLayout.add(innerDetailsLayout2);
         
-        TextWidget iterationsText = new TextWidget("Iteration: 255");
+        iterationsText = new TextWidget("Generations: 0");
         innerDetailsLayout2.add(iterationsText);
         
-        TextWidget timeText = new TextWidget("Elapsed: 00:00:02");
+        timeText = new TextWidget("Elapsed: ");
         innerDetailsLayout2.add(timeText);
         
-        TextWidget numCellsText = new TextWidget("Num. Cells: 355 000");
+        numCellsText = new TextWidget("Num. Cells: ");
         innerDetailsLayout2.add(numCellsText);
-        
         
         ImageWidget detailsImage = new ImageWidget(this.window.getTheme().getImage("headers", "details_header.png"));
         detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
@@ -762,7 +711,7 @@ public class GUI implements WindowEventListener
         resetButton = new Button(this.window.getTheme().getImage("icons", "reset_icon.png"));
         resetButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(resetButton);
-        Button stepForwardButton = new Button(window.getTheme().getImage("icons", "step_forward_icon.png"));
+        stepForwardButton = new Button(window.getTheme().getImage("icons", "step_forward_icon.png"));
         stepForwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepForwardButton);
         TextWidget playbackSpeedHeader = new TextWidget("Playback Speed:");
@@ -906,29 +855,27 @@ public class GUI implements WindowEventListener
     	generationSlider.setValue(world.getNumGenerations());
     	
     	currentGeneration = 0;
-    	updateViewports(true);
+    	updateSimulationScreen(true);
     }
     
-    public void updateViewports(boolean force)
+    public void updateSimulationScreen(boolean force)
     {
     	if (world != null)
     	{		
     		// Update slider
-			double origMaximum = generationSlider.getMaximum();
+    		int	generations = world.getNumGenerations() - 1;
+			int origMaximum = generationSlider.getMaximum();
 			
 			generationSlider.setMaximum(world.getNumGenerations() - 1);
 					
     		if (generationSlider.getValue() >= origMaximum)
     			generationSlider.setValue(world.getNumGenerations() - 1);
+    		
+    		// Update tex
+    		iterationsText.setCaption("Generations: " + generations);
 
     		// Update viewports
-    		int		generation = generationSlider.getValue();
-    		
-    		if (generation < 0)
-    		{
-    			System.out.println(generationSlider.getMinimum() + ":" + generationSlider.getValue() + ":" + generationSlider.getMaximum());
-    		}
-    		
+    		int		generation = generationSlider.getValue();    		
     		Grid 	grid = world.getGeneration(generation);
     		
     		if (grid != null && (currentGeneration != generation || force))
@@ -953,7 +900,7 @@ public class GUI implements WindowEventListener
     @Override
     public void update(float delta)
     {
-    	updateViewports(false);
+    	updateSimulationScreen(false);
     	
         if (!themeName.equals(currentThemeName))
         {
@@ -1036,97 +983,87 @@ public class GUI implements WindowEventListener
 
                 if (shape == "Square")
                 {
-                    // 3D Rectangle Grid
+                    // Rectangle Grid
+                	
+                	currentGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)));
+                	currentGrid.getCell(2, 4).setValue(0, 1);
+                	currentGrid.getCell(3, 4).setValue(0, 1);
+                	currentGrid.getCell(4, 4).setValue(0, 1);
+                    currentGrid.getCell(4, 3).setValue(0, 1);
+                    currentGrid.getCell(3, 2).setValue(0, 1);
                     
-                    rectGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)));
-                    rectGrid.getCell(2, 4).setValue(0, 1);
-                    rectGrid.getCell(3, 4).setValue(0, 1);
-                    rectGrid.getCell(4, 4).setValue(0, 1);
-                    rectGrid.getCell(4, 3).setValue(0, 1);
-                    rectGrid.getCell(3, 2).setValue(0, 1);
-                    rectGameOfLife = new GameOfLife(rectGrid);
-                    
-                    rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
-                    rectGrid3DViewer.setFlag(Widget.FILL);
-                    rectGrid3DViewer.addSlice(0, 16.0f);
-                    
-                    
-                    rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 16);
-                    rectGridViewer.setColourRuleSet(colourRules);
-                    
-                    widgetPreviewContainer.setContents(rectGridViewer);
-                    widget3DPreviewContainer.setContents(rectGrid3DViewer);
+                    grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)currentGrid, 24);
+                    grid3DViewer.setFlag(Widget.FILL);
+                    grid3DViewer.addSlice(0, 16.0f);
+                    widget3DPreviewContainer.setContents(grid3DViewer);
+    
+                    gridViewer = new RectangleGridWidget((RectangleGrid)currentGrid, 16);
+                    gridViewer.setColourRuleSet(colourRules);
+                    widgetPreviewContainer.setContents(gridViewer);
                 }
                 else if (shape == "Triangle")
                 {
-                    // 3D Triangle Grid
+                    // Triangle Grid
+                	
+                	currentGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
+                	currentGrid.getCell(7, 6).setValue(0, 1);
+                	currentGrid.getCell(7, 7).setValue(0, 1);
+                	currentGrid.getCell(7, 8).setValue(0, 1);
+                	currentGrid.getCell(6, 6).setValue(0, 1);
+                	currentGrid.getCell(6, 7).setValue(0, 1);
+                	currentGrid.getCell(6, 8).setValue(0, 1);
+
+                	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)currentGrid, 24);
+                    grid3DViewer.setFlag(Widget.FILL);
+                    grid3DViewer.addSlice(0, 16.0f);
+                    widget3DPreviewContainer.setContents(grid3DViewer);
                     
-                    triGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
-                    triGrid.getCell(7, 6).setValue(0, 1);
-                    triGrid.getCell(7, 7).setValue(0, 1);
-                    triGrid.getCell(7, 8).setValue(0, 1);
-                    triGrid.getCell(6, 6).setValue(0, 1);
-                    triGrid.getCell(6, 7).setValue(0, 1);
-                    triGrid.getCell(6, 8).setValue(0, 1);
-                    triGameOfLife = new GameOfLife(triGrid);
-        
-                    
-                    
-                    triGrid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)triGameOfLife.getGrid(), 24);
-                    triGrid3DViewer.setFlag(Widget.FILL);
-                    triGrid3DViewer.addSlice(0, 16.0f);
-                    
-                    triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
-                    triGridViewer.setColourRuleSet(colourRules);
-                    
-                    
-                    widgetPreviewContainer.setContents(triGridViewer);
-                    widget3DPreviewContainer.setContents(triGrid3DViewer);
-                    
+                    gridViewer = new TriangleGridWidget((TriangleGrid)currentGrid, 32);
+                    gridViewer.setColourRuleSet(colourRules);
+                    widgetPreviewContainer.setContents(gridViewer);                    
                 }
                 else
                 {
-                    grid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
-                    grid.getCell(6, 5).setValue(0, 1);
-                    grid.getCell(6, 6).setValue(0, 1);
-                    grid.getCell(6, 7).setValue(0, 1);        
-                    hexGameOfLife = new GameOfLife(grid);
+                	// Hexagon Grid
+                	
+                	currentGrid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
+                    currentGrid.getCell(6, 5).setValue(0, 1);
+                    currentGrid.getCell(6, 6).setValue(0, 1);
+                    currentGrid.getCell(6, 7).setValue(0, 1);        
                     
-                    hexGrid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)hexGameOfLife.getGrid(), 24);
-                    hexGrid3DViewer.setFlag(Widget.FILL);
-                    hexGrid3DViewer.addSlice(0, 16.0f);
+                    grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)currentGrid, 24);
+                    grid3DViewer.setFlag(Widget.FILL);
+                    grid3DViewer.addSlice(0, 16.0f);
+                    widget3DPreviewContainer.setContents(grid3DViewer);
             
-                    gridViewer = new HexagonGridWidget((HexagonGrid)hexGameOfLife.getGrid(), 16);
+                    gridViewer = new HexagonGridWidget((HexagonGrid)currentGrid, 16);
                     gridViewer.setColourRuleSet(colourRules);
-
                     widgetPreviewContainer.setContents(gridViewer);
-                    widget3DPreviewContainer.setContents(hexGrid3DViewer);
                 }
             }
             else if (event.target == clearRulesButton)
             {
-                CALTextArea.setText(" ");
-    
+                CALTextArea.clear();
             }
-            else if (event.target ==submitRulesButton)
+            else if (event.target == submitRulesButton)
             {
-                
-                    
                 if (selectedFile == null)
                     calFile = new File("rules/rules.cal");
                 else
                     calFile = new File(selectedFile.directory + "/" + selectedFile.filename);
                 
-                try {
-                                 FileWriter outFile = new FileWriter(calFile);
-                                 PrintWriter out = new PrintWriter(outFile);
-                         
-                                      out.println(CALTextArea.getText());
-                                      out.close();
-                                  
-                              } catch (IOException e){
-                                  e.printStackTrace();
-                              }
+                try 
+                {
+                	FileWriter outFile = new FileWriter(calFile);
+                	PrintWriter out = new PrintWriter(outFile);
+		 
+                	out.println(CALTextArea.getText());
+                	out.close();
+				} 
+                catch (IOException e)
+                {
+					e.printStackTrace();
+				}
                 
                 System.out.println("THE PATH:" + calFile.getAbsolutePath());
                 
@@ -1145,23 +1082,16 @@ public class GUI implements WindowEventListener
                 outputLayout.setFlag(Widget.WRAP);
                 outputContainer.setContents(outputLayout);
                 
-                while(iterator.hasNext()) {
+                while(iterator.hasNext()) 
+                {
                       TextWidget t = new TextWidget((String) iterator.next());
                      
                       outputLayout.add(t);
                       window.relayout();
-                }
-                
-                
-                
-                
-                
+                }                
             }
             else if (event.target == openCALFileButton)
             {
-            
-            
-                
                 selectedFile = window.askUserForFileToLoad("Select CAL File", "cal");
                 
                 System.out.println(selectedFile.directory);
@@ -1169,46 +1099,38 @@ public class GUI implements WindowEventListener
                 
                 if (selectedFile.filename.contains(".cal"))
                 {
-                     try
-                         {
-                          
-                          FileInputStream fstream = new FileInputStream(selectedFile.directory + selectedFile.filename);
-                          DataInputStream in = new DataInputStream(fstream);
-                          BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                          String strLine;
-                          String output = "";
-                          
-                          while ((strLine = br.readLine()) != null)
-                              {
-                              output += strLine + "\n";
-                              }
-                          
-                          in.close();
-                         
-                          CALTextArea.setText(output);
-                          
-                          
-                         } catch (Exception e) { window.showModalDialog(dialogCAL);}
-                    
-                    
-                }
-                
-            
-                
-                 
+                    try
+                    {
+						FileInputStream fstream = new FileInputStream(selectedFile.directory + selectedFile.filename);
+						DataInputStream in = new DataInputStream(fstream);
+						BufferedReader br = new BufferedReader(new InputStreamReader(in));
+						String strLine;
+						String output = "";
+						  
+						while ((strLine = br.readLine()) != null)
+							output += strLine + "\n";
+						  
+						in.close();
+						 
+						CALTextArea.setText(output);
+                    } 
+                    catch (Exception e) 
+                    { 
+                    	window.showModalDialog(dialogCAL);
+                    }
+                }   
             }
-            
             else if (event.target == simulateButton)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
                 serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
 
                 if (cellShapeDropDownBox.getSelectedText() == "Triangle")
-                	serverEvent.gridType = 'T';
+                	serverEvent.gridType = GridType.TRIANGLE;
                 else if (cellShapeDropDownBox.getSelectedText() == "Hexagon")
-                	serverEvent.gridType = 'H';
+                	serverEvent.gridType = GridType.HEXAGON;
                 else
-                	serverEvent.gridType = 'R';
+                	serverEvent.gridType = GridType.RECTANGLE;
                 
                 serverEvent.wrappable = wrapCheckBox.isChecked();               
                 
@@ -1229,6 +1151,11 @@ public class GUI implements WindowEventListener
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.RESET_SIMULATION);
                 server.sendEvent(serverEvent);
             }        
+            else if (event.target == stepForwardButton)
+            {
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STEP_SIMULATION);
+                server.sendEvent(serverEvent);           	
+            }
             else if (event.target == addViewportButton)
             {
             	Container container = new Container(new Vector2i(100,300));
@@ -1246,8 +1173,6 @@ public class GUI implements WindowEventListener
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
-                
-                
             }
         }
     }

@@ -11,12 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.hexcore.cas.control.discovery.Lobby;
 import com.hexcore.cas.control.discovery.LobbyListener;
-import com.hexcore.cas.control.server.ServerOverseer;
-import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.control.server.Simulator;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.ui.GUI;
@@ -36,7 +32,7 @@ public class Server implements LobbyListener
 	private GUI 			ui = null;
 	
 	private ClientThread	client = null;
-	private ServerOverseer 	overseer = null;
+	private Simulator 		simulate = null;
 	private World			world = null;
 	
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
@@ -108,30 +104,17 @@ public class Server implements LobbyListener
 					{						
 						world = new World();
 						
-						Grid grid = null;
-						
-						switch (event.gridType)
-						{
-							case 'R':
-							case 'r':
-								grid = new RectangleGrid(event.size);
-								break;
-							case 'H':
-							case 'h':
-								grid = new HexagonGrid(event.size);
-								break;								
-							case 'T':
-							case 't':
-								grid = new TriangleGrid(event.size);
-								break;
-							default:
-								Log.error(TAG, "Unknown grid type: " + event.gridType);
-								break;
-						}
-						
+						Grid grid = event.gridType.create(event.size);
+	
 						for(int y = 0; y < event.size.y; y++)
 							for(int x = 0; x < event.size.x; x++)
-								grid.getCell(x, y).setValue(0, 1.0);
+								grid.getCell(x, y).setValue(0, 0.0);
+						
+						grid.getCell(2, 4).setValue(0, 1);
+						grid.getCell(3, 4).setValue(0, 1);
+						grid.getCell(4, 4).setValue(0, 1);
+						grid.getCell(4, 3).setValue(0, 1);
+						grid.getCell(3, 2).setValue(0, 1);
 						
 						world.addGeneration(grid);
 						
@@ -163,13 +146,21 @@ public class Server implements LobbyListener
 					{
 						if (!activeSimulation.getAndSet(true)) initSimulation();
 						
-						overseer.play();
+						simulate.play();
 						break;
-					}					
+					}		
+					
+					case STEP_SIMULATION:
+					{
+						if (!activeSimulation.getAndSet(true)) initSimulation();
+						
+						simulate.step();
+						break;
+					}
 					
 					case PAUSE_SIMULATION:
 					{
-						overseer.pause();
+						simulate.pause();
 						break;
 					}
 					
@@ -177,8 +168,8 @@ public class Server implements LobbyListener
 					{
 						activeSimulation.set(false);
 						
-						overseer.disconnect();
-						overseer = null;
+						simulate.disconnect();
+						simulate = null;
 						
 						client.client.stop();
 						client = null;
@@ -202,7 +193,7 @@ public class Server implements LobbyListener
 		
 		Log.information(TAG, "Shutting down...");
 		lobby.disconnect();
-		if (overseer != null) overseer.disconnect();
+		if (simulate != null) simulate.disconnect();
 		
 		try
 		{
@@ -235,13 +226,13 @@ public class Server implements LobbyListener
 		
 		Log.information(TAG, "Starting overseer...");
 		
-		overseer = new ServerOverseer(world, config.getInteger("Network.Client", "port", 3119));
-		overseer.setClientNames(clientList);
-		overseer.start();
-		overseer.pause();
+		simulate = new Simulator(world, config.getInteger("Network.Client", "port", 3119));
+		simulate.setClientNames(clientList);
+		simulate.start();
+		simulate.pause();
 		Thread.sleep(100);
 		
-		overseer.simulate(-1);
+		simulate.simulate(-1);
 	}
 	
 	public void sendEvent(ServerEvent event)

@@ -36,7 +36,7 @@ public class CAPIPServer
 	
 	private boolean running = false;
 	
-	private ServerOverseer parent = null;
+	private Simulator parent = null;
 	private int currGen = 0;
 	private int gridsDone = 0;
 	private int totalGrids = -1;
@@ -59,7 +59,7 @@ public class CAPIPServer
 		sentWork = new HashMap<Integer, ThreadWork>();
 		completedWork = new LinkedList<ThreadWork>();
 		
-		parent = (ServerOverseer)o;
+		parent = (Simulator)o;
 		
 		workLock = new ReentrantLock();
 	}

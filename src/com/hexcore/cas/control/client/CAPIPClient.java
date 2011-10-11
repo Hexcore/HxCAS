@@ -376,7 +376,6 @@ public class CAPIPClient extends Thread
 
 			interpretInput(message);
 		}
-		long endTime = System.nanoTime();
 
 		Log.information(TAG, "Stopping client...");
 		protocol.disconnect();
