@@ -24,8 +24,8 @@ public class ServerOverseer extends Overseer
 	
 	private volatile AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
 	private volatile AtomicBoolean paused = new AtomicBoolean(false);
+	private volatile AtomicBoolean reset = new AtomicBoolean(false);
 	
-	private volatile boolean reset = false;
 	private volatile int currGen = 0;
 	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
@@ -298,7 +298,7 @@ public class ServerOverseer extends Overseer
 	
 	public void reset()
 	{
-		reset = true;
+		reset.set(true);
 		numOfGenerations = 0;
 		world.reset();
 		informationProcessor.setGeneration(currGen);
@@ -323,6 +323,14 @@ public class ServerOverseer extends Overseer
 		
 		Log.information(TAG, "Finished generation: " + currGen);
 		
+		if (reset.getAndSet(false))
+		{
+			paused.set(true);
+			setGrid(world.getGenerationZero());
+			calculateSplits();
+			splitGrids();
+		}
+		
 		if (!paused.get()) startGeneration();
 	}
 
@@ -346,12 +354,11 @@ public class ServerOverseer extends Overseer
 		calculateSplits();
 		splitGrids();
 		
+		paused.set(false);
 		isFinishedGenerations.set(false);
 		currGen = 0;
 		
 		startGeneration();
-		
-		Log.information(TAG, "Finished starting first generation");
 	}
 	
 	public void startGeneration()
@@ -378,27 +385,13 @@ public class ServerOverseer extends Overseer
 	{
 		@Override
 		public void run()
-		{
-			if (reset)
-			{
-				System.out.println("NEEDS TO RESET!");
-				reset = false;
-				setGrid(world.getGenerationZero());
-				
-				calculateSplits();
-				splitGrids();
-			}
-			
-			System.out.println(currGen + " " + numOfGenerations);
-			
+		{			
 			if(numOfGenerations == 0 || (numOfGenerations != -1 && currGen > numOfGenerations))
 			{
 				System.out.println("Finished!");
 				isFinishedGenerations.set(true);
 				return;
 			}
-
-			Log.information(TAG, "Starting generation: " + currGen);
 			
 			send();
 		}

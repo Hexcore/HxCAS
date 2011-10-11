@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ public class Lobby extends Thread
 				NetworkInterface networkInterface = interfaces.nextElement();
 				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
 				{
+					if (interfaceAddress == null) continue;
 					InetAddress broadcast = interfaceAddress.getBroadcast();
 					buffer.position(0);
 					channel.send(buffer, new InetSocketAddress(broadcast, beaconPort));
@@ -91,7 +93,15 @@ public class Lobby extends Thread
 			// Try an generic local network broadcast
 			InetAddress broadcast = InetAddress.getByName("255.255.255.255");
 			buffer.position(0);
-			channel.send(buffer, new InetSocketAddress(broadcast, beaconPort));			
+			
+			try
+			{
+				channel.send(buffer, new InetSocketAddress(broadcast, beaconPort));
+			}
+			catch (SocketException e)
+			{
+				Log.error(TAG, "Could not ping for clients - could not create an socket");
+			}
 		}
 		catch (IOException e)
 		{

@@ -78,7 +78,7 @@ public class ColourRuleSetParser extends ConfigParser
 		while (scanner.isValid())
 		{
 			symbol = scanner.peakSymbol();
-			if (symbol.type != Symbol.Type.INTEGER) break;
+			if (symbol.text.equals("}")) break;
 			
 			ColourRule.Range range = readRange();
 			if (range != null) rule.addRange(range);
@@ -111,7 +111,11 @@ public class ColourRuleSetParser extends ConfigParser
 			return null;
 		}	
 		
-		expect("..");
+		if (!expect(".."))
+		{
+			fastForward(";");
+			return null;
+		}
 		
 		symbol = scanner.getSymbol();
 		if (symbol.type == Symbol.Type.INTEGER)

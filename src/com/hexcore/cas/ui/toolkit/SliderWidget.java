@@ -56,7 +56,8 @@ public class SliderWidget extends ClickableWidget
 	{
 		Vector2i pos = this.position.add(position);
 		
-		float percent = (value - minimum) / (maximum - minimum);
+		float percent = 1.0f;
+		if (maximum > minimum) percent = (value - minimum) / (maximum - minimum);
 		
 		ButtonState state = ButtonState.NORMAL;
 		if (mouseover) state = ButtonState.HOVER;

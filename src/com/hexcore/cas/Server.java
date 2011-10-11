@@ -160,7 +160,6 @@ public class Server implements LobbyListener
 					}
 					
 					case START_SIMULATION:
-					case RESUME_SIMULATION:
 					{
 						if (!activeSimulation.getAndSet(true)) initSimulation();
 						
@@ -229,7 +228,7 @@ public class Server implements LobbyListener
 			client = new ClientThread();
 			client.start();
 			
-			Thread.sleep(1000);
+			Thread.sleep(1000); // Wait for client to start
 			
 			clientList.add("127.0.0.1");
 		}

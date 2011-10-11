@@ -30,6 +30,7 @@ import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Container;
 import com.hexcore.cas.ui.toolkit.Dialog;
+import com.hexcore.cas.ui.toolkit.DiscreteSliderWidget;
 import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
@@ -247,9 +248,13 @@ public class GUI implements WindowEventListener
     
     private Button addViewportButton;
     
-    private SliderWidget 	generationSlider;
+    private DiscreteSliderWidget 	generationSlider;
     
-    private Grid			currentGrid;
+    
+    
+    private int		currentGeneration = 0;
+    private Grid	currentGrid;
+    
     private Server 			server;
     
     public GUI(Server server)
@@ -691,7 +696,7 @@ public class GUI implements WindowEventListener
         sliderLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         masterSimulationLayout.add(sliderLayout);
         
-        generationSlider = new SliderWidget(100);
+        generationSlider = new DiscreteSliderWidget(100);
         generationSlider.setMargin(new Vector2i(5, 5));
         generationSlider.setFlag(Widget.FILL_HORIZONTAL);
         generationSlider.setShowValue(true);
@@ -897,36 +902,58 @@ public class GUI implements WindowEventListener
     	Log.information(TAG, "Switched to simulation screen");
     	
     	generationSlider.setMaximum(world.getNumGenerations());
-    	generationSlider.setMinimum(0.0f);
+    	generationSlider.setMinimum(0);
     	generationSlider.setValue(world.getNumGenerations());
+    	
+    	currentGeneration = 0;
+    	updateViewports(true);
+    }
+    
+    public void updateViewports(boolean force)
+    {
+    	if (world != null)
+    	{		
+    		// Update slider
+			double origMaximum = generationSlider.getMaximum();
+			
+			generationSlider.setMaximum(world.getNumGenerations() - 1);
+					
+    		if (generationSlider.getValue() >= origMaximum)
+    			generationSlider.setValue(world.getNumGenerations() - 1);
+
+    		// Update viewports
+    		int		generation = generationSlider.getValue();
+    		
+    		if (generation < 0)
+    		{
+    			System.out.println(generationSlider.getMinimum() + ":" + generationSlider.getValue() + ":" + generationSlider.getMaximum());
+    		}
+    		
+    		Grid 	grid = world.getGeneration(generation);
+    		
+    		if (grid != null && (currentGeneration != generation || force))
+    		{
+    			currentGeneration = generation;
+    			currentGrid = grid;
+    			
+    			if (currentGrid.getType() == grid.getType() && !force)
+    			{
+	    			for (Viewport viewport : viewports)
+	    				viewport.gridWidget.setGrid(currentGrid);
+    			}
+    			else
+    			{
+	   				for (Viewport viewport : viewports) 
+	   					viewport.recreate(grid);
+    			}
+    		}
+    	}
     }
    
     @Override
     public void update(float delta)
     {
-    	if (world != null)
-    	{
-    		Grid grid = world.getLastGeneration();
-
-    		if ((currentGrid == null) || (currentGrid.getType() != grid.getType()))
-   				for (Viewport viewport : viewports) 
-   					viewport.recreate(grid);
-
-    		//if (currentGrid != grid)
-    		{
-    			currentGrid = grid;
-    			  			
-    			for (Viewport viewport : viewports)
-    				viewport.gridWidget.setGrid(currentGrid);
-    					
-    			double origMaximum = generationSlider.getMaximum();
-    			
-    			generationSlider.setMaximum(world.getNumGenerations());
-    					
-	    		if (generationSlider.getValue() >= origMaximum)
-	    			generationSlider.setValue(world.getNumGenerations());
-    		}
-    	}
+    	updateViewports(false);
     	
         if (!themeName.equals(currentThemeName))
         {
@@ -1219,6 +1246,8 @@ public class GUI implements WindowEventListener
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
+                
+                
             }
         }
     }
