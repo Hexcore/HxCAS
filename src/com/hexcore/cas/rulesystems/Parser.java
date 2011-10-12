@@ -7,6 +7,7 @@ import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
+import org.objectweb.asm.Label;
 
 import java.io.*;
 
@@ -421,6 +422,8 @@ static public void reset()
 			
 			if(entry.kind == TableEntry.Variable)
 			{
+				if(TableEntry.isBool(type))
+				CodeGen.toDouble();
 				CodeGen.storeVariable(entry.offset);
 			}
 			else if(entry.kind == TableEntry.Property)
@@ -479,11 +482,18 @@ static public void reset()
 		Expect(lparen_Sym);
 		type  = Expression();
 		Expect(rparen_Sym);
+		Label[] pointers;
+		pointers = CodeGen.initIf();
+		
 		Statement();
+		CodeGen.jump(pointers[1]);
+		CodeGen.visitLabel(pointers[0]);
+		
 		if (la.kind == else_Sym) {
 			Get();
 			Statement();
 		}
+		CodeGen.visitLabel(pointers[1]);
 	}
 
 	static void VarDeclaration() {

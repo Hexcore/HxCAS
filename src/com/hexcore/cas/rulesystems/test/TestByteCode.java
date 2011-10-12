@@ -21,6 +21,9 @@ public class TestByteCode extends TestCase
 		
 		in = new File("Test Data/rules/testSet2.cal");
 		assertTrue(in.exists());
+		
+		in = new File("Test Data/rules/testSet3.cal");
+		assertTrue(in.exists());
 	}
 
 	
@@ -28,6 +31,8 @@ public class TestByteCode extends TestCase
 	{
 		CALCompiler compiler = new CALCompiler();
 		compiler.loadRules("Test Data/rules/testSet1.cal");
+		assertEquals(0, compiler.getErrorCount());
+		
 		RuleLoader rl = new RuleLoader();
 		
 		Rule rule = rl.loadRule(compiler.getCode());
@@ -57,6 +62,7 @@ public class TestByteCode extends TestCase
 	{
 		CALCompiler compiler = new CALCompiler();
 		compiler.loadRules("Test Data/rules/testSet2.cal");
+		assertEquals(0, compiler.getErrorCount());
 		RuleLoader rl = new RuleLoader();
 		
 		Rule rule = rl.loadRule(compiler.getCode());
@@ -80,5 +86,30 @@ public class TestByteCode extends TestCase
 		assertEquals(0.0, c.getValue(0));
 		assertEquals(2.0, c.getValue(1));
 		assertEquals(12.0, c.getValue(2));
+	}
+	
+	public void testIfStatementsBasic()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.loadRules("Test Data/rules/testSet3.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Cell c = new Cell(new double[]{0,0,0});
+		
+		
+		//New Cell Test
+		assertEquals(0.0, c.getValue(0));
+		assertEquals(0.0, c.getValue(1));
+		assertEquals(0.0, c.getValue(2));
+		
+		//Run once
+		rule.run(c, null);		
+		assertEquals(0.0, c.getValue(0));
+		assertEquals(1.0, c.getValue(1));
+		assertEquals(2.0, c.getValue(2));
 	}
 }

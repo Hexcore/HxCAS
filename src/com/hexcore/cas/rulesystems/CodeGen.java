@@ -24,24 +24,30 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static Label executeBegin;
 	private static Label executeEnd;
 	private static MethodVisitor executeVisitor;
-	private static int varIndex = 4;
+	private static int varIndex = 5;
 	private static int propertyIndex = 1;
 	
 	private static Label[] frameworkLabels;
 	private static int[] frameworkIndices;
 	private static Label defaultLabel;
 	private static int currentFrameworkIndex = 0;
+	private static boolean debugEnabled = true;
 	
-	
+	private static void debug(String msg)
+	{
+		if(debugEnabled)
+			System.out.println(msg);
+	}
 	
 	static void initClass(String ruleset)
 	{
-		varIndex = 4;
+		debug("initClass");
+		varIndex = 5;
 		currentFrameworkIndex = 0;
 		propertyIndex = 1;
 
 		name = ruleset;
-		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
 		
 		//Class initialisation
 		String[] interfaces = {"com/hexcore/cas/rulesystems/Rule"};
@@ -65,6 +71,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initExecute()
 	{
+		debug("initExecute");
 		executeVisitor = cw.visitMethod(ACC_PUBLIC, "run", "(Lcom/hexcore/cas/model/Cell;[Lcom/hexcore/cas/model/Cell;)V", null, null);
 		executeVisitor.visitCode();
 		executeBegin = new Label();
@@ -73,6 +80,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initFramework(int numTypes)
 	{
+		debug("initFramework: " + numTypes + " types");
 		currentFrameworkIndex = 0;
 		frameworkIndices = new int[numTypes];
 		frameworkLabels = new Label[numTypes];
@@ -89,6 +97,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void initType()
 	{
+		debug("initType");
 		IndexOutOfBoundsException ex = new IndexOutOfBoundsException();
 		
 		try
@@ -97,11 +106,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 				throw ex;
 			
 			executeVisitor.visitLabel(frameworkLabels[currentFrameworkIndex]);
-			
+			/*
 			if(currentFrameworkIndex == 0)
 				executeVisitor.visitFrame(F_APPEND, 1, new Object[]{INTEGER}, 0, null);
 			else
-				executeVisitor.visitFrame(F_SAME, 0, null, 0, null);
+				executeVisitor.visitFrame(F_SAME, 0, null, 0, null);*/
 			
 			currentFrameworkIndex++;
 		}
@@ -113,29 +122,35 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static int declareLocalVariable(String name)
 	{
+		debug("Declare var index: " + varIndex);
 		//executeVisitor.visitLocalVariable(name, "D", null, executeBegin, executeEnd, varIndex);
-		return varIndex+=2;
+		int result = varIndex;
+		varIndex += 2;
+		return result;
 	}
 	
 	public static int declareProperty()
 	{
+		debug("Declare property index: " + propertyIndex);
 		return propertyIndex++;
 	}
 	
 	public static void loadConstant(double value)
 	{
+		debug("Loading constant: " + value);
 		executeVisitor.visitLdcInsn(new Double(value));
 	}
 	
 	
 	public static void storeVariable(int index)
 	{
-		System.out.println("Storing at: " + index);
+		debug("Storing at: " + index);
 		executeVisitor.visitVarInsn(DSTORE, index);
 	}
 	
 	public static void storeProperty(int index)
 	{
+		debug("Storing at property: " + index);
 		//Store result in temp variable in preparation for function call.
 		executeVisitor.visitVarInsn(DSTORE, 3);
 		executeVisitor.visitVarInsn(ALOAD, 1);
@@ -150,6 +165,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void performPostOp(int index, int delta)
 	{
+		debug("Post op");
 		executeVisitor.visitVarInsn(DLOAD, index);
 		executeVisitor.visitLdcInsn(new Double(delta));
 		executeVisitor.visitInsn(DADD);
@@ -159,17 +175,20 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void derefVariable(int index)
 	{
+		debug("Deref var: " + index);
 		executeVisitor.visitVarInsn(DLOAD, index);
 	}
 	
 	public static void derefRef(int index)
 	{
+		debug("Deref ref: " + index);
 		executeVisitor.visitVarInsn(ALOAD, index);
 	}
 	
 	
 	public static void derefProperty(int index)
 	{
+		debug("Deref property: " + index);
 		executeVisitor.visitVarInsn(ALOAD, 1);
 		executeVisitor.visitLdcInsn(new Integer(index));
 		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "getValue", "(I)D");
@@ -177,8 +196,10 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void performRelationalOp(RelOpE op)
 	{
+		debug("Relational op: " + op.toString());
 		Label negative = new Label();
 		Label end = new Label();
+		executeVisitor.visitInsn(DCMPG);
 		switch(op)
 		{
 			case LT:	executeVisitor.visitJumpInsn(IFGE, negative); break;
@@ -196,8 +217,15 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitLabel(end);
 	}
 	
+	public static void toDouble()
+	{
+		debug("Convert to double");
+		executeVisitor.visitInsn(I2D);
+	}
+	
 	public static void performAddOp(AddOpE op)
 	{
+		debug("Add op: " + op.toString());
 		switch(op)
 		{
 			case ADD: executeVisitor.visitInsn(DADD); break;
@@ -208,6 +236,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void performMulOp(MulOpE op)
 	{
+		debug("Mul op: " + op.toString());
 		switch(op)
 		{
 			case MUL: executeVisitor.visitInsn(DMUL); break;
@@ -217,18 +246,44 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		}
 	}
 	
+	public static Label[]  initIf()
+	{
+		debug("Start if");
+		Label negative = new Label();
+		Label end = new Label();
+		
+		executeVisitor.visitJumpInsn(IFEQ, negative);
+		Label[] pointers = {negative, end};
+		return pointers;
+	}
+	
+	public static void visitLabel(Label label)
+	{
+		debug("Label visit: " + label);
+		executeVisitor.visitLabel(label);
+	}
+	
+	public static void jump(Label label)
+	{
+		debug("Jump to: " + label);
+		executeVisitor.visitJumpInsn(GOTO, label);
+	}
+	
 	public static void negate()
 	{
+		debug("Negate");
 		executeVisitor.visitInsn(DNEG);
 	}
 	
 	public static void endType()
 	{
+		debug("End Type");
 		executeVisitor.visitJumpInsn(GOTO, defaultLabel);
 	}
 	
 	public static void endExecute()
 	{
+		debug("End Execute");
 		executeVisitor.visitLabel(defaultLabel);
 		executeVisitor.visitInsn(RETURN);
 		executeEnd = new Label();
@@ -245,6 +300,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void endClass()
 	{
+		debug("End class");
 		//End class
 		cw.visitEnd();
 		

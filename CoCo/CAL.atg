@@ -5,6 +5,7 @@ import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
+import org.objectweb.asm.Label;
 
 COMPILER CAL $NC
 
@@ -251,6 +252,8 @@ PRODUCTIONS
   													
   													if(entry.kind == TableEntry.Variable)
   													{
+  														if(TableEntry.isBool(type))
+  														CodeGen.toDouble();
   														CodeGen.storeVariable(entry.offset);
   													}
   													else if(entry.kind == TableEntry.Property)
@@ -375,11 +378,17 @@ PRODUCTIONS
   	=
   	"if" "("
   	Expression< out type > 
-  	")"
-  	Statement
+  	")"											(. 	Label[] pointers;
+  													pointers = CodeGen.initIf();
+  												.)
+  												
+  	Statement									(.
+  													CodeGen.jump(pointers[1]); 
+  													CodeGen.visitLabel(pointers[0]);
+  												.)
   	[
-  	"else" Statement
-  	]
+  	"else" Statement							
+  	]											(. CodeGen.visitLabel(pointers[1]); .)
   	.
   	
   	
