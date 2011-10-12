@@ -21,7 +21,7 @@ public class Simulator extends Thread
 	private AtomicBoolean paused = new AtomicBoolean(false);
 	private AtomicBoolean reset = new AtomicBoolean(false);
 	
-	private volatile int currGen = 0;
+	private volatile int currentGeneration = 0;
 	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
 	private int threadWorkID = 0;
@@ -197,32 +197,25 @@ public class Simulator extends Thread
 			int bottom = borderSize.y;
 
 			Recti workArea = clientWorkables[i];
+			Vector2i workStart = workArea.getPosition();
+			Vector2i workEnd = workArea.getPosition().add(workArea.getSize());
 			
-			if(workArea.getPosition().x - left < 0)
-				left = workArea.getPosition().x;
-			if(workArea.getPosition().y - top < 0)
-				top = workArea.getPosition().y;
-			if(workArea.getSize().x + workArea.getPosition().x >= grid.getWidth())
-				right = workArea.getSize().x + workArea.getPosition().x - grid.getWidth() - 1;
-			if(workArea.getSize().y + workArea.getPosition().y >= grid.getHeight())
-				bottom = workArea.getSize().y + workArea.getPosition().y - grid.getHeight() - 1;
+			if(workStart.x - left < 0) left = workStart.x;
+			if(workStart.y - top < 0) top = workStart.y;
+			if(workEnd.x >= grid.getWidth()) right = workEnd.x - grid.getWidth();
+			if(workEnd.y >= grid.getHeight()) bottom = workEnd.y - grid.getHeight();
 			
+			Vector2i position = new Vector2i(workArea.getPosition().x - left, workArea.getPosition().y - top);
 			Vector2i size = new Vector2i(workArea.getSize().x + left + right, workArea.getSize().y + top + bottom);
 			Grid workingGrid = grid.getType().create(size, grid.getNumProperties());
-	
-			int gYPos = 0;
-			int gXPos = 0;
 			
-			for(int y = workArea.getPosition().y - top; y < workArea.getPosition().y + workArea.getSize().y + bottom; y++, gYPos++)
-				for(int x = workArea.getPosition().x - left; x < workArea.getPosition().x + workArea.getSize().x + right; x++)
-				{
-					workingGrid.setCell(gXPos, gYPos, grid.getCell(x, y));
-					gXPos++;
-					if(gXPos >= workArea.getSize().x) gXPos = 0;
-				}
+			for(int y = 0; y < size.y; y++)
+				for(int x = 0; x < size.x; x++)
+					workingGrid.setCell(x, y, grid.getCell(position.add(x, y)));
 			
 			Recti aw = new Recti(new Vector2i(left, top), workArea.getSize());
-			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
+			
+			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
 		}
 	}
 	
@@ -259,7 +252,7 @@ public class Simulator extends Thread
 			}
 			
 			Recti aw = new Recti(borderSize, workArea.getSize());
-			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
+			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
 		}
 	}
 	
@@ -283,22 +276,7 @@ public class Simulator extends Thread
 		if (paused.getAndSet(false)) 
 			startGeneration();
 	}	
-	
-	public void rebuildGrid()
-	{
-		Log.debug(TAG, "Merging work done by clients");
-		for(int i = 0; i < clientWork.length; i++)
-		{
-			int	id = clientWork[i].getID();
-			Grid g = clientWork[i].getGrid();
-			Recti aw = clientWork[i].getWorkableArea();
-			Recti uw = clientWorkables[id];
-			for(int y = uw.getPosition().y, cy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, cy++)
-				for(int x = uw.getPosition().x, cx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, cx++)
-					grid.setCell(x, y, g.getCell(cx, cy));
-		}
-	}
-	
+		
 	public void requestStatuses()
 	{
 		Log.information(TAG, "Requesting client statuses");
@@ -315,21 +293,18 @@ public class Simulator extends Thread
 		reset.set(true);
 		numOfGenerations = 0;
 		world.reset();
-		informationProcessor.setGeneration(currGen);
+		informationProcessor.setGeneration(currentGeneration);
 	}
 
-	//Called from CAPIPServer to pass up work done
-	public void setClientWork(List<ThreadWork> completedWork)
+	public void finishedGeneration()
 	{
-		clientWork = completedWork.toArray(clientWork);
 		threadWorkID = 0;
 		
-		rebuildGrid();
 		world.addGeneration(grid);
 		
 		splitGrids();
 		
-		Log.information(TAG, "Finished generation: " + currGen);
+		Log.information(TAG, "Finished generation: " + currentGeneration);
 		
 		if (reset.getAndSet(false))
 		{
@@ -364,7 +339,7 @@ public class Simulator extends Thread
 		
 		paused.set(false);
 		isFinishedGenerations.set(false);
-		currGen = 0;
+		currentGeneration = 0;
 		
 		startGeneration();
 	}
@@ -373,7 +348,7 @@ public class Simulator extends Thread
 	{
 		isFinishedGenerations.set(false);
 		
-		currGen++;
+		currentGeneration++;
 		GenerationThread generationThread = new GenerationThread();
 		generationThread.start();		
 	}
@@ -407,7 +382,7 @@ public class Simulator extends Thread
 			
 			if (numOfGenerations > 0) numOfGenerations--;
 			
-			informationProcessor.setClientWork(clientWork, currGen);
+			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
 			informationProcessor.sendInitialGrids();
 		}
 	}

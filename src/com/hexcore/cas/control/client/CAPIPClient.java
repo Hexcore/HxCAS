@@ -162,7 +162,6 @@ public class CAPIPClient extends Thread
 				return;
 			}
 
-			//parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
 			Log.warning(TAG, "DATA message unimplemented");
 		}
 		else if(header.get("TYPE").toString().equals("CONNECT"))
@@ -307,6 +306,8 @@ public class CAPIPClient extends Thread
 					sendState(2, "GRID TYPE INVALID");
 					return;
 			}
+			
+			grid.setWrappable(false);
 			
 			ArrayList<Node> rows = ((ListNode)body.get("DATA")).getListValues();
 			for(int y = 0; y < rows.size(); y++)
