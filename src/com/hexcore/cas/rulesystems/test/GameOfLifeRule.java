@@ -20,4 +20,12 @@ public class GameOfLifeRule implements Rule
 		else if(sum == 3)
 			cell.setValue(0, 1);
 	}
+
+	@Override
+	public int getNumProperties()
+	{
+		return 2;
+	}
+	
+	
 }

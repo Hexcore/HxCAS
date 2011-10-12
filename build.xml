@@ -36,6 +36,8 @@
 			<classpath>
 				<pathelement path="./bin"/>
 				<pathelement path="${jar.dir}"/>
+				<pathelement path="."/>
+				<pathelement path=".."/>
 			</classpath>
 
 			<formatter type="xml"/>

@@ -173,6 +173,12 @@ public class ClientOverseer extends Thread
 					cell.setValue(0, 1);
 			}
 		}
+		
+		@Override
+		public int getNumProperties()
+		{
+			return 2;
+		}
 	}
 	
 	class Work
