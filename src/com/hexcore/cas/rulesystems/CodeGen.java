@@ -26,6 +26,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static MethodVisitor executeVisitor;
 	private static int varIndex = 5;
 	private static int propertyIndex = 1;
+	private static int numProperties = 1;
 	
 	private static Label[] frameworkLabels;
 	private static int[] frameworkIndices;
@@ -45,6 +46,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		varIndex = 5;
 		currentFrameworkIndex = 0;
 		propertyIndex = 1;
+		numProperties = 1;
 
 		name = ruleset;
 		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
@@ -106,11 +108,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 				throw ex;
 			
 			executeVisitor.visitLabel(frameworkLabels[currentFrameworkIndex]);
-			/*
-			if(currentFrameworkIndex == 0)
-				executeVisitor.visitFrame(F_APPEND, 1, new Object[]{INTEGER}, 0, null);
-			else
-				executeVisitor.visitFrame(F_SAME, 0, null, 0, null);*/
 			
 			currentFrameworkIndex++;
 		}
@@ -132,6 +129,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	public static int declareProperty()
 	{
 		debug("Declare property index: " + propertyIndex);
+		numProperties++;
 		return propertyIndex++;
 	}
 	
@@ -296,10 +294,23 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitEnd();
 	}
 	
+	public static void implementPropertyCountFunction()
+	{
+		debug("Implement property count");
+		
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getNumProperties", "()I", null, null);
+		mVisitor.visitCode();
+		mVisitor.visitLdcInsn(new Integer(numProperties));
+		mVisitor.visitInsn(IRETURN);
+		mVisitor.visitMaxs(0, 0);
+		mVisitor.visitEnd();
+	}
+	
 	
 	
 	public static void endClass()
 	{
+		implementPropertyCountFunction();
 		debug("End class");
 		//End class
 		cw.visitEnd();

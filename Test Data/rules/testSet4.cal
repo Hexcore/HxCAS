@@ -1,0 +1,12 @@
+ruleset set4
+{
+	typecount 1;
+	
+	property land;
+	
+
+	type Land : 0
+	{
+
+	}
+}
