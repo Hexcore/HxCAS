@@ -104,7 +104,7 @@ public class Server implements LobbyListener
 					{						
 						world = new World();
 						
-						Grid grid = event.gridType.create(event.size);
+						Grid grid = event.gridType.create(event.size, 1);
 						grid.setWrappable(event.wrappable);
 	
 						for(int y = 0; y < event.size.y; y++)
