@@ -13,7 +13,6 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -34,12 +33,12 @@ public class CAPIPClient extends Thread
 	private ClientOverseer parent = null;
 	private ServerSocket sock = null;
 
-	public CAPIPClient(Overseer o, int port)
+	public CAPIPClient(ClientOverseer clientOverseer, int port)
 		throws IOException
 	{
 		Log.information(TAG, "Creating Client...");
 		
-		parent = (ClientOverseer)o;
+		parent = clientOverseer;
 		try
 		{
 			sock = new ServerSocket(port);

@@ -27,11 +27,6 @@ public class TestGrid extends TestCase
 		{
 			super(size, example);
 		}
-
-		public DummyGrid(Vector2i size)
-		{
-			super(size);
-		}
 		
 		@Override
 		public Grid clone()
@@ -61,11 +56,12 @@ public class TestGrid extends TestCase
 	public void testConstructorSize()
 	{
 		Vector2i	size = new Vector2i(7, 9);
-		DummyGrid	grid = new DummyGrid(size);
+		DummyGrid	grid = new DummyGrid(size, 3);
 		
 		assertEquals(9, grid.getHeight());
 		assertEquals(7, grid.getWidth());
 		assertTrue(grid.getSize().equals(size));
+		assertEquals(3, grid.getNumProperties());
 		
 		// Assure a copy of the size was made
 		size.x = 1;
@@ -74,6 +70,7 @@ public class TestGrid extends TestCase
 		assertEquals(9, grid.getHeight());
 		assertEquals(7, grid.getWidth());
 		assertTrue(grid.getSize().equals(new Vector2i(7, 9)));
+		assertEquals(3, grid.getNumProperties());
 	}
 	
 	public void testConstructorSizeInt()
@@ -137,7 +134,7 @@ public class TestGrid extends TestCase
 	public void testConstructorGrid()
 	{
 		Vector2i	size = new Vector2i(7, 9);
-		DummyGrid	grid = new DummyGrid(size);
+		DummyGrid	grid = new DummyGrid(size, 1);
 		grid.setWrappable(false);
 		grid.getCell(0, 0).setValue(0, 3);
 		grid.getCell(1, 0).setValue(0, 10);
@@ -174,7 +171,7 @@ public class TestGrid extends TestCase
 	public void testGetCell()
 	{
 		Vector2i	size = new Vector2i(2, 2);
-		DummyGrid	grid = new DummyGrid(size);	
+		DummyGrid	grid = new DummyGrid(size, 1);	
 		grid.getCell(0, 0).setValue(0, 9);
 		grid.getCell(1, 0).setValue(0, 10);
 		grid.getCell(0, 1).setValue(0, 11);
@@ -212,7 +209,7 @@ public class TestGrid extends TestCase
 	public void testSetCell()
 	{	
 		Vector2i	size = new Vector2i(5, 5);
-		DummyGrid	grid = new DummyGrid(size);	
+		DummyGrid	grid = new DummyGrid(size, 3);	
 		
 		Vector2i	pos1 = new Vector2i(2, 4);
 		Vector2i	pos2 = new Vector2i(3, 3);		

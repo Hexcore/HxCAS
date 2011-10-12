@@ -321,8 +321,7 @@ public class TestServerControl extends TestCase
 		ThreadWork[] cW = server.getClientWork();
 		testClientWork(cW);
 		
-		Grid[] gens = theWorld.getWorld();
-		assertEquals(2, gens.length);
+		assertEquals(2, theWorld.getNumGenerations());
 		
 		server.disconnect();
 		

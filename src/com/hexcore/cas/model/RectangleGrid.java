@@ -3,12 +3,7 @@ package com.hexcore.cas.model;
 import com.hexcore.cas.math.Vector2i;
 
 public class RectangleGrid extends Grid
-{
-	public RectangleGrid(Vector2i size) 
-	{
-		super(size);
-	}
-	
+{	
 	public RectangleGrid(Vector2i size, int numProperties)
 	{
 		super(size, numProperties);

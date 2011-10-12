@@ -4,26 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
-public class Simulator extends Overseer
+public class Simulator extends Thread
 {
 	private static final String TAG = "Server";
 	
 	private String[] clientNames = null;
 	
-	private volatile AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
-	private volatile AtomicBoolean paused = new AtomicBoolean(false);
-	private volatile AtomicBoolean reset = new AtomicBoolean(false);
+	private AtomicBoolean connected = new AtomicBoolean(false);
+	private AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
+	private AtomicBoolean paused = new AtomicBoolean(false);
+	private AtomicBoolean reset = new AtomicBoolean(false);
 	
 	private volatile int currGen = 0;
 	private volatile int numOfClients = 0;
@@ -37,6 +33,8 @@ public class Simulator extends Overseer
 	private CAPIPServer informationProcessor = null;
 	private int clientPort;
 	
+	protected Grid grid = null;
+		
 	public Simulator(World world, int clientPort)
 	{
 		this.clientPort = clientPort;
@@ -150,6 +148,11 @@ public class Simulator extends Overseer
 	public Grid getGrid()
 	{
 		return grid;
+	}
+	
+	public void setGrid(Grid g)
+	{
+		grid = g.clone();
 	}
 	
 	public int getNumberOfClients()
@@ -331,7 +334,7 @@ public class Simulator extends Overseer
 		if (reset.getAndSet(false))
 		{
 			paused.set(true);
-			setGrid(world.getGenerationZero());
+			setGrid(world.getInitialGeneration());
 			calculateSplits();
 			splitGrids();
 		}
@@ -353,7 +356,7 @@ public class Simulator extends Overseer
 		while (informationProcessor.getConnectedAmount() != clientNames.length) {}
 
 		Log.information(TAG, "Starting simulation...");
-		super.setGrid(world.getLastGeneration());
+		setGrid(world.getLastGeneration());
 		numOfGenerations = gN;
 		
 		calculateSplits();
@@ -386,6 +389,7 @@ public class Simulator extends Overseer
 		informationProcessor = new CAPIPServer(this, clientPort);
 		informationProcessor.connectClients(clientNames);
 		informationProcessor.start();
+		connected.set(true);
 	}
 	
 	class GenerationThread extends Thread

@@ -4,11 +4,6 @@ import com.hexcore.cas.math.Vector2i;
 
 public class TriangleGrid extends Grid
 {
-	public TriangleGrid(Vector2i size) 
-	{
-		super(size);
-	}
-	
 	public TriangleGrid(Vector2i size, int numProperties)
 	{
 		super(size, numProperties);

@@ -979,13 +979,13 @@ public class GUI implements WindowEventListener
                     return;
                 }
             
-                String shape = cellShapeDropDownBox.getSelectedText();
+                String	shape = cellShapeDropDownBox.getSelectedText();
+                int		properties = 1;
 
                 if (shape == "Square")
                 {
                     // Rectangle Grid
-                	
-                	currentGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)));
+                	currentGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)), properties);
                 	currentGrid.getCell(2, 4).setValue(0, 1);
                 	currentGrid.getCell(3, 4).setValue(0, 1);
                 	currentGrid.getCell(4, 4).setValue(0, 1);
@@ -1004,8 +1004,7 @@ public class GUI implements WindowEventListener
                 else if (shape == "Triangle")
                 {
                     // Triangle Grid
-                	
-                	currentGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
+                	currentGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)), properties);
                 	currentGrid.getCell(7, 6).setValue(0, 1);
                 	currentGrid.getCell(7, 7).setValue(0, 1);
                 	currentGrid.getCell(7, 8).setValue(0, 1);
@@ -1025,8 +1024,7 @@ public class GUI implements WindowEventListener
                 else
                 {
                 	// Hexagon Grid
-                	
-                	currentGrid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)));
+                	currentGrid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)), properties);
                     currentGrid.getCell(6, 5).setValue(0, 1);
                     currentGrid.getCell(6, 6).setValue(0, 1);
                     currentGrid.getCell(6, 7).setValue(0, 1);        

@@ -116,18 +116,18 @@ public class UITestApplication implements WindowEventListener
 	
 	UITestApplication()
 	{
-		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128));
+		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128), 3);
 		waterFlowGrid.setWrappable(false);
 
 		waterFlow = new WaterFlow(waterFlowGrid);
 		
-		HexagonGrid grid = new HexagonGrid(new Vector2i(22, 22));
+		HexagonGrid grid = new HexagonGrid(new Vector2i(22, 22), 1);
 		grid.getCell(6, 5).setValue(0, 1);
 		grid.getCell(6, 6).setValue(0, 1);
 		grid.getCell(6, 7).setValue(0, 1);		
 		gameOfLife = new GameOfLife(grid);
 		
-		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(22, 22));
+		RectangleGrid rectGrid = new RectangleGrid(new Vector2i(22, 22), 1);
 		rectGrid.getCell(2, 4).setValue(0, 1);
 		rectGrid.getCell(3, 4).setValue(0, 1);
 		rectGrid.getCell(4, 4).setValue(0, 1);
@@ -135,7 +135,7 @@ public class UITestApplication implements WindowEventListener
 		rectGrid.getCell(3, 2).setValue(0, 1);
 		rectGameOfLife = new GameOfLife(rectGrid);
 		
-		TriangleGrid triGrid = new TriangleGrid(new Vector2i(24, 24));
+		TriangleGrid triGrid = new TriangleGrid(new Vector2i(24, 24), 1);
 		triGrid.getCell(7, 6).setValue(0, 1);
 		triGrid.getCell(7, 7).setValue(0, 1);
 		triGrid.getCell(7, 8).setValue(0, 1);

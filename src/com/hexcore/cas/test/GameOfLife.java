@@ -14,7 +14,7 @@ public class GameOfLife
 	public static void main(String [] args)
 	{
 		int iter = 10;
-		RectangleGrid g = new RectangleGrid(new Vector2i(5, 5));
+		RectangleGrid g = new RectangleGrid(new Vector2i(5, 5), 1);
 		g.getCell(new Vector2i(2,1)).setValue(0, 1);
 		g.getCell(new Vector2i(2,2)).setValue(0, 1);
 		g.getCell(new Vector2i(2,3)).setValue(0, 1);
@@ -22,7 +22,7 @@ public class GameOfLife
 		game.run(iter);
 		
 		System.out.println("--------------------------------------");
-		HexagonGrid hex = new HexagonGrid(new Vector2i(10,10));
+		HexagonGrid hex = new HexagonGrid(new Vector2i(10,10), 1);
 		hex.getCell(new Vector2i(5,4)).setValue(0, 1);
 		hex.getCell(new Vector2i(5,5)).setValue(0, 1);
 		hex.getCell(new Vector2i(5,6)).setValue(0, 1);
@@ -30,7 +30,7 @@ public class GameOfLife
 		game.run(iter);
 		
 		System.out.println("--------------------------------------");
-		TriangleGrid tri = new TriangleGrid(new Vector2i(10,10));
+		TriangleGrid tri = new TriangleGrid(new Vector2i(10,10), 1);
 		tri.getCell(new Vector2i(5,4)).setValue(0, 1);
 		tri.getCell(new Vector2i(5,5)).setValue(0, 1);
 		tri.getCell(new Vector2i(5,6)).setValue(0, 1);
@@ -44,7 +44,7 @@ public class GameOfLife
 	public GameOfLife()
 	{
 		//start with 5x5 rectangle grid because I know how this is expected to perform.
-		grid = new RectangleGrid(new Vector2i(5, 5));
+		grid = new RectangleGrid(new Vector2i(5, 5), 1);
 		
 		//set specific pattern here - can be changed to an input file later.
 		//Going to start with a simple blinker at the moment

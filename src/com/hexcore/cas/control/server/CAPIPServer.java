@@ -20,7 +20,6 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
@@ -47,7 +46,7 @@ public class CAPIPServer
 		
 	private int clientPort;
 
-	public CAPIPServer(Overseer o, int clientPort)
+	public CAPIPServer(Simulator simulator, int clientPort)
 	{
 		super();
 		this.clientPort = clientPort;
@@ -58,7 +57,7 @@ public class CAPIPServer
 		sentWork = new HashMap<Integer, ThreadWork>();
 		completedWork = new LinkedList<ThreadWork>();
 		
-		parent = (Simulator)o;
+		parent = simulator;
 		
 		workLock = new ReentrantLock();
 	}
