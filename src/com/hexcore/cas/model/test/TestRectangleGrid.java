@@ -60,7 +60,7 @@ public class TestRectangleGrid extends TestCase
 	
 	private static RectangleGrid addNeighbours(int x, int y, boolean wrap)
 	{
-		RectangleGrid grid = new RectangleGrid(new Vector2i(x,y));
+		RectangleGrid grid = new RectangleGrid(new Vector2i(x,y), 1);
 		grid.setWrappable(wrap);
 		int count = 0;
 		
@@ -68,7 +68,7 @@ public class TestRectangleGrid extends TestCase
 			for(int j = 0; j < y; j++)
 				grid.getCell(new Vector2i(i,j)).setValue(0, count++);
 		
-		RectangleGrid neighbourSum = new RectangleGrid(new Vector2i(x,y));
+		RectangleGrid neighbourSum = new RectangleGrid(new Vector2i(x,y), 1);
 		for(int i = 0; i < x; i++)
 		{
 			for(int j = 0; j < y; j++)

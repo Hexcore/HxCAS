@@ -44,14 +44,14 @@ public class TestHexagonGrid extends TestCase
 
 	private static HexagonGrid addNeighbours(int x, int y, boolean wrap)
 	{
-		HexagonGrid grid = new HexagonGrid(new Vector2i(x,y));
+		HexagonGrid grid = new HexagonGrid(new Vector2i(x,y), 1);
 		grid.setWrappable(wrap);
 		int count = 0;
 		for(int i = 0; i < y; i++)
 			for(int j = 0; j < x; j++)
 				grid.getCell(new Vector2i(j,i)).setValue(0, count++);
 		
-		HexagonGrid neighbourSum = new HexagonGrid(new Vector2i(x,y));
+		HexagonGrid neighbourSum = new HexagonGrid(new Vector2i(x,y), 1);
 		for(int i = 0; i < y; i++)
 		{
 			for(int j = 0; j < x; j++)

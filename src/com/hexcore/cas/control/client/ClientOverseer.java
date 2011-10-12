@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
@@ -12,7 +11,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.utilities.Log;
 
-public class ClientOverseer extends Overseer
+public class ClientOverseer extends Thread
 {
 	private static final String TAG = "ClientOverseer";
 	
@@ -47,7 +46,6 @@ public class ClientOverseer extends Overseer
 		}
 	}
 	
-	@Override
 	public int checkState()
 	{
 		if(workQueue.isEmpty())

@@ -19,17 +19,7 @@ public abstract class Grid
 			for(int x = 0; x < size.x; x++)
 				this.cells[y][x] = new Cell(grid.getCell(x, y));
 	}
-	
-	public Grid(Vector2i size)
-	{
-		this.numProperties = 1;
-		this.size = new Vector2i(size);
-		this.cells = new Cell[size.y][size.x];
-		for(int y = 0; y < size.y; y++)
-			for(int x = 0; x < size.x; x++)
-				this.cells[y][x] = new Cell(numProperties);
-	}
-	
+
 	public Grid(Vector2i size, int numProperties)
 	{
 		this.numProperties = numProperties;
