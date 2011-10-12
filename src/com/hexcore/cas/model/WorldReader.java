@@ -3,15 +3,21 @@ package com.hexcore.cas.model;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 
 public class WorldReader
 {
+	private static final String TAG = "WorldReader";
+	
 	private World world = null;
 	
 	public WorldReader(World w)
@@ -19,7 +25,7 @@ public class WorldReader
 		world = w;
 	}
 	
-	public void readWorld(String worldFileName)
+	public boolean readWorld(String worldFileName)
 		throws IOException
 	{
 		/*
@@ -27,25 +33,42 @@ public class WorldReader
 		 * It will specifically look for the configuration file first,
 		 * then the rules set and then all the generation files.
 		 */
-		String rulesAndColours = "";
+		String ruleCode = null;
+		String colourCode = null;	
 		
 		File f = new File(worldFileName);
-		ZipFile zip = new ZipFile(f);
+		if (!f.exists())
+		{
+			Log.error(TAG, "Error loading world - Could not find file: " + worldFileName);
+			return false;
+		}
+		
+		ZipFile zip = null;
+		try
+		{
+			zip = new ZipFile(f);
+		}
+		catch (ZipException e)
+		{
+			Log.error(TAG, "Error loading world - " + e.getMessage());
+			return false;
+		}
+		
 		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
 		
 		int x = -1;
 		int y = -1;
 		char type = 'N';
-		int n = 0;
+		int properties = 0;
 		while(true)
 		{
 			if(!generationFiles.hasMoreElements())
 			{
 				System.out.println("Configuration file not found.");
-				return;
+				return false;
 			}
 			ZipEntry config = (ZipEntry)generationFiles.nextElement();
-			if(config.getName().indexOf(".cac") != -1)
+			if (config.getName().endsWith(".cac"))
 			{
 				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
 				String line;
@@ -65,14 +88,14 @@ public class WorldReader
 				line = in.readLine();
 				type = line.charAt(0);
 				line = in.readLine();
-				n = Integer.parseInt(line);
+				properties = Integer.parseInt(line);
 				break;
 			}
 		}
 		
 		Grid[] worldGenerations = null;
 		Vector2i gridSize = new Vector2i(x, y);
-		Cell cell = new Cell(n);
+		Cell cell = new Cell(properties);
 		switch(type)
 		{
 			case 'r':
@@ -95,33 +118,31 @@ public class WorldReader
 				break;
 			default:
 				System.out.println("Unable to create a grid with no type.");
-				return;
+				return false;
 		}
 		
 		generationFiles = zip.entries();
-		while(true)
+		while (generationFiles.hasMoreElements())
 		{
-			if(!generationFiles.hasMoreElements())
-			{
-				System.out.println("Rules and colours file not found.");
-				return;
-			}
 			ZipEntry config = (ZipEntry)generationFiles.nextElement();
-			if(config.getName().indexOf(".car") != -1)
-			{
-				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
-				String line = "";
-				char[] c = new char[1];
-				int tmp = in.read(c);
-				while(tmp != -1)
-				{
-					line += c[0];
-					tmp = in.read(c);
-				}
-				rulesAndColours = line;
-				break;
-			}
+			
+			if (config.getName().endsWith(".car"))
+				ruleCode = getStringFromStream(zip.getInputStream(config));
+			else if (config.getName().endsWith(".cacp"))
+				colourCode = getStringFromStream(zip.getInputStream(config));	
 		}
+		
+		if (ruleCode == null)
+		{
+			System.out.println("Rule file not found.");
+			return false;
+		}
+		
+		if (colourCode == null)
+		{
+			System.out.println("Colour file not found.");
+			return false;
+		}	
 		
 		int worldPos = -1;
 		generationFiles = zip.entries();
@@ -130,7 +151,7 @@ public class WorldReader
 			ZipEntry file = (ZipEntry)generationFiles.nextElement();
 			String name = file.getName();
 			long size = file.getSize();
-			if(name.indexOf(".cag") != -1)
+			if (name.endsWith(".cag"))
 			{
 				if(size > 0)
 				{
@@ -142,30 +163,43 @@ public class WorldReader
 						for(int cols = 0; cols < x; cols++)
 						{
 							line = in.readLine();
-							double[] vals = new double[n];
+							if (line.isEmpty()) continue;
+							
+							double[] vals = new double[properties];
+							
 							int prevIndex = -1;
-							int currIndex = 0;
-							for(int i = 0; i < (n - 1); i++)
+							for(int i = 0; i < properties - 1; i++)
 							{
-								currIndex = line.indexOf(" ", prevIndex);
+								int currIndex = line.indexOf(" ", prevIndex + 1);
+
+								if (currIndex <= 0)
+								{
+									Log.error(TAG, "Invalid file format");
+									return false;
+								}
+								
 								vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
 								prevIndex = currIndex;
 							}
-							vals[n - 1] = Double.parseDouble(line.substring(prevIndex + 1));
-							for(int i = 0; i < n; i++)
-								worldGenerations[worldPos].getCell(cols, rows).setValue(i, vals[i]);
+							vals[properties - 1] = Double.parseDouble(line.substring(prevIndex + 1));
+							
+							worldGenerations[worldPos].setCell(cols, rows, vals);
 						}
 						line = in.readLine();
 					}
 				}
 			}
-			else
-			{
-				System.out.println("Recieved a rule set or a config file. Cannot handle right now.");
-			}
 		}
 		
-		world.setRulesAndColours(rulesAndColours);
+		world.setRuleCode(ruleCode);
+		world.setColourCode(colourCode);
 		world.setWorldGenerations(worldGenerations);
+		
+		return true;
+	}
+	
+	private String getStringFromStream(InputStream stream)
+	{
+		return new Scanner(stream).useDelimiter("\\A").next();
 	}
 }

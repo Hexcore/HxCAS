@@ -5,26 +5,25 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
-public class SliderWidget extends ClickableWidget
+public class DiscreteSliderWidget extends ClickableWidget
 {
 	protected boolean showValue = false;
-	protected int showValuePlaces = 0;
+
+	protected int minimum;
+	protected int maximum;
+	protected int value;
 	
-	protected float minimum;
-	protected float maximum;
-	protected float value;
-	
-	public SliderWidget(int width)
+	public DiscreteSliderWidget(int width)
 	{
-		this(width, 0.0f, 100.0f, 0.0f);
+		this(width, 0, 100, 0);
 	}
 	
-	public SliderWidget(int width, float minimum, float maximum)
+	public DiscreteSliderWidget(int width, int minimum, int maximum)
 	{
 		this(width, minimum, maximum, minimum);
 	}
 	
-	public SliderWidget(int width, float minimum, float maximum, float value)
+	public DiscreteSliderWidget(int width, int minimum, int maximum, int value)
 	{
 		super(new Vector2i(width, 10));
 		this.minimum = minimum;
@@ -33,16 +32,25 @@ public class SliderWidget extends ClickableWidget
 	}
 	
 	public void setShowValue(boolean state) {showValue = state;}
-	public void setShowValuePlaces(int places) {showValuePlaces = places;}
-	public void setMinimum(float minimum) {this.minimum = minimum;}
-	public void setMaximum(float maximum) {this.maximum = maximum;}
-	public void setValue(float value) {this.value = value;}
+	
+	public void setMinimum(int minimum) 
+	{
+		this.minimum = minimum;
+		if (value < minimum) value = minimum;
+	}
+	
+	public void setMaximum(int maximum) 
+	{
+		this.maximum = maximum;
+		if (value > maximum) value = maximum;
+	}
+	
+	public void setValue(int value) {this.value = value;}
 	
 	public boolean getShowValue() {return showValue;}
-	public int getShowValuePlaces() {return showValuePlaces;}
-	public float getMinimum() {return minimum;}
-	public float getMaximum() {return maximum;}
-	public float getValue() {return value;}
+	public int getMinimum() {return minimum;}
+	public int getMaximum() {return maximum;}
+	public int getValue() {return value;}
 	
 	@Override
 	public void relayout()
@@ -57,7 +65,7 @@ public class SliderWidget extends ClickableWidget
 		Vector2i pos = this.position.add(position);
 		
 		float percent = 1.0f;
-		if (maximum > minimum) percent = (value - minimum) / (maximum - minimum);
+		if (maximum > minimum) percent = (float)(value - minimum) / (maximum - minimum);
 		
 		ButtonState state = ButtonState.NORMAL;
 		if (mouseover) state = ButtonState.HOVER;
@@ -67,7 +75,7 @@ public class SliderWidget extends ClickableWidget
 		window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
 		
 		if (showValue && active) 
-			window.getTheme().renderSliderValue(gl, pos, size, value, showValuePlaces, percent);
+			window.getTheme().renderSliderValue(gl, pos, size, value, 0, percent);
 	}
 	
 	@Override
@@ -83,7 +91,7 @@ public class SliderWidget extends ClickableWidget
 		if ((event.type == Event.Type.MOUSE_MOTION || event.type == Event.Type.MOUSE_CLICK) && active)
 		{			
 			int width = window.getTheme().getSliderHandleSize().x;
-			value = (float)(event.position.x - position.x - width / 2) * maximum / (size.x - width) + minimum;
+			value = Math.round((float)(event.position.x - position.x - width / 2) * maximum / (size.x - width) + minimum);
 			value = Math.max(Math.min(value, maximum), minimum);
 			
 			Event windowEvent = new Event(Event.Type.CHANGE);

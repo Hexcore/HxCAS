@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class TestTriangleGrid extends TestCase
 {
-	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10));
+	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10), 1);
 	
 	public void test1Width()
 	{
@@ -38,7 +38,7 @@ public class TestTriangleGrid extends TestCase
 	public void test5GetNeighbours00()
 	{
 		int gridSize = 5;
-		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)
@@ -88,7 +88,7 @@ public class TestTriangleGrid extends TestCase
 	public void test6GetNeighbours01()
 	{
 		int gridSize = 5;
-		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)
@@ -141,7 +141,7 @@ public class TestTriangleGrid extends TestCase
 	public void test7GetNeighbours22()
 	{
 		int gridSize = 5;
-		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize));
+		TriangleGrid t = new TriangleGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int y = 0; y < gridSize; y++)
 			for(int x = 0; x < gridSize; x++)

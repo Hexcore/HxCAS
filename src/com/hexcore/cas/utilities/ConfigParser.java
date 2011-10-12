@@ -2,6 +2,8 @@ package com.hexcore.cas.utilities;
 
 public abstract class ConfigParser
 {
+	private static final String TAG = "ConfigScanner";
+	
 	protected ConfigScanner scanner;
 	protected int errors = 0;
 	
@@ -62,7 +64,7 @@ public abstract class ConfigParser
 	
 	protected void error(String msg)
 	{
-		System.out.println("Error (Line " + scanner.getLineNumber() + "): " + msg);
+		Log.error(TAG, "Error (Line " + scanner.getLineNumber() + "): " + msg);
 		errors++;
 	}
 }

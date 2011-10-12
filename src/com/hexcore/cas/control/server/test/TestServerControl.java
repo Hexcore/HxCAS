@@ -15,14 +15,14 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
-import com.hexcore.cas.control.server.ServerOverseer;
+import com.hexcore.cas.control.server.Simulator;
+import com.hexcore.cas.control.server.ThreadWork;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
@@ -33,7 +33,7 @@ public class TestServerControl extends TestCase
 	private static final String TAG = "Test";
 	private static final int TEST_CLIENT_PORT = 3339;
 	
-	public ServerOverseer server = null;
+	public Simulator server = null;
 	public int genNum = 1;
 	
 	private void testClientWork(ThreadWork[] cW)
@@ -248,7 +248,7 @@ public class TestServerControl extends TestCase
 		//================================== Creating ServerOverseer ==================================
 		World theWorld = new World(); 
 		
-		server = new ServerOverseer(theWorld, TEST_CLIENT_PORT);
+		server = new Simulator(theWorld, TEST_CLIENT_PORT);
 		
 		ArrayList<String> nameList = new ArrayList<String>();
 		nameList.add("localhost");
@@ -321,8 +321,7 @@ public class TestServerControl extends TestCase
 		ThreadWork[] cW = server.getClientWork();
 		testClientWork(cW);
 		
-		Grid[] gens = theWorld.getWorld();
-		assertEquals(2, gens.length);
+		assertEquals(2, theWorld.getNumGenerations());
 		
 		server.disconnect();
 		

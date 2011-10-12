@@ -1,14 +1,15 @@
-package com.hexcore.cas.model;
+package com.hexcore.cas.control.server;
 
 import com.hexcore.cas.math.Recti;
+import com.hexcore.cas.model.Grid;
 
 public class ThreadWork
 {
-	private Grid grid = null;
-	private int generation = 0;
-	private int id = -1;
-	private Recti workable = null;
-	private long startTime = -1;
+	private Grid	grid = null;
+	private int		generation = 0;
+	private int		id = -1;
+	private Recti	workable = null;
+	private long	startTime = -1;
 	
 	public ThreadWork(int id, Grid grid, Recti workable, int generation)
 	{

@@ -20,11 +20,9 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.ThreadWork;
 import com.hexcore.cas.utilities.Log;
 
 public class CAPIPServer
@@ -36,7 +34,7 @@ public class CAPIPServer
 	
 	private boolean running = false;
 	
-	private ServerOverseer parent = null;
+	private Simulator parent = null;
 	private int currGen = 0;
 	private int gridsDone = 0;
 	private int totalGrids = -1;
@@ -48,7 +46,7 @@ public class CAPIPServer
 		
 	private int clientPort;
 
-	public CAPIPServer(Overseer o, int clientPort)
+	public CAPIPServer(Simulator simulator, int clientPort)
 	{
 		super();
 		this.clientPort = clientPort;
@@ -59,7 +57,7 @@ public class CAPIPServer
 		sentWork = new HashMap<Integer, ThreadWork>();
 		completedWork = new LinkedList<ThreadWork>();
 		
-		parent = (ServerOverseer)o;
+		parent = simulator;
 		
 		workLock = new ReentrantLock();
 	}
@@ -189,12 +187,7 @@ public class CAPIPServer
 					Log.error(TAG, "RESULT message is missing a body");
 					return;
 				}
-				
-				TreeMap<String, Node> gi = body.getDictValues();
-				Recti area = null;
-				int ID = -1;
-				int gen = 0;
-				
+								
 				if(!body.has("MORE"))
 				{
 					Log.error(TAG, "RESULT message is missing the MORE field");
@@ -216,23 +209,21 @@ public class CAPIPServer
 					return;
 				}
 				
-				ID = ((IntNode)gi.get("ID")).getIntValue();
-				
+				TreeMap<String, Node> gi = body.getDictValues();
+				Recti area = null;
+				int ID = ((IntNode)gi.get("ID")).getIntValue();
+				int gen = ((IntNode)gi.get("GENERATION")).getIntValue();
+								
 				workLock.lock();
-				
 				ThreadWork orig = sentWork.get(ID);
-				
 				workLock.unlock();
 				
-				if(orig == null)
+				if (orig == null)
 				{
 					Log.error(TAG, "RESULT message redundant - work already complete.\r\n");
 					return;
 				}
-				
-				gen = ((IntNode)gi.get("GENERATION")).getIntValue();
-				
-				if(gen != currGen)
+				else if (gen != currGen)
 				{
 					Log.error(TAG, "RESULT message considered garbage - generation not the same.");
 					return;
@@ -256,6 +247,8 @@ public class CAPIPServer
 						grid.setCell(x, y, cell);
 					}
 				}
+				
+				Log.debug(TAG, "Remove ID: " + ID);
 				
 				workLock.lock();
 				

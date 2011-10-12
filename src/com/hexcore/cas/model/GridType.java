@@ -16,20 +16,7 @@ public enum GridType
 		this.symbol = symbol;
 		this.clazz = clazz;
 	}
-	
-	public Grid create(Vector2i size)
-	{
-		try
-		{
-			return (Grid)clazz.getDeclaredConstructor(Vector2i.class).newInstance(size);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
+
 	public Grid create(Vector2i size, int numProperties)
 	{
 		try

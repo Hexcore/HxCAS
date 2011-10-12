@@ -51,6 +51,8 @@ public class TextBox extends Widget
 		selectIndex = cursorIndex;
 	}
 	
+	public void clear() {setText("");}
+	
 	public void reflowText()
 	{
 		if (window != null) 

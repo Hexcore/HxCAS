@@ -4,28 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.hexcore.cas.control.protocol.Overseer;
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.ThreadWork;
-import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
-public class ServerOverseer extends Overseer
+public class Simulator extends Thread
 {
 	private static final String TAG = "Server";
 	
 	private String[] clientNames = null;
 	
-	private volatile AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
-	private volatile AtomicBoolean paused = new AtomicBoolean(false);
+	private AtomicBoolean connected = new AtomicBoolean(false);
+	private AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
+	private AtomicBoolean paused = new AtomicBoolean(false);
+	private AtomicBoolean reset = new AtomicBoolean(false);
 	
-	private volatile boolean reset = false;
 	private volatile int currGen = 0;
 	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
@@ -38,7 +33,9 @@ public class ServerOverseer extends Overseer
 	private CAPIPServer informationProcessor = null;
 	private int clientPort;
 	
-	public ServerOverseer(World world, int clientPort)
+	protected Grid grid = null;
+		
+	public Simulator(World world, int clientPort)
 	{
 		this.clientPort = clientPort;
 		this.world = world;
@@ -151,6 +148,11 @@ public class ServerOverseer extends Overseer
 	public Grid getGrid()
 	{
 		return grid;
+	}
+	
+	public void setGrid(Grid g)
+	{
+		grid = g.clone();
 	}
 	
 	public int getNumberOfClients()
@@ -267,18 +269,30 @@ public class ServerOverseer extends Overseer
 	}
 	
 	public void play()
-	{
-		if (paused.getAndSet(false)) startGeneration();
+	{		
+		numOfGenerations = -1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
 	}
+	
+	public void step()
+	{		
+		numOfGenerations = 1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
+	}	
 	
 	public void rebuildGrid()
 	{
 		Log.debug(TAG, "Merging work done by clients");
-		for(int i = 0; i < clientWorkables.length; i++)
+		for(int i = 0; i < clientWork.length; i++)
 		{
+			int	id = clientWork[i].getID();
 			Grid g = clientWork[i].getGrid();
 			Recti aw = clientWork[i].getWorkableArea();
-			Recti uw = clientWorkables[i];
+			Recti uw = clientWorkables[id];
 			for(int y = uw.getPosition().y, cy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, cy++)
 				for(int x = uw.getPosition().x, cx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, cx++)
 					grid.setCell(x, y, g.getCell(cx, cy));
@@ -298,16 +312,10 @@ public class ServerOverseer extends Overseer
 	
 	public void reset()
 	{
-		reset = true;
+		reset.set(true);
 		numOfGenerations = 0;
 		world.reset();
 		informationProcessor.setGeneration(currGen);
-	}
-	
-	public void send()
-	{
-		informationProcessor.setClientWork(clientWork, currGen);
-		informationProcessor.sendInitialGrids();
 	}
 
 	//Called from CAPIPServer to pass up work done
@@ -322,6 +330,14 @@ public class ServerOverseer extends Overseer
 		splitGrids();
 		
 		Log.information(TAG, "Finished generation: " + currGen);
+		
+		if (reset.getAndSet(false))
+		{
+			paused.set(true);
+			setGrid(world.getInitialGeneration());
+			calculateSplits();
+			splitGrids();
+		}
 		
 		if (!paused.get()) startGeneration();
 	}
@@ -340,22 +356,23 @@ public class ServerOverseer extends Overseer
 		while (informationProcessor.getConnectedAmount() != clientNames.length) {}
 
 		Log.information(TAG, "Starting simulation...");
-		super.setGrid(world.getLastGeneration());
+		setGrid(world.getLastGeneration());
 		numOfGenerations = gN;
 		
 		calculateSplits();
 		splitGrids();
 		
+		paused.set(false);
 		isFinishedGenerations.set(false);
 		currGen = 0;
 		
 		startGeneration();
-		
-		Log.information(TAG, "Finished starting first generation");
 	}
 	
 	public void startGeneration()
 	{
+		isFinishedGenerations.set(false);
+		
 		currGen++;
 		GenerationThread generationThread = new GenerationThread();
 		generationThread.start();		
@@ -372,35 +389,26 @@ public class ServerOverseer extends Overseer
 		informationProcessor = new CAPIPServer(this, clientPort);
 		informationProcessor.connectClients(clientNames);
 		informationProcessor.start();
+		connected.set(true);
 	}
 	
 	class GenerationThread extends Thread
 	{
 		@Override
 		public void run()
-		{
-			if (reset)
-			{
-				System.out.println("NEEDS TO RESET!");
-				reset = false;
-				setGrid(world.getGenerationZero());
-				
-				calculateSplits();
-				splitGrids();
-			}
-			
-			System.out.println(currGen + " " + numOfGenerations);
-			
-			if(numOfGenerations == 0 || (numOfGenerations != -1 && currGen > numOfGenerations))
+		{			
+			if (numOfGenerations == 0)
 			{
 				System.out.println("Finished!");
 				isFinishedGenerations.set(true);
+				paused.set(true);
 				return;
 			}
-
-			Log.information(TAG, "Starting generation: " + currGen);
 			
-			send();
+			if (numOfGenerations > 0) numOfGenerations--;
+			
+			informationProcessor.setClientWork(clientWork, currGen);
+			informationProcessor.sendInitialGrids();
 		}
 	}
 }
