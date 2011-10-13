@@ -22,6 +22,8 @@ public class ClientOverseer extends Thread
 	
 	private CAPIPClient informationProcessor;
 	
+	private WorkerThread[] threads;
+	
 	private boolean running = false;
 	private boolean valid = false;
 	private int gen = 0;
@@ -91,7 +93,7 @@ public class ClientOverseer extends Thread
 	}
 	
 	@Override
-	public void run()
+	public void start()
 	{
 		if (!valid)
 		{
@@ -104,17 +106,23 @@ public class ClientOverseer extends Thread
 
 		int cores = Runtime.getRuntime().availableProcessors();
 		
-		WorkerThread[] thread = new WorkerThread[cores];
+		threads = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread(i);
+		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
 
 		informationProcessor.start();
 				
 		Log.information(TAG, "Ready");
 		
-		for (int i = 0; i < cores; i++) thread[i].start();
-		
+		for (int i = 0; i < cores; i++) threads[i].start();		
+	
 		running = true;
+		super.start();
+	}
+	
+	@Override
+	public void run()
+	{
 		while (running)
 		{
 			Work work = null;
@@ -141,8 +149,8 @@ public class ClientOverseer extends Thread
 		
 		try
 		{
-			for (int i = 0; i < cores; i++) thread[i].quit();
-			for (int i = 0; i < cores; i++) thread[i].join();
+			for (int i = 0; i < threads.length; i++) threads[i].quit();
+			for (int i = 0; i < threads.length; i++) threads[i].join();
 		}
 		catch (InterruptedException e)
 		{
