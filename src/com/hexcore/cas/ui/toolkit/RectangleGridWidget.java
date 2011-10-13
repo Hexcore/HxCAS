@@ -55,6 +55,7 @@ public class RectangleGridWidget extends Grid2DWidget
 				Graphics.renderPolygon(gl, p, rectangleBorder, true, cellBorderColour);
 			}
 		
+		if (drawSelected)
 		{
 			Vector2i p = pos.add((int)(selectedCell.x * s), (int)(selectedCell.y * s));			
 			Graphics.renderPolygon(gl, p, rectangleBorder, true, cellSelectedBorderColour);

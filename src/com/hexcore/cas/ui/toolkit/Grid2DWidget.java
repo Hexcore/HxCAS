@@ -12,6 +12,7 @@ public class Grid2DWidget extends GridWidget
 	protected Colour	cellBorderColour = Colour.WHITE;
 	protected Colour	cellSelectedBorderColour = Colour.RED;
 	
+	protected boolean	drawSelected = true;
 	protected Vector2i	selectedCell = new Vector2i(0, 0);
 	
 	public Grid2DWidget(Vector2i size, Grid grid, int cellSize)
@@ -28,6 +29,8 @@ public class Grid2DWidget extends GridWidget
 	public void setZoom(float zoom) { this.zoom = zoom; }
 	public void changeZoom(float amount) { this.zoom += zoom; }
 	
+	public void setDrawSelected(boolean state) { state = drawSelected; }
+	public boolean isSelectedDrawn() {return drawSelected;}	
 	public Vector2i getSelectedCell() { return selectedCell; }
 	
 	public void setColourProperty(int propertyIndex) { colourProperty = propertyIndex; }
