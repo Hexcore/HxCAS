@@ -66,5 +66,42 @@ public class HexagonGridWidget extends Grid2DWidget
 				Graphics.renderPolygon(gl, p, hexagon, false, colour);
 				Graphics.renderPolygon(gl, p, hexagonBorder, true, cellBorderColour);
 			}
+		
+		if (drawSelected)
+		{
+			Vector2i	p = pos.add((int)(selectedCell.x*(s+h)), (int)(selectedCell.y*r*2));
+			if ((selectedCell.x & 1) == 1) p.inc(0, (int)r);	
+			
+			Graphics.renderPolygon(gl, p, hexagonBorder, true, cellSelectedBorderColour);
+		}
 	}	
+	
+	@Override
+	public boolean handleEvent(Event event, Vector2i position)
+	{
+		boolean handled = super.handleEvent(event, position);
+		
+		if (event.type == Event.Type.MOUSE_CLICK)
+		{
+			Vector2i pos = event.position.subtract(position).add(scroll);
+			float s = cellSize * zoom;
+			float h = s / 2;
+			float r = (float)(s * Math.cos(30.0 * Math.PI / 180.0));
+			
+			int x = (int)((pos.x - h/2) / (s+h));
+			int y = (int)(pos.y / (r*2));
+			
+			Vector2i p = new Vector2i((int)(x*(s+h)), (int)(y*r*2));
+			if ((x & 1) == 1) p.inc(0, (int)r);	
+			
+			p = pos.subtract(p);
+			
+			if (p.y < 0) y--;
+			
+			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
+				selectedCell.set(x, y);
+		}
+		
+		return handled;
+	}
 }
