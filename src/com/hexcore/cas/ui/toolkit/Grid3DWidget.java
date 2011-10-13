@@ -223,7 +223,7 @@ public class Grid3DWidget extends GridWidget
 		
         gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl2.glLoadIdentity();
-        glu.gluPerspective(45.0f, (float)size.x / size.y, 16.0f, 10240.0f);
+        glu.gluPerspective(45.0f, (float)size.x / size.y, 4.0f, 2048.0f);
         gl2.glScaled(1.0f,-1.0f, 1.0f);
         gl2.glRotatef(pitch, 1.0f, 0.0f, 0.0f);
         gl2.glRotatef(yaw, 0.0f, 0.0f, 1.0f);
