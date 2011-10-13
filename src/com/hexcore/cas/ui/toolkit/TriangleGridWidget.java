@@ -50,10 +50,7 @@ public class TriangleGridWidget extends Grid2DWidget
 		upTriangleBorder[0] = new Vector2f(r+0.5f, 		0.5f);
 		upTriangleBorder[1] = new Vector2f(r+r+0.5f, 	h+0.5f);
 		upTriangleBorder[2] = new Vector2f(0.5f,		h+0.5f);		
-		
-		for (Vector2f v : downTriangle) v.inc(0.5f, 0.5f);
-		for (Vector2f v : upTriangle) v.inc(0.5f, 0.5f);
-		
+				
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
@@ -76,7 +73,50 @@ public class TriangleGridWidget extends Grid2DWidget
 					Graphics.renderPolygon(gl, p, upTriangle, false, colour);
 					Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellBorderColour);
 				}
-		
 			}
+		
+		if (drawSelected)
+		{
+			Vector2i 	p = pos.add((int)(selectedCell.x * r), (int)(selectedCell.y * h));
+			
+			if ((selectedCell.x & 1) == (selectedCell.y & 1)) // Checker-board pattern
+				Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellSelectedBorderColour);
+			else
+				Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellSelectedBorderColour);
+		}
+	}
+	
+	@Override
+	public boolean handleEvent(Event event, Vector2i position)
+	{
+		boolean handled = super.handleEvent(event, position);
+		
+		if (event.type == Event.Type.MOUSE_CLICK)
+		{
+			Vector2i pos = event.position.subtract(position).add(scroll);
+			float s = cellSize * zoom;
+			float r = s / 2;
+			float h = (float)(s * Math.sqrt(2) * 0.5);
+					
+			int y = (int)(pos.y / h);
+			float fy = pos.y / h - y;
+			int x = (int)(pos.x / r);
+			float fx = pos.x / r - x;
+			
+			System.out.println(fx + " " + fy);
+			
+			if ((x & 1) == (y & 1))
+				x = x - (fy > fx ? 1 : 0);
+			else
+				x = x - ((1.0 - fy) > fx ? 1 : 0);
+									
+			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
+			{
+				selectedCell.set(x, y);
+				window.requestFocus(this);
+			}
+		}
+		
+		return handled;
 	}
 }

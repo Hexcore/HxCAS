@@ -99,7 +99,10 @@ public class HexagonGridWidget extends Grid2DWidget
 			if (p.y < 0) y--;
 			
 			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
+			{
 				selectedCell.set(x, y);
+				window.requestFocus(this);
+			}
 		}
 		
 		return handled;

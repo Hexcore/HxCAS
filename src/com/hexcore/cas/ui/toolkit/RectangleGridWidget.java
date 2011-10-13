@@ -76,7 +76,10 @@ public class RectangleGridWidget extends Grid2DWidget
 			int y = (int)(pos.y / s);
 			
 			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
+			{
 				selectedCell.set(x, y);
+				window.requestFocus(this);
+			}
 		}
 		
 		return handled;
