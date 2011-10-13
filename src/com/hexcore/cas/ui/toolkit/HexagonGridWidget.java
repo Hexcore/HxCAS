@@ -83,11 +83,11 @@ public class HexagonGridWidget extends Grid2DWidget
 		
 		if (event.type == Event.Type.MOUSE_CLICK)
 		{
-			Vector2i pos = event.position.subtract(position).add(scroll);
+			Vector2i pos = event.position.subtract(position);
 			float s = cellSize * zoom;
 			float h = s / 2;
 			float r = (float)(s * Math.cos(30.0 * Math.PI / 180.0));
-			
+						
 			int x = (int)((pos.x - h/2) / (s+h));
 			int y = (int)(pos.y / (r*2));
 			

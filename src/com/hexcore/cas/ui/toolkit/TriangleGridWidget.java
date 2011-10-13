@@ -93,7 +93,7 @@ public class TriangleGridWidget extends Grid2DWidget
 		
 		if (event.type == Event.Type.MOUSE_CLICK)
 		{
-			Vector2i pos = event.position.subtract(position).add(scroll);
+			Vector2i pos = event.position.subtract(position);
 			float s = cellSize * zoom;
 			float r = s / 2;
 			float h = (float)(s * Math.sqrt(2) * 0.5);

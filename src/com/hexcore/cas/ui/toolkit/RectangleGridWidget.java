@@ -27,6 +27,8 @@ public class RectangleGridWidget extends Grid2DWidget
 		
 		float s = cellSize * zoom;
 		
+		pos.inc((int)(scroll.x * s), (int)(scroll.y * s));
+		
 		Vector2f[]	rectangle = new Vector2f[4];
 		rectangle[0] = new Vector2f(0.0f, 0.0f);
 		rectangle[1] = new Vector2f(0.0f, s);
@@ -69,8 +71,10 @@ public class RectangleGridWidget extends Grid2DWidget
 		
 		if (event.type == Event.Type.MOUSE_CLICK)
 		{
-			Vector2i pos = event.position.subtract(position).add(scroll);
+			Vector2i pos = event.position.subtract(position);
 			float s = cellSize * zoom;
+			
+			pos.dec((int)(scroll.x * s), (int)(scroll.y * s));
 			
 			int x = (int)(pos.x / s);
 			int y = (int)(pos.y / s);
