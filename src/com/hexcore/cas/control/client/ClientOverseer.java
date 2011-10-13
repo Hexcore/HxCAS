@@ -26,7 +26,6 @@ public class ClientOverseer extends Thread
 	
 	private boolean running = false;
 	private boolean valid = false;
-	private int gen = 0;
 
 	public ClientOverseer(int port)
 	{
@@ -61,15 +60,13 @@ public class ClientOverseer extends Thread
 		//vm.loadRules(b);
 	}
 	
-	public void addGrid(Grid grid, Recti workArea, int id, int g)
+	public void addGrid(Grid grid, Recti workArea, int id, int generation)
 	{
-		Log.information(TAG, "Got work");
-		gen = g;
-		
 		Work work = new Work();
+		work.generation = generation;
+		work.id = id;
 		work.grid = grid.clone();
 		work.workArea = new Recti(workArea);
-		work.ID = id;
 		try
 		{
 			workQueue.put(work);
@@ -129,7 +126,7 @@ public class ClientOverseer extends Thread
 			
 			try
 			{
-				work = completedQueue.poll(1000, TimeUnit.MILLISECONDS);
+				work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException e)
 			{
@@ -139,8 +136,8 @@ public class ClientOverseer extends Thread
 			if (work == null) continue;
 			
 			Log.information(TAG, "Sending completed work");
-			int more = Math.max(Runtime.getRuntime().availableProcessors() - workQueue.size(), 0);			
-			informationProcessor.sendResult(work.grid, work.workArea, more, work.ID, gen);
+			int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
+			informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
 		}
 		
 		Log.information(TAG, "Stopping...");
@@ -191,9 +188,10 @@ public class ClientOverseer extends Thread
 	
 	class Work
 	{
+		int		generation;
+		int		id;
 		Grid	grid;
 		Recti	workArea;
-		int		ID;
 	}
 	
 	class WorkerThread extends Thread
@@ -202,7 +200,7 @@ public class ClientOverseer extends Thread
 		
 		public WorkerThread(int id)
 		{
-			super("Worker - " + id);
+			super("Worker-" + id);
 		}
 		
 		public void quit()
@@ -218,7 +216,7 @@ public class ClientOverseer extends Thread
 			{
 				try
 				{
-					Work work = workQueue.poll(3, TimeUnit.SECONDS);
+					Work work = workQueue.poll(1, TimeUnit.SECONDS);
 					if (work == null) continue;
 										
 					Grid		newGrid = work.grid.getType().create(work.workArea.size, work.grid.getNumProperties());
