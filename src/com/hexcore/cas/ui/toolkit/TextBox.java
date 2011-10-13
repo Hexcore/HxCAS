@@ -159,6 +159,8 @@ public class TextBox extends Widget
 			{
 				if (event.hasModifier(Event.CTRL))
 				{
+					System.out.println("Had modifier!! - " + event.button);
+					
 					if (event.button == KeyEvent.VK_V)
 					{
 						String clipboard = window.getClipboardText();

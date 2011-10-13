@@ -544,11 +544,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			Event event2 = keyRepeatFilter.event;
 			
 			if (event2.button == keyCode) 
+			{
 				keyRepeatFilter.cancel();
-			else
-				keyReleased(event2);
-			
-			keyRepeatFilter = null;
+				keyRepeatFilter = null;
+			}
 		}
 		
 		sendEvent(event);
@@ -564,7 +563,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		
 		keyRepeatFilter = new KeyRepeatFilter(event);
-		keyRepeatTimer.schedule(keyRepeatFilter, 10);
+		keyRepeatTimer.schedule(keyRepeatFilter, 6);
 	}
 	
 	public void keyReleased(Event event)
