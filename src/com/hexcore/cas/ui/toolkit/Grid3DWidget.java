@@ -178,35 +178,38 @@ public class Grid3DWidget extends GridWidget
 	@Override
 	public void update(Vector2i position, float delta)
 	{
-		Vector2f posDelta = new Vector2f(0.0f, 0.0f);
-		float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
-		float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
-		
-		if (window.getKeyState(KeyEvent.VK_UP))
+		if (focused)
 		{
-			posDelta.x -= sinYaw;
-			posDelta.y -= cosYaw;
-		}
-		if (window.getKeyState(KeyEvent.VK_DOWN))
-		{
-			posDelta.x += sinYaw;
-			posDelta.y += cosYaw;
-		}
-		if (window.getKeyState(KeyEvent.VK_LEFT))
-		{
-			posDelta.x -= cosYaw;
-			posDelta.y += sinYaw;
-		}
-		if (window.getKeyState(KeyEvent.VK_RIGHT))
-		{
-			posDelta.x += cosYaw;
-			posDelta.y -= sinYaw;
-		}
-		
-		if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
-		{
-			posDelta.normalise();
-			move(new Vector3f(posDelta.x * delta, posDelta.y * delta, 0.0f));
+			Vector2f posDelta = new Vector2f(0.0f, 0.0f);
+			float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+			float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+			
+			if (window.getKeyState(KeyEvent.VK_UP))
+			{
+				posDelta.x -= sinYaw;
+				posDelta.y -= cosYaw;
+			}
+			if (window.getKeyState(KeyEvent.VK_DOWN))
+			{
+				posDelta.x += sinYaw;
+				posDelta.y += cosYaw;
+			}
+			if (window.getKeyState(KeyEvent.VK_LEFT))
+			{
+				posDelta.x -= cosYaw;
+				posDelta.y += sinYaw;
+			}
+			if (window.getKeyState(KeyEvent.VK_RIGHT))
+			{
+				posDelta.x += cosYaw;
+				posDelta.y -= sinYaw;
+			}
+			
+			if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
+			{
+				posDelta.normalise();
+				move(new Vector3f(posDelta.x * delta, posDelta.y * delta, 0.0f));
+			}
 		}
 	}
 	
