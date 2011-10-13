@@ -490,7 +490,7 @@ public class Theme
 				Graphics.renderRectangle(gl, position.add(padding).add(startPos, 0), new Vector2i(endPos - startPos, lineHeight), selectedColour);
 			}
 			
-			if (time % 2.0f < 1.0f)
+			if (time % 2.0f < 0.8f)
 			{
 				int cursorPos = calculateTextSize(text.substring(0, cursorIndex), Text.Size.SMALL).x;
 				Graphics.renderRectangle(gl, position.add(cursorPos + 2, padding.y), new Vector2i(1, textHeight), textColour);
