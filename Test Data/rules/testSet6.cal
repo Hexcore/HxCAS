@@ -1,0 +1,14 @@
+ruleset set6
+{
+	typecount 1;
+	
+	property land;
+	property water;
+	property another;
+	
+
+	type Land : 0
+	{
+
+	}
+}

@@ -161,20 +161,20 @@ public class Server implements LobbyListener
 					
 					case PAUSE_SIMULATION:
 					{
-						simulate.pause();
+						if (activeSimulation.get()) simulate.pause();
 						break;
 					}
 					
 					case STOP_SIMULATION:
 					{
-						activeSimulation.set(false);
-						
-						simulate.disconnect();
-						simulate = null;
-						
-						client.client.stop();
-						client = null;
-						
+						if (activeSimulation.getAndSet(false))
+						{
+							simulate.disconnect();
+							simulate = null;
+							
+							client.client.stop();
+							client = null;
+						}
 						break;
 					}
 					

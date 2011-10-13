@@ -40,8 +40,8 @@ public class CAPIPServer
 	private int totalGrids = -1;
 	private LinkedBlockingQueue<ThreadWork> workForClients = null;
 	private Map<Integer, ThreadWork> sentWork;
-	private List<ThreadWork> completedWork;
-	
+
+	private Grid currentGrid;
 	private Lock workLock;
 		
 	private int clientPort;
@@ -55,7 +55,6 @@ public class CAPIPServer
 				
 		workForClients = new LinkedBlockingQueue<ThreadWork>();
 		sentWork = new HashMap<Integer, ThreadWork>();
-		completedWork = new LinkedList<ThreadWork>();
 		
 		parent = simulator;
 		
@@ -230,7 +229,7 @@ public class CAPIPServer
 				}
 				
 				area = orig.getWorkableArea();
-				Grid grid = orig.getGrid();
+				Grid grid = orig.getGrid().getType().create(area.getSize(), 1);
 				
 				ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
 				for(int y = 0; y < rows.size(); y++)
@@ -244,25 +243,18 @@ public class CAPIPServer
 						{
 							cell.setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
 						}
-						grid.setCell(x, y, cell);
+						currentGrid.setCell(orig.getPosition().add(x, y), cell);
 					}
 				}
 				
-				Log.debug(TAG, "Remove ID: " + ID);
-				
 				workLock.lock();
-				
-				completedWork.add(new ThreadWork(ID, grid, area, gen));
 				sentWork.remove(ID);
-				
+				gridsDone++;
 				workLock.unlock();
 
-				gridsDone++;
 				if(gridsDone == totalGrids)
 				{
-					Log.debug(TAG, "Sending work done by clients");
-					parent.setClientWork(completedWork);
-					completedWork.clear();
+					parent.finishedGeneration();
 					gridsDone = 0;
 				}
 				else
@@ -421,12 +413,14 @@ public class CAPIPServer
 		System.out.println("Connected: " + clients.size());
 	}
 	
-	public void setClientWork(ThreadWork[] TW, int cG)
+	public void setClientWork(Grid grid, ThreadWork[] TW, int cG)
 	{
 		workLock.lock();
 		
 		workForClients.clear();
 		sentWork.clear();
+		
+		currentGrid = grid;
 		
 		currGen = cG;
 		gridsDone = 0;

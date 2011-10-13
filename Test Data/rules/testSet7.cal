@@ -1,0 +1,14 @@
+ruleset set7
+{
+	typecount 1;
+	
+	property land;
+	property water;
+	property another;
+	property again;
+
+	type Land : 0
+	{
+
+	}
+}

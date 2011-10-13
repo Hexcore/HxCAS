@@ -22,6 +22,8 @@ public class ClientOverseer extends Thread
 	
 	private CAPIPClient informationProcessor;
 	
+	private WorkerThread[] threads;
+	
 	private boolean running = false;
 	private boolean valid = false;
 	private int gen = 0;
@@ -91,7 +93,7 @@ public class ClientOverseer extends Thread
 	}
 	
 	@Override
-	public void run()
+	public void start()
 	{
 		if (!valid)
 		{
@@ -104,17 +106,23 @@ public class ClientOverseer extends Thread
 
 		int cores = Runtime.getRuntime().availableProcessors();
 		
-		WorkerThread[] thread = new WorkerThread[cores];
+		threads = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread(i);
+		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
 
 		informationProcessor.start();
 				
 		Log.information(TAG, "Ready");
 		
-		for (int i = 0; i < cores; i++) thread[i].start();
-		
+		for (int i = 0; i < cores; i++) threads[i].start();		
+	
 		running = true;
+		super.start();
+	}
+	
+	@Override
+	public void run()
+	{
 		while (running)
 		{
 			Work work = null;
@@ -141,8 +149,8 @@ public class ClientOverseer extends Thread
 		
 		try
 		{
-			for (int i = 0; i < cores; i++) thread[i].quit();
-			for (int i = 0; i < cores; i++) thread[i].join();
+			for (int i = 0; i < threads.length; i++) threads[i].quit();
+			for (int i = 0; i < threads.length; i++) threads[i].join();
 		}
 		catch (InterruptedException e)
 		{
@@ -159,7 +167,8 @@ public class ClientOverseer extends Thread
 			int sum = 0;
 			
 			for (Cell neighbour : neighbours)
-				sum += neighbour.getValue(0);
+				if (neighbour != null)
+					sum += neighbour.getValue(0);
 			
 			if (cell.getValue(0) == 1)
 			{
@@ -171,6 +180,12 @@ public class ClientOverseer extends Thread
 				if (sum == 3)
 					cell.setValue(0, 1);
 			}
+		}
+		
+		@Override
+		public int getNumProperties()
+		{
+			return 2;
 		}
 	}
 	
@@ -206,17 +221,19 @@ public class ClientOverseer extends Thread
 					Work work = workQueue.poll(3, TimeUnit.SECONDS);
 					if (work == null) continue;
 										
-					Grid	newGrid = work.grid.clone();
-					
-					Vector2i end = work.workArea.position.add(work.workArea.size);
-					
-					for (int y = work.workArea.position.y; y < end.y; y++)
-						for (int x = work.workArea.position.x; x < end.x; x++)
+					Grid		newGrid = work.grid.getType().create(work.workArea.size, work.grid.getNumProperties());
+					Vector2i	offset = work.workArea.position;
+					Vector2i 	size = work.workArea.size;
+										
+					for (int y = 0; y < size.y; y++)
+						for (int x = 0; x < size.x; x++)
 						{
-							Cell cell = new Cell(work.grid.getCell(x, y));
-							Cell[] neighbours = work.grid.getNeighbours(new Vector2i(x, y));
+							Vector2i 	location = offset.add(x, y);
+							Cell 		cell = new Cell(work.grid.getCell(location));
+							Cell[] 		neighbours = work.grid.getNeighbours(location);
+							
 							rule.run(cell, neighbours);
-							newGrid.setCell(new Vector2i(x, y), cell);
+							newGrid.setCell(x, y, cell);
 						}
 					
 					work.grid = newGrid;
