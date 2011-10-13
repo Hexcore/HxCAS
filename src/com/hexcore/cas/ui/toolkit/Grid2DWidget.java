@@ -5,10 +5,14 @@ import com.hexcore.cas.model.Grid;
 
 public class Grid2DWidget extends GridWidget
 {
-	protected int	colourProperty = 0; //< The property that is used to determine the colour to use
-	protected float	zoom = 1.0f;
+	protected int		colourProperty = 0; //< The property that is used to determine the colour to use
+	protected float		zoom = 1.0f;
+	protected Vector2i 	scroll = new Vector2i(0, 0);
 	
-	protected Colour cellBorderColour = Colour.WHITE;
+	protected Colour	cellBorderColour = Colour.WHITE;
+	protected Colour	cellSelectedBorderColour = Colour.RED;
+	
+	protected Vector2i	selectedCell = new Vector2i(0, 0);
 	
 	public Grid2DWidget(Vector2i size, Grid grid, int cellSize)
 	{
@@ -24,8 +28,11 @@ public class Grid2DWidget extends GridWidget
 	public void setZoom(float zoom) { this.zoom = zoom; }
 	public void changeZoom(float amount) { this.zoom += zoom; }
 	
+	public Vector2i getSelectedCell() { return selectedCell; }
+	
 	public void setColourProperty(int propertyIndex) { colourProperty = propertyIndex; }
 	public void setCellBorderColour(Colour colour) { cellBorderColour = colour; }
+	public void setSelectedCellBorderColour(Colour colour) { cellSelectedBorderColour = colour; }
 	
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)

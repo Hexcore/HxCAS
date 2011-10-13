@@ -54,5 +54,30 @@ public class RectangleGridWidget extends Grid2DWidget
 				Graphics.renderPolygon(gl, p, rectangle, false, colour);
 				Graphics.renderPolygon(gl, p, rectangleBorder, true, cellBorderColour);
 			}
+		
+		{
+			Vector2i p = pos.add((int)(selectedCell.x * s), (int)(selectedCell.y * s));			
+			Graphics.renderPolygon(gl, p, rectangleBorder, true, cellSelectedBorderColour);
+		}
 	}	
+	
+	@Override
+	public boolean handleEvent(Event event, Vector2i position)
+	{
+		boolean handled = super.handleEvent(event, position);
+		
+		if (event.type == Event.Type.MOUSE_CLICK)
+		{
+			Vector2i pos = event.position.subtract(position).add(scroll);
+			float s = cellSize * zoom;
+			
+			int x = (int)(pos.x / s);
+			int y = (int)(pos.y / s);
+			
+			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
+				selectedCell.set(x, y);
+		}
+		
+		return handled;
+	}
 }
