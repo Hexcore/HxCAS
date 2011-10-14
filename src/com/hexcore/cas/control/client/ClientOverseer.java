@@ -85,6 +85,12 @@ public class ClientOverseer extends Thread
 		informationProcessor.disconnect();
 	}
 	
+	public void setRule(Rule rule)
+	{
+		Log.information(TAG, "Loaded new rule code");
+		this.rule = rule;
+	}
+	
 	@Override
 	public void start()
 	{

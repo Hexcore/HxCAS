@@ -176,6 +176,8 @@ public class Simulator extends Thread
 		setGrid(world.getLastGeneration());
 		numOfGenerations = gN;
 		
+		informationProcessor.sendByteCode(ruleByteCode);
+		
 		calculateSplits();
 		splitGrids();
 		

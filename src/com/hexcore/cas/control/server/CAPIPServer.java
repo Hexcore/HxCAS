@@ -93,11 +93,6 @@ public class CAPIPServer
 		return connectedNum;
 	}
 	
-	public void waitForClients(int amount)
-	{
-		
-	}
-
 	protected void interpretInput(Message message, String host)
 	{
 		Log.information(TAG, "Interpreting received message");
@@ -441,6 +436,13 @@ public class CAPIPServer
 		gridsDone = 0;
 	}
 
+	public void sendByteCode(byte[] bytes)
+	{
+		Log.information(TAG, "Sending bytecode...");
+		for (ClientInfo client : clients)
+			client.sendByteCode(bytes);
+	}
+	
 	public void start()
 	{	
 		Log.information(TAG, "Running...");
@@ -527,6 +529,15 @@ public class CAPIPServer
 			}
 			
 			protocol.disconnect();
+		}
+		
+		public void sendByteCode(byte[] bytes)
+		{
+			DictNode header = makeHeader("CODE");
+			DictNode body = new DictNode();
+			body.addToDict("DATA", new ByteNode(bytes));
+			Message msg = new Message(header, body);
+			protocol.sendMessage(msg);	
 		}
 	}
 }
