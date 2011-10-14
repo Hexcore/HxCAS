@@ -9,6 +9,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.rulesystems.Rule;
+import com.hexcore.cas.rulesystems.test.GameOfLifeRule;
 import com.hexcore.cas.utilities.Log;
 
 public class ClientOverseer extends Thread
@@ -53,11 +54,6 @@ public class ClientOverseer extends Thread
 			return 0;
 		else
 			return 1;
-	}
-	
-	public void setRules(byte[] b)
-	{
-		//vm.loadRules(b);
 	}
 	
 	public void addGrid(Grid grid, Recti workArea, int id, int generation)
@@ -106,20 +102,20 @@ public class ClientOverseer extends Thread
 		threads = new WorkerThread[cores];
 		
 		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
-
-		informationProcessor.start();
 				
 		Log.information(TAG, "Ready");
-		
-		for (int i = 0; i < cores; i++) threads[i].start();		
-	
-		running = true;
 		super.start();
 	}
 	
 	@Override
 	public void run()
 	{
+		informationProcessor.start();	
+		
+		for (int i = 0; i < threads.length; i++) threads[i].start();		
+		
+		running = true;
+		
 		while (running)
 		{
 			Work work = null;
@@ -152,37 +148,6 @@ public class ClientOverseer extends Thread
 		catch (InterruptedException e)
 		{
 			e.printStackTrace();
-		}
-	}
-
-	class GameOfLifeRule implements Rule
-	{
-		@Override
-		public void run(Cell cell, Cell[] neighbours)
-		{
-			// Game of Life implementation for testing
-			int sum = 0;
-			
-			for (Cell neighbour : neighbours)
-				if (neighbour != null)
-					sum += neighbour.getValue(0);
-			
-			if (cell.getValue(0) == 1)
-			{
-				if (sum < 2 || sum > 3) 
-					cell.setValue(0, 0);
-			}
-			else
-			{
-				if (sum == 3)
-					cell.setValue(0, 1);
-			}
-		}
-		
-		@Override
-		public int getNumProperties()
-		{
-			return 2;
 		}
 	}
 	
