@@ -128,27 +128,6 @@ public class Simulator extends Thread
 		world.reset();
 		informationProcessor.setGeneration(currentGeneration);
 	}
-
-	public void finishedGeneration()
-	{
-		threadWorkID = 0;
-		
-		world.addGeneration(grid);
-		
-		splitGrids();
-		
-		Log.information(TAG, "Finished generation: " + currentGeneration);
-		
-		if (reset.getAndSet(false))
-		{
-			paused.set(true);
-			setGrid(world.getInitialGeneration());
-			calculateSplits();
-			splitGrids();
-		}
-		
-		if (!paused.get()) startGeneration();
-	}
 	
 	public void setRuleBytecode(byte[] ruleByteCode)
 	{
@@ -187,19 +166,31 @@ public class Simulator extends Thread
 		
 		startGeneration();
 	}
-	
-	public void startGeneration()
-	{
-		isFinishedGenerations.set(false);
 		
-		currentGeneration++;
-		GenerationThread generationThread = new GenerationThread();
-		generationThread.start();		
-	}
-	
 	public void disconnect()
 	{
 		informationProcessor.disconnect();
+	}
+	
+	public void finishedGeneration()
+	{
+		threadWorkID = 0;
+		
+		world.addGeneration(grid.clone());
+		
+		splitGrids();
+		
+		Log.information(TAG, "Finished generation: " + currentGeneration);
+		
+		if (reset.getAndSet(false))
+		{
+			paused.set(true);
+			setGrid(world.getInitialGeneration());
+			calculateSplits();
+			splitGrids();
+		}
+		
+		if (!paused.get()) startGeneration();
 	}
 	
 	@Override
@@ -231,8 +222,18 @@ public class Simulator extends Thread
 		}
 	}
 	
+	/////////////////////////////////////////////
 	/// Private functions
 	
+	private void startGeneration()
+	{
+		isFinishedGenerations.set(false);
+		
+		currentGeneration++;
+		GenerationThread generationThread = new GenerationThread();
+		generationThread.start();		
+	}
+		
 	/*
 	 * @author Abby Kumar
 	 */
