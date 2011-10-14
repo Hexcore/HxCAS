@@ -884,24 +884,31 @@ public class Theme
 		
 	}
 	
-	public void renderFlowedShadowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour, Colour shadowColour, Vector2i shadowOffset)
-	{
-		Vector2i	pos = new Vector2i(position);
-		for (String line : flowedText.lines)
-		{
-			renderShadowedText(gl, line, pos, colour, shadowColour, shadowOffset, flowedText.textSize);
-			pos.inc(0, flowedText.lineHeight);
-		}
-	}	
-	
 	public void renderFlowedText(GL gl, Vector2i position, FlowedText flowedText, Colour colour)
 	{
+		TextRenderer textRenderer = textRenderers.get(flowedText.textSize);
+		FontRenderContext context = textRenderer.getFontRenderContext();
+		Font font = textRenderer.getFont();
+		
+		GL2 gl2 = gl.getGL2();
+		gl2.glPushMatrix();
+		gl2.glScalef(1.0f, -1.0f, 1.0f);
+		
+		textRenderer.setColor(colour.r, colour.g, colour.b, colour.a);
+		textRenderer.begin3DRendering();
+		
 		Vector2i	pos = new Vector2i(position);
-		for (String line : flowedText.lines)
-		{
-			renderText(gl, line, pos, colour, flowedText.textSize);
+		for (String text : flowedText.lines)
+		{			
+			text = convertTabsToSpaces(text);
+			LineMetrics metrics = font.getLineMetrics(text, context);
+			textRenderer.draw(text, pos.x, -pos.y-(int)metrics.getAscent());
 			pos.inc(0, flowedText.lineHeight);
 		}
+		
+		textRenderer.end3DRendering();
+		
+		gl2.glPopMatrix();
 	}	
 	
 	public void renderFlowedText(GL gl, String text, Vector2i position, int maxWidth, Colour colour, Text.Size textSize)
