@@ -153,44 +153,16 @@ public class TextBox extends Widget
 		{
 			int startIndex = Math.min(cursorIndex, selectIndex);
 			int endIndex = Math.max(cursorIndex, selectIndex);
+					
+			if (event.type == Event.Type.KEY_PRESS)
+				System.out.println("Pressed " + event.button + " " + event.pressed);
+			else if (event.type == Event.Type.KEY_TYPED)
+				System.out.println("Typed " + event.button + " " + event.pressed);
 			
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
-			{
-				if (event.hasModifier(Event.CTRL))
-				{
-					System.out.println("Had modifier!! - " + event.button);
-					
-					if (event.button == KeyEvent.VK_V)
-					{
-						String clipboard = window.getClipboardText();
-	
-						text = text.substring(0, startIndex) + clipboard + text.substring(endIndex);
-						
-						if (startIndex < endIndex)
-							cursorIndex = startIndex + clipboard.length();
-						else
-							cursorIndex += clipboard.length();
-					}
-					else if (event.button == KeyEvent.VK_C)
-					{
-						if (startIndex < endIndex)
-						{
-							window.setClipboardText(text.substring(startIndex, endIndex));
-							cursorIndex = startIndex;
-						}
-					}	
-					else if (event.button == KeyEvent.VK_X)
-					{
-						if (startIndex < endIndex)
-						{
-							window.setClipboardText(text.substring(startIndex, endIndex));
-							text = text.substring(0, startIndex) + text.substring(endIndex);
-							cursorIndex = startIndex;
-						}	
-					}	
-				}
-				else if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
+			{				
+				if ((event.button == KeyEvent.VK_HOME) && (cursorIndex > 0))
 					cursorIndex = flowedText.getLineBeginningCursorPosition(cursorIndex);
 				else if ((event.button == KeyEvent.VK_END) && (cursorIndex < text.length()))
 					cursorIndex = flowedText.getLineEndCursorPosition(cursorIndex);	
@@ -200,10 +172,38 @@ public class TextBox extends Widget
 					cursorIndex++;
 				else
 					handled = false;
+				
+				if (handled && !event.hasModifier(Event.SHIFT)) selectIndex = cursorIndex;
 			}
-			else if (event.type == Event.Type.KEY_TYPED && !event.hasModifier(Event.CTRL))
+			else if (event.type == Event.Type.KEY_TYPED)
 			{
-				if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
+				if (event.button == 22) // Paste
+				{
+					String clipboard = window.getClipboardText();
+
+					text = text.substring(0, startIndex) + clipboard + text.substring(endIndex);
+					
+					if (startIndex < endIndex)
+						cursorIndex = startIndex + clipboard.length();
+					else
+						cursorIndex += clipboard.length();
+					
+					selectIndex = cursorIndex;
+				}
+				else if (event.button == 3) // Copy
+				{
+					if (startIndex < endIndex) window.setClipboardText(text.substring(startIndex, endIndex));
+				}	
+				else if (event.button == 24) // Cut
+				{
+					if (startIndex < endIndex)
+					{
+						window.setClipboardText(text.substring(startIndex, endIndex));
+						text = text.substring(0, startIndex) + text.substring(endIndex);
+						cursorIndex = startIndex;
+					}	
+				}
+				else if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
 				{
 					text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
 					
@@ -211,6 +211,8 @@ public class TextBox extends Widget
 						cursorIndex = startIndex + 1;
 					else
 						cursorIndex++;
+					
+					selectIndex = cursorIndex;
 				}		
 				else if (event.button == '\n') // Enter
 				{
@@ -231,6 +233,8 @@ public class TextBox extends Widget
 							cursorIndex--;
 						}
 					}
+					
+					selectIndex = cursorIndex;
 				}
 				else if (event.button == 127) // Delete
 				{
@@ -241,6 +245,8 @@ public class TextBox extends Widget
 					}
 					else if (cursorIndex < text.length())
 						text = text.substring(0, cursorIndex) + text.substring(cursorIndex + 1);
+					
+					selectIndex = cursorIndex;
 				}
 				else
 					handled = false;
@@ -251,8 +257,6 @@ public class TextBox extends Widget
 			}
 			else
 				handled = false;
-			
-			if (handled) selectIndex = cursorIndex;
 		}
 		
 		if (handled) cursorFlash = 0.0f;

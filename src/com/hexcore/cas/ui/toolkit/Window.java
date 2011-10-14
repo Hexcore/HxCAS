@@ -32,6 +32,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
+import javax.swing.SwingUtilities;
 
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -539,7 +540,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.button = keyCode;
 		event.setModifiers(e);
 		
-		if ((keyRepeatFilter != null) && (keyRepeatFilter.event != null))
+		if (keyRepeatFilter != null && keyRepeatFilter.event != null)
 		{
 			Event event2 = keyRepeatFilter.event;
 			
@@ -650,9 +651,17 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		{
 			if (event != null)
 			{
-				Event temp = event;
+				final Event temp = event;
 				event = null;
-				keyReleased(temp);
+				
+				SwingUtilities.invokeLater(new Runnable() 
+				{
+					@Override
+					public void run()
+					{
+						keyReleased(temp);
+					}	
+				});
 			}
 		}
 	}
