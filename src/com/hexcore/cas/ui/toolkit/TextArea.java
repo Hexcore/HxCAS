@@ -125,8 +125,10 @@ public class TextArea extends TextBox
 					cursorIndex = flowedText.getNextLineCursorPosition(cursorIndex);
 				else
 					handled = false;
+				
+				if (handled && !event.hasModifier(Event.SHIFT)) selectIndex = cursorIndex;
 			}
-			else if (event.type == Event.Type.KEY_TYPED && !event.hasModifier(Event.CTRL) && event.button == '\n')
+			else if (event.type == Event.Type.KEY_TYPED && event.button == '\n')
 			{
 				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
 				
@@ -134,6 +136,8 @@ public class TextArea extends TextBox
 					cursorIndex = startIndex + 1;
 				else
 					cursorIndex++;
+				
+				selectIndex = cursorIndex;
 			}
 			else if (event.type == Event.Type.MOUSE_SCROLL)
 			{
@@ -142,8 +146,6 @@ public class TextArea extends TextBox
 			}
 			else
 				handled = false;
-			
-			if (handled) selectIndex = cursorIndex;
 		}
 	
 		if (handled) relayout();
