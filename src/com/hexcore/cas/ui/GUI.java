@@ -16,6 +16,7 @@ import java.util.Iterator;
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
@@ -248,6 +249,34 @@ public class GUI implements WindowEventListener
     private Grid	currentGrid;
     
     private Server 	server;
+	private Button zoomInButton;
+
+
+	private Button zoomOutButton;
+
+
+	private Button moveUpButton;
+
+
+	private Button moveDownButton;
+
+
+	private Button moveLeftButton;
+
+
+	private Button moveRightButton;
+
+
+	private Button yawLeftButton;
+
+
+	private Button yawRightButton;
+
+
+	private Button pitchUpButton;
+
+
+	private Button pitchDownButton;
     
     public GUI(Server server)
     {
@@ -741,39 +770,44 @@ public class GUI implements WindowEventListener
         innerCameraLayout3.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout3);
         
-        Button zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
+        zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
         zoomInButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(zoomInButton);
-        Button zoomOutButton = new Button(window.getTheme().getImage("icons", "zoom_out_icon.png"));
+      
+        zoomOutButton = new Button(window.getTheme().getImage("icons", "zoom_out_icon.png"));
         zoomOutButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(zoomOutButton);
-        Button moveUpButton = new Button(window.getTheme().getImage("icons", "up_icon.png"));
+       
+        moveUpButton = new Button(window.getTheme().getImage("icons", "up_icon.png"));
         moveUpButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(moveUpButton);
-        Button moveDownButton = new Button(window.getTheme().getImage("icons", "down_icon.png"));
+       
+        moveDownButton = new Button(window.getTheme().getImage("icons", "down_icon.png"));
         moveDownButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(moveDownButton);
-        Button moveLeftButton = new Button(window.getTheme().getImage("icons", "left_icon.png"));
+       
+        moveLeftButton = new Button(window.getTheme().getImage("icons", "left_icon.png"));
         moveLeftButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(moveLeftButton);
-        Button moveRightButton = new Button(window.getTheme().getImage("icons", "right_icon.png"));
+        
+        moveRightButton = new Button(window.getTheme().getImage("icons", "right_icon.png"));
         moveRightButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(moveRightButton);
         
         
-        Button yawLeftButton = new Button(window.getTheme().getImage("icons", "yaw_left_icon.png"));
+        yawLeftButton = new Button(window.getTheme().getImage("icons", "yaw_left_icon.png"));
         yawLeftButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout3.add(yawLeftButton);
         
-        Button yawRightButton = new Button(window.getTheme().getImage("icons", "yaw_right_icon.png"));
+        yawRightButton = new Button(window.getTheme().getImage("icons", "yaw_right_icon.png"));
         yawRightButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout3.add(yawRightButton);
         
-        Button pitchUpButton = new Button(window.getTheme().getImage("icons", "pitch_up_icon.png"));
+        pitchUpButton = new Button(window.getTheme().getImage("icons", "pitch_up_icon.png"));
         pitchUpButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout3.add(pitchUpButton);
         
-        Button pitchDownButton = new Button(window.getTheme().getImage("icons", "pitch_down_icon.png"));
+        pitchDownButton = new Button(window.getTheme().getImage("icons", "pitch_down_icon.png"));
         pitchDownButton.setMargin(new Vector2i(5, 0));
         
         innerCameraLayout3.add(pitchDownButton);
@@ -792,7 +826,7 @@ public class GUI implements WindowEventListener
         viewSettingsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(viewSettingsLayout);
         
-        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(148, 25), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(14, 25), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout);
         
@@ -1163,7 +1197,98 @@ public class GUI implements WindowEventListener
             	
             	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D);
             	viewport.recreate(currentGrid);
+            	
+            	viewports.add(viewport);
             }
+            
+            // VIEWPORT CAMERA
+            
+            else if (event.target == zoomOutButton)
+            {
+            
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(new Vector3f(1, 1, 1));
+    					}
+    				}
+            	}
+            	
+            }
+
+	
+			 else if (event.target ==moveUpButton)
+	         {
+	         	
+	         }
+
+
+			 else if (event.target ==moveDownButton)
+	            {
+	            	
+	            }
+
+
+			 else if (event.target ==moveLeftButton)
+	            {
+	            	
+	            }
+
+
+			 else if (event.target ==moveRightButton)
+	            {
+	            	
+	            }
+
+
+			 else if (event.target ==yawLeftButton)
+	            {
+			
+				 
+				 for (Viewport viewport : viewports)
+	            	{	
+	    				
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.changeYaw(2);
+	    					}
+	    				
+	            	}
+	            }
+
+
+			 else if (event.target ==yawRightButton)
+	            {
+				 
+				 for (Viewport viewport : viewports)
+	            	{	
+	    				
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.changeYaw(-2);
+	    					}
+	    				
+	            	}
+				 
+				 
+	            	
+	            }
+
+
+			 else if (event.target ==pitchUpButton)
+	            {
+	            	
+	            }
+
+
+            
+            
         }
         else if (event.type == Event.Type.CHANGE)
         {
