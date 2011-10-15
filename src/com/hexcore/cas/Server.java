@@ -110,16 +110,10 @@ public class Server implements LobbyListener
 						for(int y = 0; y < event.size.y; y++)
 							for(int x = 0; x < event.size.x; x++)
 								grid.getCell(x, y).setValue(0, 0.0);
-						
-						grid.getCell(2, 4).setValue(0, 1);
-						grid.getCell(3, 4).setValue(0, 1);
-						grid.getCell(4, 4).setValue(0, 1);
-						grid.getCell(4, 3).setValue(0, 1);
-						grid.getCell(3, 2).setValue(0, 1);
-						
+												
 						world.addGeneration(grid);
 						
-						ui.startSimulation(world);
+						ui.startWorldEditor(world);
 						
 						break;
 					}
@@ -138,7 +132,7 @@ public class Server implements LobbyListener
 							e.printStackTrace();
 						}
 						
-						ui.startSimulation(world);
+						ui.startWorldEditor(world);
 						
 						break;
 					}

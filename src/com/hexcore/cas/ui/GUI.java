@@ -2,6 +2,7 @@
 
 package com.hexcore.cas.ui;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -867,35 +868,124 @@ public class GUI implements WindowEventListener
         window.relayout();
     }
     
-    
-    
-    
-    public void setWorld()
-    {
-    	
-    }
-    
-
-    
-    public void startSimulation(World world)
+    public void startWorldEditor(World world)
     {
     	this.world = world;
+    	loadPropertiesFromWorld();
     	
-    	masterView.setIndex(2);
-    	Log.information(TAG, "Switched to simulation screen");
-    	
-    	generationSlider.setMaximum(world.getNumGenerations());
-    	generationSlider.setMinimum(0);
-    	generationSlider.setValue(world.getNumGenerations());
-    	
-    	currentGeneration = 0;
-    	updateSimulationScreen(true);
+    	masterView.setIndex(1); 	
+    	window.relayout();
     }
     
+    public void loadPropertiesFromWorld()
+    {
+    	Grid grid = world.getInitialGeneration();
+    	
+    	worldSizeXNumberBox.setValue(grid.getWidth());
+    	worldSizeYNumberBox.setValue(grid.getHeight());
+    	
+    	switch (grid.getType())
+    	{
+    		case RECTANGLE:
+    			cellShapeDropDownBox.setSelected(0);
+    			break;
+    		case TRIANGLE:
+    			cellShapeDropDownBox.setSelected(1);
+    			break;
+    		case HEXAGON:
+    			cellShapeDropDownBox.setSelected(2);
+    			break;
+    	}
+    	
+    	wrapCheckBox.setChecked(grid.isWrappable());
+    	
+    	updatePreview();
+    }
+    
+    public void savePropertiesToWorld()
+    {
+    	Grid grid = world.getInitialGeneration();
+    	
+        Vector2i size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
+
+        GridType type;
+        if (cellShapeDropDownBox.getSelectedText() == "Triangle")
+        	type = GridType.TRIANGLE;
+        else if (cellShapeDropDownBox.getSelectedText() == "Hexagon")
+        	type = GridType.HEXAGON;
+        else
+        	type = GridType.RECTANGLE;
+        
+        if (!grid.getSize().equals(size) || grid.getType() != type)
+        {
+        	Log.information(TAG, "Recreating grid, the current state will be lost");
+        	grid = type.create(size, grid.getNumProperties());
+        	
+			grid.getCell(2, 4).setValue(0, 1);
+			grid.getCell(3, 4).setValue(0, 1);
+			grid.getCell(4, 4).setValue(0, 1);
+			grid.getCell(4, 3).setValue(0, 1);
+			grid.getCell(3, 2).setValue(0, 1);
+        }
+        
+        grid.setWrappable(wrapCheckBox.isChecked());
+        
+        world.reset();
+        world.setWorldGenerations(new Grid[] {grid});
+    }
+    
+    public void updatePreview()
+    {
+    	Grid grid = world.getInitialGeneration();
+    	if (grid == null)
+    	{
+    		Log.error(TAG, "World doesn't have an initial grid");
+    		return;
+    	}
+    	
+    	Log.debug(TAG, grid.toString());
+    	
+    	switch (grid.getType())
+    	{
+    		case RECTANGLE:
+	            grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)grid, 24);
+	            grid3DViewer.setFlag(Widget.FILL);
+	            grid3DViewer.addSlice(0, 16.0f);
+	            widget3DPreviewContainer.setContents(grid3DViewer);
+	
+	            gridViewer = new RectangleGridWidget((RectangleGrid)grid, 16);
+	            gridViewer.setColourRuleSet(colourRules);
+	            widgetPreviewContainer.setContents(gridViewer);
+	            break;
+	            
+    		case TRIANGLE:
+	        	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)grid, 24);
+	            grid3DViewer.setFlag(Widget.FILL);
+	            grid3DViewer.addSlice(0, 16.0f);
+	            widget3DPreviewContainer.setContents(grid3DViewer);
+	            
+	            gridViewer = new TriangleGridWidget((TriangleGrid)grid, 32);
+	            gridViewer.setColourRuleSet(colourRules);
+	            widgetPreviewContainer.setContents(gridViewer);      
+	            break;
+	            
+            case HEXAGON:
+	            grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)grid, 24);
+	            grid3DViewer.setFlag(Widget.FILL);
+	            grid3DViewer.addSlice(0, 16.0f);
+	            widget3DPreviewContainer.setContents(grid3DViewer);
+	    
+	            gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
+	            gridViewer.setColourRuleSet(colourRules);
+	            widgetPreviewContainer.setContents(gridViewer);
+	            break;
+        }
+    }
+        
     public void updateSimulationScreen(boolean force)
     {
     	if (world != null)
-    	{		
+    	{
     		// Update slider
     		int	generations = world.getNumGenerations() - 1;
 			int origMaximum = generationSlider.getMaximum();
@@ -929,6 +1019,30 @@ public class GUI implements WindowEventListener
     			}
     		}
     	}
+    }
+    
+    private static String readFileAsString(File file)
+    {
+    	try
+    	{
+	        byte[] buffer = new byte[(int)file.length()];
+	        BufferedInputStream f = null;
+	        try 
+	        {
+	            f = new BufferedInputStream(new FileInputStream(file));
+	            f.read(buffer);
+	        }
+	        finally 
+	        {
+	            f.close(); 
+	        }
+	        return new String(buffer);
+    	}
+    	catch (IOException e)
+    	{
+    	}
+    	
+    	return "";
     }
    
     @Override
@@ -969,9 +1083,11 @@ public class GUI implements WindowEventListener
         {
             if (event.target == createWorldButton)
             {            	
-                masterView.setIndex(1 - masterView.getIndex());
-                //buttonBarLayout.toggleVisibility();
-                window.relayout();
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
+                serverEvent.size = new Vector2i(100, 100);
+                serverEvent.gridType = GridType.RECTANGLE;
+                serverEvent.wrappable = true;
+                server.sendEvent(serverEvent);
             }
             else if (event.target == loadWorldButton)
             {
@@ -982,96 +1098,34 @@ public class GUI implements WindowEventListener
                     ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.LOAD_WORLD);
                     serverEvent.filename = result.getFullName();
                     server.sendEvent(serverEvent);
-                	
-                    masterView.setIndex(1 - masterView.getIndex());
-                    window.relayout();	
                 }
             }
             else if (event.target == helpButton)
             {
-                mainView.setIndex(3 - mainView.getIndex());
+            	
             }
             else if (event.target == quitButton)
             {
                 window.exit();
             }
-           
             else if ((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
             {
                 window.closeModalDialog();
             }
-            
             else if (event.target == backButton)
             {
                 masterView.setIndex(0);
             }
             else if (event.target == submitButton)
-            {
+            {            	
                 if(( worldSizeXNumberBox.getValue(5) < 5) || ( worldSizeYNumberBox.getValue(5) < 5))
                 {
                     window.showModalDialog(dialog);
                     return;
                 }
-            
-                String	shape = cellShapeDropDownBox.getSelectedText();
-                int		properties = 1;
-
-                if (shape == "Square")
-                {
-                    // Rectangle Grid
-                	currentGrid = new RectangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5),worldSizeYNumberBox.getValue(5)), properties);
-                	currentGrid.getCell(2, 4).setValue(0, 1);
-                	currentGrid.getCell(3, 4).setValue(0, 1);
-                	currentGrid.getCell(4, 4).setValue(0, 1);
-                    currentGrid.getCell(4, 3).setValue(0, 1);
-                    currentGrid.getCell(3, 2).setValue(0, 1);
-                    
-                    grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)currentGrid, 24);
-                    grid3DViewer.setFlag(Widget.FILL);
-                    grid3DViewer.addSlice(0, 16.0f);
-                    widget3DPreviewContainer.setContents(grid3DViewer);
-    
-                    gridViewer = new RectangleGridWidget((RectangleGrid)currentGrid, 16);
-                    gridViewer.setColourRuleSet(colourRules);
-                    widgetPreviewContainer.setContents(gridViewer);
-                }
-                else if (shape == "Triangle")
-                {
-                    // Triangle Grid
-                	currentGrid = new TriangleGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)), properties);
-                	currentGrid.getCell(7, 6).setValue(0, 1);
-                	currentGrid.getCell(7, 7).setValue(0, 1);
-                	currentGrid.getCell(7, 8).setValue(0, 1);
-                	currentGrid.getCell(6, 6).setValue(0, 1);
-                	currentGrid.getCell(6, 7).setValue(0, 1);
-                	currentGrid.getCell(6, 8).setValue(0, 1);
-
-                	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)currentGrid, 24);
-                    grid3DViewer.setFlag(Widget.FILL);
-                    grid3DViewer.addSlice(0, 16.0f);
-                    widget3DPreviewContainer.setContents(grid3DViewer);
-                    
-                    gridViewer = new TriangleGridWidget((TriangleGrid)currentGrid, 32);
-                    gridViewer.setColourRuleSet(colourRules);
-                    widgetPreviewContainer.setContents(gridViewer);                    
-                }
-                else
-                {
-                	// Hexagon Grid
-                	currentGrid = new HexagonGrid(new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5)), properties);
-                    currentGrid.getCell(6, 5).setValue(0, 1);
-                    currentGrid.getCell(6, 6).setValue(0, 1);
-                    currentGrid.getCell(6, 7).setValue(0, 1);        
-                    
-                    grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)currentGrid, 24);
-                    grid3DViewer.setFlag(Widget.FILL);
-                    grid3DViewer.addSlice(0, 16.0f);
-                    widget3DPreviewContainer.setContents(grid3DViewer);
-            
-                    gridViewer = new HexagonGridWidget((HexagonGrid)currentGrid, 16);
-                    gridViewer.setColourRuleSet(colourRules);
-                    widgetPreviewContainer.setContents(gridViewer);
-                }
+                
+                savePropertiesToWorld();
+                updatePreview();
             }
             else if (event.target == clearRulesButton)
             {
@@ -1105,22 +1159,22 @@ public class GUI implements WindowEventListener
                 TextWidget text = new TextWidget("Compiler Report:");
                 outputLayout.add(text);
             
-                
-                ArrayList<String> parserResults  = compiler.getResult();
-                
-                Iterator<String> iterator = parserResults.iterator();
                 outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
                 outputLayout.setMargin(new Vector2i(0, 0));
                 outputLayout.setFlag(Widget.WRAP);
                 outputContainer.setContents(outputLayout);
-                
-                while(iterator.hasNext()) 
+ 
+                for (String result : compiler.getResult())
                 {
-                      TextWidget t = new TextWidget((String) iterator.next());
-                     
-                      outputLayout.add(t);
+                      outputLayout.add(new TextWidget(result));
                       window.relayout();
-                }                
+                }
+                
+                if (compiler.getErrorCount() == 0)
+                {
+                	Log.information(TAG, "Loading rule code into World");
+                	world.setRuleCode(readFileAsString(calFile));
+                }
             }
             else if (event.target == openCALFileButton)
             {
@@ -1154,19 +1208,11 @@ public class GUI implements WindowEventListener
             }
             else if (event.target == simulateButton)
             {
-                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
-                serverEvent.size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
+            	masterView.setIndex(2);
+            	Log.information(TAG, "Switched to simulation screen");
 
-                if (cellShapeDropDownBox.getSelectedText() == "Triangle")
-                	serverEvent.gridType = GridType.TRIANGLE;
-                else if (cellShapeDropDownBox.getSelectedText() == "Hexagon")
-                	serverEvent.gridType = GridType.HEXAGON;
-                else
-                	serverEvent.gridType = GridType.RECTANGLE;
-                
-                serverEvent.wrappable = wrapCheckBox.isChecked();               
-                
-                server.sendEvent(serverEvent);
+            	currentGeneration = 0;
+            	updateSimulationScreen(true);
             }
             else if (event.target == playButton)
             {

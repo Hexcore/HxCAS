@@ -334,7 +334,7 @@ public class Simulator extends Thread
 	
 	private void splitGrids()
 	{
-		if(grid.getWrappable())
+		if(grid.isWrappable())
 			splitWrappableGrids();
 		else
 			splitNonwrappableGrids();
