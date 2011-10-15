@@ -1066,7 +1066,7 @@ public class GUI implements WindowEventListener
                 System.out.println("THE PATH:" + calFile.getAbsolutePath());
                 
                 CALCompiler compiler = new CALCompiler();
-                compiler.loadRules(calFile.getAbsolutePath());
+                compiler.compileFile(calFile.getAbsolutePath());
                 
                 TextWidget text = new TextWidget("Compiler Report:");
                 outputLayout.add(text);
