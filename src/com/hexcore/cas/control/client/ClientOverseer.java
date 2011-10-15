@@ -157,6 +157,12 @@ public class ClientOverseer extends Thread
 		}
 	}
 	
+	public void reset()
+	{
+		workQueue.clear();
+		completedQueue.clear();
+	}
+	
 	class Work
 	{
 		int		generation;

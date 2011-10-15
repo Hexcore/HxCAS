@@ -27,7 +27,8 @@ public class CAPIPClient extends Thread
 {
 	private static final String TAG = "CAPIPClient";
 	public final static int PROTOCOL_VERSION = 1;
-	
+
+	private volatile boolean running = false;
 	private boolean sentAccept = false;
 	private boolean valid = false;
 	private CAPMessageProtocol protocol = null;
@@ -82,6 +83,7 @@ public class CAPIPClient extends Thread
 		}
 		
 		sentAccept = false;
+		running = false;
 	}
 
 	public void sendResult(Grid g, Recti area, int more, int id, int gen)
@@ -342,8 +344,7 @@ public class CAPIPClient extends Thread
 			sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 	}
 	
-	@Override
-	public void start()
+	public void setup()
 	{
 		Log.information(TAG, "Waiting for server...");
 		
@@ -359,33 +360,51 @@ public class CAPIPClient extends Thread
 			e.printStackTrace();
 		}
 		
+		if(!running)
+			running = true;
+	}
+	
+	@Override
+	public void start()
+	{
+		setup();
 		super.start();
 	}
 		
 	@Override
 	public void run()
-	{				
-		Log.information(TAG, "Client Running...");
-		
-		protocol.start();
-		
-		while (protocol.isRunning())
-		{			
-			Message message = protocol.waitForMessage();
-			if (message == null) continue; 
-
-			interpretInput(message);
-		}
-
-		Log.information(TAG, "Stopping client...");
-		protocol.disconnect();
-		
-		try
+	{
+		while(running)
 		{
-			sock.close();
-		} 
-		catch (IOException e)
-		{
+			Log.information(TAG, "Client running...");
+			
+			protocol.start();
+			
+			while (protocol.isRunning())
+			{			
+				Message message = protocol.waitForMessage();
+				if (message == null) continue; 
+	
+				interpretInput(message);
+			}
+	
+			//Log.information(TAG, "Stopping client...");
+			Log.information(TAG, "Closing connection to downed server...");
+			protocol.disconnect();
+			
+			try
+			{
+				sock.close();
+			} 
+			catch (IOException e)
+			{
+			}
+			
+			if(!running)
+				break;
+			
+			parent.reset();
+			setup();
 		}
 	}
 }
