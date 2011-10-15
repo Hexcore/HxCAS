@@ -472,6 +472,20 @@ public class TestServerControl extends TestCase
 					fail("Expected QUERY message");
 			}
 			
+			//Waiting for CODE message type
+			Log.debug(TAG, "Waiting for a byte code message.");
+			message = null;
+			while (message == null) message = capMP.waitForMessage();
+
+			if (message != null)
+			{
+				DictNode header = message.getHeader();
+				if (header.get("TYPE").toString().equals("CODE"))
+					Log.debug(TAG, "Got byte code");
+				else
+					fail("Expected QUERY message");
+			}
+			
 			for(int a = 0; /*a < 4 * genNum*/; a++)
 			{
 				//Waiting for GRID message type.
