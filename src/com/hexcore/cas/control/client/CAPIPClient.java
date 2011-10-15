@@ -20,6 +20,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.utilities.Log;
 
 public class CAPIPClient extends Thread
@@ -162,7 +163,10 @@ public class CAPIPClient extends Thread
 				return;
 			}
 
-			Log.warning(TAG, "DATA message unimplemented");
+			byte[] ruleByteCode = ((ByteNode)body.get("DATA")).getByteValues();
+			
+			RuleLoader loader = new RuleLoader();
+			parent.setRule(loader.loadRule(ruleByteCode));
 		}
 		else if(header.get("TYPE").toString().equals("CONNECT"))
 		{

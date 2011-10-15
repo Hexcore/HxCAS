@@ -38,7 +38,7 @@ public class CAPIPServer
 	private int currGen = 0;
 	private int gridsDone = 0;
 	private int totalGrids = -1;
-	private LinkedBlockingQueue<ThreadWork> workForClients = null;
+	private LinkedBlockingQueue<ThreadWork> workQueue = null;
 	private Map<Integer, ThreadWork> sentWork;
 
 	private Grid currentGrid;
@@ -53,7 +53,7 @@ public class CAPIPServer
 		
 		this.clients = new ArrayList<ClientInfo>();
 				
-		workForClients = new LinkedBlockingQueue<ThreadWork>();
+		workQueue = new LinkedBlockingQueue<ThreadWork>();
 		sentWork = new HashMap<Integer, ThreadWork>();
 		
 		parent = simulator;
@@ -92,7 +92,7 @@ public class CAPIPServer
 				connectedNum++;
 		return connectedNum;
 	}
-
+	
 	protected void interpretInput(Message message, String host)
 	{
 		Log.information(TAG, "Interpreting received message");
@@ -229,8 +229,7 @@ public class CAPIPServer
 				}
 				
 				area = orig.getWorkableArea();
-				Grid grid = orig.getGrid().getType().create(area.getSize(), 1);
-				
+			
 				ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
 				for(int y = 0; y < rows.size(); y++)
 				{
@@ -284,7 +283,7 @@ public class CAPIPServer
 		int target = getTotalCoreAmount() + 1;
 		int sent = 0;
 		
-		while (!workForClients.isEmpty() && target > sent)
+		while (!workQueue.isEmpty() && target > sent)
 			for (ClientInfo client : clients)
 			{
 				sent++;
@@ -300,7 +299,7 @@ public class CAPIPServer
 		
 		ThreadWork work = null;
 		
-		if (workForClients.isEmpty())
+		if (workQueue.isEmpty())
 		{			
 			// Resend work that hasn't been completed yet
 			long now = System.nanoTime();
@@ -313,7 +312,7 @@ public class CAPIPServer
 				}
 		}
 		else
-			work = workForClients.poll();
+			work = workQueue.poll();
 				
 		if (work != null) sendWork(work, client);
 		
@@ -396,7 +395,7 @@ public class CAPIPServer
 		client.protocol.sendMessage(msg);
 	}
 	
-	public void connectClients(String[] names)
+	public void connectClients(List<String> names)
 	{
 		for (ClientInfo client : clients) client.disconnect();
 				
@@ -417,7 +416,7 @@ public class CAPIPServer
 	{
 		workLock.lock();
 		
-		workForClients.clear();
+		workQueue.clear();
 		sentWork.clear();
 		
 		currentGrid = grid;
@@ -425,7 +424,7 @@ public class CAPIPServer
 		currGen = cG;
 		gridsDone = 0;
 		for(int i = 0; i < TW.length; i++)
-			workForClients.add(TW[i]);
+			workQueue.add(TW[i]);
 		totalGrids = TW.length;
 				
 		workLock.unlock();
@@ -437,6 +436,13 @@ public class CAPIPServer
 		gridsDone = 0;
 	}
 
+	public void sendByteCode(byte[] bytes)
+	{
+		Log.information(TAG, "Sending bytecode...");
+		for (ClientInfo client : clients)
+			client.sendByteCode(bytes);
+	}
+	
 	public void start()
 	{	
 		Log.information(TAG, "Running...");
@@ -523,6 +529,15 @@ public class CAPIPServer
 			}
 			
 			protocol.disconnect();
+		}
+		
+		public void sendByteCode(byte[] bytes)
+		{
+			DictNode header = makeHeader("CODE");
+			DictNode body = new DictNode();
+			body.addToDict("DATA", new ByteNode(bytes));
+			Message msg = new Message(header, body);
+			protocol.sendMessage(msg);	
 		}
 	}
 }
