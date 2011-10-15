@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -170,12 +171,12 @@ public class TestServerControl extends TestCase
 		Log.information(TAG, "SUCCESS - grid was calculated and set correctly");
 	}
 	
-	private void testNameList(String[] nameList)
+	private void testNameList(List<String> list)
 	{
 		Log.information(TAG, "Testing nameList was set correctly");
 		
-		for(int i = 0; i < nameList.length; i++)
-			assertEquals("localhost", nameList[i]);
+		for (String address : list)
+			assertEquals("localhost", address);
 
 		Log.information(TAG, "SUCCESS - nameList was set correctly");
 	}
@@ -254,8 +255,7 @@ public class TestServerControl extends TestCase
 		nameList.add("localhost");
 		server.setClientNames(nameList);
 		
-		String[] nameListArr = server.getClientNames();
-		testNameList(nameListArr);
+		testNameList(server.getClientAddresses());
 
 		Log.debug(TAG, " -- Start server");
 		server.start();
@@ -472,6 +472,20 @@ public class TestServerControl extends TestCase
 					fail("Expected QUERY message");
 			}
 			
+			//Waiting for CODE message type
+			Log.debug(TAG, "Waiting for a byte code message.");
+			message = null;
+			while (message == null) message = capMP.waitForMessage();
+
+			if (message != null)
+			{
+				DictNode header = message.getHeader();
+				if (header.get("TYPE").toString().equals("CODE"))
+					Log.debug(TAG, "Got byte code");
+				else
+					fail("Expected QUERY message");
+			}
+			
 			for(int a = 0; /*a < 4 * genNum*/; a++)
 			{
 				//Waiting for GRID message type.
@@ -602,16 +616,15 @@ public class TestServerControl extends TestCase
 				sizeNode.addToList(new IntNode(grid.getHeight()));
 				
 				ListNode rows = new ListNode();
-				for(int y = 0; y < grid.getHeight(); y++)
+				for(int y = 0; y < workable.getSize().y; y++)
 				{
 					ListNode currRow = new ListNode(); 
-					for(int x = 0; x < grid.getWidth(); x++)
+					for(int x = 0; x < workable.getSize().x; x++)
 					{
 						ListNode currCell = new ListNode();
-						for(int i = 0; i < grid.getCell(x, y).getValueCount(); i++)
-						{
-							currCell.addToList(new DoubleNode(grid.getCell(x, y).getValue(i)));
-						}
+						for(int i = 0; i < grid.getNumProperties(); i++)
+							currCell.addToList(new DoubleNode(grid.getCell(workable.getPosition().add(x, y)).getValue(i)));
+						
 						currRow.addToList(currCell);
 					}
 					rows.addToList(currRow);

@@ -84,7 +84,7 @@ public abstract class Grid
 		return size.x;
 	}
 	
-	public boolean getWrappable()
+	public boolean isWrappable()
 	{
 		return wrap;
 	}

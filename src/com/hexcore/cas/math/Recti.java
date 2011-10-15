@@ -55,4 +55,10 @@ public class Recti
 		
 		return new Recti(lowest, highest.subtract(lowest));
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Recti<" + position.x + ", " + position.y + "; " + size.x + ", " + size.y + ">";
+	}
 }

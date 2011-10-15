@@ -35,6 +35,8 @@ public class TestClientOverseer
 		ClientOverseer client = new ClientOverseer(TEST_CLIENT_PORT);
 		client.start();
 				
+		System.out.println("Starting server");
+		
 		// Create dummy server
 		ServerThread server = new ServerThread();
 		server.start();

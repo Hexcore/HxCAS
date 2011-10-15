@@ -1,5 +1,8 @@
 package com.hexcore.cas.control.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,14 +17,14 @@ public class Simulator extends Thread
 {
 	private static final String TAG = "Server";
 	
-	private String[] clientNames = null;
+	private List<String> clientAddresses = null;
 	
 	private AtomicBoolean connected = new AtomicBoolean(false);
 	private AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
 	private AtomicBoolean paused = new AtomicBoolean(false);
 	private AtomicBoolean reset = new AtomicBoolean(false);
 	
-	private volatile int currGen = 0;
+	private volatile int currentGeneration = 0;
 	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
 	private int threadWorkID = 0;
@@ -33,18 +36,208 @@ public class Simulator extends Thread
 	private CAPIPServer informationProcessor = null;
 	private int clientPort;
 	
-	protected Grid grid = null;
+	private Grid 	grid = null;
+	private byte[]	ruleByteCode = null;
 		
 	public Simulator(World world, int clientPort)
 	{
 		this.clientPort = clientPort;
 		this.world = world;
+		
+		try
+		{
+			this.ruleByteCode = readBytes("Test Data/bytecode/GameOfLifeRule.class");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+		
+	public ThreadWork[] getClientWork()
+	{
+		return clientWork;
 	}
 	
+	public List<String> getClientAddresses()
+	{
+		return clientAddresses;
+	}
+	
+	public Recti[] getClientWorkables()
+	{
+		return clientWorkables;
+	}
+	
+	public Grid getGrid()
+	{
+		return grid;
+	}
+	
+	public void setGrid(Grid g)
+	{
+		grid = g.clone();
+	}
+	
+	public int getNumberOfClients()
+	{
+		return numOfClients;
+	}
+	
+	public boolean isFinished()
+	{
+		return isFinishedGenerations.get();
+	}
+		
+	public void pause()
+	{
+		paused.set(true);
+	}
+	
+	public void play()
+	{		
+		numOfGenerations = -1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
+	}
+	
+	public void step()
+	{		
+		numOfGenerations = 1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
+	}	
+		
+	public void requestStatuses()
+	{
+		Log.information(TAG, "Requesting client statuses");
+		informationProcessor.updateClientStatus();
+	}
+	
+	public void forceConnect(int index)
+	{
+		informationProcessor.forceConnect(index);
+	}
+	
+	public void reset()
+	{
+		reset.set(true);
+		numOfGenerations = 0;
+		world.reset();
+		informationProcessor.setGeneration(currentGeneration);
+	}
+	
+	public void setRuleBytecode(byte[] ruleByteCode)
+	{
+		this.ruleByteCode = ruleByteCode;
+	}
+	
+	public byte[] getRuleByteCode()
+	{
+		return ruleByteCode;
+	}
+
+	public void setClientNames(ArrayList<String> names)
+	{
+		int size = names.size();
+		clientAddresses = names;
+		numOfClients = size;
+	}
+		
+	public void simulate(int gN)
+	{
+		Log.information(TAG, "Waiting for clients to send connect...");
+		while (informationProcessor.getConnectedAmount() != clientAddresses.size()) {}
+
+		Log.information(TAG, "Starting simulation...");
+		setGrid(world.getLastGeneration());
+		numOfGenerations = gN;
+		
+		informationProcessor.sendByteCode(ruleByteCode);
+		
+		calculateSplits();
+		splitGrids();
+		
+		paused.set(false);
+		isFinishedGenerations.set(false);
+		currentGeneration = 0;
+		
+		startGeneration();
+	}
+		
+	public void disconnect()
+	{
+		informationProcessor.disconnect();
+	}
+	
+	public void finishedGeneration()
+	{
+		threadWorkID = 0;
+		
+		world.addGeneration(grid.clone());
+		
+		splitGrids();
+		
+		Log.information(TAG, "Finished generation: " + currentGeneration);
+		
+		if (reset.getAndSet(false))
+		{
+			paused.set(true);
+			setGrid(world.getInitialGeneration());
+			calculateSplits();
+			splitGrids();
+		}
+		
+		if (!paused.get()) startGeneration();
+	}
+	
+	@Override
+	public void run()
+	{
+		informationProcessor = new CAPIPServer(this, clientPort);
+		informationProcessor.connectClients(clientAddresses);
+		informationProcessor.start();
+		connected.set(true);
+	}
+	
+	class GenerationThread extends Thread
+	{
+		@Override
+		public void run()
+		{			
+			if (numOfGenerations == 0)
+			{
+				System.out.println("Finished!");
+				isFinishedGenerations.set(true);
+				paused.set(true);
+				return;
+			}
+			
+			if (numOfGenerations > 0) numOfGenerations--;
+			
+			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
+			informationProcessor.sendInitialGrids();
+		}
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
+	
+	private void startGeneration()
+	{
+		isFinishedGenerations.set(false);
+		
+		currentGeneration++;
+		GenerationThread generationThread = new GenerationThread();
+		generationThread.start();		
+	}
+		
 	/*
-	 * Function done by Abby Kumar
+	 * @author Abby Kumar
 	 */
-	public static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor)
+	private static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor)
 	{
 		int temp;
 		//calculate how many splits needed:
@@ -130,42 +323,7 @@ public class Simulator extends Thread
 		return split;
 	}
 	
-	public ThreadWork[] getClientWork()
-	{
-		return clientWork;
-	}
-	
-	public String[] getClientNames()
-	{
-		return clientNames;
-	}
-	
-	public Recti[] getClientWorkables()
-	{
-		return clientWorkables;
-	}
-	
-	public Grid getGrid()
-	{
-		return grid;
-	}
-	
-	public void setGrid(Grid g)
-	{
-		grid = g.clone();
-	}
-	
-	public int getNumberOfClients()
-	{
-		return numOfClients;
-	}
-	
-	public boolean isFinished()
-	{
-		return isFinishedGenerations.get();
-	}
-	
-	public void calculateSplits()
+	private void calculateSplits()
 	{
 		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 2);
 		clientWorkables = new Recti[splits.length];
@@ -174,9 +332,9 @@ public class Simulator extends Thread
 			clientWorkables[i] = new Recti(splits[i].getPosition(), splits[i].getSize());
 	}
 	
-	public void splitGrids()
+	private void splitGrids()
 	{
-		if(grid.getWrappable())
+		if(grid.isWrappable())
 			splitWrappableGrids();
 		else
 			splitNonwrappableGrids();
@@ -197,32 +355,25 @@ public class Simulator extends Thread
 			int bottom = borderSize.y;
 
 			Recti workArea = clientWorkables[i];
+			Vector2i workStart = workArea.getPosition();
+			Vector2i workEnd = workArea.getPosition().add(workArea.getSize());
 			
-			if(workArea.getPosition().x - left < 0)
-				left = workArea.getPosition().x;
-			if(workArea.getPosition().y - top < 0)
-				top = workArea.getPosition().y;
-			if(workArea.getSize().x + workArea.getPosition().x >= grid.getWidth())
-				right = workArea.getSize().x + workArea.getPosition().x - grid.getWidth() - 1;
-			if(workArea.getSize().y + workArea.getPosition().y >= grid.getHeight())
-				bottom = workArea.getSize().y + workArea.getPosition().y - grid.getHeight() - 1;
+			if(workStart.x - left < 0) left = workStart.x;
+			if(workStart.y - top < 0) top = workStart.y;
+			if(workEnd.x >= grid.getWidth()) right = workEnd.x - grid.getWidth();
+			if(workEnd.y >= grid.getHeight()) bottom = workEnd.y - grid.getHeight();
 			
+			Vector2i position = new Vector2i(workArea.getPosition().x - left, workArea.getPosition().y - top);
 			Vector2i size = new Vector2i(workArea.getSize().x + left + right, workArea.getSize().y + top + bottom);
 			Grid workingGrid = grid.getType().create(size, grid.getNumProperties());
-	
-			int gYPos = 0;
-			int gXPos = 0;
 			
-			for(int y = workArea.getPosition().y - top; y < workArea.getPosition().y + workArea.getSize().y + bottom; y++, gYPos++)
-				for(int x = workArea.getPosition().x - left; x < workArea.getPosition().x + workArea.getSize().x + right; x++)
-				{
-					workingGrid.setCell(gXPos, gYPos, grid.getCell(x, y));
-					gXPos++;
-					if(gXPos >= workArea.getSize().x) gXPos = 0;
-				}
+			for(int y = 0; y < size.y; y++)
+				for(int x = 0; x < size.x; x++)
+					workingGrid.setCell(x, y, grid.getCell(position.add(x, y)));
 			
 			Recti aw = new Recti(new Vector2i(left, top), workArea.getSize());
-			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
+			
+			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
 		}
 	}
 	
@@ -259,156 +410,34 @@ public class Simulator extends Thread
 			}
 			
 			Recti aw = new Recti(borderSize, workArea.getSize());
-			clientWork[i] = new ThreadWork(threadWorkID++, workingGrid, aw, currGen);
+			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
 		}
 	}
 	
-	public void pause()
+	private byte[] readBytes(String filename) throws Exception
 	{
-		paused.set(true);
-	}
-	
-	public void play()
-	{		
-		numOfGenerations = -1;
+		File file = new File(filename);
 		
-		if (paused.getAndSet(false)) 
-			startGeneration();
-	}
-	
-	public void step()
-	{		
-		numOfGenerations = 1;
+		if (!file.exists()) throw new Exception("Test bytecode could not be found");
 		
-		if (paused.getAndSet(false)) 
-			startGeneration();
-	}	
-	
-	public void rebuildGrid()
-	{
-		Log.debug(TAG, "Merging work done by clients");
-		for(int i = 0; i < clientWork.length; i++)
-		{
-			int	id = clientWork[i].getID();
-			Grid g = clientWork[i].getGrid();
-			Recti aw = clientWork[i].getWorkableArea();
-			Recti uw = clientWorkables[id];
-			for(int y = uw.getPosition().y, cy = aw.getPosition().y; y < uw.getPosition().y + uw.getSize().y; y++, cy++)
-				for(int x = uw.getPosition().x, cx = aw.getPosition().x; x < uw.getPosition().x + uw.getSize().x; x++, cx++)
-					grid.setCell(x, y, g.getCell(cx, cy));
-		}
-	}
-	
-	public void requestStatuses()
-	{
-		Log.information(TAG, "Requesting client statuses");
-		informationProcessor.updateClientStatus();
-	}
-	
-	public void forceConnect(int index)
-	{
-		informationProcessor.forceConnect(index);
-	}
-	
-	public void reset()
-	{
-		reset.set(true);
-		numOfGenerations = 0;
-		world.reset();
-		informationProcessor.setGeneration(currGen);
-	}
+		InputStream stream = new FileInputStream(file);
+		
+		int length = (int)file.length();
+		byte[] bytes = new byte[length];
+		
+		System.out.println("Bytecode - File: " + filename + " - Size: " + length);
+		
+		int index = 0;
+	    int numRead = 0;
+	    while (index < bytes.length)
+	    {
+	    	numRead = stream.read(bytes, index, bytes.length-index);
+	    	if (numRead <= 0) break;
+	    	index += numRead;
+	    }
+	    
+	    if (index < length) throw new Exception("Not all bytes were read in");
 
-	//Called from CAPIPServer to pass up work done
-	public void setClientWork(List<ThreadWork> completedWork)
-	{
-		clientWork = completedWork.toArray(clientWork);
-		threadWorkID = 0;
-		
-		rebuildGrid();
-		world.addGeneration(grid);
-		
-		splitGrids();
-		
-		Log.information(TAG, "Finished generation: " + currGen);
-		
-		if (reset.getAndSet(false))
-		{
-			paused.set(true);
-			setGrid(world.getInitialGeneration());
-			calculateSplits();
-			splitGrids();
-		}
-		
-		if (!paused.get()) startGeneration();
-	}
-
-	public void setClientNames(ArrayList<String> names)
-	{
-		int size = names.size();
-		clientNames = new String[size];
-		names.toArray(clientNames);
-		numOfClients = size;
-	}
-		
-	public void simulate(int gN)
-	{
-		Log.information(TAG, "Waiting for clients to send connect...");
-		while (informationProcessor.getConnectedAmount() != clientNames.length) {}
-
-		Log.information(TAG, "Starting simulation...");
-		setGrid(world.getLastGeneration());
-		numOfGenerations = gN;
-		
-		calculateSplits();
-		splitGrids();
-		
-		paused.set(false);
-		isFinishedGenerations.set(false);
-		currGen = 0;
-		
-		startGeneration();
-	}
-	
-	public void startGeneration()
-	{
-		isFinishedGenerations.set(false);
-		
-		currGen++;
-		GenerationThread generationThread = new GenerationThread();
-		generationThread.start();		
-	}
-	
-	public void disconnect()
-	{
-		informationProcessor.disconnect();
-	}
-	
-	@Override
-	public void run()
-	{
-		informationProcessor = new CAPIPServer(this, clientPort);
-		informationProcessor.connectClients(clientNames);
-		informationProcessor.start();
-		connected.set(true);
-	}
-	
-	class GenerationThread extends Thread
-	{
-		@Override
-		public void run()
-		{			
-			if (numOfGenerations == 0)
-			{
-				System.out.println("Finished!");
-				isFinishedGenerations.set(true);
-				paused.set(true);
-				return;
-			}
-			
-			if (numOfGenerations > 0) numOfGenerations--;
-			
-			informationProcessor.setClientWork(clientWork, currGen);
-			informationProcessor.sendInitialGrids();
-		}
+	    return bytes;
 	}
 }

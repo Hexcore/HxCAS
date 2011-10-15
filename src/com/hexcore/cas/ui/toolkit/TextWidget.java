@@ -10,9 +10,6 @@ public class TextWidget extends Widget
 	private Text.Size	textSize;
 	private Colour		colour;
 	
-	private boolean		textShadow = false;
-	private Colour		shadowColour;
-	
 	private FlowedText	flowedText;
 	private boolean		flowed = false;
 	
@@ -43,12 +40,6 @@ public class TextWidget extends Widget
 		this.flowedText = null;
 	}
 	
-	public void		setShadow(Colour shadowColour)
-	{
-		textShadow = true;
-		this.shadowColour = shadowColour;
-	}
-	
 	public void 	setFlowed(boolean state) {flowed = state;}
 	public boolean	isFlowed() {return flowed;}
 	
@@ -59,20 +50,10 @@ public class TextWidget extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		
-		if (textShadow)
-		{
-			if ((size.x > 0) && (flowedText != null))
-				window.getTheme().renderFlowedShadowedText(gl, pos, flowedText, colour, shadowColour, new Vector2i(0, 1));
-			else
-				window.getTheme().renderShadowedText(gl, caption, pos, colour, shadowColour, new Vector2i(0, 1), textSize);
-		}
+		if ((size.x > 0) && (flowedText != null))
+			window.getTheme().renderFlowedText(gl, pos, flowedText, colour);
 		else
-		{
-			if ((size.x > 0) && (flowedText != null))
-				window.getTheme().renderFlowedText(gl, pos, flowedText, colour);
-			else
-				window.getTheme().renderText(gl, caption, pos, colour, textSize);
-		}
+			window.getTheme().renderText(gl, caption, pos, colour, textSize);
 		
 		if (window.isDebugLayout()) 
 			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));

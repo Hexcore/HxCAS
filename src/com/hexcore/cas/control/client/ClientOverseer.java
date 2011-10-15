@@ -9,6 +9,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.rulesystems.Rule;
+import com.hexcore.cas.rulesystems.test.GameOfLifeRule;
 import com.hexcore.cas.utilities.Log;
 
 public class ClientOverseer extends Thread
@@ -22,9 +23,10 @@ public class ClientOverseer extends Thread
 	
 	private CAPIPClient informationProcessor;
 	
+	private WorkerThread[] threads;
+	
 	private boolean running = false;
 	private boolean valid = false;
-	private int gen = 0;
 
 	public ClientOverseer(int port)
 	{
@@ -54,20 +56,13 @@ public class ClientOverseer extends Thread
 			return 1;
 	}
 	
-	public void setRules(byte[] b)
+	public void addGrid(Grid grid, Recti workArea, int id, int generation)
 	{
-		//vm.loadRules(b);
-	}
-	
-	public void addGrid(Grid grid, Recti workArea, int id, int g)
-	{
-		Log.information(TAG, "Got work");
-		gen = g;
-		
 		Work work = new Work();
+		work.generation = generation;
+		work.id = id;
 		work.grid = grid.clone();
 		work.workArea = new Recti(workArea);
-		work.ID = id;
 		try
 		{
 			workQueue.put(work);
@@ -90,8 +85,14 @@ public class ClientOverseer extends Thread
 		informationProcessor.disconnect();
 	}
 	
+	public void setRule(Rule rule)
+	{
+		Log.information(TAG, "Loaded new rule code");
+		this.rule = rule;
+	}
+	
 	@Override
-	public void run()
+	public void start()
 	{
 		if (!valid)
 		{
@@ -104,24 +105,30 @@ public class ClientOverseer extends Thread
 
 		int cores = Runtime.getRuntime().availableProcessors();
 		
-		WorkerThread[] thread = new WorkerThread[cores];
+		threads = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++) thread[i] = new WorkerThread(i);
-
-		informationProcessor.start();
+		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
 				
 		Log.information(TAG, "Ready");
+		super.start();
+	}
+	
+	@Override
+	public void run()
+	{
+		informationProcessor.start();	
 		
-		for (int i = 0; i < cores; i++) thread[i].start();
+		for (int i = 0; i < threads.length; i++) threads[i].start();		
 		
 		running = true;
+		
 		while (running)
 		{
 			Work work = null;
 			
 			try
 			{
-				work = completedQueue.poll(1000, TimeUnit.MILLISECONDS);
+				work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException e)
 			{
@@ -131,8 +138,8 @@ public class ClientOverseer extends Thread
 			if (work == null) continue;
 			
 			Log.information(TAG, "Sending completed work");
-			int more = Math.max(Runtime.getRuntime().availableProcessors() - workQueue.size(), 0);			
-			informationProcessor.sendResult(work.grid, work.workArea, more, work.ID, gen);
+			int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
+			informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
 		}
 		
 		Log.information(TAG, "Stopping...");
@@ -141,50 +148,27 @@ public class ClientOverseer extends Thread
 		
 		try
 		{
-			for (int i = 0; i < cores; i++) thread[i].quit();
-			for (int i = 0; i < cores; i++) thread[i].join();
+			for (int i = 0; i < threads.length; i++) threads[i].quit();
+			for (int i = 0; i < threads.length; i++) threads[i].join();
 		}
 		catch (InterruptedException e)
 		{
 			e.printStackTrace();
 		}
 	}
-
-	class GameOfLifeRule implements Rule
+	
+	public void reset()
 	{
-		@Override
-		public void run(Cell cell, Cell[] neighbours)
-		{
-			// Game of Life implementation for testing
-			int sum = 0;
-			
-			for (Cell neighbour : neighbours)
-				sum += neighbour.getValue(0);
-			
-			if (cell.getValue(0) == 1)
-			{
-				if (sum < 2 || sum > 3) 
-					cell.setValue(0, 0);
-			}
-			else
-			{
-				if (sum == 3)
-					cell.setValue(0, 1);
-			}
-		}
-		
-		@Override
-		public int getNumProperties()
-		{
-			return 2;
-		}
+		workQueue.clear();
+		completedQueue.clear();
 	}
 	
 	class Work
 	{
+		int		generation;
+		int		id;
 		Grid	grid;
 		Recti	workArea;
-		int		ID;
 	}
 	
 	class WorkerThread extends Thread
@@ -193,7 +177,7 @@ public class ClientOverseer extends Thread
 		
 		public WorkerThread(int id)
 		{
-			super("Worker - " + id);
+			super("Worker-" + id);
 		}
 		
 		public void quit()
@@ -209,20 +193,22 @@ public class ClientOverseer extends Thread
 			{
 				try
 				{
-					Work work = workQueue.poll(3, TimeUnit.SECONDS);
+					Work work = workQueue.poll(1, TimeUnit.SECONDS);
 					if (work == null) continue;
 										
-					Grid	newGrid = work.grid.clone();
-					
-					Vector2i end = work.workArea.position.add(work.workArea.size);
-					
-					for (int y = work.workArea.position.y; y < end.y; y++)
-						for (int x = work.workArea.position.x; x < end.x; x++)
+					Grid		newGrid = work.grid.getType().create(work.workArea.size, work.grid.getNumProperties());
+					Vector2i	offset = work.workArea.position;
+					Vector2i 	size = work.workArea.size;
+										
+					for (int y = 0; y < size.y; y++)
+						for (int x = 0; x < size.x; x++)
 						{
-							Cell cell = new Cell(work.grid.getCell(x, y));
-							Cell[] neighbours = work.grid.getNeighbours(new Vector2i(x, y));
+							Vector2i 	location = offset.add(x, y);
+							Cell 		cell = new Cell(work.grid.getCell(location));
+							Cell[] 		neighbours = work.grid.getNeighbours(location);
+							
 							rule.run(cell, neighbours);
-							newGrid.setCell(new Vector2i(x, y), cell);
+							newGrid.setCell(x, y, cell);
 						}
 					
 					work.grid = newGrid;

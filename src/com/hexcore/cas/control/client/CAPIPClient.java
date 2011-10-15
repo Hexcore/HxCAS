@@ -20,13 +20,15 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.utilities.Log;
 
 public class CAPIPClient extends Thread
 {
 	private static final String TAG = "CAPIPClient";
 	public final static int PROTOCOL_VERSION = 1;
-	
+
+	private volatile boolean running = false;
 	private boolean sentAccept = false;
 	private boolean valid = false;
 	private CAPMessageProtocol protocol = null;
@@ -81,6 +83,7 @@ public class CAPIPClient extends Thread
 		}
 		
 		sentAccept = false;
+		running = false;
 	}
 
 	public void sendResult(Grid g, Recti area, int more, int id, int gen)
@@ -162,8 +165,10 @@ public class CAPIPClient extends Thread
 				return;
 			}
 
-			//parent.setRules(((ByteNode)codeInfo.get("DATA")).getByteValues());
-			Log.warning(TAG, "DATA message unimplemented");
+			byte[] ruleByteCode = ((ByteNode)body.get("DATA")).getByteValues();
+			
+			RuleLoader loader = new RuleLoader();
+			parent.setRule(loader.loadRule(ruleByteCode));
 		}
 		else if(header.get("TYPE").toString().equals("CONNECT"))
 		{
@@ -308,6 +313,8 @@ public class CAPIPClient extends Thread
 					return;
 			}
 			
+			grid.setWrappable(false);
+			
 			ArrayList<Node> rows = ((ListNode)body.get("DATA")).getListValues();
 			for(int y = 0; y < rows.size(); y++)
 			{
@@ -337,8 +344,7 @@ public class CAPIPClient extends Thread
 			sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 	}
 	
-	@Override
-	public void start()
+	public void setup()
 	{
 		Log.information(TAG, "Waiting for server...");
 		
@@ -354,33 +360,51 @@ public class CAPIPClient extends Thread
 			e.printStackTrace();
 		}
 		
+		if(!running)
+			running = true;
+	}
+	
+	@Override
+	public void start()
+	{
+		setup();
 		super.start();
 	}
 		
 	@Override
 	public void run()
-	{				
-		Log.information(TAG, "Client Running...");
-		
-		protocol.start();
-		
-		while (protocol.isRunning())
-		{			
-			Message message = protocol.waitForMessage();
-			if (message == null) continue; 
-
-			interpretInput(message);
-		}
-
-		Log.information(TAG, "Stopping client...");
-		protocol.disconnect();
-		
-		try
+	{
+		while(running)
 		{
-			sock.close();
-		} 
-		catch (IOException e)
-		{
+			Log.information(TAG, "Client running...");
+			
+			protocol.start();
+			
+			while (protocol.isRunning())
+			{			
+				Message message = protocol.waitForMessage();
+				if (message == null) continue; 
+	
+				interpretInput(message);
+			}
+	
+			//Log.information(TAG, "Stopping client...");
+			Log.information(TAG, "Closing connection to downed server...");
+			protocol.disconnect();
+			
+			try
+			{
+				sock.close();
+			} 
+			catch (IOException e)
+			{
+			}
+			
+			if(!running)
+				break;
+			
+			parent.reset();
+			setup();
 		}
 	}
 }

@@ -13,7 +13,8 @@ public class GameOfLifeRule implements Rule
 		int sum = 0;
 		
 		for (Cell neighbour : neighbours)
-			sum += neighbour.getValue(0);
+			if (neighbour != null)
+				sum += neighbour.getValue(0);
 		
 		if(sum < 2 || sum > 3)
 			cell.setValue(0, 0);
