@@ -1,6 +1,9 @@
 package com.hexcore.cas.control.server.test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -245,7 +248,7 @@ public class TestServerControl extends TestCase
 		 * [0.0][0.0][1.0][0.0]
 		 * [0.0][1.0][0.0][0.0]
 		 */
-		
+				
 		//================================== Creating ServerOverseer ==================================
 		World theWorld = new World(); 
 		
@@ -254,6 +257,17 @@ public class TestServerControl extends TestCase
 		ArrayList<String> nameList = new ArrayList<String>();
 		nameList.add("localhost");
 		server.setClientNames(nameList);
+		
+		byte[] bytes = new byte[] {};
+		try
+		{
+			bytes = readBytes("Test Data/bytecode/GameOfLifeRule.class");
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		server.setRuleBytecode(bytes);
 		
 		testNameList(server.getClientAddresses());
 
@@ -682,5 +696,32 @@ public class TestServerControl extends TestCase
 					fail("Expected DISCONNECT message");
 			}
 		}
+	}
+	
+	private byte[] readBytes(String filename) throws Exception
+	{
+		File file = new File(filename);
+		
+		if (!file.exists()) throw new Exception("Test bytecode could not be found");
+		
+		InputStream stream = new FileInputStream(file);
+		
+		int length = (int)file.length();
+		byte[] bytes = new byte[length];
+		
+		System.out.println("Bytecode - File: " + filename + " - Size: " + length);
+		
+		int index = 0;
+	    int numRead = 0;
+	    while (index < bytes.length)
+	    {
+	    	numRead = stream.read(bytes, index, bytes.length-index);
+	    	if (numRead <= 0) break;
+	    	index += numRead;
+	    }
+	    
+	    if (index < length) throw new Exception("Not all bytes were read in");
+
+	    return bytes;
 	}
 }
