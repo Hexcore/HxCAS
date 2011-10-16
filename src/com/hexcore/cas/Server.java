@@ -16,6 +16,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.model.WorldSaver;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
@@ -242,10 +243,19 @@ public class Server implements LobbyListener
 			clientList.add("127.0.0.1");
 		}
 		
+		Log.information(TAG, "Compiling rule code...");
+		
+		CALCompiler compiler = new CALCompiler();
+		compiler.compile(world.getRuleCode());
+		
+		if (compiler.getErrorCount() > 0)
+			Log.error(TAG, "Invalid rule code");
+		
 		Log.information(TAG, "Starting overseer...");
 		
 		simulate = new Simulator(world, config.getInteger("Network.Client", "port", 3119));
 		simulate.setClientNames(clientList);
+		simulate.setRuleBytecode(compiler.getCode());
 		simulate.start();
 		simulate.pause();
 		Thread.sleep(100);
