@@ -33,7 +33,7 @@ public class CAPIPClient extends Thread
 	private boolean valid = false;
 	private CAPMessageProtocol protocol = null;
 	private ClientOverseer parent = null;
-	private ServerSocket sock = null;
+	private ServerSocket serverSocket = null;
 
 	public CAPIPClient(ClientOverseer clientOverseer, int port)
 		throws IOException
@@ -43,9 +43,9 @@ public class CAPIPClient extends Thread
 		parent = clientOverseer;
 		try
 		{
-			sock = new ServerSocket(port);
+			serverSocket = new ServerSocket(port);
 			valid = true;
-			Log.information(TAG, "Socket listening on " + sock.getLocalPort());
+			Log.information(TAG, "Socket listening on " + serverSocket.getLocalPort());
 		}
 		catch(IOException ex)
 		{
@@ -71,17 +71,18 @@ public class CAPIPClient extends Thread
 		Log.information(TAG, "Disconnecting...");
 		
 		valid = false;
-				
+		
+		if (protocol != null) protocol.disconnect();
+		
 		try
 		{
-			if (sock != null) sock.close();
+			serverSocket.close();
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
-			Log.error(TAG, "Error closing ServerSocket");
 			e.printStackTrace();
 		}
-		
+						
 		sentAccept = false;
 		running = false;
 	}
@@ -350,7 +351,7 @@ public class CAPIPClient extends Thread
 		
 		try
 		{
-			Socket clientSocket = sock.accept();
+			Socket clientSocket = serverSocket.accept();
 			Log.information(TAG, "Server connected");
 			protocol = new CAPMessageProtocol(clientSocket);
 			
@@ -391,8 +392,15 @@ public class CAPIPClient extends Thread
 				interpretInput(message);
 			}
 			
-			Log.information(TAG, "Closing connection to downed server...");
-			protocol.disconnect();
+			Log.information(TAG, "Closing connection to server...");
+			try
+			{
+				protocol.join();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 }
