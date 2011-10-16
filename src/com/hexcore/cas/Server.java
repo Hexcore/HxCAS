@@ -15,6 +15,7 @@ import com.hexcore.cas.control.server.Simulator;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
+import com.hexcore.cas.model.WorldSaver;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
@@ -110,16 +111,10 @@ public class Server implements LobbyListener
 						for(int y = 0; y < event.size.y; y++)
 							for(int x = 0; x < event.size.x; x++)
 								grid.getCell(x, y).setValue(0, 0.0);
-						
-						grid.getCell(2, 4).setValue(0, 1);
-						grid.getCell(3, 4).setValue(0, 1);
-						grid.getCell(4, 4).setValue(0, 1);
-						grid.getCell(4, 3).setValue(0, 1);
-						grid.getCell(3, 2).setValue(0, 1);
-						
+												
 						world.addGeneration(grid);
 						
-						ui.startSimulation(world);
+						ui.startWorldEditor(world);
 						
 						break;
 					}
@@ -138,9 +133,24 @@ public class Server implements LobbyListener
 							e.printStackTrace();
 						}
 						
-						ui.startSimulation(world);
+						ui.startWorldEditor(world);
 						
 						break;
+					}
+					
+					case SAVE_WORLD:
+					{
+						WorldSaver saver = new WorldSaver();
+						
+						try
+						{
+							saver.saveWorld(world);
+							Log.information(TAG, "Saved world");
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
 					}
 					
 					case START_SIMULATION:

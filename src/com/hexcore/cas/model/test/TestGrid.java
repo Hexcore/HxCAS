@@ -164,7 +164,7 @@ public class TestGrid extends TestCase
 		assertEquals(5.0, grid2.getCell(2, 2).getValue(0));
 		assertEquals(9.0, grid2.getCell(6, 8).getValue(0));
 		
-		assertEquals(false, grid2.getWrappable());
+		assertEquals(false, grid2.isWrappable());
 	}	
 	
 	@Test

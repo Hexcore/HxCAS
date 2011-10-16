@@ -1,0 +1,51 @@
+ruleset set8
+{
+	typecount 1;
+	
+	property land;
+	property water;
+	property another;
+	property again;
+
+	type Land : 0
+	{
+		var n1 = 5;
+		var n2 = 6;
+		var n3 = 7;
+		var n4 = 8;
+		
+		self.land = 0;
+		self.water = 0;
+		self.another = 0;
+		self.again = 0;
+		
+		if(n1 < n2)
+			if(n3 < n4)
+				self.land = 1;
+			
+		if(n1 < n2)
+		{
+			if(n3 > n4)
+				self.water = 1;
+			else
+				self.water = 2;
+		}
+		else
+			self.water = 3;
+			
+		
+		if(n1 > n2)
+		{
+			if(n3 < n4)
+				self.another = 1;
+		}
+		else
+			self.another = 3;
+			
+		if(n1 < n2)
+			if(n3 > n4)
+				self.again = 1;
+			else
+				self.again = 4;
+	}
+}
