@@ -74,7 +74,7 @@ public class ThemeParser extends ConfigParser
 		addTypeProperties("SliderHandle", 
 				"background", "border", "border-radius", "height", "width");	
 		addTypeProperties("List", 
-				"background", "border", "border-radius", "text-colour", "hover-background", "selected-background");		
+				"background", "border", "border-radius", "text-colour", "hover-background", "selected-background", "padding", "item-padding");		
 		addTypeProperties("Dialog", 
 				"background", "border", "border-radius");
 		addTypeProperties("DialogFade", 

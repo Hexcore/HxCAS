@@ -5,14 +5,13 @@
 }
 
 
-
-
 List
 {
 	background: rgb(1.0, 1.0, 1.0);
 	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	item-padding: 4 4;
 	hover-background: rgba(0.8, 0.9, 1.0, 0.8);
-	selected-background: rgb(0.6, 0.8, 1.0);
+	selected-background: rgb(0.7, 0.85, 1.0);
 }
 
 
