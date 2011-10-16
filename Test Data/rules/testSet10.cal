@@ -1,0 +1,12 @@
+ruleset set10
+{
+	typecount 1;
+	
+	property land;
+
+
+	type Land : 0
+	{
+		self.land = max(neighbours.land);
+	}
+}

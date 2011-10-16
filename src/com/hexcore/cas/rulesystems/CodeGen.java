@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -14,6 +12,7 @@ import org.objectweb.asm.MethodVisitor;
 import com.hexcore.cas.rulesystems.Parser.AddOpE;
 import com.hexcore.cas.rulesystems.Parser.MulOpE;
 import com.hexcore.cas.rulesystems.Parser.RelOpE;
+import com.hexcore.cas.rulesystems.TableEntry;
 
 public class CodeGen implements org.objectweb.asm.Opcodes
 {
@@ -205,7 +204,28 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	
 	public static void generatePropertyArray(int index)
 	{
+		debug("Generating property array.");
+		executeVisitor.visitLdcInsn(new Integer(index));
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", "generatePropertyArray", "([Lcom/hexcore/cas/model/Cell;I)[D");
+	}
 	
+	public static void invokeStandardArrayMethod(String name, int type)
+	{
+		debug("Invoking StdLib array method: " + name + " as type " + type);
+		
+		if(type == TableEntry.doubleType)
+			executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "([D)D");
+		else if(type == TableEntry.intType)
+		{
+			executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "([D)I");
+			executeVisitor.visitInsn(I2D);
+		}
+	}
+	
+	public static void invokeStandardScalarMethod(String name)
+	{
+		debug("Invoking StdLib scalar method: " + name);
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(D)D");		
 	}
 	
 	public static void performRelationalOp(RelOpE op)

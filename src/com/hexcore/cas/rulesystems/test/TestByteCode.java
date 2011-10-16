@@ -216,4 +216,27 @@ public class TestByteCode extends TestCase
 		
 		assertEquals(6.0, c.getValue(1));
 	}
+	
+	public void testStdLibFunctionCalls()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet10.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());		
+		
+		Cell c = new Cell(new double[]{0,0});
+		Cell[] n = new Cell[5];
+		
+		n[0] = new Cell(new double[]{0,5});
+		n[1] = new Cell(new double[]{0,10});
+		n[2] = new Cell(new double[]{0,-1});
+		n[3] = new Cell(new double[]{0,-300});
+		n[4] = new Cell(new double[]{0,55});
+		
+		rule.run(c, n);
+		
+		assertEquals(55.0, c.getValue(1));
+	}
 }
