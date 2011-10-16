@@ -597,7 +597,7 @@ PRODUCTIONS
   													}
   													else
   													{
-  														CodeGen.invokeStandardArrayMethod(entry.name, entry.type);
+  														CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
   													}
   												}
   												else
@@ -608,7 +608,7 @@ PRODUCTIONS
   													}
   													else
   													{
-  														CodeGen.invokeStandardScalarMethod(entry.name);
+  														CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
   													}
   												}
   												p.kind = TableEntry.Constant;

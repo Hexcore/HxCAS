@@ -7,7 +7,10 @@ import org.junit.experimental.theories.suppliers.TestedOn;
 
 import junit.framework.TestCase;
 
+import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
+import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
@@ -239,4 +242,37 @@ public class TestByteCode extends TestCase
 		
 		assertEquals(55.0, c.getValue(1));
 	}
+	
+	
+	/*
+	public void testGameOfLife()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet11.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		Vector2i size = new Vector2i(10, 10);
+		
+		
+		Cell example = new Cell(new double[]{0,0});
+		
+		Grid g = new RectangleGrid(size, example);
+		
+		g.getCell(1, 1).setValue(1, 1);
+		g.getCell(2, 1).setValue(1, 1);
+		g.getCell(3, 1).setValue(1, 1);
+		
+		
+		Grid nG = new RectangleGrid(g);
+		for(int r = 0; r < 10; r++)
+		{
+			for(int c = 0; c < 10; c++)
+			{
+				//nG[r][c]
+			}
+		}
+	}
+	*/
 }

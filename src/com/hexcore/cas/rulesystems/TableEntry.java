@@ -19,6 +19,7 @@ public class TableEntry
 	public int 				kind;				
 	public int 				value;				//Constant value
 	public int 				offset;
+	public int				argType;
 	public String			name;
 	
 	public TableEntry 		nextEntry;

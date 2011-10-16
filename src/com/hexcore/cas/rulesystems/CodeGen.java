@@ -209,23 +209,57 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", "generatePropertyArray", "([Lcom/hexcore/cas/model/Cell;I)[D");
 	}
 	
-	public static void invokeStandardArrayMethod(String name, int type)
+	public static void invokeStandardArrayMethod(String name, int argType, int returnType)
 	{
-		debug("Invoking StdLib array method: " + name + " as type " + type);
+		String aType = "";
+		String rType = "";
 		
-		if(type == TableEntry.doubleType)
-			executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "([D)D");
-		else if(type == TableEntry.intType)
+		switch(argType)
 		{
-			executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "([D)I");
-			executeVisitor.visitInsn(I2D);
+			case TableEntry.intType: aType = "[I"; break;
+			case TableEntry.doubleType: aType = "[D"; break;
+			case TableEntry.cellType: aType = "[Lcom/hexcore/cas/model/Cell"; break;
 		}
+		
+		switch(returnType)
+		{
+			case TableEntry.intType: rType = "I"; break;
+			case TableEntry.doubleType: rType = "D"; break;
+		}
+		
+		
+		debug("Invoking StdLib array method: " + name + " with argtype " + aType + " and rType " + rType);		
+		
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
+		if(returnType == TableEntry.intType)
+			executeVisitor.visitInsn(I2D);
+
 	}
 	
-	public static void invokeStandardScalarMethod(String name)
+	public static void invokeStandardScalarMethod(String name, int argType, int returnType)
 	{
-		debug("Invoking StdLib scalar method: " + name);
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(D)D");		
+		String aType = "";
+		String rType = "";
+		
+		switch(argType)
+		{
+			case TableEntry.intType: aType = "I"; break;
+			case TableEntry.doubleType: aType = "D"; break;
+			case TableEntry.cellType: aType = "Lcom/hexcore/cas/Cell"; break;
+		}
+		
+		switch(returnType)
+		{
+			case TableEntry.intType: rType = "I"; break;
+			case TableEntry.doubleType: rType = "D"; break;
+		}
+		
+		
+		debug("Invoking StdLib scalar method: " + name + " with argtype " + aType + " and rType " + rType);		
+		
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
+		if(returnType == TableEntry.intType)
+			executeVisitor.visitInsn(I2D);
 	}
 	
 	public static void performRelationalOp(RelOpE op)
