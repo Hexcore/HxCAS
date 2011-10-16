@@ -115,7 +115,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					else
 					{
 						Grid2DWidget temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-						
+						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp2DWidget);
@@ -135,7 +135,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					else
 					{
 						Grid2DWidget temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						
+						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp2DWidget);
@@ -155,7 +155,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					else
 					{
 						Grid2DWidget temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						
+						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp2DWidget);
@@ -1617,15 +1617,6 @@ public class GUI implements WindowEventListener, LobbyListener
             
             //PREVIEW GRID
             
-            else if (event.target == previewViewport.gridWidget)
-            {
-            	
-            	Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
-            	
-            	world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell()).setValue(1, 1.0f);
-            	
-            			}
-            
             // VIEWPORT CAMERA
             
             else if (event.target == zoomOutButton)
@@ -1876,6 +1867,12 @@ public class GUI implements WindowEventListener, LobbyListener
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
+            //PREVIEW GRID
+            else if (event.target == previewViewport.gridWidget)
+            {
+				Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
+				world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell()).setValue(1, 1.0f);
+			}
         }
     }
 
