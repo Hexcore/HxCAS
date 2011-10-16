@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import com.hexcore.cas.utilities.Log;
 
@@ -38,8 +40,8 @@ public class CAPMessageProtocol extends Thread
 		
 		try
 		{
-			inputStream = new BufferedInputStream(socket.getInputStream());
-			outputStream = new BufferedOutputStream(socket.getOutputStream());
+			inputStream = new BufferedInputStream(new GZIPInputStream(socket.getInputStream()));
+			outputStream = new BufferedOutputStream(new GZIPOutputStream(socket.getOutputStream()));
 		}
 		catch (IOException e)
 		{
