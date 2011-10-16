@@ -15,7 +15,6 @@ public class ClickableWidget extends Widget
 	}
 	
 	public void 	handleClick() {}
-	public boolean	canGetFocus() {return true;}
 	
 	@Override	
 	public boolean handleEvent(Event event, Vector2i position)
@@ -30,7 +29,6 @@ public class ClickableWidget extends Widget
 			if (wasActive && !active && mouseover)
 			{
 				handleClick();
-				window.requestFocus(this);
 				
 				Event clickEvent = new Event(Event.Type.ACTION);
 				clickEvent.target = this;

@@ -1410,232 +1410,189 @@ public class GUI implements WindowEventListener
             
             else if (event.target == zoomOutButton)
             {
-            
             	for (Viewport viewport : viewports)
             	{
-    			//	if (viewport.gridWidget.hasFocus())
-    			//	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
     					if (viewport.type == Viewport.Type.THREE_D)
     					{
     						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
     						temp3DWidget.move(new Vector3f(0, 0, 1));
     					}
-    			//	}
+    				}
             	}
-            	
             }
             
             else if (event.target == zoomInButton)
             {
-            	 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.move(0, 0, -1);
-	    					}
-	    			//	}
-	            	}
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 0, -1);
+    					}
+    				}
+            	}
             }
             
             else if (event.target == zoomOutButton)
             {
-            	 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.move(0, 0, 1);
-	    					}
-	    			//	}
-	            	}
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 0, 1);
+    					}
+    				}
+            	}
             }
-
-	
-			 else if (event.target ==moveUpButton)
-	         {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.move(0, -1, 0);
-	    					}
-	    			//	}
-	            	}
-	         }
-
-
-			 else if (event.target ==moveDownButton)
-	            {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.move(0, 1, 0);
-	    					}
-	    			//	}
-	            	}
-	            }
-
-
-			 else if (event.target ==moveLeftButton)
-	            {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.move(-1, 0, 0);
-	    					}
-	    			//	}
-	            	}
-				 
-				 
-	            
-
-	            }
-
-
-			 else if (event.target ==moveRightButton)
-	            {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
+			else if (event.target ==moveUpButton)
+	        {
+	        	for (Viewport viewport : viewports)
+	        	{
+					if (viewport.gridWidget.hasFocus())
+					{
+						if (viewport.type == Viewport.Type.THREE_D)
+						{
+							Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+							temp3DWidget.move(0, -1, 0);
+						}
+					}
+	        	}
+	        }
+			else if (event.target ==moveDownButton)
+			{
+	        	for (Viewport viewport : viewports)
+	        	{
+					if (viewport.gridWidget.hasFocus())
+					{
+						if (viewport.type == Viewport.Type.THREE_D)
+						{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 1, 0);
+    					}
+    				}
+            	}
+            }
+			else if (event.target ==moveLeftButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(-1, 0, 0);
+    					}
+    				}
+            	}
+	        }
+			else if (event.target ==moveRightButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
 	    					{
 	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
 	    						temp3DWidget.move(1, 0, 0);
 	    					}
-	    			//	}
+	    				}
 	            	}
-				 
-				 
-	            }
-
-
-			 else if (event.target ==yawLeftButton)
-	            {
-			
-				 
-				 for (Viewport viewport : viewports)
-	            	{	
-	    				
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changeYaw(2);
-	    					}
-	    				
+			}
+			else if (event.target ==yawLeftButton)
+			{
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changeYaw(2);
+    					}
 	            	}
+            	}
+            }
+            else if (event.target ==yawRightButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changeYaw(-2);
+    					}
+    				}
 	            }
-
-
-			 else if (event.target ==yawRightButton)
-	            {
-				 
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changeYaw(-2);
-	    					}
-	    		//		}
-	            	}
-				 
-				 
-	            	
-	            }
-
-
-			 else if (event.target == pitchUpButton)
-	            {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changePitch(2);
-	    					}
-	    		//		}
-	            	}
-	            }
-
-            
-			 else if (event.target == pitchDownButton)
-	            {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changePitch(-2);
-	    					}
-	    		//		}
-	            	}
-	            }
+			}
+            else if (event.target == pitchUpButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changePitch(2);
+    					}
+    				}
+            	}
+            }
+            else if (event.target == pitchDownButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changePitch(-2);
+    					}
+    				}
+            	}
+            }
 
             //VIEWPORT SETTINGS BUTTONS
             
-			 else if (event.target == toggle3dButton)
-			 {
-				 for (Viewport viewport : viewports)
-	            	{	
-	    		//	if (viewport.gridWidget.hasFocus())
-	    		//		{
-	    					viewport.switchDimension(currentGrid);
-	    		//		}
-	            	} 
-				 
-			 }
-            
-			 else if (event.target == toggleHideButton)
-			 {
-				 
-				 
-			 }
-            
-			 else if (event.target == toggleShowButton)
-			 {
-				 
-				 
-			 }
-            
-			 else if (event.target == toggleWireframeButton)
-			 {
-				 
-				 
-			 }
-            
-            
-            
-            
-
+			else if (event.target == toggle3dButton)
+			{
+				for (Viewport viewport : viewports)
+				{	
+					if (viewport.gridWidget.hasFocus()) 
+						viewport.switchDimension(currentGrid);
+				} 
+			}
+			else if (event.target == toggleHideButton)
+			{
+				 				 
+			}
+			else if (event.target == toggleShowButton)
+			{
+				 				 
+			}
+			else if (event.target == toggleWireframeButton)
+			{
+				 				 
+			}
             // DISTRIBUTION BUTTONS
-			 else if (event.target == refreshServerButton)
-			 {
-				 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
-	                server.sendEvent(serverEvent);
-			 }
+			else if (event.target == refreshServerButton)
+			{
+				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+				server.sendEvent(serverEvent);
+			}
             
             //COLOUR RANGES
             
