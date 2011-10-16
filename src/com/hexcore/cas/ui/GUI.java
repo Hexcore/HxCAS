@@ -80,6 +80,19 @@ public class GUI implements WindowEventListener
 			this.type = type;
 		}
 		
+		
+		public void switchDimension(Grid grid)
+		{			
+			if (this.type == Viewport.Type.THREE_D)
+				type =  Viewport.Type.TWO_D;
+				
+			else			
+				type =  Viewport.Type.THREE_D;
+			
+			recreate(grid);
+			
+		}
+		
 		public void recreate(Grid grid)
 		{
 	    	switch (grid.getType())
@@ -290,6 +303,24 @@ public class GUI implements WindowEventListener
 
 
 	private LinearLayout masterColoursLayout;
+
+
+	private Button toggleHideButton;
+
+
+	private Button toggle3dButton;
+
+
+	private Button toggleWireframeButton;
+
+
+	private Button removeViewportButton;
+
+
+	private ImageWidget viewSettingsHeader;
+
+
+	private Button toggleShowButton;
     
     public GUI(Server server)
     {
@@ -886,23 +917,23 @@ public class GUI implements WindowEventListener
         viewSettingsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(viewSettingsLayout);
         
-        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(14, 25), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(145, 25), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout);
         
-        LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(218, 40), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(220, 40), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout2);
         
-        Button toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
+        toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
         toggleHideButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleHideButton);
         
-        Button toggle3DButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
-        toggle3DButton.setMargin(new Vector2i(5, 0));
-        innerViewSettingsLayout2.add(toggle3DButton);
+        toggle3dButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
+        toggle3dButton.setMargin(new Vector2i(5, 0));
+        innerViewSettingsLayout2.add(toggle3dButton);
         
-        Button toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
+        toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
         toggleWireframeButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleWireframeButton);
         
@@ -910,15 +941,15 @@ public class GUI implements WindowEventListener
         addViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(addViewportButton);
         
-        Button removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
+        removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
         removeViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(removeViewportButton);
         
-        ImageWidget viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
+        viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
         cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerViewSettingsLayout.add(viewSettingsHeader);
         
-        Button toggleShowButton = new Button(new Vector2i(10, 15), "");
+        toggleShowButton = new Button(new Vector2i(10, 15), "");
         toggleShowButton.setFlag(Widget.FILL_HORIZONTAL);
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
@@ -1378,34 +1409,98 @@ public class GUI implements WindowEventListener
             
             	for (Viewport viewport : viewports)
             	{
-    				if (viewport.gridWidget.hasFocus())
-    				{
+    			//	if (viewport.gridWidget.hasFocus())
+    			//	{
     					if (viewport.type == Viewport.Type.THREE_D)
     					{
     						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-    						temp3DWidget.move(new Vector3f(1, 1, 1));
+    						temp3DWidget.move(new Vector3f(0, 0, 1));
     					}
-    				}
+    			//	}
             	}
             	
+            }
+            
+            else if (event.target == zoomInButton)
+            {
+            	 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(0, 0, -1);
+	    					}
+	    			//	}
+	            	}
+            }
+            
+            else if (event.target == zoomOutButton)
+            {
+            	 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(0, 0, 1);
+	    					}
+	    			//	}
+	            	}
             }
 
 	
 			 else if (event.target ==moveUpButton)
 	         {
-	         	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(0, -1, 0);
+	    					}
+	    			//	}
+	            	}
 	         }
 
 
 			 else if (event.target ==moveDownButton)
 	            {
-	            	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(0, 1, 0);
+	    					}
+	    			//	}
+	            	}
 	            }
 
 
 			 else if (event.target ==moveLeftButton)
 	            {
-	            	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(-1, 0, 0);
+	    					}
+	    			//	}
+	            	}
+				 
+				 
+	            
+
 	            }
 
 
@@ -1449,14 +1544,14 @@ public class GUI implements WindowEventListener
 				 
 				 for (Viewport viewport : viewports)
 	            	{	
-	    			if (viewport.gridWidget.hasFocus())
-	    				{
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
 	    					if (viewport.type == Viewport.Type.THREE_D)
 	    					{
 	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
 	    						temp3DWidget.changeYaw(-2);
 	    					}
-	    				}
+	    		//		}
 	            	}
 				 
 				 
@@ -1464,11 +1559,72 @@ public class GUI implements WindowEventListener
 	            }
 
 
-			 else if (event.target ==pitchUpButton)
+			 else if (event.target == pitchUpButton)
 	            {
-	            	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.changePitch(2);
+	    					}
+	    		//		}
+	            	}
 	            }
 
+            
+			 else if (event.target == pitchDownButton)
+	            {
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.changePitch(-2);
+	    					}
+	    		//		}
+	            	}
+	            }
+
+            //VIEWPORT SETTINGS BUTTONS
+            
+			 else if (event.target == toggle3dButton)
+			 {
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					viewport.switchDimension(currentGrid);
+	    		//		}
+	            	} 
+				 
+			 }
+            
+			 else if (event.target == toggleHideButton)
+			 {
+				 
+				 
+			 }
+            
+			 else if (event.target == toggleShowButton)
+			 {
+				 
+				 
+			 }
+            
+			 else if (event.target == toggleWireframeButton)
+			 {
+				 
+				 
+			 }
+            
+            
+            
+            
 
             // DISTRIBUTION BUTTONS
 			 else if (event.target == refreshServerButton)
