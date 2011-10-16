@@ -114,7 +114,7 @@ public class Server implements LobbyListener
 								grid.getCell(x, y).setValue(0, 0.0);
 												
 						world.addGeneration(grid);						
-						world.setRuleCode("ruleset Flash\n{\n\ttypecount 1;\n\tproperty alive;\n\ttype Land : 0\n\t{\n\t\tself.alive = 1 - self.alive;\n\t}\n}");
+						world.setRuleCode("ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land : 0\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}");
 						
 						ui.startWorldEditor(world);
 						
