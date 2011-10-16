@@ -86,7 +86,7 @@ public class Client
 		
 		Log.information(TAG, "Shutting down...");
 		beacon.disconnect();
-		overseer.disconnect();
+		overseer.stopRunning();
 		
 		try
 		{

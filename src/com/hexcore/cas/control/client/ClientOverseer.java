@@ -26,7 +26,9 @@ public class ClientOverseer extends Thread
 	private WorkerThread[] threads;
 	
 	private boolean running = false;
+	private boolean busy = false;
 	private boolean valid = false;
+	private int port = -1;
 
 	public ClientOverseer(int port)
 	{
@@ -37,15 +39,8 @@ public class ClientOverseer extends Thread
 		
 		rule = new GameOfLifeRule();
 		
-		try
-		{
-			informationProcessor = new CAPIPClient(this, port);
-			valid = informationProcessor.isValid();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		this.port = port;
+		//setup();
 	}
 	
 	public int checkState()
@@ -81,7 +76,7 @@ public class ClientOverseer extends Thread
 	public void disconnect()
 	{
 		valid = false;
-		running = false;
+		busy = false;
 		informationProcessor.disconnect();
 	}
 	
@@ -91,9 +86,38 @@ public class ClientOverseer extends Thread
 		this.rule = rule;
 	}
 	
+	public void stopRunning()
+	{
+		disconnect();
+		running = false;
+	}
+	
+	public void setup()
+	{
+		try
+		{
+			informationProcessor = new CAPIPClient(this, port);
+			valid = informationProcessor.isValid();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		int cores = Runtime.getRuntime().availableProcessors();
+		
+		threads = new WorkerThread[cores];
+		
+		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
+				
+		Log.information(TAG, "Ready");
+		
+	}
+	
 	@Override
 	public void start()
 	{
+		setup();
 		if (!valid)
 		{
 			Log.warning(TAG, "Socket not connected - Shutting down");
@@ -103,57 +127,59 @@ public class ClientOverseer extends Thread
 		
 		Log.information(TAG, "Starting...");
 
-		int cores = Runtime.getRuntime().availableProcessors();
-		
-		threads = new WorkerThread[cores];
-		
-		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
-				
-		Log.information(TAG, "Ready");
 		super.start();
 	}
 	
 	@Override
 	public void run()
 	{
-		informationProcessor.start();	
-		
-		for (int i = 0; i < threads.length; i++) threads[i].start();		
-		
 		running = true;
-		
-		while (running)
+		while(running)
 		{
-			Work work = null;
+			informationProcessor.start();	
+			
+			for (int i = 0; i < threads.length; i++) threads[i].start();
+			
+			busy = true;
+			
+			while (busy)
+			{
+				Work work = null;
+				
+				try
+				{
+					work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				
+				if (work == null) continue;
+				
+				Log.information(TAG, "Sending completed work");
+				int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
+				informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
+			}
+			
+			Log.information(TAG, "Stopping...");
+			
+			informationProcessor.disconnect();
 			
 			try
 			{
-				work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
+				for (int i = 0; i < threads.length; i++) threads[i].quit();
+				for (int i = 0; i < threads.length; i++) threads[i].join();
 			}
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();
 			}
 			
-			if (work == null) continue;
+			if(!running)
+				break;
 			
-			Log.information(TAG, "Sending completed work");
-			int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
-			informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
-		}
-		
-		Log.information(TAG, "Stopping...");
-		
-		informationProcessor.disconnect();
-		
-		try
-		{
-			for (int i = 0; i < threads.length; i++) threads[i].quit();
-			for (int i = 0; i < threads.length; i++) threads[i].join();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
+			setup();
 		}
 	}
 	

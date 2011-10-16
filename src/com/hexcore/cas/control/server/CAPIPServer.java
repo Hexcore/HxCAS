@@ -405,8 +405,9 @@ public class CAPIPServer
 		{
 			Log.debug(TAG, "Connecting client");
 			ClientInfo client = new ClientInfo(name);			
-			client.connect();
-			clients.add(client);
+			boolean result = client.connect();
+			if(result)
+				clients.add(client);
 		}
 		
 		System.out.println("Connected: " + clients.size());
@@ -493,22 +494,24 @@ public class CAPIPServer
 			}
 		}
 		
-		public void connect()
+		public boolean connect()
 		{			
 			try
 			{
 				protocol = new CAPMessageProtocol(new Socket(name, clientPort));
 				protocol.start();
+				
+				DictNode header = makeHeader("CONNECT");
+				Message msg = new Message(header);
+				protocol.sendMessage(msg);
+				return true;
 			}
 			catch(IOException e)
 			{
 				Log.error(TAG, "Error making protocol after client additions/deletions");
 				e.printStackTrace();
+				return false;
 			}
-			
-			DictNode header = makeHeader("CONNECT");
-			Message msg = new Message(header);
-			protocol.sendMessage(msg);
 		}
 		
 		public void disconnect()
