@@ -284,6 +284,12 @@ public class GUI implements WindowEventListener
 
 
 	private Button refreshServerButton;
+
+
+	private Container coloursContainer;
+
+
+	private LinearLayout masterColoursLayout;
     
     public GUI(Server server)
     {
@@ -613,6 +619,28 @@ public class GUI implements WindowEventListener
         refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
         masterDistributionLayout.add(refreshServerButton);
         
+        
+        coloursContainer = new Container(new Vector2i(100, 100));
+        coloursContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(coloursContainer, "Colour Ranges");
+        
+        masterColoursLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterColoursLayout.setFlag(Widget.FILL);
+        coloursContainer.setContents(masterColoursLayout);
+        
+        
+        LinearLayout colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        colourInstructionsLayout.setHeight(35);
+        colourInstructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        colourInstructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+        masterColoursLayout.add(colourInstructionsLayout);
+		   
+		TextWidget coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
+		colourInstructionsLayout.add(coloursInstructions);
+		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
+        
+        
+        ///
         
         
         
@@ -1094,6 +1122,19 @@ public class GUI implements WindowEventListener
     	return false;
     }
 
+    public void constructColoursTab()
+    {
+    	int numProperties = world.getGeneration(0).getNumProperties();
+    	
+    	for (int i = 0; i < numProperties; i++)
+    	{
+    		TextWidget t = new TextWidget("Property " + i + " goes here!");
+    		masterColoursLayout.add(t);
+    	}
+    	
+    }
+    
+    
     @Override
     public void handleWindowEvent(Event event)
     {
@@ -1173,6 +1214,9 @@ public class GUI implements WindowEventListener
                 {
                 	Log.information(TAG, "Loading rule code into World");
                 	world.setRuleCode(CALCode);
+                	
+                	constructColoursTab();
+                	
                 }
                 else
                 {
@@ -1367,7 +1411,19 @@ public class GUI implements WindowEventListener
 
 			 else if (event.target ==moveRightButton)
 	            {
-	            	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(1, 0, 0);
+	    					}
+	    			//	}
+	            	}
+				 
+				 
 	            }
 
 
@@ -1393,13 +1449,14 @@ public class GUI implements WindowEventListener
 				 
 				 for (Viewport viewport : viewports)
 	            	{	
-	    				
+	    			if (viewport.gridWidget.hasFocus())
+	    				{
 	    					if (viewport.type == Viewport.Type.THREE_D)
 	    					{
 	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
 	    						temp3DWidget.changeYaw(-2);
 	    					}
-	    				
+	    				}
 	            	}
 				 
 				 
@@ -1419,6 +1476,10 @@ public class GUI implements WindowEventListener
 				 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
 	                server.sendEvent(serverEvent);
 			 }
+            
+            //COLOUR RANGES
+            
+			
             
         }
         else if (event.type == Event.Type.CHANGE)
