@@ -62,7 +62,8 @@ public class StdLib
 		double[] values = new double[cells.length];
 		
 		for(int i = 0; i < cells.length; i++)
-			values[i] = cells[i].getValue(propertyIndex);
+			if(cells[i] != null)
+				values[i] = cells[i].getValue(propertyIndex);
 		
 		return values;
 	}
