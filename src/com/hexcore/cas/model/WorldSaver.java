@@ -7,6 +7,14 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Class WorldSaver
+ * An instance of this object is used to write all details
+ * of a world to where it is stored.
+ * 
+ * @author Megan
+ *
+ */
 public class WorldSaver
 {
 	public WorldSaver()

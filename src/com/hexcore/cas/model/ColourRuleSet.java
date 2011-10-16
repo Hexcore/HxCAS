@@ -2,6 +2,15 @@ package com.hexcore.cas.model;
 
 import com.hexcore.cas.ui.toolkit.Colour;
 
+/**
+ * Class ColorRuleSet
+ * Use this class to assign colourRules to
+ * all properties.
+ * 
+ * @author Divan
+ *
+ */
+
 public class ColourRuleSet
 {
 	public ColourRule[]	colourRules;

@@ -1,5 +1,16 @@
 package com.hexcore.cas.math;
 
+/**
+ * Class Rectf:
+ * 	Stores a set of cells as two points in floating point:
+ * 	position - a vector2f object which represents 
+ * 	the left-top corner of a rectangle of cells.
+ * 	size - a vector2f object which represents 
+ * 	the size of the rectangle described.
+ * 
+ * @author Divan
+ * 
+ */
 public class Rectf
 {
 	public Vector2f position = new Vector2f(0, 0);
