@@ -1,0 +1,12 @@
+ruleset set9
+{
+	typecount 1;
+	
+	property land;
+
+
+	type Land : 0
+	{
+		self.land = neighbours[0].land + 1;
+	}
+}
