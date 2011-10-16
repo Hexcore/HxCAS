@@ -82,6 +82,7 @@ static int typeCountExpected = 0;
 static int typeCountActual = 0;
 static boolean postOpQueued = false;
 static PostOpE postOpType;
+static boolean valid = true;
 
 static TreeSet<Integer> typeIndices = new TreeSet<Integer>();
 
@@ -116,6 +117,13 @@ static ArrayList<String> getErrorList()
 	return results;
 }
 
+static void SemanticError(String msg)
+{
+	valid = false;
+	SemError(msg);
+	System.err.println("SEM ERROR");
+}
+
 static byte[] getCode()
 {
 	return CodeGen.getCode();
@@ -128,11 +136,15 @@ static public void reset()
 	Errors.first = null;
 	Errors.last = null;
 	Errors.eof = false;
+	valid = true;
 }
 
 
 
+	//Changed by Karl Zoller
 	static void SynErr (int n) {
+		System.err.println("SYN ERROR");
+		valid = false;
 		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
 		errDist = 0;
 	}
@@ -211,10 +223,14 @@ static public void reset()
 		RuleSet();
 		if(typeIndices.size() != typeCountExpected)
 		{
-			SemError("Mismatch between declared and actual type count");
+			SemanticError("Mismatch between declared and actual type count");
 		}
-		CodeGen.endExecute();
-		CodeGen.endClass();
+		
+		if(valid)
+		{
+			CodeGen.endExecute();
+			CodeGen.endClass();
+		}
 		
 		if (la.kind == colourset_Sym) {
 			ColourSet();
@@ -228,8 +244,11 @@ static public void reset()
 		
 		Expect(ruleset_Sym);
 		name  = Ident();
-		CodeGen.initClass(name);
-		CodeGen.initExecute();
+		if(valid)
+		{
+			CodeGen.initClass(name);
+			CodeGen.initExecute();
+		}
 		
 		Expect(lbrace_Sym);
 		TypeCount();
@@ -270,10 +289,12 @@ static public void reset()
 		value  = IntConst();
 		if(value < 1)
 		{
-			SemError("At least one type of cell must be declared");
+			SemanticError("At least one type of cell must be declared");
 		}
 		typeCountExpected = value;
-		CodeGen.initFramework(typeCountExpected);
+		
+		if(valid)
+			CodeGen.initFramework(typeCountExpected);
 		
 		Expect(semicolon_Sym);
 	}
@@ -282,7 +303,7 @@ static public void reset()
 		String name = "";
 		Expect(property_Sym);
 		name  = Ident();
-		if(table.find(name).type != TableEntry.noType) SemError("Identifier \"" + name + "\" already declared.");
+		if(table.find(name).type != TableEntry.noType) SemanticError("Identifier \"" + name + "\" already declared.");
 		TableEntry entry = new TableEntry();
 		entry.name = name;
 		entry.type = TableEntry.doubleType;
@@ -303,21 +324,27 @@ static public void reset()
 		value  = IntConst();
 		if(typeIndices.contains(new Integer(value)))
 		{
-			SemError("Duplicate type ID");
+			SemanticError("Duplicate type ID");
 		}
 		if(typeIndices.size() >= typeCountExpected)
 		{
-			SemError("Too many types");
+			SemanticError("Too many types");
 		}
 		typeIndices.add(new Integer(value));
-		CodeGen.initType();
+		
+		if(valid)
+			CodeGen.initType();
 		
 		Expect(lbrace_Sym);
 		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
-		table.popScope(); CodeGen.endType();
+		table.popScope();
+		
+		if(valid)
+			CodeGen.endType();
+		
 	}
 
 	static int IntConst() {
@@ -406,46 +433,52 @@ static public void reset()
 
 	static void AssignCall() {
 		TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;
-		entry  = Designator();
+		entry = Designator(false);
 		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
 			Get();
 			type  = Expression();
 			if(!(TableEntry.isArith(entry.type) && TableEntry.isArith(type)) && !(TableEntry.isBool(entry.type) && TableEntry.isBool(type)))
 			{
-				SemError("Incompatable Types");
+				SemanticError("Incompatable Types");
 			}
 			else if(!(TableEntry.isArray(entry.type) && TableEntry.isArray(type)) && !(!TableEntry.isArray(entry.type) && !TableEntry.isArray(type)))
 			{
-				SemError("Cannot mix scalar and array types in assignment");
+				SemanticError("Cannot mix scalar and array types in assignment");
 			}
 			
-			if(entry.kind == TableEntry.Variable)
+			if(valid)
 			{
-				if(TableEntry.isBool(type))
-				CodeGen.toDouble();
-				CodeGen.storeVariable(entry.offset);
-			}
-			else if(entry.kind == TableEntry.Property)
-			{
-				CodeGen.storeProperty(entry.offset);
+				if(entry.kind == TableEntry.Variable)
+				{
+					if(TableEntry.isBool(type))
+						CodeGen.toDouble();
+					CodeGen.storeVariable(entry.offset);
+				}
+				else if(entry.kind == TableEntry.Property)
+				{
+					CodeGen.storeProperty(entry.offset);
+				}
 			}
 			
 		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
 			if(!TableEntry.isArith(entry.type))
-				SemError("Cannot perform a post operation on a boolan type.");
+				SemanticError("Cannot perform a post operation on a boolan type.");
 				
 			if(entry.kind != TableEntry.Variable)
 			{
-				SemError("Can only perform post operation on a variable.");
+				SemanticError("Can only perform post operation on a variable.");
 			}
 			else
 			{
-				if(T == PostOpE.INC)
-					CodeGen.performPostOp(entry.offset, 1);
-				else
-					CodeGen.performPostOp(entry.offset, -1);
+				if(valid)
+				{
+					if(T == PostOpE.INC)
+						CodeGen.performPostOp(entry.offset, 1);
+					else
+						CodeGen.performPostOp(entry.offset, -1);
+				}
 			}
 			
 		} else if (la.kind == lparen_Sym) {
@@ -453,21 +486,21 @@ static public void reset()
 			typeA  = Arguments();
 			if(!TableEntry.isFunction(entry.kind))
 			{
-			SemError("Arguments can only be given to a function.");
+			SemanticError("Arguments can only be given to a function.");
 			}
 			
 			if(entry.kind == TableEntry.aFunction)
 			{
 			if(!TableEntry.isArray(typeA))
 			{
-			SemError("Invalid argument. Argument must be an array");
+			SemanticError("Invalid argument. Argument must be an array");
 			}
 			}
 			else
 			{
 			if(TableEntry.isArray(typeA))
 			{
-			SemError("Invalid argument. Argument must be a scalar type");
+			SemanticError("Invalid argument. Argument must be a scalar type");
 			}
 			}
 			
@@ -482,18 +515,26 @@ static public void reset()
 		Expect(lparen_Sym);
 		type  = Expression();
 		Expect(rparen_Sym);
-		Label[] pointers;
-		pointers = CodeGen.initIf();
+		Label[] pointers = null;	
+		if(valid)
+		{	
+			pointers = CodeGen.initIf();
+		}
 		
 		Statement();
-		CodeGen.jump(pointers[1]);
-		CodeGen.visitLabel(pointers[0]);
+		if(valid)
+		{
+			CodeGen.jump(pointers[1]);
+			CodeGen.visitLabel(pointers[0]);
+		}
 		
 		if (la.kind == else_Sym) {
 			Get();
 			Statement();
 		}
-		CodeGen.visitLabel(pointers[1]);
+		if(valid)
+			CodeGen.visitLabel(pointers[1]);
+		
 	}
 
 	static void VarDeclaration() {
@@ -506,7 +547,7 @@ static public void reset()
 		Expect(semicolon_Sym);
 	}
 
-	static TableEntry Designator() {
+	static TableEntry Designator(boolean attr) {
 		TableEntry entry;
 		int type = TableEntry.noType;
 		int typeE = TableEntry.noType;
@@ -516,29 +557,35 @@ static public void reset()
 		name  = Ident();
 		entry = table.find(name);
 		if(entry.type == TableEntry.noType)
-			SemError("Undeclared identifier \"" + name + "\"");
+			SemanticError("Undeclared identifier \"" + name + "\"");
 		else
 			type = entry.type;
 			
+		if(entry.kind == TableEntry.Property && attr == false)
+			SemanticError("Properties must be called with \"self\"");
+			
 			
 		if(entry.kind == TableEntry.Cell)
+			if(valid)
 				CodeGen.derefRef(entry.offset);
 			
 		
 		if (la.kind == lbrack_Sym) {
 			Get();
 			typeE  = Expression();
-			if((type % 2) == 0) SemError("Cannot index scalar type \"" + name +  "\"");
+			if((type % 2) == 0) SemanticError("Cannot index scalar type \"" + name +  "\"");
 			if(!TableEntry.isArith(typeE))
 			{
-			SemError("Index must be arithmetic");
+			SemanticError("Index must be arithmetic");
 			}
+			
+			if(valid)
 			CodeGen.derefArrayRef();
 			
 			Expect(rbrack_Sym);
 			if(!TableEntry.isArray(type))
 			{
-				SemError("Can only index arrays");
+				SemanticError("Can only index arrays");
 			}
 			TableEntry entryS = new TableEntry();
 			entryS.name = entry.name;
@@ -550,8 +597,8 @@ static public void reset()
 		if (la.kind == point_Sym) {
 			Get();
 			entryA  = Attribute();
-			if(entry.kind != TableEntry.Cell) SemError("Only cells have attributes.");
-			if(entryA.kind != TableEntry.Property) SemError("Only declared properties can be used as cell attributes.");
+			if(entry.kind != TableEntry.Cell) SemanticError("Only cells have attributes.");
+			if(entryA.kind != TableEntry.Property) SemanticError("Only declared properties can be used as cell attributes.");
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
 			entryAA.kind = entryA.kind;
@@ -585,13 +632,14 @@ static public void reset()
 			type2  = AddExp();
 			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
 			{
-				SemError("Type mismatch");
+				SemanticError("Type mismatch");
 				type = TableEntry.noType;
 			}
 				
 			type = TableEntry.boolType;
 			
-			CodeGen.performRelationalOp(op);										
+			if(valid)
+				CodeGen.performRelationalOp(op);										
 			
 		}
 		return type;
@@ -621,7 +669,7 @@ static public void reset()
 
 	static TableEntry Attribute() {
 		TableEntry entry;
-		entry  = Designator();
+		entry = Designator(true);
 		return entry;
 	}
 
@@ -632,7 +680,7 @@ static public void reset()
 		entry.name = "__new__";
 		
 		if(table.find(name).type != TableEntry.noType)
-			SemError("Identifier \"" + name + "\" already declared.");
+			SemanticError("Identifier \"" + name + "\" already declared.");
 		else
 		{
 			entry.kind = TableEntry.Variable;
@@ -649,7 +697,8 @@ static public void reset()
 				entry.type = type;
 			}
 			
-			CodeGen.storeVariable(entry.offset);
+			if(valid)
+				CodeGen.storeVariable(entry.offset);
 			
 		}
 		if(!entry.name.equals("__new__"))
@@ -678,9 +727,10 @@ static public void reset()
 		if(negative)
 		{
 			if(!TableEntry.isArith(type1))
-				SemError("Cannot negate a boolean type");
+				SemanticError("Cannot negate a boolean type");
 			else
-				CodeGen.negate();
+				if(valid)
+					CodeGen.negate();
 		}
 		
 		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
@@ -690,19 +740,20 @@ static public void reset()
 			{
 				case OR:
 					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
-						SemError("Boolean Types Required");
+						SemanticError("Boolean Types Required");
 					type = TableEntry.boolType;
 					break;
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
-						SemError("Numeric Types Required");
+						SemanticError("Numeric Types Required");
 					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
 						type = TableEntry.intType;
 					else
 						type = TableEntry.doubleType;
 			}
 			
-			CodeGen.performAddOp(op);
+			if(valid)
+				CodeGen.performAddOp(op);
 			
 		}
 		return type;
@@ -763,19 +814,20 @@ static public void reset()
 			{
 				case AND:
 					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
-						SemError("Boolean Types Required");
+						SemanticError("Boolean Types Required");
 					type = TableEntry.boolType;
 					break;
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
-						SemError("Numeric Types Required");
+						SemanticError("Numeric Types Required");
 					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
 						type = TableEntry.intType;
 					else
 						type = TableEntry.doubleType;  														
 			}
 			
-			CodeGen.performMulOp(op);
+			if(valid)
+				CodeGen.performMulOp(op);
 			
 		}
 		return type;
@@ -806,20 +858,23 @@ static public void reset()
 		type = p.type;
 		if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
-			if(!TableEntry.isArith(type)) SemError("Cannot perform a post operation on a boolan type.");
+			if(!TableEntry.isArith(type)) SemanticError("Cannot perform a post operation on a boolan type.");
 			if(p.kind != TableEntry.Variable)
 			{
-				SemError("Can only perform post operations on a variable.");
+				SemanticError("Can only perform post operations on a variable.");
 			}
 			else
+			{
+			if(valid)
 			{
 			if(T == PostOpE.INC)
 			{
-			CodeGen.performPostOp(p.offset, 1);
+				CodeGen.performPostOp(p.offset, 1);
 			}
 			else
 			{
-			CodeGen.performPostOp(p.offset, -1);
+				CodeGen.performPostOp(p.offset, -1);
+			}
 			}
 			}
 			
@@ -858,19 +913,23 @@ static public void reset()
 		TableEntry entry = null;
 		
 		if (la.kind == identifier_Sym) {
-			entry  = Designator();
+			entry = Designator(false);
 			p.type = entry.type;
 			p.kind = TableEntry.Variable;
 			p.offset = entry.offset;
 			
-			if(entry.kind == TableEntry.Variable)
-				CodeGen.derefVariable(entry.offset);		  											
-			else if(entry.kind == TableEntry.Property)
+			
+			if(valid)
 			{
-				if(TableEntry.isArray(entry.type))
-					CodeGen.generatePropertyArray(entry.offset);
-				else
-					CodeGen.derefProperty(entry.offset);
+			if(entry.kind == TableEntry.Variable)
+					CodeGen.derefVariable(entry.offset);		  											
+				else if(entry.kind == TableEntry.Property)
+				{
+					if(TableEntry.isArray(entry.type))
+						CodeGen.generatePropertyArray(entry.offset);
+					else
+						CodeGen.derefProperty(entry.offset);
+				}
 			}
 			
 			if (la.kind == lparen_Sym) {
@@ -878,29 +937,31 @@ static public void reset()
 				typeA  = Arguments();
 				if(!TableEntry.isFunction(entry.kind))
 				{
-				SemError("Arguments can only be given to a function.");
+				SemanticError("Arguments can only be given to a function.");
 				}
 				
 				if(entry.kind == TableEntry.aFunction)
 				{
 				if(!TableEntry.isArray(typeA))
 				{
-					SemError("Invalid argument. Argument must be an array");
+					SemanticError("Invalid argument. Argument must be an array");
 				}
 				else
 				{
-					CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
+					if(valid)
+						CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
 				}
 				}
 				else
 				{
 				if(TableEntry.isArray(typeA))
 				{
-					SemError("Invalid argument. Argument must be a scalar type");
+					SemanticError("Invalid argument. Argument must be a scalar type");
 				}
 				else
 				{
-					CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
+					if(valid)
+						CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
 				}
 				}
 				p.kind = TableEntry.Constant;
@@ -912,7 +973,9 @@ static public void reset()
 			con  = Constant();
 			p.type = con.type;
 			p.kind = TableEntry.Constant;
-			CodeGen.loadConstant((double)con.value);
+			
+			if(valid)
+				CodeGen.loadConstant((double)con.value);
 			
 		} else if (la.kind == lparen_Sym) {
 			Get();
