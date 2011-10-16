@@ -92,7 +92,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		}
 		
 		defaultLabel = new Label();
-		derefProperty(0);
+		
+		//Current index required
+		derefRef(1);			//Self
+		derefProperty(0);		//Self.type
+		
 		executeVisitor.visitInsn(D2I);
 		executeVisitor.visitLookupSwitchInsn(defaultLabel, frameworkIndices, frameworkLabels);
 	}
@@ -151,7 +155,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		debug("Storing at property: " + index);
 		//Store result in temp variable in preparation for function call.
 		executeVisitor.visitVarInsn(DSTORE, 3);
-		executeVisitor.visitVarInsn(ALOAD, 1);
+		//executeVisitor.visitVarInsn(ALOAD, 1);
 		executeVisitor.visitLdcInsn(new Integer(index));
 		
 		//Restore value
@@ -183,13 +187,25 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitVarInsn(ALOAD, index);
 	}
 	
+	public static void derefArrayRef()
+	{
+		debug("Dereferencing array");
+		executeVisitor.visitInsn(D2I);
+		executeVisitor.visitInsn(AALOAD);
+	}
+	
 	
 	public static void derefProperty(int index)
 	{
 		debug("Deref property: " + index);
-		executeVisitor.visitVarInsn(ALOAD, 1);
+		//executeVisitor.visitVarInsn(ALOAD, 1);
 		executeVisitor.visitLdcInsn(new Integer(index));
 		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "getValue", "(I)D");
+	}
+	
+	public static void generatePropertyArray(int index)
+	{
+	
 	}
 	
 	public static void performRelationalOp(RelOpE op)

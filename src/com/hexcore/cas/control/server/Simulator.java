@@ -43,15 +43,7 @@ public class Simulator extends Thread
 	{
 		this.clientPort = clientPort;
 		this.world = world;
-		
-		try
-		{
-			this.ruleByteCode = readBytes("Test Data/bytecode/GameOfLifeRule.class");
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		this.ruleByteCode = null;
 	}
 		
 	public ThreadWork[] getClientWork()
@@ -412,32 +404,5 @@ public class Simulator extends Thread
 			Recti aw = new Recti(borderSize, workArea.getSize());
 			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
 		}
-	}
-	
-	private byte[] readBytes(String filename) throws Exception
-	{
-		File file = new File(filename);
-		
-		if (!file.exists()) throw new Exception("Test bytecode could not be found");
-		
-		InputStream stream = new FileInputStream(file);
-		
-		int length = (int)file.length();
-		byte[] bytes = new byte[length];
-		
-		System.out.println("Bytecode - File: " + filename + " - Size: " + length);
-		
-		int index = 0;
-	    int numRead = 0;
-	    while (index < bytes.length)
-	    {
-	    	numRead = stream.read(bytes, index, bytes.length-index);
-	    	if (numRead <= 0) break;
-	    	index += numRead;
-	    }
-	    
-	    if (index < length) throw new Exception("Not all bytes were read in");
-
-	    return bytes;
 	}
 }

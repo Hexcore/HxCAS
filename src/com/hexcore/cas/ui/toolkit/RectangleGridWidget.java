@@ -54,7 +54,7 @@ public class RectangleGridWidget extends Grid2DWidget
 					
 				Vector2i p = pos.add((int)(x * s), (int)(y * s));
 				Graphics.renderPolygon(gl, p, rectangle, false, colour);
-				Graphics.renderPolygon(gl, p, rectangleBorder, true, cellBorderColour);
+				if (drawWireframe) Graphics.renderPolygon(gl, p, rectangleBorder, true, cellBorderColour);
 			}
 		
 		if (drawSelected)

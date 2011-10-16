@@ -58,7 +58,7 @@ public class SymbolTable
 		selfEntry.type = TableEntry.cellType;
 		selfEntry.kind = TableEntry.Cell;
 		selfEntry.name = "self";
-		selfEntry.offset = 0;
+		selfEntry.offset = 1;
 		insert(selfEntry);
 		
 		TableEntry typeEntry = new TableEntry();
@@ -108,7 +108,7 @@ public class SymbolTable
 		neighboursEntry.type = TableEntry.cellType + 1;
 		neighboursEntry.kind = TableEntry.Cell;
 		neighboursEntry.name = "neighbours";
-		neighboursEntry.offset = 1;
+		neighboursEntry.offset = 2;
 		insert(neighboursEntry);
 	}
 	

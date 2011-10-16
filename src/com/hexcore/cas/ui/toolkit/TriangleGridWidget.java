@@ -66,12 +66,12 @@ public class TriangleGridWidget extends Grid2DWidget
 				if ((x & 1) == (y & 1)) // Checker-board pattern
 				{
 					Graphics.renderPolygon(gl, p, downTriangle, false, colour);
-					Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellBorderColour);
+					if (drawWireframe) Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellBorderColour);
 				}
 				else
 				{
 					Graphics.renderPolygon(gl, p, upTriangle, false, colour);
-					Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellBorderColour);
+					if (drawWireframe) Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellBorderColour);
 				}
 			}
 		

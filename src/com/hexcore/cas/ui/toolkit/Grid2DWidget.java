@@ -28,10 +28,7 @@ public class Grid2DWidget extends GridWidget
 	{
 		super(position, size, grid, cellSize);
 	}	
-	
-	@Override
-	public boolean canGetFocus() {return true;}
-	
+		
 	public float getZoom() { return zoom; }
 	public void setZoom(float zoom) { this.zoom = zoom; }
 	public void changeZoom(float amount) { this.zoom += zoom; }

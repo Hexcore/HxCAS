@@ -519,6 +519,11 @@ static public void reset()
 			SemError("Undeclared identifier \"" + name + "\"");
 		else
 			type = entry.type;
+			
+			
+		if(entry.kind == TableEntry.Cell)
+				CodeGen.derefRef(entry.offset);
+			
 		
 		if (la.kind == lbrack_Sym) {
 			Get();
@@ -528,6 +533,7 @@ static public void reset()
 			{
 			SemError("Index must be arithmetic");
 			}
+			CodeGen.derefArrayRef();
 			
 			Expect(rbrack_Sym);
 			if(!TableEntry.isArray(type))
@@ -858,11 +864,14 @@ static public void reset()
 			p.offset = entry.offset;
 			
 			if(entry.kind == TableEntry.Variable)
-				CodeGen.derefVariable(entry.offset);
-			else if(entry.kind == TableEntry.Cell)
-				CodeGen.derefRef(entry.offset);
+				CodeGen.derefVariable(entry.offset);		  											
 			else if(entry.kind == TableEntry.Property)
-				CodeGen.derefProperty(entry.offset);						
+			{
+				if(TableEntry.isArray(entry.type))
+					CodeGen.generatePropertyArray(entry.offset);
+				else
+					CodeGen.derefProperty(entry.offset);
+			}
 			
 			if (la.kind == lparen_Sym) {
 				Get();

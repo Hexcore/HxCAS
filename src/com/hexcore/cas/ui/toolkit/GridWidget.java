@@ -9,6 +9,8 @@ public abstract class GridWidget extends Widget
 	protected Grid	grid;
 	protected int	cellSize;
 	
+	protected boolean	drawWireframe = true;
+	
 	protected Colour		backgroundColour = Colour.BLACK;
 	protected ColourRuleSet	colourRules;
 	
@@ -25,19 +27,14 @@ public abstract class GridWidget extends Widget
 		this.grid = grid;
 		this.cellSize = cellSize;
 	}
-
-	public void setBackgroundColour(Colour colour)
-	{
-		backgroundColour = colour;
-	}
 	
-	public void setGrid(Grid grid)
-	{
-		this.grid = grid;
-	}
+	@Override
+	public boolean canGetFocus() {return true;}
 
-	public void setColourRuleSet(ColourRuleSet ruleSet)
-	{
-		colourRules = ruleSet;
-	}
+	public void setDrawWireframe(boolean state) {drawWireframe = state;}
+	public void toggleDrawWireframe() {drawWireframe = !drawWireframe;}
+	
+	public void setBackgroundColour(Colour colour){backgroundColour = colour;}
+	public void setGrid(Grid grid) {this.grid = grid;}
+	public void setColourRuleSet(ColourRuleSet ruleSet) {colourRules = ruleSet;}
 }

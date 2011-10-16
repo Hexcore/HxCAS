@@ -2,17 +2,14 @@
 
 package com.hexcore.cas.ui;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
@@ -27,7 +24,6 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
-import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -37,6 +33,7 @@ import com.hexcore.cas.ui.toolkit.DiscreteSliderWidget;
 import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
+import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
@@ -80,6 +77,19 @@ public class GUI implements WindowEventListener
 			this.type = type;
 		}
 		
+		
+		public void switchDimension(Grid grid)
+		{			
+			if (this.type == Viewport.Type.THREE_D)
+				type =  Viewport.Type.TWO_D;
+				
+			else			
+				type =  Viewport.Type.THREE_D;
+			
+			recreate(grid);
+			
+		}
+		
 		public void recreate(Grid grid)
 		{
 	    	switch (grid.getType())
@@ -88,7 +98,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -98,7 +108,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -108,7 +118,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -169,7 +179,7 @@ public class GUI implements WindowEventListener
     public Button		submitButton;
     
     public Grid3DWidget	grid3DViewer = null;
-    public GridWidget	gridViewer = null;
+    public Grid2DWidget	gridViewer = null;
 
     // RULES TAB    
     public Container rulesContainer;
@@ -284,27 +294,55 @@ public class GUI implements WindowEventListener
 
 
 	private Button refreshServerButton;
+
+
+	private Container coloursContainer;
+
+
+	private LinearLayout masterColoursLayout;
+
+
+	private Button toggleHideButton;
+
+
+	private Button toggle3dButton;
+
+
+	private Button toggleWireframeButton;
+
+
+	private Button removeViewportButton;
+
+
+	private ImageWidget viewSettingsHeader;
+
+
+	private Button toggleShowButton;
     
     public GUI(Server server)
     {
         this.server = server;               
         
-        colourRules = new ColourRuleSet(3);
+        colourRules = new ColourRuleSet(4);
         ColourRule    colourRule;
+
+        colourRule = new ColourRule();
+        colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(1.0f, 0.0f, 0.0f)));
+        colourRules.setColourRule(0, colourRule);
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
-        colourRules.setColourRule(0, colourRule);
+        colourRules.setColourRule(1, colourRule);
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
-        colourRules.setColourRule(1, colourRule);    
+        colourRules.setColourRule(2, colourRule);    
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
-        colourRules.setColourRule(2, colourRule);    
+        colourRules.setColourRule(3, colourRule);    
         
         theme = new Theme();
         window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
@@ -614,6 +652,28 @@ public class GUI implements WindowEventListener
         masterDistributionLayout.add(refreshServerButton);
         
         
+        coloursContainer = new Container(new Vector2i(100, 100));
+        coloursContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(coloursContainer, "Colour Ranges");
+        
+        masterColoursLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterColoursLayout.setFlag(Widget.FILL);
+        coloursContainer.setContents(masterColoursLayout);
+        
+        
+        LinearLayout colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        colourInstructionsLayout.setHeight(35);
+        colourInstructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        colourInstructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+        masterColoursLayout.add(colourInstructionsLayout);
+		   
+		TextWidget coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
+		colourInstructionsLayout.add(coloursInstructions);
+		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
+        
+        
+        ///
+        
         
         
         worldPreviewContainer = new Container(new Vector2i(100, 100));
@@ -858,23 +918,23 @@ public class GUI implements WindowEventListener
         viewSettingsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(viewSettingsLayout);
         
-        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(14, 25), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerViewSettingsLayout = new LinearLayout(new Vector2i(145, 25), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout);
         
-        LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(218, 40), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerViewSettingsLayout2 = new LinearLayout(new Vector2i(220, 40), LinearLayout.Direction.HORIZONTAL);
         innerViewSettingsLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         viewSettingsLayout.add(innerViewSettingsLayout2);
         
-        Button toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
+        toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
         toggleHideButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleHideButton);
         
-        Button toggle3DButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
-        toggle3DButton.setMargin(new Vector2i(5, 0));
-        innerViewSettingsLayout2.add(toggle3DButton);
+        toggle3dButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
+        toggle3dButton.setMargin(new Vector2i(5, 0));
+        innerViewSettingsLayout2.add(toggle3dButton);
         
-        Button toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
+        toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
         toggleWireframeButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(toggleWireframeButton);
         
@@ -882,15 +942,15 @@ public class GUI implements WindowEventListener
         addViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(addViewportButton);
         
-        Button removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
+        removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
         removeViewportButton.setMargin(new Vector2i(5, 0));
         innerViewSettingsLayout2.add(removeViewportButton);
         
-        ImageWidget viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
+        viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
         cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerViewSettingsLayout.add(viewSettingsHeader);
         
-        Button toggleShowButton = new Button(new Vector2i(10, 15), "");
+        toggleShowButton = new Button(new Vector2i(10, 15), "");
         toggleShowButton.setFlag(Widget.FILL_HORIZONTAL);
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
@@ -956,11 +1016,11 @@ public class GUI implements WindowEventListener
         	Log.information(TAG, "Recreating grid, the current state will be lost");
         	grid = type.create(size, grid.getNumProperties());
         	
-			grid.getCell(2, 4).setValue(0, 1);
-			grid.getCell(3, 4).setValue(0, 1);
-			grid.getCell(4, 4).setValue(0, 1);
-			grid.getCell(4, 3).setValue(0, 1);
-			grid.getCell(3, 2).setValue(0, 1);
+			grid.getCell(2, 4).setValue(1, 1);
+			grid.getCell(3, 4).setValue(1, 1);
+			grid.getCell(4, 4).setValue(1, 1);
+			grid.getCell(4, 3).setValue(1, 1);
+			grid.getCell(3, 2).setValue(1, 1);
         }
         
         grid.setWrappable(wrapCheckBox.isChecked());
@@ -985,10 +1045,11 @@ public class GUI implements WindowEventListener
     		case RECTANGLE:
 	            grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	
 	            gridViewer = new RectangleGridWidget((RectangleGrid)grid, 16);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
@@ -996,10 +1057,11 @@ public class GUI implements WindowEventListener
     		case TRIANGLE:
 	        	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	            
 	            gridViewer = new TriangleGridWidget((TriangleGrid)grid, 32);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);      
 	            break;
@@ -1007,10 +1069,11 @@ public class GUI implements WindowEventListener
             case HEXAGON:
 	            grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	    
 	            gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
@@ -1094,6 +1157,19 @@ public class GUI implements WindowEventListener
     	return false;
     }
 
+    public void constructColoursTab()
+    {
+    	int numProperties = world.getGeneration(0).getNumProperties();
+    	
+    	for (int i = 0; i < numProperties; i++)
+    	{
+    		TextWidget t = new TextWidget("Property " + i + " goes here!");
+    		masterColoursLayout.add(t);
+    	}
+    	
+    }
+    
+    
     @Override
     public void handleWindowEvent(Event event)
     {
@@ -1173,6 +1249,9 @@ public class GUI implements WindowEventListener
                 {
                 	Log.information(TAG, "Loading rule code into World");
                 	world.setRuleCode(CALCode);
+                	
+                	constructColoursTab();
+                	
                 }
                 else
                 {
@@ -1331,7 +1410,6 @@ public class GUI implements WindowEventListener
             
             else if (event.target == zoomOutButton)
             {
-            
             	for (Viewport viewport : viewports)
             	{
     				if (viewport.gridWidget.hasFocus())
@@ -1339,86 +1417,186 @@ public class GUI implements WindowEventListener
     					if (viewport.type == Viewport.Type.THREE_D)
     					{
     						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-    						temp3DWidget.move(new Vector3f(1, 1, 1));
+    						temp3DWidget.move(new Vector3f(0, 0, 1));
     					}
     				}
             	}
-            	
+            }
+            
+            else if (event.target == zoomInButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 0, -1);
+    					}
+    				}
+            	}
+            }
+            
+            else if (event.target == zoomOutButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 0, 1);
+    					}
+    				}
+            	}
+            }
+			else if (event.target ==moveUpButton)
+	        {
+	        	for (Viewport viewport : viewports)
+	        	{
+					if (viewport.gridWidget.hasFocus())
+					{
+						if (viewport.type == Viewport.Type.THREE_D)
+						{
+							Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+							temp3DWidget.move(0, -1, 0);
+						}
+					}
+	        	}
+	        }
+			else if (event.target ==moveDownButton)
+			{
+	        	for (Viewport viewport : viewports)
+	        	{
+					if (viewport.gridWidget.hasFocus())
+					{
+						if (viewport.type == Viewport.Type.THREE_D)
+						{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(0, 1, 0);
+    					}
+    				}
+            	}
+            }
+			else if (event.target ==moveLeftButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.move(-1, 0, 0);
+    					}
+    				}
+            	}
+	        }
+			else if (event.target ==moveRightButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(1, 0, 0);
+	    					}
+	    				}
+	            	}
+			}
+			else if (event.target ==yawLeftButton)
+			{
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changeYaw(2);
+    					}
+	            	}
+            	}
+            }
+            else if (event.target ==yawRightButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changeYaw(-2);
+    					}
+    				}
+	            }
+			}
+            else if (event.target == pitchUpButton)
+	        {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changePitch(2);
+    					}
+    				}
+            	}
+            }
+            else if (event.target == pitchDownButton)
+            {
+            	for (Viewport viewport : viewports)
+            	{
+    				if (viewport.gridWidget.hasFocus())
+    				{
+    					if (viewport.type == Viewport.Type.THREE_D)
+    					{
+    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+    						temp3DWidget.changePitch(-2);
+    					}
+    				}
+            	}
             }
 
-	
-			 else if (event.target ==moveUpButton)
-	         {
-	         	
-	         }
-
-
-			 else if (event.target ==moveDownButton)
-	            {
-	            	
-	            }
-
-
-			 else if (event.target ==moveLeftButton)
-	            {
-	            	
-	            }
-
-
-			 else if (event.target ==moveRightButton)
-	            {
-	            	
-	            }
-
-
-			 else if (event.target ==yawLeftButton)
-	            {
-			
-				 
-				 for (Viewport viewport : viewports)
-	            	{	
-	    				
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changeYaw(2);
-	    					}
-	    				
-	            	}
-	            }
-
-
-			 else if (event.target ==yawRightButton)
-	            {
-				 
-				 for (Viewport viewport : viewports)
-	            	{	
-	    				
-	    					if (viewport.type == Viewport.Type.THREE_D)
-	    					{
-	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
-	    						temp3DWidget.changeYaw(-2);
-	    					}
-	    				
-	            	}
-				 
-				 
-	            	
-	            }
-
-
-			 else if (event.target ==pitchUpButton)
-	            {
-	            	
-	            }
-
-
+            //VIEWPORT SETTINGS BUTTONS
+            
+			else if (event.target == toggle3dButton)
+			{
+				for (Viewport viewport : viewports)
+				{	
+					if (viewport.gridWidget.hasFocus()) 
+						viewport.switchDimension(currentGrid);
+				} 
+			}
+			else if (event.target == toggleHideButton)
+			{
+				 				 
+			}
+			else if (event.target == toggleShowButton)
+			{
+				 				 
+			}
+			else if (event.target == toggleWireframeButton)
+			{
+				 				 
+			}
             // DISTRIBUTION BUTTONS
-			 else if (event.target == refreshServerButton)
-			 {
-				 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
-	                server.sendEvent(serverEvent);
-			 }
+			else if (event.target == refreshServerButton)
+			{
+				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+				server.sendEvent(serverEvent);
+			}
+            
+            //COLOUR RANGES
+            
+			
             
         }
         else if (event.type == Event.Type.CHANGE)

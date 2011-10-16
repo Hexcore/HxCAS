@@ -16,6 +16,7 @@ import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.utilities.Log;
 import com.jogamp.common.nio.Buffers;
 
 public class Grid3DWidget extends GridWidget
@@ -43,8 +44,6 @@ public class Grid3DWidget extends GridWidget
 	
 	// Options
 	protected ArrayList<Slice>	slices;
-	
-	protected boolean	drawGrid = true;
 	
 	// Camera
 	protected float		yaw = 0.0f, pitch = 30.0f;
@@ -105,7 +104,13 @@ public class Grid3DWidget extends GridWidget
 		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
 		if (speed < 10.0f) speed = 10.0f;
 		
-		cameraPosition.inc(amount.x * speed, amount.y * speed, amount.z * speed);
+		float sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+		float cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+		
+		float xr = amount.x * cosYaw + amount.y * sinYaw;
+		float yr = amount.y * cosYaw - amount.x * sinYaw;
+		
+		cameraPosition.inc(xr * speed, yr * speed, amount.z * speed);
 	}
 	
 	/*
@@ -116,7 +121,13 @@ public class Grid3DWidget extends GridWidget
 		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
 		if (speed < 10.0f) speed = 10.0f;
 		
-		cameraPosition.inc(x * speed, y * speed, z * speed);
+		float cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+		float sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+		
+		float xr = x * cosYaw + y * sinYaw;
+		float yr = y * cosYaw - x * sinYaw;
+		
+		cameraPosition.inc(xr * speed, yr * speed, z * speed);
 	}	
 	
 	public void setDirection(float yaw, float pitch)
@@ -150,10 +161,11 @@ public class Grid3DWidget extends GridWidget
 		colourRules = ruleSet;
 		dirty = true;
 	}
-
-	public void setDrawGrid(boolean state)
+	
+	@Override
+	public void setDrawWireframe(boolean state)
 	{
-		drawGrid = state;
+		drawWireframe = state;
 		dirty = true;
 	}
 	
@@ -181,29 +193,15 @@ public class Grid3DWidget extends GridWidget
 		if (focused)
 		{
 			Vector2f posDelta = new Vector2f(0.0f, 0.0f);
-			float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
-			float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
 			
 			if (window.getKeyState(KeyEvent.VK_UP))
-			{
-				posDelta.x -= sinYaw;
-				posDelta.y -= cosYaw;
-			}
+				posDelta.y -= 1;
 			if (window.getKeyState(KeyEvent.VK_DOWN))
-			{
-				posDelta.x += sinYaw;
-				posDelta.y += cosYaw;
-			}
+				posDelta.y += 1;
 			if (window.getKeyState(KeyEvent.VK_LEFT))
-			{
-				posDelta.x -= cosYaw;
-				posDelta.y += sinYaw;
-			}
+				posDelta.x -= 1;
 			if (window.getKeyState(KeyEvent.VK_RIGHT))
-			{
-				posDelta.x += cosYaw;
-				posDelta.y -= sinYaw;
-			}
+				posDelta.x += 1;
 			
 			if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
 			{
@@ -366,7 +364,7 @@ public class Grid3DWidget extends GridWidget
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, normalBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(3));
 			gl.glBufferData(GL.GL_ARRAY_BUFFER, numLinePoints * 3 * Buffers.SIZEOF_FLOAT, lineBufferData.position(0), GL2.GL_STREAM_DRAW);
@@ -380,7 +378,7 @@ public class Grid3DWidget extends GridWidget
 		
 		GL2 gl2 = gl.getGL2();
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 			gl2.glPolygonOffset(0.5f, 0.5f);
@@ -406,7 +404,7 @@ public class Grid3DWidget extends GridWidget
 		gl2.glDisableClientState(GL2.GL_COLOR_ARRAY);
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 			
@@ -485,7 +483,7 @@ public class Grid3DWidget extends GridWidget
 				addVertex(pos.x+f.x, pos.y+f.y, startHeight, normal, colour);
 			}
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			for (int i = 0; i < polygon.length; i++)	
 			{

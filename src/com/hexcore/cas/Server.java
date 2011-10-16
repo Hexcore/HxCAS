@@ -16,6 +16,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
 import com.hexcore.cas.model.WorldSaver;
+import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
@@ -105,14 +106,15 @@ public class Server implements LobbyListener
 					{						
 						world = new World();
 						
-						Grid grid = event.gridType.create(event.size, 1);
+						Grid grid = event.gridType.create(event.size, 2);
 						grid.setWrappable(event.wrappable);
 	
 						for(int y = 0; y < event.size.y; y++)
 							for(int x = 0; x < event.size.x; x++)
 								grid.getCell(x, y).setValue(0, 0.0);
 												
-						world.addGeneration(grid);
+						world.addGeneration(grid);						
+						world.setRuleCode("ruleset Flash\n{\n\ttypecount 1;\n\tproperty alive;\n\ttype Land : 0\n\t{\n\t\tself.alive = 1 - self.alive;\n\t}\n}");
 						
 						ui.startWorldEditor(world);
 						
@@ -241,10 +243,19 @@ public class Server implements LobbyListener
 			clientList.add("127.0.0.1");
 		}
 		
+		Log.information(TAG, "Compiling rule code...");
+		
+		CALCompiler compiler = new CALCompiler();
+		compiler.compile(world.getRuleCode());
+		
+		if (compiler.getErrorCount() > 0)
+			Log.error(TAG, "Invalid rule code");
+		
 		Log.information(TAG, "Starting overseer...");
 		
 		simulate = new Simulator(world, config.getInteger("Network.Client", "port", 3119));
 		simulate.setClientNames(clientList);
+		simulate.setRuleBytecode(compiler.getCode());
 		simulate.start();
 		simulate.pause();
 		Thread.sleep(100);

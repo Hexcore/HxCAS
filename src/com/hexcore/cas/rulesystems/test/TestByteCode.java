@@ -39,6 +39,9 @@ public class TestByteCode extends TestCase
 		
 		in = new File("Test Data/rules/testSet8.cal");
 		assertTrue(in.exists());
+		
+		in = new File("Test Data/rules/testSet9.cal");
+		assertTrue(in.exists());
 	}
 
 	
@@ -191,5 +194,26 @@ public class TestByteCode extends TestCase
 		assertEquals(4, rule2.getNumProperties());
 		assertEquals(5, rule3.getNumProperties());	
 		
+	}
+	
+	public void testNeighboursAccess()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet9.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Cell c = new Cell(new double[]{0,0});
+		Cell[] n = new Cell[2];
+		
+		n[0] = new Cell(new double[]{0,5});
+		n[1] = new Cell(new double[]{0,10});
+		
+		rule.run(c, n);
+		
+		assertEquals(6.0, c.getValue(1));
 	}
 }
