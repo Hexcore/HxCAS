@@ -278,6 +278,18 @@ public class GUI implements WindowEventListener
 
 
 	private Button pitchDownButton;
+
+
+	private Button saveAsCALFileButton;
+
+
+	private Button refreshServerButton;
+
+
+	private Container coloursContainer;
+
+
+	private LinearLayout masterColoursLayout;
     
     public GUI(Server server)
     {
@@ -418,6 +430,7 @@ public class GUI implements WindowEventListener
         worldSizeLayout.add(worldSizeLabel);
         
         worldSizeXNumberBox = new NumberBox(35);
+        worldSizeXNumberBox.setWidth(50);  
         worldSizeXNumberBox.setValue(10);
         worldSizeXNumberBox.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeXNumberBox);
@@ -427,6 +440,7 @@ public class GUI implements WindowEventListener
         worldSizeLayout.add(worldSizeXLabel);
         
         worldSizeYNumberBox = new NumberBox(35);
+        worldSizeYNumberBox.setWidth(50);  
         worldSizeYNumberBox.setValue(10);
         worldSizeYNumberBox.setFlag(Widget.CENTER_VERTICAL);
         worldSizeLayout.add(worldSizeYNumberBox);
@@ -503,22 +517,27 @@ public class GUI implements WindowEventListener
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
         
-        LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        LinearLayout instructionsCALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        instructionsCALLayout.setHeight(35);
+        instructionsCALLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        instructionsCALLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+        masterRulesLayout.add(instructionsCALLayout);
+		   
+		TextWidget CALInstructions = new TextWidget("Inform the compiler of the cells and their properties that your world will support.");
+		instructionsCALLayout.add(CALInstructions);
+		instructionsCALLayout.setWidth(CALInstructions.getWidth()+ 20);
+        
+        
+        LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         CALLayout.setFlag(Widget.FILL);
         masterRulesLayout.add(CALLayout);
         
-        LinearLayout leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        leftLayout.setFlag(Widget.FILL);
-        CALLayout.add(leftLayout);
         
-        LinearLayout rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        rightLayout.setFlag(Widget.FILL);
-        CALLayout.add(rightLayout);
         
         
         ImageWidget calEditorHeader = new ImageWidget(window.getTheme().getImage("headers","cal_editor_header.png"));
         calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
-        leftLayout.add(calEditorHeader);    
+        CALLayout.add(calEditorHeader);    
         
         CALTextArea = new TextArea(100, 20);
         CALTextArea.setMargin(new Vector2i(0,0));
@@ -530,22 +549,22 @@ public class GUI implements WindowEventListener
         textAreaContainer.setFlag(Widget.FILL);
     
         textAreaContainer.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-        leftLayout.add(textAreaContainer);
+        CALLayout.add(textAreaContainer);
         
         textAreaContainer.setContents(CALTextArea);
         
         
         ImageWidget compilerOutputHeader = new ImageWidget(window.getTheme().getImage("headers","compiler_output_header.png"));
         compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
-        rightLayout.add(compilerOutputHeader);    
+        CALLayout.add(compilerOutputHeader);    
         
         
         
-        outputContainer = new ScrollableContainer(new Vector2i(350, 100));
-        outputContainer.setFlag(Widget.FILL);
+        outputContainer = new ScrollableContainer(new Vector2i(250, 100));
+        outputContainer.setFlag(Widget.FILL_HORIZONTAL);
         outputContainer.setFlag(Widget.CENTER_HORIZONTAL);
         outputContainer.setThemeClass("List");
-        rightLayout.add(outputContainer);
+        CALLayout.add(outputContainer);
         
         outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         outputLayout.setMargin(new Vector2i(0, 0));
@@ -554,7 +573,7 @@ public class GUI implements WindowEventListener
         outputContainer.setContents(outputLayout);
         
 
-        LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(875, 50), LinearLayout.Direction.HORIZONTAL);
         buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
         masterRulesLayout.add(buttonRulesLayout);
@@ -569,28 +588,68 @@ public class GUI implements WindowEventListener
             submitRulesButton.setHeight(35);
             buttonRulesLayout.add(submitRulesButton);
             
-            openCALFileButton = new Button(new Vector2i(100, 50), "Open CAL File");
+            openCALFileButton = new Button(new Vector2i(100, 50), "Open File");
             openCALFileButton.setWidth(165);
             openCALFileButton.setHeight(35);
             buttonRulesLayout.add(openCALFileButton);
             
-            saveCALFileButton = new Button(new Vector2i(100, 50), "Save CAL File");
+            saveCALFileButton = new Button(new Vector2i(100, 50), "Save File");
             saveCALFileButton.setWidth(165);
             saveCALFileButton.setHeight(35);
             buttonRulesLayout.add(saveCALFileButton);
+            
+           saveAsCALFileButton = new Button(new Vector2i(100, 50), "Save File As");
+            saveAsCALFileButton.setWidth(165);
+            saveAsCALFileButton.setHeight(35);
+            buttonRulesLayout.add(saveAsCALFileButton);
+            
             
         
         
         
         distributionContainer = new Container(new Vector2i(100, 100));
         distributionContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+        
+        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterDistributionLayout.setFlag(Widget.FILL);
+        distributionContainer.setContents(masterDistributionLayout);
+        
+        
+        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
+        masterDistributionLayout.add(refreshServerButton);
+        
+        
+        coloursContainer = new Container(new Vector2i(100, 100));
+        coloursContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(coloursContainer, "Colour Ranges");
+        
+        masterColoursLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterColoursLayout.setFlag(Widget.FILL);
+        coloursContainer.setContents(masterColoursLayout);
+        
+        
+        LinearLayout colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        colourInstructionsLayout.setHeight(35);
+        colourInstructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        colourInstructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
+        masterColoursLayout.add(colourInstructionsLayout);
+		   
+		TextWidget coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
+		colourInstructionsLayout.add(coloursInstructions);
+		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
+        
+        
+        ///
+        
+        
         
         worldPreviewContainer = new Container(new Vector2i(100, 100));
         worldPreviewContainer.setFlag(Widget.FILL);
         
         
 
-        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+     
         tabbedWorldView.add(worldPreviewContainer, "World Preview");
         
         
@@ -1063,6 +1122,19 @@ public class GUI implements WindowEventListener
     	return false;
     }
 
+    public void constructColoursTab()
+    {
+    	int numProperties = world.getGeneration(0).getNumProperties();
+    	
+    	for (int i = 0; i < numProperties; i++)
+    	{
+    		TextWidget t = new TextWidget("Property " + i + " goes here!");
+    		masterColoursLayout.add(t);
+    	}
+    	
+    }
+    
+    
     @Override
     public void handleWindowEvent(Event event)
     {
@@ -1142,6 +1214,9 @@ public class GUI implements WindowEventListener
                 {
                 	Log.information(TAG, "Loading rule code into World");
                 	world.setRuleCode(CALCode);
+                	
+                	constructColoursTab();
+                	
                 }
                 else
                 {
@@ -1149,6 +1224,72 @@ public class GUI implements WindowEventListener
                 	world.setRuleCode("");
                 }
             }
+            
+            else if (event.target == saveCALFileButton)
+            {
+            	if (selectedFile == null)
+            	{
+            		  selectedFile = window.askUserForFileToSave("Select a location to save", "cal");
+                	  
+                	  File f = new File(selectedFile.getFullPath() + ".cal");
+                	 
+                	  try {
+    					f.createNewFile();
+    					PrintWriter out = new PrintWriter(f);
+    			        
+    					out.write(CALTextArea.getText());
+    					
+    					out.close();
+    					
+    					
+    					
+    				} catch (IOException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+            	}
+            	else
+            	{
+            	  File f = new File(selectedFile.getFullPath() + ".cal");
+              	  try {
+  					PrintWriter out = new PrintWriter(f);
+  			        
+  					out.write(CALTextArea.getText());
+  					
+  					out.close();
+  					
+  					
+  					
+  				} catch (IOException e) {
+  					// TODO Auto-generated catch block
+  					e.printStackTrace();
+  				}
+            	}
+            }
+            
+            else if (event.target == saveAsCALFileButton)
+            {
+            	
+            	  
+            	  FileSelectResult calFile = window.askUserForFileToSave("Select a location to save", "cal");
+            	  
+            	  File f = new File(calFile.getFullPath() + ".cal");
+            	  System.out.println(calFile.getFullPath() + "/" + calFile.filename);
+            	  try {
+					f.createNewFile();
+					PrintWriter out = new PrintWriter(f);
+			        out.write(CALTextArea.getText());
+					out.close();
+					
+					
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	  
+            }
+            
             else if (event.target == openCALFileButton)
             {
                 selectedFile = window.askUserForFileToLoad("Select CAL File", "cal");
@@ -1156,28 +1297,31 @@ public class GUI implements WindowEventListener
                 System.out.println(selectedFile.directory);
                 System.out.println(selectedFile.filename);
                 
-                if (selectedFile.filename.contains(".cal"))
+                if (selectedFile.isValid())
                 {
-                    try
-                    {
-						FileInputStream fstream = new FileInputStream(selectedFile.directory + selectedFile.filename);
-						DataInputStream in = new DataInputStream(fstream);
-						BufferedReader br = new BufferedReader(new InputStreamReader(in));
-						String strLine;
-						String output = "";
-						  
-						while ((strLine = br.readLine()) != null)
-							output += strLine + "\n";
-						  
-						in.close();
-						 
-						CALTextArea.setText(output);
-                    } 
-                    catch (Exception e) 
-                    { 
-                    	window.showModalDialog(dialogCAL);
-                    }
-                }   
+	                if (selectedFile.filename.contains(".cal"))
+	                {
+	                    try
+	                    {
+							FileInputStream fstream = new FileInputStream(selectedFile.directory + selectedFile.filename);
+							DataInputStream in = new DataInputStream(fstream);
+							BufferedReader br = new BufferedReader(new InputStreamReader(in));
+							String strLine;
+							String output = "";
+							  
+							while ((strLine = br.readLine()) != null)
+								output += strLine + "\n";
+							  
+							in.close();
+							 
+							CALTextArea.setText(output);
+	                    } 
+	                    catch (Exception e) 
+	                    { 
+	                    	window.showModalDialog(dialogCAL);
+	                    }
+	                } 
+                }
             }
             else if (event.target == simulateButton)
             {
@@ -1267,7 +1411,19 @@ public class GUI implements WindowEventListener
 
 			 else if (event.target ==moveRightButton)
 	            {
-	            	
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    					if (viewport.type == Viewport.Type.THREE_D)
+	    					{
+	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+	    						temp3DWidget.move(1, 0, 0);
+	    					}
+	    			//	}
+	            	}
+				 
+				 
 	            }
 
 
@@ -1293,13 +1449,14 @@ public class GUI implements WindowEventListener
 				 
 				 for (Viewport viewport : viewports)
 	            	{	
-	    				
+	    			if (viewport.gridWidget.hasFocus())
+	    				{
 	    					if (viewport.type == Viewport.Type.THREE_D)
 	    					{
 	    						Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
 	    						temp3DWidget.changeYaw(-2);
 	    					}
-	    				
+	    				}
 	            	}
 				 
 				 
@@ -1313,7 +1470,16 @@ public class GUI implements WindowEventListener
 	            }
 
 
+            // DISTRIBUTION BUTTONS
+			 else if (event.target == refreshServerButton)
+			 {
+				 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+	                server.sendEvent(serverEvent);
+			 }
             
+            //COLOUR RANGES
+            
+			
             
         }
         else if (event.type == Event.Type.CHANGE)

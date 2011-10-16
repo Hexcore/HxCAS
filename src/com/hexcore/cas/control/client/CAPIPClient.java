@@ -3,8 +3,8 @@ package com.hexcore.cas.control.client;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
-
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
@@ -353,15 +353,18 @@ public class CAPIPClient extends Thread
 			Socket clientSocket = sock.accept();
 			Log.information(TAG, "Server connected");
 			protocol = new CAPMessageProtocol(clientSocket);
+			
+			if(!running)
+				running = true;
+		}
+		catch(SocketException ex)
+		{
 		}
 		catch(IOException e)
 		{
 			Log.error(TAG, "Error starting protocol");
 			e.printStackTrace();
 		}
-		
-		if(!running)
-			running = true;
 	}
 	
 	@Override
@@ -383,28 +386,13 @@ public class CAPIPClient extends Thread
 			while (protocol.isRunning())
 			{			
 				Message message = protocol.waitForMessage();
-				if (message == null) continue; 
+				if (message == null) continue;
 	
 				interpretInput(message);
 			}
-	
-			//Log.information(TAG, "Stopping client...");
+			
 			Log.information(TAG, "Closing connection to downed server...");
 			protocol.disconnect();
-			
-			try
-			{
-				sock.close();
-			} 
-			catch (IOException e)
-			{
-			}
-			
-			if(!running)
-				break;
-			
-			parent.reset();
-			setup();
 		}
 	}
 }

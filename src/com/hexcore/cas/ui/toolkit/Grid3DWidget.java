@@ -105,7 +105,13 @@ public class Grid3DWidget extends GridWidget
 		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
 		if (speed < 10.0f) speed = 10.0f;
 		
-		cameraPosition.inc(amount.x * speed, amount.y * speed, amount.z * speed);
+		float sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+		float cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+		
+		float xr = amount.x * cosYaw + amount.y * sinYaw;
+		float yr = amount.y * cosYaw - amount.x * sinYaw;
+		
+		cameraPosition.inc(xr * speed, yr * speed, amount.z * speed);
 	}
 	
 	/*
@@ -116,7 +122,13 @@ public class Grid3DWidget extends GridWidget
 		float speed = (float)Math.sqrt(cameraPosition.z) * 6.0f;
 		if (speed < 10.0f) speed = 10.0f;
 		
-		cameraPosition.inc(x * speed, y * speed, z * speed);
+		float cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
+		float sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
+		
+		float xr = x * cosYaw + y * sinYaw;
+		float yr = y * cosYaw - x * sinYaw;
+		
+		cameraPosition.inc(xr * speed, yr * speed, z * speed);
 	}	
 	
 	public void setDirection(float yaw, float pitch)
@@ -181,29 +193,15 @@ public class Grid3DWidget extends GridWidget
 		if (focused)
 		{
 			Vector2f posDelta = new Vector2f(0.0f, 0.0f);
-			float	 sinYaw = (float)Math.sin(yaw * Math.PI / 180.0f);
-			float	 cosYaw = (float)Math.cos(yaw * Math.PI / 180.0f);
 			
 			if (window.getKeyState(KeyEvent.VK_UP))
-			{
-				posDelta.x -= sinYaw;
-				posDelta.y -= cosYaw;
-			}
+				posDelta.y -= 1;
 			if (window.getKeyState(KeyEvent.VK_DOWN))
-			{
-				posDelta.x += sinYaw;
-				posDelta.y += cosYaw;
-			}
+				posDelta.y += 1;
 			if (window.getKeyState(KeyEvent.VK_LEFT))
-			{
-				posDelta.x -= cosYaw;
-				posDelta.y += sinYaw;
-			}
+				posDelta.x -= 1;
 			if (window.getKeyState(KeyEvent.VK_RIGHT))
-			{
-				posDelta.x += cosYaw;
-				posDelta.y -= sinYaw;
-			}
+				posDelta.x += 1;
 			
 			if ((posDelta.x != 0.0f) || (posDelta.y != 0.0f))
 			{

@@ -44,10 +44,13 @@ public class TextBox extends Widget
 	public String	getText() {return text;}
 	public void		setText(String text) 
 	{
+		if (text == null) text = "";
+			
 		this.text = text; 
 		reflowText();
 		
 		cursorIndex = cursorIndex >= text.length() ? text.length() - 1 : cursorIndex;
+		if (cursorIndex < 0) cursorIndex = 0;
 		selectIndex = cursorIndex;
 	}
 	
@@ -151,6 +154,9 @@ public class TextBox extends Widget
 		}
 		else if (focused)
 		{
+			if (cursorIndex < 0) cursorIndex = 0;
+			if (selectIndex < 0) selectIndex = 0;
+			
 			int startIndex = Math.min(cursorIndex, selectIndex);
 			int endIndex = Math.max(cursorIndex, selectIndex);
 					
@@ -204,7 +210,7 @@ public class TextBox extends Widget
 					}	
 				}
 				else if ((event.button >= ' ' || event.button == '\t') && (event.button != 127))
-				{
+				{					
 					text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
 					
 					if (startIndex != endIndex)

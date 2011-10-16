@@ -15,6 +15,7 @@ import com.hexcore.cas.control.server.Simulator;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.model.WorldReader;
+import com.hexcore.cas.model.WorldSaver;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
@@ -137,6 +138,21 @@ public class Server implements LobbyListener
 						break;
 					}
 					
+					case SAVE_WORLD:
+					{
+						WorldSaver saver = new WorldSaver();
+						
+						try
+						{
+							saver.saveWorld(world);
+							Log.information(TAG, "Saved world");
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+					}
+					
 					case START_SIMULATION:
 					{
 						if (!activeSimulation.getAndSet(true)) initSimulation();
@@ -169,6 +185,12 @@ public class Server implements LobbyListener
 							client.client.stop();
 							client = null;
 						}
+						break;
+					}
+					
+					case PING_CLIENTS:
+					{
+						lobby.ping();
 						break;
 					}
 					
