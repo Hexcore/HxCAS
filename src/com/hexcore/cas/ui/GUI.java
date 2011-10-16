@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -1523,7 +1524,13 @@ public class GUI implements WindowEventListener, LobbyListener
             		return;
             	}
             	
+            	List<InetSocketAddress> clients = new ArrayList<InetSocketAddress>();
+            	
+            	for (ClientEntry clientEntry : usingClients)
+            		clients.add(clientEntry.address);
+            	
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.READY_SIMULATION);
+                serverEvent.clients = clients;
                 server.sendEvent(serverEvent);
             	
             	masterView.setIndex(2);

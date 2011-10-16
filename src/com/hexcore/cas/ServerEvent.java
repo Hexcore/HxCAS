@@ -1,5 +1,8 @@
 package com.hexcore.cas;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.GridType;
 
@@ -12,7 +15,10 @@ public class ServerEvent
 		PING_CLIENTS;
 	}
 	
-	public Type			 type;
+	public Type		type;
+	
+	// READY_SIMULATION
+	public List<InetSocketAddress>	clients;
 		
 	// CREATE_WORLD
 	public Vector2i	size;
