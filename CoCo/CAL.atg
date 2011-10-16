@@ -58,6 +58,7 @@ static void SemanticError(String msg)
 {
 	valid = false;
 	SemError(msg);
+	System.err.println("SEM ERROR");
 }
 
 static byte[] getCode()
@@ -263,7 +264,7 @@ PRODUCTIONS
   	/********** Assignment or function call *********/
   	AssignCall									(. TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;.)
   	=
-  	Designator< out entry >						(. PostOpE T = PostOpE.UN; .)
+  	Designator< out entry, false >			(. PostOpE T = PostOpE.UN; .)
   	(
   		"=" Expression< out type >				(. 	
   													if(!(TableEntry.isArith(entry.type) && TableEntry.isArith(type)) && !(TableEntry.isBool(entry.type) && TableEntry.isBool(type)))
@@ -336,12 +337,12 @@ PRODUCTIONS
   	/*************************************************/
   	
   	
-  	Designator<. out TableEntry entry .>		(.
-  													int type = TableEntry.noType;
-  													int typeE = TableEntry.noType;
-  													String name = "";
-  													TableEntry entryA = null;
-  												.)
+  	Designator<. out TableEntry entry, boolean attr .>	(.
+			  													int type = TableEntry.noType;
+			  													int typeE = TableEntry.noType;
+			  													String name = "";
+			  													TableEntry entryA = null;
+			  												.)
   	=
   	Ident< out name >							(.
 
@@ -350,6 +351,9 @@ PRODUCTIONS
   														SemanticError("Undeclared identifier \"" + name + "\"");
   													else
   														type = entry.type;
+  														
+  													if(entry.kind == TableEntry.Property && attr == false)
+  														SemanticError("Properties must be called with \"self\"");
   														
   														
   													if(entry.kind == TableEntry.Cell)
@@ -409,7 +413,7 @@ PRODUCTIONS
   	
   	Attribute<. out TableEntry entry .>
   	=
-  	Designator< out entry >
+  	Designator< out entry, true >
   	.
   	
   	
@@ -617,7 +621,7 @@ PRODUCTIONS
   												TableEntry entry = null;
   											.)
   	=
-  	Designator< out entry >					(.
+  	Designator< out entry, false >		(.
   												p.type = entry.type;
   												p.kind = TableEntry.Variable;
   												p.offset = entry.offset;

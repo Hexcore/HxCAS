@@ -121,6 +121,7 @@ static void SemanticError(String msg)
 {
 	valid = false;
 	SemError(msg);
+	System.err.println("SEM ERROR");
 }
 
 static byte[] getCode()
@@ -140,7 +141,10 @@ static public void reset()
 
 
 
+	//Changed by Karl Zoller
 	static void SynErr (int n) {
+		System.err.println("SYN ERROR");
+		valid = false;
 		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
 		errDist = 0;
 	}
@@ -429,7 +433,7 @@ static public void reset()
 
 	static void AssignCall() {
 		TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;
-		entry  = Designator();
+		entry = Designator(false);
 		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
 			Get();
@@ -543,7 +547,7 @@ static public void reset()
 		Expect(semicolon_Sym);
 	}
 
-	static TableEntry Designator() {
+	static TableEntry Designator(boolean attr) {
 		TableEntry entry;
 		int type = TableEntry.noType;
 		int typeE = TableEntry.noType;
@@ -556,6 +560,9 @@ static public void reset()
 			SemanticError("Undeclared identifier \"" + name + "\"");
 		else
 			type = entry.type;
+			
+		if(entry.kind == TableEntry.Property && attr == false)
+			SemanticError("Properties must be called with \"self\"");
 			
 			
 		if(entry.kind == TableEntry.Cell)
@@ -662,7 +669,7 @@ static public void reset()
 
 	static TableEntry Attribute() {
 		TableEntry entry;
-		entry  = Designator();
+		entry = Designator(true);
 		return entry;
 	}
 
@@ -906,7 +913,7 @@ static public void reset()
 		TableEntry entry = null;
 		
 		if (la.kind == identifier_Sym) {
-			entry  = Designator();
+			entry = Designator(false);
 			p.type = entry.type;
 			p.kind = TableEntry.Variable;
 			p.offset = entry.offset;
