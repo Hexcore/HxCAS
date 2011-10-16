@@ -9,10 +9,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
+import com.hexcore.cas.control.discovery.LobbyListener;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.ColourRule;
@@ -38,8 +42,10 @@ import com.hexcore.cas.ui.toolkit.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
+import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
+import com.hexcore.cas.ui.toolkit.ListWidget;
 import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
 import com.hexcore.cas.ui.toolkit.RectangleGrid3DWidget;
@@ -61,7 +67,7 @@ import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.utilities.Log;
 
-public class GUI implements WindowEventListener
+public class GUI implements WindowEventListener, LobbyListener
 {	
 	public static class Viewport
 	{
@@ -76,9 +82,10 @@ public class GUI implements WindowEventListener
 			this.container = container;
 			this.type = type;
 		}
+
 		
-		
-		public void switchDimension(Grid grid)
+		public void switchDimension(Grid grid, Window window)
+
 		{			
 			if (this.type == Viewport.Type.THREE_D)
 				type =  Viewport.Type.TWO_D;
@@ -86,11 +93,11 @@ public class GUI implements WindowEventListener
 			else			
 				type =  Viewport.Type.THREE_D;
 			
-			recreate(grid);
+			recreate(grid, window);
 			
 		}
 		
-		public void recreate(Grid grid)
+		public void recreate(Grid grid, Window window)
 		{
 	    	switch (grid.getType())
 			{
@@ -99,36 +106,82 @@ public class GUI implements WindowEventListener
 					{
 						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
 				case HEXAGON:
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
 				case TRIANGLE:
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
     			
 			}
 	    	
 	    	gridWidget.setFlag(Widget.FILL);
 	    	container.setContents(gridWidget);
+		}
+	}
+
+	static class ClientEntry implements Comparable<ClientEntry>
+	{
+		InetSocketAddress address;
+		
+		ClientEntry(InetSocketAddress address)
+		{
+			this.address = address;
+		}
+		
+		@Override
+		public int compareTo(ClientEntry other)
+		{
+			return address.getHostName().compareTo(other.address.getHostName());
 		}
 	}
 	
@@ -138,8 +191,11 @@ public class GUI implements WindowEventListener
     
     
     //OUR VIEWPORTS//
-   public ArrayList<Viewport> viewports;
+    public ArrayList<Viewport> viewports;
     ////////////////
+
+    public Set<ClientEntry> availableClients;   
+    public Set<ClientEntry> usingClients;
 	
 	public static final String TAG = "GUI";
 	
@@ -318,10 +374,27 @@ public class GUI implements WindowEventListener
 
 
 	private Button toggleShowButton;
+	
+	
+	// Distribution tab
+	public ListWidget 	clientsAvailableList;
+	public ListWidget 	clientsUsingList;
+	
+	public Image	computerIcon;
+	public Image	computerLinkIcon;
+	
+	private Button	addClientButton;
+	private Button	addAllClientsButton;
+	private Button	removeClientButton;
+	private Button	removeAllClientsButton;
     
     public GUI(Server server)
     {
-        this.server = server;               
+        this.server = server;
+        
+        availableClients = new TreeSet<ClientEntry>();
+        usingClients = new TreeSet<ClientEntry>();
+        refreshClients();
         
         colourRules = new ColourRuleSet(4);
         ColourRule    colourRule;
@@ -342,8 +415,8 @@ public class GUI implements WindowEventListener
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
-        colourRules.setColourRule(3, colourRule);    
-        
+        colourRules.setColourRule(3, colourRule);  
+
         theme = new Theme();
         window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
         
@@ -354,6 +427,9 @@ public class GUI implements WindowEventListener
     public void initialise()
     {
         theme.loadTheme(themeName);
+        
+        computerIcon = window.getTheme().getImage("icons", "computer.png");
+        computerLinkIcon = window.getTheme().getImage("icons", "computer_link.png");
         
         masterView = new View(new Vector2i(10, 10));
         masterView.setMargin(new Vector2i(0, 0));
@@ -635,22 +711,8 @@ public class GUI implements WindowEventListener
             saveAsCALFileButton.setHeight(35);
             buttonRulesLayout.add(saveAsCALFileButton);
             
-            
-        
-        
-        
-        distributionContainer = new Container(new Vector2i(100, 100));
-        distributionContainer.setFlag(Widget.FILL);
-        tabbedWorldView.add(distributionContainer, "Distribution Settings");
-        
-        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        masterDistributionLayout.setFlag(Widget.FILL);
-        distributionContainer.setContents(masterDistributionLayout);
-        
-        
-        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
-        masterDistributionLayout.add(refreshServerButton);
-        
+            createDistributionTab();
+
         
         coloursContainer = new Container(new Vector2i(100, 100));
         coloursContainer.setFlag(Widget.FILL);
@@ -959,6 +1021,76 @@ public class GUI implements WindowEventListener
         window.relayout();
     }
     
+    public void createDistributionTab()
+    {
+    	distributionContainer = new Container(new Vector2i(100, 100));
+    	distributionContainer.setMargin(new Vector2i(0, 0));
+        distributionContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+        
+        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterDistributionLayout.setMargin(new Vector2i(0, 0));
+        masterDistributionLayout.setFlag(Widget.FILL);
+        distributionContainer.setContents(masterDistributionLayout);
+        
+        // List Layout
+        LinearLayout listLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        listLayout.setFlag(Widget.FILL);
+        masterDistributionLayout.add(listLayout);
+        
+        	// Left List Layout
+	        LinearLayout leftListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        leftListLayout.setMargin(new Vector2i(0, 0));
+	        leftListLayout.setFlag(Widget.FILL);
+	        listLayout.add(leftListLayout);
+	        
+	        TextWidget leftListTitle = new TextWidget("Available clients");
+	        leftListLayout.add(leftListTitle);
+	        
+	        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
+	        clientsAvailableList.setFlag(Widget.FILL);
+	        leftListLayout.add(clientsAvailableList);
+	        
+	        // Center buttons
+	        LinearLayout centerButtonLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        centerButtonLayout.setMargin(new Vector2i(0, 0));
+	        centerButtonLayout.setFlag(Widget.WRAP | Widget.CENTER_VERTICAL);
+	        listLayout.add(centerButtonLayout);
+	        
+	        addClientButton = new Button(new Vector2i(150, 40), "Add >");
+	        centerButtonLayout.add(addClientButton);
+	        
+	        addAllClientsButton = new Button(new Vector2i(150, 40), "Add All >>");
+	        centerButtonLayout.add(addAllClientsButton);
+	        
+	        removeClientButton = new Button(new Vector2i(150, 40), "< Remove");
+	        centerButtonLayout.add(removeClientButton);
+	        
+	        removeAllClientsButton = new Button(new Vector2i(150, 40), "<< Remove All");
+	        centerButtonLayout.add(removeAllClientsButton);
+	        
+	        // Right List Layout
+	        LinearLayout rightListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        rightListLayout.setMargin(new Vector2i(0, 0));
+	        rightListLayout.setFlag(Widget.FILL);
+	        listLayout.add(rightListLayout);
+	        
+	        TextWidget rightListTitle = new TextWidget("Using clients");
+	        rightListLayout.add(rightListTitle);
+	        
+	        clientsUsingList = new ListWidget(new Vector2i(10, 10));
+	        clientsUsingList.setFlag(Widget.FILL);   
+	        rightListLayout.add(clientsUsingList);
+        
+        // Control Layout
+        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        controlLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
+        masterDistributionLayout.add(controlLayout);      
+        
+        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
+        controlLayout.add(refreshServerButton);
+    }
+    
     public void startWorldEditor(World world)
     {
     	this.world = world;
@@ -1113,7 +1245,7 @@ public class GUI implements WindowEventListener
     			else
     			{
 	   				for (Viewport viewport : viewports) 
-	   					viewport.recreate(grid);
+	   					viewport.recreate(grid, window);
     			}
     		}
     	}
@@ -1125,6 +1257,27 @@ public class GUI implements WindowEventListener
     	dialogMessage.setCaption(message);
     	window.showModalDialog(dialog);
     }
+    
+    public void refreshClients()
+    {
+    	availableClients.clear();
+    	usingClients.clear();
+    	
+		ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+		server.sendEvent(serverEvent);
+    }
+    
+    public void updateAvailableClientsList()
+    {
+    	clientsAvailableList.clear();
+    	clientsUsingList.clear();
+    	
+    	for (ClientEntry client : availableClients)
+    		clientsAvailableList.addItem(computerIcon, client.address.getHostName());
+			
+		for (ClientEntry client : usingClients)
+			clientsUsingList.addItem(computerLinkIcon, client.address.getHostName());    			
+	}
    
     @Override
     public void update(float delta)
@@ -1401,7 +1554,7 @@ public class GUI implements WindowEventListener
             	viewportsLayout.add(container);
             	
             	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D);
-            	viewport.recreate(currentGrid);
+            	viewport.recreate(currentGrid, window);
             	
             	viewports.add(viewport);
             }
@@ -1567,12 +1720,13 @@ public class GUI implements WindowEventListener
 
             //VIEWPORT SETTINGS BUTTONS
             
+
 			else if (event.target == toggle3dButton)
 			{
 				for (Viewport viewport : viewports)
 				{	
 					if (viewport.gridWidget.hasFocus()) 
-						viewport.switchDimension(currentGrid);
+						viewport.switchDimension(currentGrid, window);
 				} 
 			}
 			else if (event.target == toggleHideButton)
@@ -1585,15 +1739,64 @@ public class GUI implements WindowEventListener
 			}
 			else if (event.target == toggleWireframeButton)
 			{
-				 				 
+				for (Viewport viewport : viewports)
+				{	
+					if (viewport.gridWidget.hasFocus()) 
+						viewport.gridWidget.toggleDrawWireframe();
+				} 	 				 
 			}
+
             // DISTRIBUTION BUTTONS
 			else if (event.target == refreshServerButton)
 			{
-				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
-				server.sendEvent(serverEvent);
+				refreshClients();
 			}
-            
+			else if (event.target == addAllClientsButton)
+			{
+				for (ClientEntry clientEntry : availableClients) usingClients.add(clientEntry);
+				
+				availableClients.clear();
+
+				updateAvailableClientsList();
+			}
+			else if (event.target == removeAllClientsButton)
+			{
+				for (ClientEntry clientEntry : usingClients) availableClients.add(clientEntry);
+				
+				usingClients.clear();
+
+				updateAvailableClientsList();
+			} 
+			else if (event.target == addClientButton)
+			{
+				String hostname = clientsAvailableList.getSelectedText();
+				
+				for (ClientEntry clientEntry : availableClients)
+				{
+					if (clientEntry.address.getHostName().equals(hostname))
+					{
+						availableClients.remove(clientEntry);
+						usingClients.add(clientEntry);
+					}
+				}
+				
+				updateAvailableClientsList();
+			}
+			else if (event.target == removeClientButton)
+			{
+				String hostname = clientsUsingList.getSelectedText();
+				
+				for (ClientEntry clientEntry : usingClients)
+				{
+					if (clientEntry.address.getHostName().equals(hostname))
+					{
+						usingClients.remove(clientEntry);
+						availableClients.add(clientEntry);
+					}
+				}
+				
+				updateAvailableClientsList();
+			}
             //COLOUR RANGES
             
 			
@@ -1608,4 +1811,18 @@ public class GUI implements WindowEventListener
             }
         }
     }
+
+	@Override
+	public void foundClient(InetSocketAddress address)
+	{
+		if (availableClients != null)
+		{
+			if (address.getHostName().equals("localhost")) return;
+				
+			ClientEntry clientEntry = new ClientEntry(address);
+			availableClients.add(clientEntry);
+			
+			updateAvailableClientsList();
+		}
+	}
 }

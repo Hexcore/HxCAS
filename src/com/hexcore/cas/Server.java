@@ -1,7 +1,6 @@
 package com.hexcore.cas;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -10,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.hexcore.cas.control.discovery.Lobby;
-import com.hexcore.cas.control.discovery.LobbyListener;
 import com.hexcore.cas.control.server.Simulator;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
@@ -21,7 +19,7 @@ import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
 
-public class Server implements LobbyListener
+public class Server
 {
 	private final static String TAG = "Server";
 	public final static String VERSION = "v0.1";
@@ -64,10 +62,10 @@ public class Server implements LobbyListener
 		int beaconReplyPort = config.getInteger("Network.Beacon", "replyPort", 3117);
 		lobby = new Lobby(beaconPort, beaconReplyPort);
 		lobby.start();
-		lobby.addListener(this);
 		
 		Log.information(TAG, "Starting user interface...");
 		ui = new GUI(instance);
+		lobby.addListener(ui);
 		
 		try
 		{
@@ -203,7 +201,7 @@ public class Server implements LobbyListener
 						break;
 					}
 				}
-			}
+			}								
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();
@@ -265,22 +263,6 @@ public class Server implements LobbyListener
 	
 	public void sendEvent(ServerEvent event)
 	{
-		try 
-		{
-			eventQueue.put(event);
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void foundClient(SocketAddress address) 
-	{
-		ServerEvent event = new ServerEvent(ServerEvent.Type.FOUND_CLIENT);
-		event.address = address;
-		
 		try 
 		{
 			eventQueue.put(event);

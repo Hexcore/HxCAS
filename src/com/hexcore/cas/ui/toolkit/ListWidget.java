@@ -8,23 +8,32 @@ import com.hexcore.cas.math.Vector2i;
 
 public class ListWidget extends Widget
 {
+	public static class Entry
+	{
+		Image	icon = null;
+		String	caption;
+		
+		Entry(String caption) {this.caption = caption;}
+		Entry(Image icon, String caption) {this.icon = icon; this.caption = caption;}
+	}
+	
 	private int					selected = -1;
 	private int					mouseoverItem = -1;
-	private ArrayList<String>	items;
+	private ArrayList<Entry>	items = new ArrayList<Entry>();
 	
 	public ListWidget(Vector2i size)
 	{
 		super(size);
-		items = new ArrayList<String>();
 	}
 
 	public ListWidget(Vector2i position, Vector2i size)
 	{
 		super(position, size);
-		items = new ArrayList<String>();
 	}
 		
-	public void		addItem(String text) {items.add(text);}
+	public void		clear() {items.clear();}
+	public void		addItem(String text) {items.add(new Entry(text));}
+	public void		addItem(Image icon, String text) {items.add(new Entry(icon, text));}
 	
 	public void 	setSelected(int index) {selected = index;}
 	public int 		getSelected() {return selected;}
@@ -32,7 +41,7 @@ public class ListWidget extends Widget
 	public String	getSelectedText() 
 	{
 		if ((selected < 0) || (selected >= items.size())) return "";
-		return items.get(selected);
+		return items.get(selected).caption;
 	}
 	
 	@Override
@@ -61,7 +70,12 @@ public class ListWidget extends Widget
 		Vector2i itemPos = pos.add(padding);
 		for (int i = 0; i < items.size(); i++)
 		{
-			String item = items.get(i);
+			Image icon = items.get(i).icon;
+			String item = items.get(i).caption;
+			
+			int leftPadding = 0;
+			int height = textHeight;
+			if (icon != null) height = Math.max(height, icon.getHeight());
 			
 			if (i == selected)
 			{
@@ -75,7 +89,14 @@ public class ListWidget extends Widget
 			}
 			
 			itemPos.inc(0, itemPadding.y);
-			theme.renderText(gl, item, itemPos.add(itemPadding.x, 0), textColour, textSize);
+			
+			if (icon != null)
+			{
+				leftPadding = icon.getWidth() + 4;
+				Graphics.renderRectangle(gl, itemPos.add(itemPadding.x, 0), icon);
+			}
+			
+			theme.renderText(gl, item, itemPos.add(itemPadding.x + leftPadding, 0), textColour, textSize);
 			itemPos.inc(0, textHeight + itemPadding.y);
 		}
 		
@@ -101,7 +122,7 @@ public class ListWidget extends Widget
 				int			itemHeight = textHeight + itemPadding.y * 2;
 				
 				int index = (event.position.y - position.y - padding.y) / itemHeight;
-				
+								
 				if (index >= 0 && index < items.size())
 				{
 					mouseoverItem = index;
@@ -109,6 +130,8 @@ public class ListWidget extends Widget
 					if ((event.type == Event.Type.MOUSE_CLICK) && event.pressed)
 						selected = index;
 				}
+				else
+					mouseoverItem = -1;
 			}
 		}
 		

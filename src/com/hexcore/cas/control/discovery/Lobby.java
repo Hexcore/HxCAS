@@ -129,10 +129,14 @@ public class Lobby extends Thread
 				if (buffer.get(2) != (byte)0xCA) continue;
 				if (buffer.get(3) != (byte)0xFE) continue;
 				
-				Log.information(TAG, "Got reply from " + replyAddress);
+				if (!(replyAddress instanceof InetSocketAddress)) continue;
+				
+				InetSocketAddress replyInetAddress = (InetSocketAddress)replyAddress;
+				
+				Log.information(TAG, "Got reply from " + replyInetAddress.getAddress());
 				
 				for (LobbyListener listener : listeners)
-					listener.foundClient(replyAddress);
+					listener.foundClient(replyInetAddress);
 			}
 		}
 		catch (IOException e)
