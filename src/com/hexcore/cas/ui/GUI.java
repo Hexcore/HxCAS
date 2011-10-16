@@ -2,17 +2,14 @@
 
 package com.hexcore.cas.ui;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
@@ -27,7 +24,6 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
-import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -37,6 +33,7 @@ import com.hexcore.cas.ui.toolkit.DiscreteSliderWidget;
 import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
+import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
@@ -101,7 +98,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -111,7 +108,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -121,7 +118,7 @@ public class GUI implements WindowEventListener
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						temp3DWidget.addSlice(0, 10.0f);
+						temp3DWidget.addSlice(1, 10.0f);
 						gridWidget = temp3DWidget;
 					}
 					else 
@@ -182,7 +179,7 @@ public class GUI implements WindowEventListener
     public Button		submitButton;
     
     public Grid3DWidget	grid3DViewer = null;
-    public GridWidget	gridViewer = null;
+    public Grid2DWidget	gridViewer = null;
 
     // RULES TAB    
     public Container rulesContainer;
@@ -326,22 +323,26 @@ public class GUI implements WindowEventListener
     {
         this.server = server;               
         
-        colourRules = new ColourRuleSet(3);
+        colourRules = new ColourRuleSet(4);
         ColourRule    colourRule;
+
+        colourRule = new ColourRule();
+        colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(1.0f, 0.0f, 0.0f)));
+        colourRules.setColourRule(0, colourRule);
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
-        colourRules.setColourRule(0, colourRule);
+        colourRules.setColourRule(1, colourRule);
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 15.1, new Colour(0.0f, 0.5f, 0.8f), new Colour(0.0f, 0.25f, 0.5f)));
-        colourRules.setColourRule(1, colourRule);    
+        colourRules.setColourRule(2, colourRule);    
         
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
-        colourRules.setColourRule(2, colourRule);    
+        colourRules.setColourRule(3, colourRule);    
         
         theme = new Theme();
         window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
@@ -1015,11 +1016,11 @@ public class GUI implements WindowEventListener
         	Log.information(TAG, "Recreating grid, the current state will be lost");
         	grid = type.create(size, grid.getNumProperties());
         	
-			grid.getCell(2, 4).setValue(0, 1);
-			grid.getCell(3, 4).setValue(0, 1);
-			grid.getCell(4, 4).setValue(0, 1);
-			grid.getCell(4, 3).setValue(0, 1);
-			grid.getCell(3, 2).setValue(0, 1);
+			grid.getCell(2, 4).setValue(1, 1);
+			grid.getCell(3, 4).setValue(1, 1);
+			grid.getCell(4, 4).setValue(1, 1);
+			grid.getCell(4, 3).setValue(1, 1);
+			grid.getCell(3, 2).setValue(1, 1);
         }
         
         grid.setWrappable(wrapCheckBox.isChecked());
@@ -1044,10 +1045,11 @@ public class GUI implements WindowEventListener
     		case RECTANGLE:
 	            grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	
 	            gridViewer = new RectangleGridWidget((RectangleGrid)grid, 16);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
@@ -1055,10 +1057,11 @@ public class GUI implements WindowEventListener
     		case TRIANGLE:
 	        	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	            
 	            gridViewer = new TriangleGridWidget((TriangleGrid)grid, 32);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);      
 	            break;
@@ -1066,10 +1069,11 @@ public class GUI implements WindowEventListener
             case HEXAGON:
 	            grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(0, 16.0f);
+	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	    
 	            gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
+	            gridViewer.setColourProperty(1);
 	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;

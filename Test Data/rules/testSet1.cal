@@ -8,7 +8,7 @@ ruleset set1
 
 	type Land : 0
 	{
-		self.land = self.land + 1;
-		self.water = self.land + 1;
+		//self.land = self.land + 1;
+		self.water = self.land;// + 1;
 	}
 }

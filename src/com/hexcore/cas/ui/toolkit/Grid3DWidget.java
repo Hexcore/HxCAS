@@ -16,6 +16,7 @@ import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.utilities.Log;
 import com.jogamp.common.nio.Buffers;
 
 public class Grid3DWidget extends GridWidget

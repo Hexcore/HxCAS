@@ -105,14 +105,15 @@ public class Server implements LobbyListener
 					{						
 						world = new World();
 						
-						Grid grid = event.gridType.create(event.size, 1);
+						Grid grid = event.gridType.create(event.size, 2);
 						grid.setWrappable(event.wrappable);
 	
 						for(int y = 0; y < event.size.y; y++)
 							for(int x = 0; x < event.size.x; x++)
 								grid.getCell(x, y).setValue(0, 0.0);
 												
-						world.addGeneration(grid);
+						world.addGeneration(grid);						
+						world.setRuleCode("ruleset Flash\n{\n\ttypecount 1;\n\tproperty alive;\n\ttype Land : 0\n\t{\n\t\tself.alive = 1 - self.alive;\n\t}\n}");
 						
 						ui.startWorldEditor(world);
 						

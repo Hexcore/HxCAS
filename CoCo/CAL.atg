@@ -319,6 +319,11 @@ PRODUCTIONS
   														SemError("Undeclared identifier \"" + name + "\"");
   													else
   														type = entry.type;
+  														
+  														
+  													if(entry.kind == TableEntry.Cell)
+		  													CodeGen.derefRef(entry.offset);
+  														
   												.)
   													 
   	[
@@ -328,6 +333,7 @@ PRODUCTIONS
   													{
   														SemError("Index must be arithmetic");
   													}
+  													CodeGen.derefArrayRef();
   												.)
   												
   												
@@ -565,12 +571,15 @@ PRODUCTIONS
   												p.kind = TableEntry.Variable;
   												p.offset = entry.offset;
   												
-  												if(entry.kind == TableEntry.Variable)
-  													CodeGen.derefVariable(entry.offset);
-  												else if(entry.kind == TableEntry.Cell)
-  													CodeGen.derefRef(entry.offset);
-  												else if(entry.kind == TableEntry.Property)
-  													CodeGen.derefProperty(entry.offset);						
+ 												if(entry.kind == TableEntry.Variable)
+		  											CodeGen.derefVariable(entry.offset);		  											 
+		  										else if(entry.kind == TableEntry.Property)
+		  										{
+		  											if(TableEntry.isArray(entry.type))
+		  												CodeGen.generatePropertyArray(entry.offset);
+		  											else
+		  												CodeGen.derefProperty(entry.offset);
+		  										}
   											.)
   	[
   	"("		
