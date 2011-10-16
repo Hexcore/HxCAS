@@ -21,6 +21,7 @@ import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
+import com.hexcore.cas.ui.toolkit.ListWidget;
 import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
 import com.hexcore.cas.ui.toolkit.RectangleGrid3DWidget;
@@ -64,6 +65,7 @@ public class UITestApplication implements WindowEventListener
 	public Container	headingContainer;
 	public TextWidget	headingLabel;
 	public SliderWidget	slider;
+	public ListWidget	listWidget;
 	public View			mainView;
 	
 	public ScrollableContainer	listScroll;
@@ -290,6 +292,13 @@ public class UITestApplication implements WindowEventListener
 		paragraph.setFlag(Widget.FILL_HORIZONTAL);
 		paragraph.setFlowed(true);
 		innerLayout.add(paragraph);
+		
+		listWidget = new ListWidget(new Vector2i(50, 50));
+		listWidget.setFlag(Widget.FILL);
+		listWidget.addItem("First");
+		listWidget.addItem("Second");
+		listWidget.addItem("Third");
+		innerLayout.add(listWidget);
 		
 		/** A list **/		
 		listScroll = new ScrollableContainer(new Vector2i(50, 50));
