@@ -887,6 +887,10 @@ static public void reset()
 				{
 					SemError("Invalid argument. Argument must be an array");
 				}
+				else
+				{
+					CodeGen.invokeStandardArrayMethod(entry.name, entry.type);
+				}
 				}
 				else
 				{
@@ -894,8 +898,13 @@ static public void reset()
 				{
 					SemError("Invalid argument. Argument must be a scalar type");
 				}
+				else
+				{
+					CodeGen.invokeStandardScalarMethod(entry.name);
+				}
 				}
 				p.kind = TableEntry.Constant;
+				
 				
 				Expect(rparen_Sym);
 			}
