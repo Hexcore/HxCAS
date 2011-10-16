@@ -1,8 +1,13 @@
 package com.hexcore.cas.math;
 
-/*
- * A class that contains two integers, useful for storing sizes or positions.
- * Member variables are public so "Vector2i point; point.x = 5;" is allowed.
+/**
+ * Class Vector2i:
+ * 	A class that contains two integers, 
+ * 	useful for storing sizes or positions.
+ * 	Member variables are public so 
+ * 	"Vector2i point; point.x = 5;" is allowed.
+ * 
+ * @author Divan
  */
 public class Vector2i
 {

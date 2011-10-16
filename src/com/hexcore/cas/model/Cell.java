@@ -1,5 +1,15 @@
 package com.hexcore.cas.model;
 
+/**
+ * Class Cell:
+ * 	The basic building block of the CA.
+ * 	Has an array of doubles called values
+ * 	that contains its properties.
+ * 
+ * @author Apurva
+ *
+ */
+
 public class Cell
 {
 	private double[] 	values;

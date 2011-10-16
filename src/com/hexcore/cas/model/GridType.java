@@ -2,6 +2,15 @@ package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
 
+/**
+ * Class GridType
+ * Manages 3 different possible grid shapes:
+ * Rectangle, hexagon, triangle.
+ * 
+ * @author Megan
+ *
+ */
+
 public enum GridType
 {
 	RECTANGLE('R', RectangleGrid.class),

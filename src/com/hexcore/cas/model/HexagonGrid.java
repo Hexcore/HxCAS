@@ -1,7 +1,15 @@
 package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
-
+/**
+ * Class HexagonGrid
+ * Stores details specific to a grid made of hexagon cells.
+ * For example, the different number of neighbours that 
+ * a hexagon grid has.
+ * 
+ * @author Apurva
+ *
+ */
 public class HexagonGrid extends Grid
 {	
 	public HexagonGrid(Vector2i size, int numProperties)

@@ -6,6 +6,16 @@ import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.utilities.ConfigParser;
 import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 
+/**
+ * Class ColorRuleSetParser:
+ * Used to parse details of a colourSet from a file
+ * into a ColourRuleSet object.
+ * Also used to read details from colour sets.
+ * 
+ * @author Divan
+ *
+ */
+
 public class ColourRuleSetParser extends ConfigParser
 {
 	public ColourRuleSetParser()
