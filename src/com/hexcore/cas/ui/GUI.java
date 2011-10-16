@@ -1622,7 +1622,13 @@ public class GUI implements WindowEventListener
             
 			 else if (event.target == toggleWireframeButton)
 			 {
-				 
+				 for (Viewport viewport : viewports)
+	            	{	
+	    		//	if (viewport.gridWidget.hasFocus())
+	    		//		{
+	    				
+	    		//		}
+	            	} 
 				 
 			 }
             
