@@ -149,7 +149,12 @@ public class Server
 					
 					case READY_SIMULATION:
 					{
+						serverLock.lock();
+						
+						clients = event.clients;
 						if (!activeSimulation.getAndSet(true)) initSimulation();
+						
+						serverLock.unlock();
 						break;
 					}
 					

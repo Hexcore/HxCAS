@@ -494,7 +494,8 @@ public class CAPIPServer
 		{			
 			try
 			{
-				protocol = new CAPMessageProtocol(new Socket(address.getHostName(), address.getPort()));
+				Log.information(TAG, "Connecting to: " + address.getHostName() + ":" + clientPort);
+				protocol = new CAPMessageProtocol(new Socket(address.getHostName(), clientPort));
 				protocol.start();
 				
 				DictNode header = makeHeader("CONNECT");
