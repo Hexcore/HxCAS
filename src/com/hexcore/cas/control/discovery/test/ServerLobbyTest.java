@@ -1,6 +1,6 @@
 package com.hexcore.cas.control.discovery.test;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
 import com.hexcore.cas.control.discovery.Lobby;
 import com.hexcore.cas.control.discovery.LobbyListener;
@@ -32,7 +32,7 @@ public class ServerLobbyTest implements LobbyListener
 	}
 
 	@Override
-	public void foundClient(SocketAddress address)
+	public void foundClient(InetSocketAddress address)
 	{
 		System.out.println("A client has been discovered : " + address);
 	}

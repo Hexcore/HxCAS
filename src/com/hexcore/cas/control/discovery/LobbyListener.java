@@ -1,8 +1,8 @@
 package com.hexcore.cas.control.discovery;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
 public interface LobbyListener
 {
-	public void foundClient(SocketAddress address);
+	public void foundClient(InetSocketAddress address);
 }

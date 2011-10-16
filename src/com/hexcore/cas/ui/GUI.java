@@ -9,10 +9,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
+import com.hexcore.cas.control.discovery.LobbyListener;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.ColourRule;
@@ -40,6 +44,7 @@ import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
+import com.hexcore.cas.ui.toolkit.ListWidget;
 import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
 import com.hexcore.cas.ui.toolkit.RectangleGrid3DWidget;
@@ -61,7 +66,7 @@ import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
 import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.utilities.Log;
 
-public class GUI implements WindowEventListener
+public class GUI implements WindowEventListener, LobbyListener
 {	
 	public static class Viewport
 	{
@@ -76,8 +81,7 @@ public class GUI implements WindowEventListener
 			this.container = container;
 			this.type = type;
 		}
-		
-		
+
 		public void switchDimension(Grid grid)
 		{			
 			if (this.type == Viewport.Type.THREE_D)
@@ -131,6 +135,22 @@ public class GUI implements WindowEventListener
 	    	container.setContents(gridWidget);
 		}
 	}
+
+	static class ClientEntry implements Comparable<ClientEntry>
+	{
+		InetSocketAddress address;
+		
+		ClientEntry(InetSocketAddress address)
+		{
+			this.address = address;
+		}
+		
+		@Override
+		public int compareTo(ClientEntry other)
+		{
+			return address.getHostName().compareTo(other.address.getHostName());
+		}
+	}
 	
 	//OUR WORLD///
     public World world;
@@ -138,8 +158,10 @@ public class GUI implements WindowEventListener
     
     
     //OUR VIEWPORTS//
-   public ArrayList<Viewport> viewports;
+    public ArrayList<Viewport> viewports;
     ////////////////
+
+    public Set<ClientEntry> availableClients;    
 	
 	public static final String TAG = "GUI";
 	
@@ -318,10 +340,18 @@ public class GUI implements WindowEventListener
 
 
 	private Button toggleShowButton;
+	
+	
+	// Distribution tab
+	public ListWidget 	clientsAvailableList;
+	public ListWidget 	clientUsingList;
     
     public GUI(Server server)
     {
-        this.server = server;               
+        this.server = server;
+        
+        availableClients = new TreeSet<ClientEntry>();
+        refreshClients();
         
         colourRules = new ColourRuleSet(4);
         ColourRule    colourRule;
@@ -635,22 +665,7 @@ public class GUI implements WindowEventListener
             saveAsCALFileButton.setHeight(35);
             buttonRulesLayout.add(saveAsCALFileButton);
             
-            
-        
-        
-        
-        distributionContainer = new Container(new Vector2i(100, 100));
-        distributionContainer.setFlag(Widget.FILL);
-        tabbedWorldView.add(distributionContainer, "Distribution Settings");
-        
-        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        masterDistributionLayout.setFlag(Widget.FILL);
-        distributionContainer.setContents(masterDistributionLayout);
-        
-        
-        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
-        masterDistributionLayout.add(refreshServerButton);
-        
+        createDistributionTab();
         
         coloursContainer = new Container(new Vector2i(100, 100));
         coloursContainer.setFlag(Widget.FILL);
@@ -959,6 +974,40 @@ public class GUI implements WindowEventListener
         window.relayout();
     }
     
+    public void createDistributionTab()
+    {
+    	distributionContainer = new Container(new Vector2i(100, 100));
+    	distributionContainer.setMargin(new Vector2i(0, 0));
+        distributionContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+        
+        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterDistributionLayout.setMargin(new Vector2i(0, 0));
+        masterDistributionLayout.setFlag(Widget.FILL);
+        distributionContainer.setContents(masterDistributionLayout);
+        
+        // List Layout
+        LinearLayout listLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        listLayout.setFlag(Widget.FILL);
+        masterDistributionLayout.add(listLayout);
+        
+        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
+        clientsAvailableList.setFlag(Widget.FILL);
+        listLayout.add(clientsAvailableList);
+        
+        clientUsingList = new ListWidget(new Vector2i(10, 10));
+        clientUsingList.setFlag(Widget.FILL);   
+        listLayout.add(clientUsingList);
+        
+        // Control Layout
+        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        controlLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
+        masterDistributionLayout.add(controlLayout);      
+        
+        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
+        controlLayout.add(refreshServerButton);
+    }
+    
     public void startWorldEditor(World world)
     {
     	this.world = world;
@@ -1124,6 +1173,22 @@ public class GUI implements WindowEventListener
     	dialogTitle.setCaption(caption);
     	dialogMessage.setCaption(message);
     	window.showModalDialog(dialog);
+    }
+    
+    public void refreshClients()
+    {
+    	availableClients.clear();
+    	
+		ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+		server.sendEvent(serverEvent);
+    }
+    
+    public void updateAvailableClientsList()
+    {
+    	clientsAvailableList.clear();
+    	
+    	for (ClientEntry client : availableClients)
+    		clientsAvailableList.addItem(client.address.getHostName());
     }
    
     @Override
@@ -1590,8 +1655,7 @@ public class GUI implements WindowEventListener
             // DISTRIBUTION BUTTONS
 			else if (event.target == refreshServerButton)
 			{
-				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
-				server.sendEvent(serverEvent);
+				refreshClients();
 			}
             
             //COLOUR RANGES
@@ -1608,4 +1672,16 @@ public class GUI implements WindowEventListener
             }
         }
     }
+
+	@Override
+	public void foundClient(InetSocketAddress address)
+	{
+		if (availableClients != null)
+		{
+			ClientEntry clientEntry = new ClientEntry(address);
+			availableClients.add(clientEntry);
+			
+			updateAvailableClientsList();
+		}
+	}
 }

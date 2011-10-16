@@ -24,6 +24,7 @@ public class ListWidget extends Widget
 		items = new ArrayList<String>();
 	}
 		
+	public void		clear() {items.clear();}
 	public void		addItem(String text) {items.add(text);}
 	
 	public void 	setSelected(int index) {selected = index;}
