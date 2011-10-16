@@ -40,8 +40,8 @@ public class CAPMessageProtocol extends Thread
 		
 		try
 		{
-			inputStream = new BufferedInputStream(new GZIPInputStream(socket.getInputStream()));
-			outputStream = new BufferedOutputStream(new GZIPOutputStream(socket.getOutputStream()));
+			inputStream = new BufferedInputStream((socket.getInputStream()));
+			outputStream = new BufferedOutputStream((socket.getOutputStream()));
 		}
 		catch (IOException e)
 		{
