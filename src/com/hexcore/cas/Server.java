@@ -188,6 +188,12 @@ public class Server implements LobbyListener
 						break;
 					}
 					
+					case PING_CLIENTS:
+					{
+						lobby.ping();
+						break;
+					}
+					
 					case SHUTDOWN:
 					{
 						Log.information(TAG, "Got shutdown message");

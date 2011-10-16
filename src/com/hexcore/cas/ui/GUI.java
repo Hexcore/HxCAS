@@ -281,6 +281,9 @@ public class GUI implements WindowEventListener
 
 
 	private Button saveAsCALFileButton;
+
+
+	private Button refreshServerButton;
     
     public GUI(Server server)
     {
@@ -600,13 +603,25 @@ public class GUI implements WindowEventListener
         
         distributionContainer = new Container(new Vector2i(100, 100));
         distributionContainer.setFlag(Widget.FILL);
+        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+        
+        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterDistributionLayout.setFlag(Widget.FILL);
+        distributionContainer.setContents(masterDistributionLayout);
+        
+        
+        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
+        masterDistributionLayout.add(refreshServerButton);
+        
+        
+        
         
         worldPreviewContainer = new Container(new Vector2i(100, 100));
         worldPreviewContainer.setFlag(Widget.FILL);
         
         
 
-        tabbedWorldView.add(distributionContainer, "Distribution Settings");
+     
         tabbedWorldView.add(worldPreviewContainer, "World Preview");
         
         
@@ -1398,7 +1413,12 @@ public class GUI implements WindowEventListener
 	            }
 
 
-            
+            // DISTRIBUTION BUTTONS
+			 else if (event.target == refreshServerButton)
+			 {
+				 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
+	                server.sendEvent(serverEvent);
+			 }
             
         }
         else if (event.type == Event.Type.CHANGE)
