@@ -3,8 +3,8 @@ package com.hexcore.cas.control.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -30,7 +30,7 @@ public class CAPIPServer
 	private static final String TAG = "Server";
 	private final static int PROTOCOL_VERSION = 1;
 	
-	private ArrayList<ClientInfo> clients = null;
+	private List<ClientInfo> clients = null;
 	
 	private boolean running = false;
 	
@@ -50,8 +50,7 @@ public class CAPIPServer
 	{
 		super();
 		this.clientPort = clientPort;
-		
-		this.clients = new ArrayList<ClientInfo>();
+		this.clients = Collections.synchronizedList(new ArrayList<ClientInfo>());
 				
 		workQueue = new LinkedBlockingQueue<ThreadWork>();
 		sentWork = new HashMap<Integer, ThreadWork>();
@@ -209,7 +208,6 @@ public class CAPIPServer
 				}
 				
 				TreeMap<String, Node> gi = body.getDictValues();
-				Recti area = null;
 				int ID = ((IntNode)gi.get("ID")).getIntValue();
 				int gen = ((IntNode)gi.get("GENERATION")).getIntValue();
 								
@@ -227,8 +225,6 @@ public class CAPIPServer
 					Log.error(TAG, "RESULT message considered garbage - generation not the same.");
 					return;
 				}
-				
-				area = orig.getWorkableArea();
 			
 				ArrayList<Node> rows = ((ListNode)gi.get("DATA")).getListValues();
 				for(int y = 0; y < rows.size(); y++)

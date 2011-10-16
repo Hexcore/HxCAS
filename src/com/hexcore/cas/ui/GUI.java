@@ -1178,7 +1178,7 @@ public class GUI implements WindowEventListener
             if (event.target == createWorldButton)
             {            	
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
-                serverEvent.size = new Vector2i(100, 100);
+                serverEvent.size = new Vector2i(32, 32);
                 serverEvent.gridType = GridType.RECTANGLE;
                 serverEvent.wrappable = true;
                 server.sendEvent(serverEvent);
