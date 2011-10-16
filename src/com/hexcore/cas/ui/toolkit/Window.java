@@ -611,7 +611,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			this.directory = directory;
 		}
 		
-		public String getFullName()
+		public String getFullPath()
 		{
 			if (filename == null) return null;
 			return (directory != null ? directory : "") + filename;

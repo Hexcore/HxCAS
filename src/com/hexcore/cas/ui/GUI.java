@@ -899,6 +899,10 @@ public class GUI implements WindowEventListener
     	
     	wrapCheckBox.setChecked(grid.isWrappable());
     	
+    	String ruleCode = world.getRuleCode();
+    	if (ruleCode == null) ruleCode = "";
+    	CALTextArea.setText(ruleCode);
+    	
     	updatePreview();
     }
     
@@ -1021,28 +1025,11 @@ public class GUI implements WindowEventListener
     	}
     }
     
-    private static String readFileAsString(File file)
+    public void showDialog(String caption, String message)
     {
-    	try
-    	{
-	        byte[] buffer = new byte[(int)file.length()];
-	        BufferedInputStream f = null;
-	        try 
-	        {
-	            f = new BufferedInputStream(new FileInputStream(file));
-	            f.read(buffer);
-	        }
-	        finally 
-	        {
-	            f.close(); 
-	        }
-	        return new String(buffer);
-    	}
-    	catch (IOException e)
-    	{
-    	}
-    	
-    	return "";
+    	dialogTitle.setCaption(caption);
+    	dialogMessage.setCaption(message);
+    	window.showModalDialog(dialog);
     }
    
     @Override
@@ -1052,7 +1039,7 @@ public class GUI implements WindowEventListener
     	
         if (!themeName.equals(currentThemeName))
         {
-            System.out.println("Changing theme to "+themeName);
+            System.out.println("Changing theme to " + themeName);
             
             theme.loadTheme(themeName);
             currentThemeName = themeName;
@@ -1096,7 +1083,7 @@ public class GUI implements WindowEventListener
                 if (result.isValid())
                 {
                     ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.LOAD_WORLD);
-                    serverEvent.filename = result.getFullName();
+                    serverEvent.filename = result.getFullPath();
                     server.sendEvent(serverEvent);
                 }
             }
@@ -1133,28 +1120,9 @@ public class GUI implements WindowEventListener
             }
             else if (event.target == submitRulesButton)
             {
-                if (selectedFile == null)
-                    calFile = new File("rules/rules.cal");
-                else
-                    calFile = new File(selectedFile.directory + "/" + selectedFile.filename);
-                
-                try 
-                {
-                	FileWriter outFile = new FileWriter(calFile);
-                	PrintWriter out = new PrintWriter(outFile);
-		 
-                	out.println(CALTextArea.getText());
-                	out.close();
-				} 
-                catch (IOException e)
-                {
-					e.printStackTrace();
-				}
-                
-                System.out.println("THE PATH:" + calFile.getAbsolutePath());
-                
+            	String CALCode = CALTextArea.getText();
                 CALCompiler compiler = new CALCompiler();
-                compiler.compileFile(calFile.getAbsolutePath());
+                compiler.compile(CALCode);
                 
                 TextWidget text = new TextWidget("Compiler Report:");
                 outputLayout.add(text);
@@ -1173,7 +1141,12 @@ public class GUI implements WindowEventListener
                 if (compiler.getErrorCount() == 0)
                 {
                 	Log.information(TAG, "Loading rule code into World");
-                	world.setRuleCode(readFileAsString(calFile));
+                	world.setRuleCode(CALCode);
+                }
+                else
+                {
+                	Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
+                	world.setRuleCode("");
                 }
             }
             else if (event.target == openCALFileButton)
@@ -1208,6 +1181,13 @@ public class GUI implements WindowEventListener
             }
             else if (event.target == simulateButton)
             {
+            	String ruleCode = world.getRuleCode();
+            	if (ruleCode == null || ruleCode.equals(""))
+            	{
+            		showDialog("Simulation", "Cell rules not set yet");
+            		return;
+            	}
+            	
             	masterView.setIndex(2);
             	Log.information(TAG, "Switched to simulation screen");
 
