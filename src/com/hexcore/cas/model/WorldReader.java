@@ -14,6 +14,15 @@ import java.util.zip.ZipFile;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class WorldReader
+ * An instance of this object is used to read all details
+ * of a world from where it is stored.
+ * 
+ * @author Megan
+ *
+ */
+
 public class WorldReader
 {
 	private static final String TAG = "WorldReader";

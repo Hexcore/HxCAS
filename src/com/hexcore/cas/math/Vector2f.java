@@ -1,7 +1,12 @@
 package com.hexcore.cas.math;
 
-/*
- * A class that contains two floating point number, useful for storing sizes or positions.
+/**
+ * Class Vector2f:
+ * 	A class that contains two floating point number, 
+ * 	useful for storing sizes or positions.
+ * 
+ * @author Divan
+ *
  */
 public class Vector2f
 {

@@ -1,5 +1,16 @@
 package com.hexcore.cas.math;
 
+/**
+ * Class Recti:
+ *  Stores a set of cells as two points in integer:
+ * 	position - a vector2f object which represents 
+ * 	the left-top corner of a rectangle of cells.
+ * 	size - a vector2f object which represents 
+ * 	the size of the rectangle described.
+ * 
+ * @author Divan
+ *
+ */
 public class Recti
 {
 	public Vector2i position = new Vector2i(0, 0);

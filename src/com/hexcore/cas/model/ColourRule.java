@@ -4,9 +4,20 @@ import java.util.ArrayList;
 
 import com.hexcore.cas.ui.toolkit.Colour;
 
+/**
+ * Class ColorRule:
+ * 	Contains the static Range class.
+ * 	Use this class to assign a colour or colour range
+ *  to a specific property.
+ * 
+ * @author Divan
+ *
+ */
+
 public class ColourRule
 {
-	/*
+	/**
+	 * 	Static Range class.
 	 *  A Range doesn't not include the end of the range (the value of 'to')
 	 */
 	public static class Range

@@ -1,7 +1,16 @@
 package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
-
+/**
+ * Class Grid
+ * This is the grid representing a world.
+ * It stores details of the wrappability, 
+ * number of properties and size.
+ * 
+ * @author Megan 
+ * @author Divan
+ * @author Apurva
+ */
 public abstract class Grid
 {
 	protected boolean		wrap = true;

@@ -2,6 +2,16 @@ package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
 
+/**
+ * Class RectangleGrid
+ * Stores details specific to a grid made of rectangle cells.
+ * For example, the different number of neighbours that 
+ * a rectangle grid has.
+ * 
+ * @author Apurva
+ *
+ */
+
 public class RectangleGrid extends Grid
 {	
 	public RectangleGrid(Vector2i size, int numProperties)
