@@ -64,7 +64,7 @@ public class HexagonGridWidget extends Grid2DWidget
 					colour = Colour.LIGHT_GREY;
 					
 				Graphics.renderPolygon(gl, p, hexagon, false, colour);
-				Graphics.renderPolygon(gl, p, hexagonBorder, true, cellBorderColour);
+				if (drawWireframe) Graphics.renderPolygon(gl, p, hexagonBorder, true, cellBorderColour);
 			}
 		
 		if (drawSelected)

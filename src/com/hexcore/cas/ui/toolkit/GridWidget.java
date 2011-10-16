@@ -9,6 +9,8 @@ public abstract class GridWidget extends Widget
 	protected Grid	grid;
 	protected int	cellSize;
 	
+	protected boolean	drawWireframe = true;
+	
 	protected Colour		backgroundColour = Colour.BLACK;
 	protected ColourRuleSet	colourRules;
 	
@@ -26,6 +28,16 @@ public abstract class GridWidget extends Widget
 		this.cellSize = cellSize;
 	}
 
+	public void setDrawWireframe(boolean state)
+	{
+		drawWireframe = state;
+	}
+	
+	public void toggleDrawWireframe()
+	{
+		drawWireframe = !drawWireframe;
+	}
+	
 	public void setBackgroundColour(Colour colour)
 	{
 		backgroundColour = colour;

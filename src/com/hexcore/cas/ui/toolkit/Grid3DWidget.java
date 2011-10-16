@@ -45,8 +45,6 @@ public class Grid3DWidget extends GridWidget
 	// Options
 	protected ArrayList<Slice>	slices;
 	
-	protected boolean	drawGrid = true;
-	
 	// Camera
 	protected float		yaw = 0.0f, pitch = 30.0f;
 	protected Vector3f	cameraPosition;
@@ -163,10 +161,11 @@ public class Grid3DWidget extends GridWidget
 		colourRules = ruleSet;
 		dirty = true;
 	}
-
-	public void setDrawGrid(boolean state)
+	
+	@Override
+	public void setDrawWireframe(boolean state)
 	{
-		drawGrid = state;
+		drawWireframe = state;
 		dirty = true;
 	}
 	
@@ -365,7 +364,7 @@ public class Grid3DWidget extends GridWidget
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, numVertices * 3 * Buffers.SIZEOF_FLOAT, normalBufferData.position(0), GL2.GL_STREAM_DRAW);
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);	
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, buffers.get(3));
 			gl.glBufferData(GL.GL_ARRAY_BUFFER, numLinePoints * 3 * Buffers.SIZEOF_FLOAT, lineBufferData.position(0), GL2.GL_STREAM_DRAW);
@@ -379,7 +378,7 @@ public class Grid3DWidget extends GridWidget
 		
 		GL2 gl2 = gl.getGL2();
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 			gl2.glPolygonOffset(0.5f, 0.5f);
@@ -405,7 +404,7 @@ public class Grid3DWidget extends GridWidget
 		gl2.glDisableClientState(GL2.GL_COLOR_ARRAY);
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 			
@@ -484,7 +483,7 @@ public class Grid3DWidget extends GridWidget
 				addVertex(pos.x+f.x, pos.y+f.y, startHeight, normal, colour);
 			}
 		
-		if (drawGrid)
+		if (drawWireframe)
 		{
 			for (int i = 0; i < polygon.length; i++)	
 			{
