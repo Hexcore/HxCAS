@@ -203,7 +203,7 @@ public class Server implements LobbyListener
 						break;
 					}
 				}
-			}
+			}								
 			catch (InterruptedException e)
 			{
 				e.printStackTrace();

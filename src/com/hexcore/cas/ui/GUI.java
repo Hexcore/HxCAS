@@ -40,6 +40,7 @@ import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
+import com.hexcore.cas.ui.toolkit.ListWidget;
 import com.hexcore.cas.ui.toolkit.NumberBox;
 import com.hexcore.cas.ui.toolkit.Panel;
 import com.hexcore.cas.ui.toolkit.RectangleGrid3DWidget;
@@ -78,7 +79,7 @@ public class GUI implements WindowEventListener
 		}
 		
 		
-		public void switchDimension(Grid grid)
+		public void switchDimension(Grid grid, Window window)
 		{			
 			if (this.type == Viewport.Type.THREE_D)
 				type =  Viewport.Type.TWO_D;
@@ -86,11 +87,11 @@ public class GUI implements WindowEventListener
 			else			
 				type =  Viewport.Type.THREE_D;
 			
-			recreate(grid);
+			recreate(grid, window);
 			
 		}
 		
-		public void recreate(Grid grid)
+		public void recreate(Grid grid, Window window)
 		{
 	    	switch (grid.getType())
 			{
@@ -99,30 +100,60 @@ public class GUI implements WindowEventListener
 					{
 						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
 				case HEXAGON:
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
 				case TRIANGLE:
 					if (type == Viewport.Type.THREE_D)
 					{
 						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
 						temp3DWidget.addSlice(1, 10.0f);
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp3DWidget);
 						gridWidget = temp3DWidget;
 					}
-					else 
-						gridWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+					else
+					{
+						Grid2DWidget temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+						
+						if (gridWidget != null)
+							if (gridWidget.hasFocus()) 
+								window.requestFocus(temp2DWidget);
+						gridWidget = temp2DWidget;
+					}	
 					break;
     			
 			}
@@ -647,6 +678,10 @@ public class GUI implements WindowEventListener
         masterDistributionLayout.setFlag(Widget.FILL);
         distributionContainer.setContents(masterDistributionLayout);
         
+        ListWidget distributedList = new ListWidget(new Vector2i(200,300));
+        distributedList.setFlag(Widget.FILL);
+        masterDistributionLayout.add(distributedList);
+        
         
         refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
         masterDistributionLayout.add(refreshServerButton);
@@ -1113,7 +1148,7 @@ public class GUI implements WindowEventListener
     			else
     			{
 	   				for (Viewport viewport : viewports) 
-	   					viewport.recreate(grid);
+	   					viewport.recreate(grid, window);
     			}
     		}
     	}
@@ -1401,7 +1436,7 @@ public class GUI implements WindowEventListener
             	viewportsLayout.add(container);
             	
             	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D);
-            	viewport.recreate(currentGrid);
+            	viewport.recreate(currentGrid, window);
             	
             	viewports.add(viewport);
             }
@@ -1573,7 +1608,7 @@ public class GUI implements WindowEventListener
 				for (Viewport viewport : viewports)
 				{	
 					if (viewport.gridWidget.hasFocus()) 
-						viewport.switchDimension(currentGrid);
+						viewport.switchDimension(currentGrid, window);
 				} 
 			}
 			else if (event.target == toggleHideButton)
@@ -1586,7 +1621,11 @@ public class GUI implements WindowEventListener
 			}
 			else if (event.target == toggleWireframeButton)
 			{
-				 				 
+				for (Viewport viewport : viewports)
+				{	
+					if (viewport.gridWidget.hasFocus()) 
+						viewport.gridWidget.toggleDrawWireframe();
+				} 	 				 
 			}
 
             // DISTRIBUTION BUTTONS
