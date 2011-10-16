@@ -362,7 +362,6 @@ public class GUI implements WindowEventListener, LobbyListener
         
         availableClients = new TreeSet<ClientEntry>();
         usingClients = new TreeSet<ClientEntry>();
-        refreshClients();
         
         colourRules = new ColourRuleSet(4);
         ColourRule    colourRule;
@@ -1302,6 +1301,8 @@ public class GUI implements WindowEventListener, LobbyListener
                 serverEvent.gridType = GridType.RECTANGLE;
                 serverEvent.wrappable = true;
                 server.sendEvent(serverEvent);
+                
+                refreshClients();
             }
             else if (event.target == loadWorldButton)
             {
@@ -1313,6 +1314,8 @@ public class GUI implements WindowEventListener, LobbyListener
                     serverEvent.filename = result.getFullPath();
                     server.sendEvent(serverEvent);
                 }
+                
+                refreshClients();
             }
             else if (event.target == helpButton)
             {
@@ -1486,6 +1489,9 @@ public class GUI implements WindowEventListener, LobbyListener
             		showDialog("Simulation", "Cell rules not set yet");
             		return;
             	}
+            	
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.READY_SIMULATION);
+                server.sendEvent(serverEvent);
             	
             	masterView.setIndex(2);
             	Log.information(TAG, "Switched to simulation screen");

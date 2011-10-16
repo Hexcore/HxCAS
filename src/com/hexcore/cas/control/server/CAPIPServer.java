@@ -1,6 +1,7 @@
 package com.hexcore.cas.control.server;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.control.protocol.Node;
-import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.utilities.Log;
@@ -391,16 +391,16 @@ public class CAPIPServer
 		client.protocol.sendMessage(msg);
 	}
 	
-	public void connectClients(List<String> names)
+	public void connectClients(List<InetSocketAddress> addresses)
 	{
 		for (ClientInfo client : clients) client.disconnect();
 				
 		clients.clear();
 				
-		for (String name : names) 
+		for (InetSocketAddress address : addresses) 
 		{
 			Log.debug(TAG, "Connecting client");
-			ClientInfo client = new ClientInfo(name);			
+			ClientInfo client = new ClientInfo(address);			
 			boolean result = client.connect();
 			if(result)
 				clients.add(client);
@@ -461,18 +461,18 @@ public class CAPIPServer
 	
 	private class ClientInfo extends Thread
 	{
-		String name = null;
+		InetSocketAddress address = null;
 		CAPMessageProtocol protocol = null;
 		int	status = 0;
 		boolean accepted = false;
 		boolean running = false;
 		int cores = 0;
 		
-		public ClientInfo(String name)
+		public ClientInfo(InetSocketAddress address)
 		{
-			super("ClientThread-" + name);
+			super("ClientThread-" + address.getHostName());
 			
-			this.name = name;
+			this.address = address;
 			this.protocol = null;
 			this.accepted = false;
 			this.cores = 0;
@@ -494,7 +494,7 @@ public class CAPIPServer
 		{			
 			try
 			{
-				protocol = new CAPMessageProtocol(new Socket(name, clientPort));
+				protocol = new CAPMessageProtocol(new Socket(address.getHostName(), address.getPort()));
 				protocol.start();
 				
 				DictNode header = makeHeader("CONNECT");

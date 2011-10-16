@@ -1,7 +1,5 @@
 package com.hexcore.cas;
 
-import java.net.SocketAddress;
-
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.GridType;
 
@@ -9,13 +7,12 @@ public class ServerEvent
 {	
 	public enum Type
 	{
-		FOUND_CLIENT, SHUTDOWN, CREATE_WORLD, LOAD_WORLD, SAVE_WORLD, 
+		SHUTDOWN, CREATE_WORLD, LOAD_WORLD, SAVE_WORLD, READY_SIMULATION, 
 		START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION, STOP_SIMULATION, STEP_SIMULATION,
 		PING_CLIENTS;
 	}
 	
 	public Type			 type;
-	public SocketAddress address = null;
 		
 	// CREATE_WORLD
 	public Vector2i	size;
