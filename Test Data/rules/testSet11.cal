@@ -1,12 +1,22 @@
-ruleset set11
+ruleset cooloff
 {
 	typecount 1;
 	property alive;
+	property cooloff;
+
 	type Land : 0
 	{
-		if((sum(neighbours.alive) > 3) || (sum(neighbours.alive) < 2))
-			self.alive = 0;
-		else if(sum(neighbours.alive) == 3)
+		var c = sum(neighbours.alive);
+		if (c > 1)
+		{
 			self.alive = 1;
+			self.cooloff = self.cooloff + 1;
+		}
+
+		if(self.cooloff > 20)
+		{
+			self.alive = 0;
+			self.cooloff = 0;
+		}
 	}
 }
