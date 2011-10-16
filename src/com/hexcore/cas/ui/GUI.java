@@ -42,6 +42,7 @@ import com.hexcore.cas.ui.toolkit.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
+import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
 import com.hexcore.cas.ui.toolkit.ListWidget;
@@ -161,7 +162,8 @@ public class GUI implements WindowEventListener, LobbyListener
     public ArrayList<Viewport> viewports;
     ////////////////
 
-    public Set<ClientEntry> availableClients;    
+    public Set<ClientEntry> availableClients;   
+    public Set<ClientEntry> usingClients;
 	
 	public static final String TAG = "GUI";
 	
@@ -344,13 +346,22 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	// Distribution tab
 	public ListWidget 	clientsAvailableList;
-	public ListWidget 	clientUsingList;
+	public ListWidget 	clientsUsingList;
+	
+	public Image	computerIcon;
+	public Image	computerLinkIcon;
+	
+	private Button	addClientButton;
+	private Button	addAllClientsButton;
+	private Button	removeClientButton;
+	private Button	removeAllClientsButton;
     
     public GUI(Server server)
     {
         this.server = server;
         
         availableClients = new TreeSet<ClientEntry>();
+        usingClients = new TreeSet<ClientEntry>();
         refreshClients();
         
         colourRules = new ColourRuleSet(4);
@@ -372,8 +383,8 @@ public class GUI implements WindowEventListener, LobbyListener
         colourRule = new ColourRule();
         colourRule.addRange(new ColourRule.Range(0.0, 8.0, new Colour(0.5f, 0.25f, 0.0f), new Colour(0.0f, 0.8f, 0.5f)));
         colourRule.addRange(new ColourRule.Range(8.0, 16.0, new Colour(0.0f, 0.8f, 0.5f), new Colour(0.4f, 1.0f, 0.8f)));
-        colourRules.setColourRule(3, colourRule);    
-        
+        colourRules.setColourRule(3, colourRule);  
+
         theme = new Theme();
         window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
         
@@ -384,6 +395,9 @@ public class GUI implements WindowEventListener, LobbyListener
     public void initialise()
     {
         theme.loadTheme(themeName);
+        
+        computerIcon = window.getTheme().getImage("icons", "computer.png");
+        computerLinkIcon = window.getTheme().getImage("icons", "computer_link.png");
         
         masterView = new View(new Vector2i(10, 10));
         masterView.setMargin(new Vector2i(0, 0));
@@ -991,13 +1005,49 @@ public class GUI implements WindowEventListener, LobbyListener
         listLayout.setFlag(Widget.FILL);
         masterDistributionLayout.add(listLayout);
         
-        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
-        clientsAvailableList.setFlag(Widget.FILL);
-        listLayout.add(clientsAvailableList);
-        
-        clientUsingList = new ListWidget(new Vector2i(10, 10));
-        clientUsingList.setFlag(Widget.FILL);   
-        listLayout.add(clientUsingList);
+        	// Left List Layout
+	        LinearLayout leftListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        leftListLayout.setMargin(new Vector2i(0, 0));
+	        leftListLayout.setFlag(Widget.FILL);
+	        listLayout.add(leftListLayout);
+	        
+	        TextWidget leftListTitle = new TextWidget("Available clients");
+	        leftListLayout.add(leftListTitle);
+	        
+	        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
+	        clientsAvailableList.setFlag(Widget.FILL);
+	        leftListLayout.add(clientsAvailableList);
+	        
+	        // Center buttons
+	        LinearLayout centerButtonLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        centerButtonLayout.setMargin(new Vector2i(0, 0));
+	        centerButtonLayout.setFlag(Widget.WRAP | Widget.CENTER_VERTICAL);
+	        listLayout.add(centerButtonLayout);
+	        
+	        addClientButton = new Button(new Vector2i(150, 40), "Add >");
+	        centerButtonLayout.add(addClientButton);
+	        
+	        addAllClientsButton = new Button(new Vector2i(150, 40), "Add All >>");
+	        centerButtonLayout.add(addAllClientsButton);
+	        
+	        removeClientButton = new Button(new Vector2i(150, 40), "< Remove");
+	        centerButtonLayout.add(removeClientButton);
+	        
+	        removeAllClientsButton = new Button(new Vector2i(150, 40), "<< Remove All");
+	        centerButtonLayout.add(removeAllClientsButton);
+	        
+	        // Right List Layout
+	        LinearLayout rightListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        rightListLayout.setMargin(new Vector2i(0, 0));
+	        rightListLayout.setFlag(Widget.FILL);
+	        listLayout.add(rightListLayout);
+	        
+	        TextWidget rightListTitle = new TextWidget("Using clients");
+	        rightListLayout.add(rightListTitle);
+	        
+	        clientsUsingList = new ListWidget(new Vector2i(10, 10));
+	        clientsUsingList.setFlag(Widget.FILL);   
+	        rightListLayout.add(clientsUsingList);
         
         // Control Layout
         LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
@@ -1178,6 +1228,7 @@ public class GUI implements WindowEventListener, LobbyListener
     public void refreshClients()
     {
     	availableClients.clear();
+    	usingClients.clear();
     	
 		ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PING_CLIENTS);
 		server.sendEvent(serverEvent);
@@ -1186,10 +1237,14 @@ public class GUI implements WindowEventListener, LobbyListener
     public void updateAvailableClientsList()
     {
     	clientsAvailableList.clear();
+    	clientsUsingList.clear();
     	
     	for (ClientEntry client : availableClients)
-    		clientsAvailableList.addItem(client.address.getHostName());
-    }
+    		clientsAvailableList.addItem(computerIcon, client.address.getHostName());
+			
+		for (ClientEntry client : usingClients)
+			clientsUsingList.addItem(computerLinkIcon, client.address.getHostName());    			
+	}
    
     @Override
     public void update(float delta)
@@ -1657,7 +1712,52 @@ public class GUI implements WindowEventListener, LobbyListener
 			{
 				refreshClients();
 			}
-            
+			else if (event.target == addAllClientsButton)
+			{
+				for (ClientEntry clientEntry : availableClients) usingClients.add(clientEntry);
+				
+				availableClients.clear();
+
+				updateAvailableClientsList();
+			}
+			else if (event.target == removeAllClientsButton)
+			{
+				for (ClientEntry clientEntry : usingClients) availableClients.add(clientEntry);
+				
+				usingClients.clear();
+
+				updateAvailableClientsList();
+			} 
+			else if (event.target == addClientButton)
+			{
+				String hostname = clientsAvailableList.getSelectedText();
+				
+				for (ClientEntry clientEntry : availableClients)
+				{
+					if (clientEntry.address.getHostName().equals(hostname))
+					{
+						availableClients.remove(clientEntry);
+						usingClients.add(clientEntry);
+					}
+				}
+				
+				updateAvailableClientsList();
+			}
+			else if (event.target == removeClientButton)
+			{
+				String hostname = clientsUsingList.getSelectedText();
+				
+				for (ClientEntry clientEntry : usingClients)
+				{
+					if (clientEntry.address.getHostName().equals(hostname))
+					{
+						usingClients.remove(clientEntry);
+						availableClients.add(clientEntry);
+					}
+				}
+				
+				updateAvailableClientsList();
+			}
             //COLOUR RANGES
             
 			
@@ -1678,6 +1778,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	{
 		if (availableClients != null)
 		{
+			if (address.getHostName().equals("localhost")) return;
+				
 			ClientEntry clientEntry = new ClientEntry(address);
 			availableClients.add(clientEntry);
 			
