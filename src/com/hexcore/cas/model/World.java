@@ -6,7 +6,16 @@ import java.util.Collections;
 import java.util.List;
 
 import com.hexcore.cas.math.Vector2i;
-
+/**
+ * Class World
+ * Contains all information about a world.
+ * Generations - end and first, rules, colours,
+ * load and saving of a world by calling a worldLoader
+ * and WorldSaver function.
+ * 
+ * @author Megan
+ *
+ */
 public class World
 {
 	private List<Grid> worldGenerations = null;

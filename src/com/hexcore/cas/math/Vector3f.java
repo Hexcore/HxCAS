@@ -2,8 +2,12 @@ package com.hexcore.cas.math;
 
 import java.nio.FloatBuffer;
 
-/*
- * A class that contains three floating point number, useful for storing sizes or positions.
+/**
+ * Class Vector3f:
+ * 	A class that contains three floating point number, 
+ * 	useful for storing sizes or positions.
+ * 
+ * @author Divan
  */
 public class Vector3f
 {

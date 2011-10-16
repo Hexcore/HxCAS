@@ -1,7 +1,15 @@
 package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
-
+/**
+ * Class TriangleGrid
+ * Stores details specific to a grid made of triangle cells.
+ * For example, the different number of neighbours that 
+ * a triangle grid has.
+ * 
+ * @author Megan
+ *
+ */
 public class TriangleGrid extends Grid
 {
 	public TriangleGrid(Vector2i size, int numProperties)
