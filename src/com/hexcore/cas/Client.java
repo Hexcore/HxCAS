@@ -17,11 +17,17 @@ public class Client
 	private Configuration 	config = null;
 	private ClientOverseer 	overseer = null;
 	private AtomicBoolean	running = new AtomicBoolean();
+	private int				clientPort;
 	
 	public static void main(String[] args)
 	{
 		Client instance = new Client();
 		instance.start(true);
+	}
+	
+	public int getPort()
+	{
+		return clientPort;
 	}
 	
 	public void stop()
@@ -41,7 +47,8 @@ public class Client
 		beacon.start();
 		
 		Log.information(TAG, "Setting up client overseer...");
-		overseer = new ClientOverseer(config.getInteger("Network.Client", "port", 3119));
+		clientPort = config.getInteger("Network.Client", "port", 3119);
+		overseer = new ClientOverseer(clientPort);
 		overseer.start();
 		
 		if (overseer.isValid())

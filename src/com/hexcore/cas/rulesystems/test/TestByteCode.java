@@ -244,8 +244,8 @@ public class TestByteCode extends TestCase
 	}
 	
 	
-	/*
-	public void testGameOfLife()
+	
+	public void testSet11Test()
 	{
 		CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/rules/testSet11.cal");
@@ -253,26 +253,28 @@ public class TestByteCode extends TestCase
 		RuleLoader rl = new RuleLoader();
 		
 		Rule rule = rl.loadRule(compiler.getCode());
-		Vector2i size = new Vector2i(10, 10);
+
 		
 		
-		Cell example = new Cell(new double[]{0,0});
+		Cell c = new Cell(new double[]{0,0,0});
+		Cell[] n = new Cell[5];
 		
-		Grid g = new RectangleGrid(size, example);
+		n[0] = new Cell(new double[]{0,1,0});
+		n[1] = new Cell(new double[]{0,1,0});
+		n[2] = new Cell(new double[]{0,0,0});
+		n[3] = new Cell(new double[]{0,0,0});
+		n[4] = new Cell(new double[]{0,0,0});
 		
-		g.getCell(1, 1).setValue(1, 1);
-		g.getCell(2, 1).setValue(1, 1);
-		g.getCell(3, 1).setValue(1, 1);
+		for(int i = 0; i < 20 ; i++)
+			rule.run(c, n);
 		
+		assertEquals(1.0, c.getValue(1));
+		assertEquals(20.0, c.getValue(2));
 		
-		Grid nG = new RectangleGrid(g);
-		for(int r = 0; r < 10; r++)
-		{
-			for(int c = 0; c < 10; c++)
-			{
-				//nG[r][c]
-			}
-		}
+		rule.run(c, n);
+		assertEquals(0.0, c.getValue(1));
+		assertEquals(0.0, c.getValue(2));
+
 	}
-	*/
+	
 }

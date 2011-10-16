@@ -43,7 +43,10 @@ public class Parser {
 
 	-->declarations
 
+	//Changed by Karl Zoller
 	static void SynErr (int n) {
+		System.err.println("SYN ERROR");
+		valid = false;
 		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
 		errDist = 0;
 	}

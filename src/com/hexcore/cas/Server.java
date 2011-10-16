@@ -1,12 +1,13 @@
 package com.hexcore.cas;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.hexcore.cas.control.discovery.Lobby;
 import com.hexcore.cas.control.server.Simulator;
@@ -35,13 +36,14 @@ public class Server
 	private Simulator 		simulate = null;
 	private World			world = null;
 	
+	private List<InetSocketAddress>	clients;	
+	
+	private ReentrantLock	serverLock = new ReentrantLock();
+	
 	private LinkedBlockingQueue<ServerEvent>	eventQueue;
 	
 	private static Server instance = null;
-	
-	// Temp
-	private Set<String> names = new TreeSet<String>();
-	
+
 	public static void main(String[] args)
 	{
 		 instance = new Server();
@@ -66,17 +68,8 @@ public class Server
 		Log.information(TAG, "Starting user interface...");
 		ui = new GUI(instance);
 		lobby.addListener(ui);
-		
-		try
-		{
-			Thread.sleep(1000);
-		} 
-		catch (InterruptedException e1)
-		{
-			e1.printStackTrace();
-		}
-		
-		lobby.ping();
+
+		clients = new ArrayList<InetSocketAddress>();
 				
 		running.set(true);
 		while (running.get())
@@ -87,21 +80,11 @@ public class Server
 				if (event == null) continue;
 				
 				switch (event.type) 
-				{
-					case FOUND_CLIENT:
-					{
-						String str = event.address.toString();
-						str = str.substring(1, str.length() - 5);
-						
-						System.out.println(event.address);
-						
-						if (str.equals("127.0.0.1")) break; // Ignore localhost
-						names.add(str);
-						break;
-					}
-										
+				{				
 					case CREATE_WORLD:
-					{						
+					{				
+						serverLock.lock();
+						
 						world = new World();
 						
 						Grid grid = event.gridType.create(event.size, 2);
@@ -115,12 +98,15 @@ public class Server
 						world.setRuleCode("ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land : 0\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}");
 						
 						ui.startWorldEditor(world);
-						
+
+						serverLock.unlock();
 						break;
 					}
 					
 					case LOAD_WORLD:
 					{
+						serverLock.lock();
+						
 						world = new World();
 						WorldReader reader = new WorldReader(world);
 						
@@ -135,11 +121,16 @@ public class Server
 						
 						ui.startWorldEditor(world);
 						
+						if (!activeSimulation.getAndSet(true)) initSimulation();
+						
+						serverLock.unlock();
 						break;
 					}
 					
 					case SAVE_WORLD:
 					{
+						serverLock.lock();
+						
 						WorldSaver saver = new WorldSaver();
 						
 						try
@@ -151,32 +142,60 @@ public class Server
 						{
 							e.printStackTrace();
 						}
+						
+						serverLock.unlock();
+						break;
+					}
+					
+					case READY_SIMULATION:
+					{
+						serverLock.lock();
+						
+						clients = event.clients;
+						if (!activeSimulation.getAndSet(true)) initSimulation();
+						
+						serverLock.unlock();
+						break;
 					}
 					
 					case START_SIMULATION:
 					{
+						serverLock.lock();
+						
 						if (!activeSimulation.getAndSet(true)) initSimulation();
 						
 						simulate.play();
+						
+						serverLock.unlock();
 						break;
 					}		
 					
 					case STEP_SIMULATION:
 					{
+						serverLock.lock();
+						
 						if (!activeSimulation.getAndSet(true)) initSimulation();
 						
 						simulate.step();
+						
+						serverLock.unlock();
 						break;
 					}
 					
 					case PAUSE_SIMULATION:
 					{
+						serverLock.lock();
+						
 						if (activeSimulation.get()) simulate.pause();
+						
+						serverLock.unlock();
 						break;
 					}
 					
 					case STOP_SIMULATION:
 					{
+						serverLock.lock();
+						
 						if (activeSimulation.getAndSet(false))
 						{
 							simulate.disconnect();
@@ -185,6 +204,8 @@ public class Server
 							client.client.stop();
 							client = null;
 						}
+						
+						serverLock.unlock();
 						break;
 					}
 					
@@ -226,19 +247,16 @@ public class Server
 	
 	private void initSimulation() throws InterruptedException
 	{
-		ArrayList<String> clientList = new ArrayList<String>();
-		clientList.addAll(names);
-		
-		if (clientList.isEmpty())
+		if (clients.isEmpty())
 		{
 			Log.information(TAG, "No network clients found, starting local client");
 			
 			client = new ClientThread();
 			client.start();
 			
-			Thread.sleep(1000); // Wait for client to start
+			Thread.sleep(100); // Wait for client to start
 			
-			clientList.add("127.0.0.1");
+			clients.add(new InetSocketAddress("localhost", client.client.getPort()));
 		}
 		
 		Log.information(TAG, "Compiling rule code...");
@@ -252,7 +270,7 @@ public class Server
 		Log.information(TAG, "Starting overseer...");
 		
 		simulate = new Simulator(world, config.getInteger("Network.Client", "port", 3119));
-		simulate.setClientNames(clientList);
+		simulate.setClients(clients);
 		simulate.setRuleBytecode(compiler.getCode());
 		simulate.start();
 		simulate.pause();

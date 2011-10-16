@@ -326,7 +326,7 @@ public class CAPMessageProtocol extends Thread
 				
 				if (i == -1)
 				{
-					Log.error(TAG, "Unexpected end of stream");
+					Log.information(TAG, "End of stream");
 					throw new ProtocolCloseException("End of stream");
 				}
 								
@@ -356,7 +356,7 @@ public class CAPMessageProtocol extends Thread
 				
 				if (currentByte == -1)
 				{
-					Log.error(TAG, "Unexpected end of stream");
+					Log.information(TAG, "End of stream");
 					throw new ProtocolCloseException("End of stream");
 				}
 			}

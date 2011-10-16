@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -174,12 +175,12 @@ public class TestServerControl extends TestCase
 		Log.information(TAG, "SUCCESS - grid was calculated and set correctly");
 	}
 	
-	private void testNameList(List<String> list)
+	private void testNameList(List<InetSocketAddress> list)
 	{
 		Log.information(TAG, "Testing nameList was set correctly");
 		
-		for (String address : list)
-			assertEquals("localhost", address);
+		for (InetSocketAddress address : list)
+			assertEquals("localhost", address.getHostName());
 
 		Log.information(TAG, "SUCCESS - nameList was set correctly");
 	}
@@ -254,9 +255,9 @@ public class TestServerControl extends TestCase
 		
 		server = new Simulator(theWorld, TEST_CLIENT_PORT);
 		
-		ArrayList<String> nameList = new ArrayList<String>();
-		nameList.add("localhost");
-		server.setClientNames(nameList);
+		ArrayList<InetSocketAddress> nameList = new ArrayList<InetSocketAddress>();
+		nameList.add(new InetSocketAddress("localhost", TEST_CLIENT_PORT));
+		server.setClients(nameList);
 		
 		byte[] bytes = new byte[] {};
 		try
@@ -328,7 +329,7 @@ public class TestServerControl extends TestCase
 		Grid grid = server.getGrid();
 		testGridAfterFlips(grid);
 		
-		int NOC = server.getNumberOfClients();
+		int NOC = server.getClientAddresses().size();
 		Recti[] w = server.getClientWorkables();
 		testWorkables(w, NOC);
 	

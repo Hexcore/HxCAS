@@ -125,8 +125,6 @@ public class ClientOverseer extends Thread
 			return;
 		}
 		
-		Log.information(TAG, "Starting...");
-
 		super.start();
 	}
 	
@@ -136,6 +134,7 @@ public class ClientOverseer extends Thread
 		running = true;
 		while(running)
 		{
+			Log.information(TAG, "Starting...");
 			informationProcessor.start();	
 			
 			for (int i = 0; i < threads.length; i++) threads[i].start();
@@ -165,6 +164,7 @@ public class ClientOverseer extends Thread
 			Log.information(TAG, "Stopping...");
 			
 			informationProcessor.disconnect();
+			informationProcessor = null;
 			
 			try
 			{

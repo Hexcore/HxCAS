@@ -1,5 +1,6 @@
 package com.hexcore.cas.control.server;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,7 +15,7 @@ public class Simulator extends Thread
 {
 	private static final String TAG = "Server";
 	
-	private List<String> clientAddresses = null;
+	private List<InetSocketAddress> clientAddresses = null;
 	
 	private AtomicBoolean connected = new AtomicBoolean(false);
 	private AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
@@ -22,7 +23,6 @@ public class Simulator extends Thread
 	private AtomicBoolean reset = new AtomicBoolean(false);
 	
 	private volatile int currentGeneration = 0;
-	private volatile int numOfClients = 0;
 	private volatile int numOfGenerations = 0;
 	private int threadWorkID = 0;
 	
@@ -48,7 +48,7 @@ public class Simulator extends Thread
 		return clientWork;
 	}
 	
-	public List<String> getClientAddresses()
+	public List<InetSocketAddress> getClientAddresses()
 	{
 		return clientAddresses;
 	}
@@ -66,11 +66,6 @@ public class Simulator extends Thread
 	public void setGrid(Grid g)
 	{
 		grid = g.clone();
-	}
-	
-	public int getNumberOfClients()
-	{
-		return numOfClients;
 	}
 	
 	public boolean isFinished()
@@ -128,11 +123,9 @@ public class Simulator extends Thread
 		return ruleByteCode;
 	}
 
-	public void setClientNames(ArrayList<String> names)
+	public void setClients(List<InetSocketAddress> names)
 	{
-		int size = names.size();
 		clientAddresses = names;
-		numOfClients = size;
 	}
 		
 	public void simulate(int gN)
@@ -148,12 +141,11 @@ public class Simulator extends Thread
 		
 		calculateSplits();
 		splitGrids();
-		
-		paused.set(false);
+
 		isFinishedGenerations.set(false);
 		currentGeneration = 0;
 		
-		startGeneration();
+		if (!paused.get()) startGeneration();
 	}
 		
 	public void disconnect()
