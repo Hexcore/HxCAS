@@ -387,6 +387,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button	addAllClientsButton;
 	private Button	removeClientButton;
 	private Button	removeAllClientsButton;
+
+
+	private LinearLayout masterWorldPreviewLayout;
+
+
+	private LinearLayout leftLayout;
+
+
+	private LinearLayout rightLayout;
+	private Container previewWindowContainer;
+	private Viewport previewViewport;
     
     public GUI(Server server)
     {
@@ -740,14 +751,34 @@ public class GUI implements WindowEventListener, LobbyListener
         
         worldPreviewContainer = new Container(new Vector2i(100, 100));
         worldPreviewContainer.setFlag(Widget.FILL);
-        
-        
-
-     
         tabbedWorldView.add(worldPreviewContainer, "World Preview");
         
         
+        masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        masterWorldPreviewLayout.setFlag(Widget.FILL);
+        worldPreviewContainer.setContents(masterWorldPreviewLayout);
         
+        leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        leftLayout.setFlag(Widget.FILL);
+        masterWorldPreviewLayout.add(leftLayout);
+        
+        rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        rightLayout.setFlag(Widget.FILL);
+        masterWorldPreviewLayout.add(rightLayout);
+       
+        previewWindowContainer = new Container(new Vector2i(500,300));
+        previewWindowContainer.setFlag(Widget.FILL);
+        previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
+        
+        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D);    
+        leftLayout.add(previewViewport.container);
+        
+        
+        
+        //
+        
+        
+        //
         
 
         dialog = new Dialog(window, new Vector2i(400, 200));
@@ -1161,8 +1192,18 @@ public class GUI implements WindowEventListener, LobbyListener
         world.setWorldGenerations(new Grid[] {grid});
     }
     
-    public void updatePreview()
+    
+    public void createPreviewTab()
     {
+     
+    	previewViewport.recreate(world.getInitialGeneration(), window);
+	        
+    }
+    
+   
+    
+    public void updatePreview()
+    { 
     	Grid grid = world.getInitialGeneration();
     	if (grid == null)
     	{
@@ -1210,6 +1251,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
         }
+    	
+    	createPreviewTab();
     }
         
     public void updateSimulationScreen(boolean force)
@@ -1558,6 +1601,17 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	viewports.add(viewport);
             }
+            
+            //PREVIEW GRID
+            
+            else if (event.target == previewViewport.gridWidget)
+            {
+            	
+            	Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
+            	
+            	world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell()).setValue(1, 1.0f);
+            	
+            			}
             
             // VIEWPORT CAMERA
             
