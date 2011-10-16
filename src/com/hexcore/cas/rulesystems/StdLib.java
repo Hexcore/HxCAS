@@ -1,5 +1,7 @@
 package com.hexcore.cas.rulesystems;
 
+import com.hexcore.cas.model.Cell;
+
 public class StdLib
 {
 	public static double max(double[] values)
@@ -53,5 +55,15 @@ public class StdLib
 	public static int count(double[] values)
 	{
 		return values.length;
+	}
+	
+	public static double[] generatePropertyArray(Cell[] cells, int propertyIndex)
+	{
+		double[] values = new double[cells.length];
+		
+		for(int i = 0; i < cells.length; i++)
+			values[i] = cells[i].getValue(propertyIndex);
+		
+		return values;
 	}
 }
