@@ -31,6 +31,7 @@ public class CAPIPServer
 	private final static int PROTOCOL_VERSION = 1;
 	
 	private List<ClientInfo> clients = null;
+	private Lock clientListLock;
 	
 	private boolean running = false;
 	
@@ -39,7 +40,6 @@ public class CAPIPServer
 	private int gridsDone = 0;
 	private int totalGrids = -1;
 	private LinkedBlockingQueue<ThreadWork> workQueue = null;
-	private Map<Integer, ThreadWork> sentWork;
 
 	private Grid currentGrid;
 	private Lock workLock;
@@ -50,13 +50,13 @@ public class CAPIPServer
 	{
 		super();
 		this.clientPort = clientPort;
-		this.clients = Collections.synchronizedList(new ArrayList<ClientInfo>());
+		this.clients = new ArrayList<ClientInfo>();
 				
 		workQueue = new LinkedBlockingQueue<ThreadWork>();
-		sentWork = new HashMap<Integer, ThreadWork>();
 		
 		parent = simulator;
 		
+		clientListLock = new ReentrantLock();
 		workLock = new ReentrantLock();
 	}
 	
@@ -72,7 +72,10 @@ public class CAPIPServer
 	{
 		Log.information(TAG, "Disconnecting clients");
 		running = false;
+		
+		clientListLock.lock();
 		for (ClientInfo client : clients) client.disconnect();
+		clientListLock.unlock();
 	}
 	
 	public int getTotalCoreAmount()
@@ -212,7 +215,7 @@ public class CAPIPServer
 				int gen = ((IntNode)gi.get("GENERATION")).getIntValue();
 								
 				workLock.lock();
-				ThreadWork orig = sentWork.get(ID);
+				ThreadWork orig = fromClient.sentWork.get(ID);
 				workLock.unlock();
 				
 				if (orig == null)
@@ -243,7 +246,7 @@ public class CAPIPServer
 				}
 				
 				workLock.lock();
-				sentWork.remove(ID);
+				fromClient.sentWork.remove(ID);
 				gridsDone++;
 				workLock.unlock();
 
@@ -254,8 +257,7 @@ public class CAPIPServer
 				}
 				else
 				{
-					int more = ((IntNode)gi.get("MORE")).getIntValue();
-					
+					int more = ((IntNode)gi.get("MORE")).getIntValue() * 2;
 					for (int i = 0; i < more; i++) sendGrid(fromClient);
 				}
 			}
@@ -275,13 +277,19 @@ public class CAPIPServer
 	public void sendInitialGrids()
 	{
 		Log.information(TAG, "Sending grids - initial procedure");
-		
 		int target = getTotalCoreAmount() + 1;
+		sendGrids(target);
+	}	
+	
+	public void sendGrids(int target)
+	{
 		int sent = 0;
 		
 		while (!workQueue.isEmpty() && target > sent)
 			for (ClientInfo client : clients)
 			{
+				if (!client.accepted) continue;
+				
 				sent++;
 				sendGrid(client);
 			}
@@ -295,22 +303,11 @@ public class CAPIPServer
 		
 		ThreadWork work = null;
 		
-		if (workQueue.isEmpty())
-		{			
-			// Resend work that hasn't been completed yet
-			long now = System.nanoTime();
-			for (ThreadWork curWork : sentWork.values())
-				if (now > 30L * 1000000000L + curWork.getStartTime()) // Resend if the result hasn't returned in 10 seconds
-				{
-					Log.warning(TAG, "Work had to be resent : " + now + " " + curWork.getStartTime());
-					work = curWork;
-					break;
-				}
-		}
-		else
+		if (!workQueue.isEmpty())
 			work = workQueue.poll();
 				
-		if (work != null) sendWork(work, client);
+		if (work != null) 
+			sendWork(work, client);
 		
 		workLock.unlock();
 	}
@@ -367,7 +364,7 @@ public class CAPIPServer
 		workLock.lock();
 		
 		work.setStartTime(System.nanoTime());
-		sentWork.put(work.getID(), work);
+		client.sentWork.put(work.getID(), work);
 		
 		workLock.unlock();
 	}
@@ -393,7 +390,8 @@ public class CAPIPServer
 	
 	public void connectClients(List<InetSocketAddress> addresses)
 	{
-		for (ClientInfo client : clients) client.disconnect();
+		for (ClientInfo client : clients) 
+			client.disconnect();
 				
 		clients.clear();
 				
@@ -414,7 +412,9 @@ public class CAPIPServer
 		workLock.lock();
 		
 		workQueue.clear();
-		sentWork.clear();
+		
+		for (ClientInfo client : clients) 
+			client.sentWork.clear();
 		
 		currentGrid = grid;
 		
@@ -459,6 +459,25 @@ public class CAPIPServer
 		}
 	}
 	
+	private void clientDisconnect(ClientInfo client)
+	{
+		System.out.println("Client has disconnected: " + client.address.getHostName());
+
+		int resendAmount = client.sentWork.size(); 
+		
+		try
+		{
+			for (ThreadWork work : client.sentWork.values())
+				workQueue.put(work);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
+		sendGrids(resendAmount);
+	}
+	
 	private class ClientInfo extends Thread
 	{
 		InetSocketAddress address = null;
@@ -468,6 +487,8 @@ public class CAPIPServer
 		boolean running = false;
 		int cores = 0;
 		
+		private Map<Integer, ThreadWork> sentWork;
+		
 		public ClientInfo(InetSocketAddress address)
 		{
 			super("ClientThread-" + address.getHostName());
@@ -476,6 +497,7 @@ public class CAPIPServer
 			this.protocol = null;
 			this.accepted = false;
 			this.cores = 0;
+			this.sentWork = new HashMap<Integer, ThreadWork>();
 		}
 		
 		@Override
@@ -485,7 +507,11 @@ public class CAPIPServer
 			while (running)
 			{
 				Message message = protocol.waitForMessage();
-				if (!protocol.isRunning()) disconnect();
+				if (!protocol.isRunning())
+				{
+					disconnect();
+					clientDisconnect(this);
+				}
 				if (message != null) interpretInput(message, protocol.getSocket().getInetAddress().getHostName());
 			}
 		}
@@ -514,6 +540,7 @@ public class CAPIPServer
 		public void disconnect()
 		{
 			running = false;
+			accepted = false;
 			
 			DictNode header = makeHeader("DISCONNECT");
 			Message msg = new Message(header);

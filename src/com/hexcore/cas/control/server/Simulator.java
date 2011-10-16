@@ -196,6 +196,14 @@ public class Simulator extends Thread
 				return;
 			}
 			
+			Log.information(TAG, "Clients: " + informationProcessor.getConnectedAmount());
+			if (informationProcessor.getConnectedAmount() == 0)
+			{
+				System.out.println("No clients connected, pausing...");
+				paused.set(true);
+				return;
+			}
+			
 			if (numOfGenerations > 0) numOfGenerations--;
 			
 			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
@@ -218,7 +226,7 @@ public class Simulator extends Thread
 	/*
 	 * @author Abby Kumar
 	 */
-	private static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor)
+	private static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor, int minimumSize)
 	{
 		int temp;
 		//calculate how many splits needed:
@@ -234,11 +242,13 @@ public class Simulator extends Thread
 		{
 			if (temp > 0)
 			{
+				if (x * 2 * minimumSize >= sizeOfGrid.x) break;
 				x += x;
 				temp = temp * (-1);
 			}
 			else if(temp < 0)
 			{
+				if (y * 2 * minimumSize >= sizeOfGrid.y) break;
 				y += y;
 				temp = temp * (-1);
 			}
@@ -306,8 +316,9 @@ public class Simulator extends Thread
 	
 	private void calculateSplits()
 	{
-		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 2);
+		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 4, 8);
 		clientWorkables = new Recti[splits.length];
+		Log.information(TAG, "Split size: " + splits.length);
 		
 		for(int i = 0; i < splits.length; i++)
 			clientWorkables[i] = new Recti(splits[i].getPosition(), splits[i].getSize());
