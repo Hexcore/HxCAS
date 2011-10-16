@@ -1,0 +1,12 @@
+ruleset set11
+{
+	typecount 1;
+	property alive;
+	type Land : 0
+	{
+		if((sum(neighbours.alive) > 3) || (sum(neighbours.alive) < 2))
+			self.alive = 0;
+		else if(sum(neighbours.alive) == 3)
+			self.alive = 1;
+	}
+}

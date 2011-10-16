@@ -72,37 +72,50 @@ public class SymbolTable
 		maxEntry.type = TableEntry.doubleType;
 		maxEntry.kind = TableEntry.aFunction;
 		maxEntry.name = "max";
+		maxEntry.argType = TableEntry.doubleType;
 		insert(maxEntry);
 		
 		TableEntry minEntry = new TableEntry();
 		minEntry.type = TableEntry.doubleType;
 		minEntry.kind = TableEntry.aFunction;
 		minEntry.name = "min";
+		minEntry.argType = TableEntry.doubleType;
 		insert(minEntry);
 		
 		TableEntry logEntry = new TableEntry();
 		logEntry.type = TableEntry.doubleType;
 		logEntry.kind = TableEntry.sFunction;
 		logEntry.name = "log";
+		logEntry.argType = TableEntry.doubleType;
 		insert(logEntry);
 		
 		TableEntry lnEntry = new TableEntry();
 		lnEntry.type = TableEntry.doubleType;
 		lnEntry.kind = TableEntry.sFunction;
 		lnEntry.name = "ln";
+		logEntry.argType = TableEntry.doubleType;
 		insert(lnEntry);
 		
 		TableEntry sumEntry = new TableEntry();
 		sumEntry.type = TableEntry.doubleType;
 		sumEntry.kind = TableEntry.aFunction;
 		sumEntry.name = "sum";
+		sumEntry.argType = TableEntry.doubleType;
 		insert(sumEntry);
 		
 		TableEntry countEntry = new TableEntry();
 		countEntry.type = TableEntry.intType;
 		countEntry.kind = TableEntry.aFunction;
 		countEntry.name = "count";
+		countEntry.argType = TableEntry.intType;
 		insert(countEntry);
+		
+		TableEntry existsEntry = new TableEntry();
+		existsEntry.type = TableEntry.boolType;
+		existsEntry.kind = TableEntry.sFunction;
+		existsEntry.name = "exists";
+		existsEntry.argType = TableEntry.cellType;
+		insert(existsEntry);
 		
 		TableEntry neighboursEntry = new TableEntry();
 		neighboursEntry.type = TableEntry.cellType + 1;

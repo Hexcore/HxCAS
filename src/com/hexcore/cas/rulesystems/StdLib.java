@@ -57,6 +57,11 @@ public class StdLib
 		return values.length;
 	}
 	
+	public int exists(Cell c)
+	{
+		return c == null ? 0 : 1;
+	}
+	
 	public static double[] generatePropertyArray(Cell[] cells, int propertyIndex)
 	{
 		double[] values = new double[cells.length];

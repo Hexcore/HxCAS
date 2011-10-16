@@ -889,7 +889,7 @@ static public void reset()
 				}
 				else
 				{
-					CodeGen.invokeStandardArrayMethod(entry.name, entry.type);
+					CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
 				}
 				}
 				else
@@ -900,7 +900,7 @@ static public void reset()
 				}
 				else
 				{
-					CodeGen.invokeStandardScalarMethod(entry.name);
+					CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
 				}
 				}
 				p.kind = TableEntry.Constant;
