@@ -443,8 +443,9 @@ public class GUI implements WindowEventListener, LobbyListener
         colourRules.setColourRule(0, colourRule);
         
         colourRule = new ColourRule();
-        colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
-        colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
+        colourRule.useClosestRange = true;
+        colourRule.addRange(new ColourRule.Range(0.0, 10.0, new Colour(0.0f, 0.25f, 0.5f)));
+        colourRule.addRange(new ColourRule.Range(10.0, 20.0, new Colour(0.0f, 0.8f, 0.5f)));
         colourRules.setColourRule(1, colourRule);
         
         colourRule = new ColourRule();
