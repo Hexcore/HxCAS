@@ -1,5 +1,7 @@
 package com.hexcore.cas.rulesystems.test;
 
+import java.util.ArrayList;
+
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.rulesystems.Rule;
 
@@ -27,6 +29,18 @@ public class GameOfLifeRule implements Rule
 	{
 		return 2;
 	}
+
+	@Override
+	public ArrayList<String> getPropertyList() {
+		ArrayList<String> a = new ArrayList<String>();
+		
+		a.add("type");
+		a.add("alive");
+		
+		return a;
+	}
+	
+	
 	
 	
 }

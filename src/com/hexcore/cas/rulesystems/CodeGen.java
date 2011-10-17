@@ -26,6 +26,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static int varIndex = 5;
 	private static int propertyIndex = 1;
 	private static int numProperties = 1;
+	private static ArrayList<String> properties;
 	
 	private static Label[] frameworkLabels;
 	private static int[] frameworkIndices;
@@ -46,6 +47,10 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		currentFrameworkIndex = 0;
 		propertyIndex = 1;
 		numProperties = 1;
+		properties = new ArrayList<String>();
+		properties.clear();
+		
+		properties.add("type");
 
 		name = ruleset;
 		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
@@ -129,9 +134,10 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		return result;
 	}
 	
-	public static int declareProperty()
+	public static int declareProperty(String name)
 	{
 		debug("Declare property index: " + propertyIndex);
+		properties.add(name);
 		numProperties++;
 		return propertyIndex++;
 	}
@@ -376,11 +382,30 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		mVisitor.visitEnd();
 	}
 	
+	public static void implementPropertyListFunction()
+	{
+		debug("Implement property list");
+		
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getPropertyList", "()Ljava/util/ArrayList;", null, null);
+		mVisitor.visitCode();
+		mVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/CodeGen", "getPropertyList", "()Ljava/util/ArrayList;");
+		mVisitor.visitInsn(ARETURN);
+		mVisitor.visitMaxs(0, 0);
+		mVisitor.visitEnd();
+	}
+	
+	public static ArrayList<String> getPropertyList()
+	{
+		return properties;
+	}
+	
+	
 	
 	
 	public static void endClass()
 	{
 		implementPropertyCountFunction();
+		implementPropertyListFunction();
 		debug("End class");
 		//End class
 		cw.visitEnd();
