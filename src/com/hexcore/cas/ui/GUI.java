@@ -20,6 +20,7 @@ import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.control.discovery.LobbyListener;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
+import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
@@ -70,6 +71,12 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
 {	
+	public static class CellContainer
+	{
+		
+	}
+	
+	
 	public static class Viewport
 	{
 		enum Type {TWO_D, THREE_D};
@@ -399,6 +406,14 @@ public class GUI implements WindowEventListener, LobbyListener
 	private LinearLayout rightLayout;
 	private Container previewWindowContainer;
 	private Viewport previewViewport;
+	private ArrayList<LinearLayout> rightLayouts;
+
+
+	private Button setCellValueButton;
+
+
+	private ArrayList<NumberBox> numberboxList;
+	private Cell c;
     
     public GUI(Server server)
     {
@@ -588,8 +603,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         cellShapeLayout.add(cellShapeDropDownBox);
                 
-        submitButton = new Button(new Vector2i(120,35), "Preview");
-        propertiesLayout.add(submitButton);
+        
         
         LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
@@ -607,7 +621,7 @@ public class GUI implements WindowEventListener, LobbyListener
         widget3DPreviewContainer.setContents(grid3DViewer);
         widgetPreviewContainer.setContents(gridViewer);
         
-        LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(525, 50), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
         buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
@@ -622,6 +636,11 @@ public class GUI implements WindowEventListener, LobbyListener
             saveWorldButton.setWidth(165);
             saveWorldButton.setHeight(35);
             buttonHeaderLayout.add(saveWorldButton);
+            
+            submitButton = new Button(new Vector2i(145,50), "Apply Changes");
+            submitButton.setWidth(165);
+            submitButton.setHeight(35);
+            buttonHeaderLayout.add(submitButton);
             
             simulateButton = new Button(new Vector2i(100, 50), "Simulate");
             simulateButton.setWidth(165);
@@ -773,6 +792,11 @@ public class GUI implements WindowEventListener, LobbyListener
         previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D);    
         leftLayout.add(previewViewport.container);
         
+        
+        setCellValueButton = new Button(new Vector2i(70,43), "SET");
+    	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
+        rightLayout.add(setCellValueButton);
+    	
         
         
         //
@@ -1195,8 +1219,14 @@ public class GUI implements WindowEventListener, LobbyListener
     
     public void createPreviewTab()
     {
-     
+    	
     	previewViewport.recreate(world.getInitialGeneration(), window);
+    	
+    	
+    
+    	
+    	
+    	
 	        
     }
     
@@ -1252,7 +1282,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	            break;
         }
     	
-    	createPreviewTab();
+    	
     }
         
     public void updateSimulationScreen(boolean force)
@@ -1420,6 +1450,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 savePropertiesToWorld();
                 updatePreview();
+                createPreviewTab();
             }
             else if (event.target == clearRulesButton)
             {
@@ -1857,7 +1888,24 @@ public class GUI implements WindowEventListener, LobbyListener
 			}
             //COLOUR RANGES
             
-			
+			///PREVIEW
+                      
+			 else if (event.target == setCellValueButton)
+			 {
+				 int numProperties = world.getInitialGeneration().getNumProperties();
+				 
+				 for (int i = 0; i < numProperties; i++)
+				 {
+					 int newValue = numberboxList.get(i).getValue(0);
+					 
+					 System.out.println("VALUE:" + newValue);
+					 
+					c.setValue(i, newValue);
+					 
+					 
+					 
+				 }
+			 }
             
         }
         else if (event.type == Event.Type.CHANGE)
@@ -1867,11 +1915,48 @@ public class GUI implements WindowEventListener, LobbyListener
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
+            
+           
             //PREVIEW GRID
             else if (event.target == previewViewport.gridWidget)
             {
 				Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
-				world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell()).setValue(1, 1.0f);
+				
+				c = world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell());
+				
+            	int numProperties = world.getInitialGeneration().getNumProperties();
+            	
+            	System.out.println(numProperties);
+            	
+            	
+            	numberboxList = new ArrayList<NumberBox>();
+            	
+            	
+            	for (int i = 0 ; i < numProperties; i++)
+            	{
+            	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+            	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
+            	cellPropertyLayout.setHeight(40);
+            	cellPropertyLayout.setWidth(250);
+            	
+            	rightLayout.add(cellPropertyLayout);
+            	
+            
+            	
+            	TextWidget t = new TextWidget("Property: " + i);
+            	cellPropertyLayout.add(t);
+            	
+            	NumberBox n = new NumberBox(40);
+            	n.setValue((int) c.getValue(i));
+            	cellPropertyLayout.add(n);
+            	
+            	numberboxList.add(n);
+            	
+            	
+            	}
+            	
+            	
+            	
 			}
         }
     }

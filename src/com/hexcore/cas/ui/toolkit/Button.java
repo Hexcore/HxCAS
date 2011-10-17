@@ -11,6 +11,8 @@ public class Button extends ClickableWidget
 	private String	caption;
 	private String	description;
 	
+	private int id;
+	
 	private Image	icon;
 	private Image	hoverIcon;
 	
@@ -31,6 +33,13 @@ public class Button extends ClickableWidget
 		this(new Vector2i(0, 0), size, caption, "");
 	}
 	
+	/// L added this
+	public Button(Vector2i size, String caption, int id)
+	{
+		this(new Vector2i(0, 0), size, caption, "");
+		this.id = id;
+	}
+	///////////
 	public Button(Vector2i size, String caption, String description)
 	{
 		this(new Vector2i(0, 0), size, caption, description);

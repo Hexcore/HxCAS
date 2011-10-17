@@ -9,6 +9,12 @@ public class NumberBox extends TextBox
 		super(width);
 	}
 
+	public NumberBox(int width, int id)
+	{
+		super(width);
+		this.id = id;
+	}
+	
 	public NumberBox(Vector2i position, Vector2i size)
 	{
 		super(position, size);

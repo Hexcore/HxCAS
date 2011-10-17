@@ -12,6 +12,10 @@ public class TextBox extends Widget
 	protected FlowedText	flowedText;
 	protected Text.Size		textSize = Text.Size.SMALL;
 	
+	// L added this
+	int id;
+	//
+	
 	protected int		cursorIndex = 0;
 	protected int		selectIndex = 0;
 	protected boolean	selecting = false;
