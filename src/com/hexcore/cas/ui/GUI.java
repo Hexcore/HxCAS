@@ -180,7 +180,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	
 	    	if (temp3DWidget != null)
 	    	{
-				for (int index = 0; index < 1; index++)
+				for (int index = 1; index < 2; index++)
 					temp3DWidget.addSlice(index, 10.0f);
 	    	}
 	    	
