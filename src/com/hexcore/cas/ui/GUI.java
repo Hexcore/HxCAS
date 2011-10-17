@@ -158,15 +158,16 @@ public class GUI implements WindowEventListener, LobbyListener
 		public GridWidget	gridWidget;
 		public Type 		type;
 		
-		public Viewport(Container container, Type type)
+		public ColourRuleSet	colourRuleSet;
+		
+		public Viewport(Container container, Type type, ColourRuleSet colourRuleSet)
 		{
 			this.container = container;
 			this.type = type;
+			this.colourRuleSet = colourRuleSet;
 		}
 
-		
 		public void switchDimension(Grid grid, Window window)
-
 		{			
 			if (this.type == Viewport.Type.THREE_D)
 				type =  Viewport.Type.TWO_D;
@@ -175,18 +176,20 @@ public class GUI implements WindowEventListener, LobbyListener
 				type =  Viewport.Type.THREE_D;
 			
 			recreate(grid, window);
-			
 		}
 		
 		public void recreate(Grid grid, Window window)
 		{
+			Grid3DWidget temp3DWidget = null;
+			Grid2DWidget temp2DWidget = null;
+			
 	    	switch (grid.getType())
 			{
 				case RECTANGLE:
 					if (type == Viewport.Type.THREE_D)
 					{
-						Grid3DWidget temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-						temp3DWidget.addSlice(1, 10.0f);
+						temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+												
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp3DWidget);
@@ -194,7 +197,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					else
 					{
-						Grid2DWidget temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
+						temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
 						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
@@ -205,8 +208,8 @@ public class GUI implements WindowEventListener, LobbyListener
 				case HEXAGON:
 					if (type == Viewport.Type.THREE_D)
 					{
-						Grid3DWidget temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						temp3DWidget.addSlice(1, 10.0f);
+						temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+						
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp3DWidget);
@@ -214,7 +217,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					else
 					{
-						Grid2DWidget temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
+						temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
 						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
@@ -225,8 +228,8 @@ public class GUI implements WindowEventListener, LobbyListener
 				case TRIANGLE:
 					if (type == Viewport.Type.THREE_D)
 					{
-						Grid3DWidget temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						temp3DWidget.addSlice(1, 10.0f);
+						temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+						
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
 								window.requestFocus(temp3DWidget);
@@ -234,7 +237,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					else
 					{
-						Grid2DWidget temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+						temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
 						temp2DWidget.setColourProperty(1);
 						if (gridWidget != null)
 							if (gridWidget.hasFocus()) 
@@ -245,6 +248,13 @@ public class GUI implements WindowEventListener, LobbyListener
     			
 			}
 	    	
+	    	if (temp3DWidget != null)
+	    	{
+				for (int index = 1; index < 2; index++)
+					temp3DWidget.addSlice(index, 10.0f);
+	    	}
+	    	
+	    	gridWidget.setColourRuleSet(colourRuleSet);
 	    	gridWidget.setFlag(Widget.FILL);
 	    	container.setContents(gridWidget);
 		}
@@ -509,8 +519,9 @@ public class GUI implements WindowEventListener, LobbyListener
         colourRules.setColourRule(0, colourRule);
         
         colourRule = new ColourRule();
-        colourRule.addRange(new ColourRule.Range(0.0, 1.0, new Colour(0.0f, 0.25f, 0.5f)));
-        colourRule.addRange(new ColourRule.Range(1.0, 2.0, new Colour(0.0f, 0.8f, 0.5f)));
+        colourRule.useClosestRange = true;
+        colourRule.addRange(new ColourRule.Range(0.0, 10.0, new Colour(0.0f, 0.25f, 0.5f)));
+        colourRule.addRange(new ColourRule.Range(10.0, 20.0, new Colour(0.0f, 0.8f, 0.5f)));
         colourRules.setColourRule(1, colourRule);
         
         colourRule = new ColourRule();
@@ -873,7 +884,7 @@ public class GUI implements WindowEventListener, LobbyListener
         previewWindowContainer.setFlag(Widget.FILL);
         previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         
-        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D);    
+        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
         leftLayout.add(previewViewport.container);
         
         
@@ -943,18 +954,27 @@ public class GUI implements WindowEventListener, LobbyListener
         masterView.add(masterSimulationLayout);
         masterSimulationLayout.add(worldHeaderLayout);
         
+        LinearLayout topLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        topLayout.setMargin(new Vector2i(0, 0));
+        topLayout.setFlag(Widget.FILL);
+        masterSimulationLayout.add(topLayout);
+	   
+	        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
+	        topLayout.add(controlLayout);
         
-        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        viewportsLayout.setFlag(Widget.FILL);
-        masterSimulationLayout.add(viewportsLayout);
-   
-         
+	        	Button addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
+	        	controlLayout.add(addSliceButton);
+	        	
+	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	        viewportsLayout.setFlag(Widget.FILL);
+	        topLayout.add(viewportsLayout);
         
         Container simulationWindowContainer = new Container(new Vector2i(500,300));
         simulationWindowContainer.setFlag(Widget.FILL);
         simulationWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         
-        Viewport v = new Viewport(simulationWindowContainer, Viewport.Type.THREE_D);    
+        Viewport v = new Viewport(simulationWindowContainer, Viewport.Type.THREE_D, colourRules);    
         viewportsLayout.add(v.container);
       
         viewports = new ArrayList<Viewport>();
@@ -1237,6 +1257,7 @@ public class GUI implements WindowEventListener, LobbyListener
     {
     	this.world = world;
     	loadPropertiesFromWorld();
+    	createPreviewTab();
     	
     	masterView.setIndex(1); 	
     	window.relayout();
@@ -1267,6 +1288,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	String ruleCode = world.getRuleCode();
     	if (ruleCode == null) ruleCode = "";
     	CALTextArea.setText(ruleCode);
+    	saveRuleCodeToWorld();
     	
     	updatePreview();
     }
@@ -1297,7 +1319,30 @@ public class GUI implements WindowEventListener, LobbyListener
         world.setWorldGenerations(new Grid[] {grid});
     }
     
-    
+    public void saveRuleCodeToWorld()
+    {
+    	String code = CALTextArea.getText();
+    	
+    	CALCompiler compiler = new CALCompiler();
+    	RuleLoader ruleLoader = new RuleLoader();
+    	compiler.compile(code);
+    	
+    	Rule rule = ruleLoader.loadRule(compiler.getCode());
+    	
+    	Log.information(TAG, "Loading rule code into World");
+    	world.setRuleCode(code);
+    	  	
+    	Grid grid = world.getInitialGeneration();
+        if (grid.getNumProperties() != rule.getNumProperties())
+        {
+        	Log.information(TAG, "Recreating grid, the current state will be lost");
+        	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
+        	
+            world.reset();
+            world.setWorldGenerations(new Grid[] {grid});
+        }
+    }
+    	
     public void createPreviewTab()
     {
     	
@@ -1617,6 +1662,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 }
                 
                 savePropertiesToWorld();
+                saveRuleCodeToWorld();
                 updatePreview();
                 createPreviewTab();
                
@@ -1647,24 +1693,12 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 if (compiler.getErrorCount() == 0)
                 {
-                	RuleLoader ruleLoader = new RuleLoader();
-                	Rule rule = ruleLoader.loadRule(compiler.getCode());
-                	
-                	Log.information(TAG, "Loading rule code into World");
-                	world.setRuleCode(CALCode);
-                	
-                	  	
-                	Grid grid = world.getInitialGeneration();
-                    if (grid.getNumProperties() != rule.getNumProperties())
-                    {
-                    	Log.information(TAG, "Recreating grid, the current state will be lost");
-                    	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
-                    	
-                        world.reset();
-                        world.setWorldGenerations(new Grid[] {grid});
-                    }
-                	
+
                     createColoursTab();
+
+                	saveRuleCodeToWorld();                	
+
+
                 }
                 else
                 {
@@ -1822,7 +1856,7 @@ public class GUI implements WindowEventListener, LobbyListener
             	container.setBackground(new Fill(new Colour(0f,0f,0f)));
             	viewportsLayout.add(container);
             	
-            	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D);
+            	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D, colourRules);
             	viewport.recreate(currentGrid, window);
             	
             	viewports.add(viewport);

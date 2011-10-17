@@ -31,6 +31,8 @@ public class HexagonGridWidget extends Grid2DWidget
 		float h = s / 2;
 		float r = (float)(s * Math.cos(30.0 * Math.PI / 180.0));
 		
+		pos.inc((int)(scroll.x * s), (int)(scroll.y * s));
+		
 		Vector2f[]	hexagon = new Vector2f[6];
 		hexagon[0] = new Vector2f(0.0f,	r);
 		hexagon[1] = new Vector2f(h,	r+r);
@@ -93,6 +95,8 @@ public class HexagonGridWidget extends Grid2DWidget
 			float s = cellSize * zoom;
 			float h = s / 2;
 			float r = (float)(s * Math.cos(30.0 * Math.PI / 180.0));
+			
+			pos.dec((int)(scroll.x * s), (int)(scroll.y * s));
 						
 			int x = (int)((pos.x - h/2) / (s+h));
 			int y = (int)(pos.y / (r*2));

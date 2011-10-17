@@ -31,6 +31,8 @@ public class TriangleGridWidget extends Grid2DWidget
 		float r = s / 2;
 		float h = (float)(s * Math.sqrt(2) * 0.5);
 		
+		pos.inc((int)(scroll.x * s), (int)(scroll.y * s));
+		
 		Vector2f[]	downTriangle = new Vector2f[3];
 		downTriangle[0] = new Vector2f(0.0f, 	0.0f);
 		downTriangle[1] = new Vector2f(r+r, 	0.0f);
@@ -103,6 +105,8 @@ public class TriangleGridWidget extends Grid2DWidget
 			float s = cellSize * zoom;
 			float r = s / 2;
 			float h = (float)(s * Math.sqrt(2) * 0.5);
+			
+			pos.dec((int)(scroll.x * s), (int)(scroll.y * s));
 					
 			int y = (int)(pos.y / h);
 			float fy = pos.y / h - y;
