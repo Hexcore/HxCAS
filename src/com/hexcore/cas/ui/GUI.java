@@ -22,6 +22,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
+import com.hexcore.cas.model.ColourRule.Range;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.GridType;
@@ -33,6 +34,7 @@ import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.CodeGen;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
+import com.hexcore.cas.ui.GUI.RangeContainer;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -74,8 +76,76 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
 {	
-	public static class CellContainer
+	
+	public static class RangeContainer
 	{
+		int id;
+		public NumberBox firstRange;
+		public NumberBox secondRange;
+		
+		public NumberBox r;
+		public NumberBox g;
+		public NumberBox b;
+		
+		
+		public RangeContainer(int id)
+		{
+			this.id = id;
+			firstRange = new NumberBox(40);
+			secondRange = new NumberBox(40);
+		
+			
+			
+			r = new NumberBox(0);
+			g = new NumberBox(0);
+			b = new NumberBox(0);
+		
+		}
+		
+		
+		
+		
+		
+		
+	}
+	
+	public static class ColourContainer
+	{
+		public ArrayList<ColourRule> colourRuleList;
+		public ArrayList<RangeContainer> rangeContainerList;
+		public int numRanges = 0;
+		
+		public int id = 0;
+		
+		public Button addRangeButton;
+		public LinearLayout layout;
+		
+		
+		public ColourContainer(int id)
+		{
+			this.id = id;
+			addRangeButton = new Button(new Vector2i(100,20), "Add Range");
+			layout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeContainerList = new ArrayList<GUI.RangeContainer>();
+		}
+		
+		public void addRange()
+		{
+			numRanges++;
+			RangeContainer rc = new RangeContainer(numRanges);
+			rangeContainerList.add(rc);
+			
+		}
+		
+		public LinearLayout getLayout()
+		{
+			return layout;
+		}
+		
+		public Button getAddRangeButton()
+		{
+			return addRangeButton;
+		}
 		
 	}
 	
@@ -417,6 +487,12 @@ public class GUI implements WindowEventListener, LobbyListener
 
 	private ArrayList<NumberBox> numberboxList;
 	private Cell c;
+
+
+	private ArrayList<ColourContainer> colourContainerList;
+
+
+	private Button setColourRangesButton;
     
     public GUI(Server server)
     {
@@ -766,6 +842,10 @@ public class GUI implements WindowEventListener, LobbyListener
 		colourInstructionsLayout.add(coloursInstructions);
 		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
         
+		
+		
+		
+		
         
         ///
         
@@ -773,7 +853,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         worldPreviewContainer = new Container(new Vector2i(100, 100));
         worldPreviewContainer.setFlag(Widget.FILL);
-        tabbedWorldView.add(worldPreviewContainer, "World Preview");
+        tabbedWorldView.add(worldPreviewContainer, "World Editor");
         
         
         masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
@@ -1222,13 +1302,63 @@ public class GUI implements WindowEventListener, LobbyListener
     {
     	
     	previewViewport.recreate(world.getInitialGeneration(), window);
-    	
-    	
+          
+    }
     
+    
+    public void createColoursTab()
+    {
+    	int numProperties = world.getInitialGeneration().getNumProperties();
+    	
+    	for (int i = 0 ; i < numProperties; i++)
+    	{
+    	   		
+    	LinearLayout colourPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+    	colourPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
+    	
+    	colourPropertyLayout.setHeight(40);
+    	colourPropertyLayout.setWidth(250);
+    	colourPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
+    	    	
+    	masterColoursLayout.add(colourPropertyLayout);
+    	
+    	colourContainerList = new ArrayList<GUI.ColourContainer>();
+    	  	
+    	
+    	ColourContainer c = new ColourContainer(i);
+    	    	
+    	colourContainerList.add(c);
+    	
+    	
+    	masterColoursLayout.add(c.getLayout());
+    	
+    	colourPropertyLayout.add(c.getAddRangeButton());
+    	
+    	
+    	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
+    	colourPropertyLayout.add(t);
+    	
+    	TextWidget t1 = new TextWidget("Range: ");
+    	colourPropertyLayout.add(t1);
+    	
+    	NumberBox firstRange = new NumberBox(40);
+    	firstRange.setValue(0);
+    	colourPropertyLayout.add(firstRange);
+    	
+    	TextWidget t3 = new TextWidget(" - ");
+    	colourPropertyLayout.add(t3);
+    	
+    	NumberBox secondRange = new NumberBox(40);
+    	secondRange.setValue(0);
+    	colourPropertyLayout.add(secondRange);
     	
     	
     	
-	        
+    	
+    	}
+    	setColourRangesButton = new Button(new Vector2i(100,20), "Set Colours");
+    	
+    	
     }
     
    
@@ -1384,17 +1514,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	return false;
     }
 
-    public void constructColoursTab()
-    {
-    	int numProperties = world.getGeneration(0).getNumProperties();
-    	
-    	for (int i = 0; i < numProperties; i++)
-    	{
-    		TextWidget t = new TextWidget("Property " + i + " goes here!");
-    		masterColoursLayout.add(t);
-    	}
-    	
-    }
+  
     
     
     @Override
@@ -1402,6 +1522,53 @@ public class GUI implements WindowEventListener, LobbyListener
     {
         if (event.type == Event.Type.ACTION)
         {
+        	
+        	if (colourContainerList != null)
+        	{
+	        	for (ColourContainer c : colourContainerList)
+	        	{
+	        		if (event.target == c.addRangeButton)
+	        		{
+	        			
+	        		RangeContainer rc = new RangeContainer(c.id);
+	        		c.rangeContainerList.add(rc);
+	        		
+	        		
+	        		
+	        		
+	        		}	
+	        		
+	        			
+	        			
+	        			
+	        			
+	        	}
+        	}
+        	
+        	
+        	
+        	if (event.target == setColourRangesButton)
+        	{
+        		
+        		for (ColourContainer c : colourContainerList)
+	        	{
+        			for (RangeContainer r : c.rangeContainerList)
+        			{
+        				
+        				float red = (float) (r.r.getValue(0) / 255.0);
+        				float green = (float) (r.g.getValue(0) / 255.0);
+        				float blue = (float) (r.b.getValue(0) / 255.0);
+        				
+        				ColourRule cr = new ColourRule();
+        				cr.addRange(new Range(r.firstRange.getValue(0), r.secondRange.getValue(0), new Colour(red,green,blue)));        				
+        				
+        				colourRules.setColourRule(c.id, cr);
+        			}
+	        	} 
+        		
+        		
+        	}
+        	
             if (event.target == createWorldButton)
             {            	
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
@@ -1452,6 +1619,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 savePropertiesToWorld();
                 updatePreview();
                 createPreviewTab();
+               
             }
             else if (event.target == clearRulesButton)
             {
@@ -1496,7 +1664,7 @@ public class GUI implements WindowEventListener, LobbyListener
                         world.setWorldGenerations(new Grid[] {grid});
                     }
                 	
-                	constructColoursTab();
+                    createColoursTab();
                 }
                 else
                 {
