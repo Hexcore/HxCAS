@@ -42,6 +42,16 @@ public class StdLib
 		return Math.log(value);
 	}
 	
+	public static double sin(double value)
+	{
+		return Math.sin(value);
+	}
+	
+	public static double cos(double value)
+	{
+		return Math.cos(value);
+	}
+	
 	public static double sum(double[] values)
 	{
 		double sum = 0;

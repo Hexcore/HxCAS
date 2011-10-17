@@ -89,11 +89,25 @@ public class SymbolTable
 		logEntry.argType = TableEntry.doubleType;
 		insert(logEntry);
 		
+		TableEntry sinEntry = new TableEntry();
+		sinEntry.type = TableEntry.doubleType;
+		sinEntry.kind = TableEntry.sFunction;
+		sinEntry.name = "sin";
+		sinEntry.argType = TableEntry.doubleType;
+		insert(sinEntry);
+		
+		TableEntry cosEntry = new TableEntry();
+		cosEntry.type = TableEntry.doubleType;
+		cosEntry.kind = TableEntry.sFunction;
+		cosEntry.name = "cos";
+		cosEntry.argType = TableEntry.doubleType;
+		insert(cosEntry);
+		
 		TableEntry lnEntry = new TableEntry();
 		lnEntry.type = TableEntry.doubleType;
 		lnEntry.kind = TableEntry.sFunction;
 		lnEntry.name = "ln";
-		logEntry.argType = TableEntry.doubleType;
+		lnEntry.argType = TableEntry.doubleType;
 		insert(lnEntry);
 		
 		TableEntry sumEntry = new TableEntry();
