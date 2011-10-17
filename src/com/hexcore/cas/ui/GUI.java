@@ -1103,8 +1103,9 @@ public class GUI implements WindowEventListener, LobbyListener
 	        leftListLayout.setFlag(Widget.FILL);
 	        listLayout.add(leftListLayout);
 	        
-	        TextWidget leftListTitle = new TextWidget("Available clients");
-	        leftListLayout.add(leftListTitle);
+	        ImageWidget availableClientsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "available_clients_header.png"));
+	        availableClientsHeader.setFlag(Widget.CENTER_HORIZONTAL);
+	        leftListLayout.add(availableClientsHeader);
 	        
 	        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
 	        clientsAvailableList.setFlag(Widget.FILL);
@@ -1134,8 +1135,10 @@ public class GUI implements WindowEventListener, LobbyListener
 	        rightListLayout.setFlag(Widget.FILL);
 	        listLayout.add(rightListLayout);
 	        
-	        TextWidget rightListTitle = new TextWidget("Using clients");
-	        rightListLayout.add(rightListTitle);
+	        
+	        ImageWidget usingClientsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "using_clients_header.png"));
+	        usingClientsHeader.setFlag(Widget.CENTER_HORIZONTAL);
+	        rightListLayout.add(usingClientsHeader);
 	        
 	        clientsUsingList = new ListWidget(new Vector2i(10, 10));
 	        clientsUsingList.setFlag(Widget.FILL);   
