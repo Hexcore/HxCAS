@@ -31,6 +31,8 @@ import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.CodeGen;
+import com.hexcore.cas.rulesystems.Rule;
+import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -1204,12 +1206,6 @@ public class GUI implements WindowEventListener, LobbyListener
         {
         	Log.information(TAG, "Recreating grid, the current state will be lost");
         	grid = type.create(size, grid.getNumProperties());
-        	
-			grid.getCell(2, 4).setValue(1, 1);
-			grid.getCell(3, 4).setValue(1, 1);
-			grid.getCell(4, 4).setValue(1, 1);
-			grid.getCell(4, 3).setValue(1, 1);
-			grid.getCell(3, 2).setValue(1, 1);
         }
         
         grid.setWrappable(wrapCheckBox.isChecked());
@@ -1480,11 +1476,20 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 if (compiler.getErrorCount() == 0)
                 {
+                	RuleLoader ruleLoader = new RuleLoader();
+                	Rule rule = ruleLoader.loadRule(compiler.getCode());
+                	
                 	Log.information(TAG, "Loading rule code into World");
                 	world.setRuleCode(CALCode);
                 	
-                	constructColoursTab();
+                	Grid grid = world.getInitialGeneration();
+                    if (grid.getNumProperties() != rule.getNumProperties())
+                    {
+                    	Log.information(TAG, "Recreating grid, the current state will be lost");
+                    	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
+                    }
                 	
+                	constructColoursTab();
                 }
                 else
                 {
