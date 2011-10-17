@@ -1157,6 +1157,7 @@ public class GUI implements WindowEventListener, LobbyListener
     {
     	this.world = world;
     	loadPropertiesFromWorld();
+    	createPreviewTab();
     	
     	masterView.setIndex(1); 	
     	window.relayout();
@@ -1187,6 +1188,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	String ruleCode = world.getRuleCode();
     	if (ruleCode == null) ruleCode = "";
     	CALTextArea.setText(ruleCode);
+    	saveRuleCodeToWorld();
     	
     	updatePreview();
     }
@@ -1217,7 +1219,30 @@ public class GUI implements WindowEventListener, LobbyListener
         world.setWorldGenerations(new Grid[] {grid});
     }
     
-    
+    public void saveRuleCodeToWorld()
+    {
+    	String code = CALTextArea.getText();
+    	
+    	CALCompiler compiler = new CALCompiler();
+    	RuleLoader ruleLoader = new RuleLoader();
+    	compiler.compile(code);
+    	
+    	Rule rule = ruleLoader.loadRule(compiler.getCode());
+    	
+    	Log.information(TAG, "Loading rule code into World");
+    	world.setRuleCode(code);
+    	  	
+    	Grid grid = world.getInitialGeneration();
+        if (grid.getNumProperties() != rule.getNumProperties())
+        {
+        	Log.information(TAG, "Recreating grid, the current state will be lost");
+        	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
+        	
+            world.reset();
+            world.setWorldGenerations(new Grid[] {grid});
+        }
+    }
+    	
     public void createPreviewTab()
     {
     	
@@ -1450,6 +1475,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 }
                 
                 savePropertiesToWorld();
+                saveRuleCodeToWorld();
                 updatePreview();
                 createPreviewTab();
             }
@@ -1479,23 +1505,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 if (compiler.getErrorCount() == 0)
                 {
-                	RuleLoader ruleLoader = new RuleLoader();
-                	Rule rule = ruleLoader.loadRule(compiler.getCode());
-                	
-                	Log.information(TAG, "Loading rule code into World");
-                	world.setRuleCode(CALCode);
-                	
-                	  	
-                	Grid grid = world.getInitialGeneration();
-                    if (grid.getNumProperties() != rule.getNumProperties())
-                    {
-                    	Log.information(TAG, "Recreating grid, the current state will be lost");
-                    	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
-                    	
-                        world.reset();
-                        world.setWorldGenerations(new Grid[] {grid});
-                    }
-                	
+                	saveRuleCodeToWorld();                	
                 	constructColoursTab();
                 }
                 else
