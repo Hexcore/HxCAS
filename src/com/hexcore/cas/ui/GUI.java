@@ -178,13 +178,11 @@ public class GUI implements WindowEventListener, LobbyListener
     			
 			}
 	    	
-	    	/*
 	    	if (temp3DWidget != null)
 	    	{
-				for (int index = 0; index < grid.getNumProperties(); index++)
+				for (int index = 0; index < 1; index++)
 					temp3DWidget.addSlice(index, 10.0f);
 	    	}
-	    	*/
 	    	
 	    	gridWidget.setColourRuleSet(colourRuleSet);
 	    	gridWidget.setFlag(Widget.FILL);
