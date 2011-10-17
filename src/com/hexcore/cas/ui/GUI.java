@@ -1482,11 +1482,15 @@ public class GUI implements WindowEventListener, LobbyListener
                 	Log.information(TAG, "Loading rule code into World");
                 	world.setRuleCode(CALCode);
                 	
+                	  	
                 	Grid grid = world.getInitialGeneration();
                     if (grid.getNumProperties() != rule.getNumProperties())
                     {
                     	Log.information(TAG, "Recreating grid, the current state will be lost");
                     	grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
+                    	
+                        world.reset();
+                        world.setWorldGenerations(new Grid[] {grid});
                     }
                 	
                 	constructColoursTab();
