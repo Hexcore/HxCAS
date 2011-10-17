@@ -91,6 +91,12 @@ public class TriangleGridWidget extends Grid2DWidget
 	{
 		boolean handled = super.handleEvent(event, position);
 		
+		if ((event.type == Event.Type.MOUSE_CLICK) 
+				&& ((event.position.x < position.x) || (event.position.y < position.y) 
+				|| (event.position.x > position.x + size.x)
+				|| (event.position.y > position.y + size.y)))
+			return handled;
+		
 		if (event.type == Event.Type.MOUSE_CLICK)
 		{
 			Vector2i pos = event.position.subtract(position);
