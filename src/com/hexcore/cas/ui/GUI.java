@@ -30,6 +30,7 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
+import com.hexcore.cas.rulesystems.CodeGen;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -778,14 +779,15 @@ public class GUI implements WindowEventListener, LobbyListener
         worldPreviewContainer.setContents(masterWorldPreviewLayout);
         
         leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        leftLayout.setFlag(Widget.FILL);
+        leftLayout.setWidth(500);
+        leftLayout.setFlag(Widget.FILL_VERTICAL);
         masterWorldPreviewLayout.add(leftLayout);
         
         rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         rightLayout.setFlag(Widget.FILL);
         masterWorldPreviewLayout.add(rightLayout);
        
-        previewWindowContainer = new Container(new Vector2i(500,300));
+        previewWindowContainer = new Container(new Vector2i(100,100));
         previewWindowContainer.setFlag(Widget.FILL);
         previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         
@@ -910,8 +912,8 @@ public class GUI implements WindowEventListener, LobbyListener
         iterationsText = new TextWidget("Generations: 0");
         innerDetailsLayout2.add(iterationsText);
         
-        timeText = new TextWidget("Elapsed: ");
-        innerDetailsLayout2.add(timeText);
+       // numPropertiesText = new TextWidget("Num Properties: ");
+       // innerDetailsLayout2.add(numPropertiesText);
         
         numCellsText = new TextWidget("Num. Cells: ");
         innerDetailsLayout2.add(numCellsText);
@@ -1928,6 +1930,11 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	System.out.println(numProperties);
             	
+            	rightLayout.clear();
+            	
+            	 setCellValueButton = new Button(new Vector2i(70,43), "SET");
+             	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
+                 rightLayout.add(setCellValueButton);
             	
             	numberboxList = new ArrayList<NumberBox>();
             	
@@ -1936,14 +1943,15 @@ public class GUI implements WindowEventListener, LobbyListener
             	{
             	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
             	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
+            	
             	cellPropertyLayout.setHeight(40);
             	cellPropertyLayout.setWidth(250);
-            	
+            	cellPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
             	rightLayout.add(cellPropertyLayout);
             	
             
             	
-            	TextWidget t = new TextWidget("Property: " + i);
+            	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
             	cellPropertyLayout.add(t);
             	
             	NumberBox n = new NumberBox(40);

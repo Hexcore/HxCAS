@@ -36,6 +36,12 @@ public class Layout extends Widget
 		lastMouse = new Vector2i();
 	}
 			
+	
+	public void clear()
+	{
+		components.clear();
+	}
+	
 	@Override
 	public void relayout()
 	{
