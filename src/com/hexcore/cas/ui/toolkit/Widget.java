@@ -223,7 +223,7 @@ public abstract class Widget
 		return false;
 	}	
 	
-	protected void setWindow(Window window) 
+	public void setWindow(Window window) 
 	{
 		this.window = window;
 		if (margin.x < 0) margin.x = window.getDefaultMargin().x;

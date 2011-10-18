@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -76,7 +77,32 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
 {	
-	
+	 public void createColoursTab()
+	    {
+		 
+		 	colourPropertiesLayout.clear();
+		 
+	    	int numProperties = world.getInitialGeneration().getNumProperties();
+	    	colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
+	    	
+	    	for (int i = 0 ; i < numProperties; i++)
+	    	{
+	    	   		
+	    		
+	    	
+	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i));
+	    	
+	    		colourPropertiesLayout.add(c.getLayout());
+
+	    		colourContainerList.add(c);
+	    	
+	    	
+	    	}
+	    	setColourRangesButton = new Button(new Vector2i(100,40), "Set Colours");
+	    	colourPropertiesLayout.add(setColourRangesButton);
+	    	
+	    	
+	    }
 	public static class RangeContainer
 	{
 		int id;
@@ -87,19 +113,53 @@ public class GUI implements WindowEventListener, LobbyListener
 		public NumberBox g;
 		public NumberBox b;
 		
+		public TextWidget t;
+		public TextWidget t1;
+		public TextWidget t2;
+		public TextWidget t3;
+		public TextWidget t4;
 		
-		public RangeContainer(int id)
+		public LinearLayout rangeLayout;
+		
+		
+		public RangeContainer(int id, Window window)
 		{
 			this.id = id;
+			
+			
+			
 			firstRange = new NumberBox(40);
 			secondRange = new NumberBox(40);
-		
+			r = new NumberBox(40);
+			g = new NumberBox(40);
+			b = new NumberBox(40);
 			
+	       	t2 = new TextWidget("Range: ");
+	       	t3 = new TextWidget(" - ");
+	    	t4 = new TextWidget("RGB Value:");
+	       	
+	       	rangeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	       	rangeLayout.setFlag(Widget.WRAP);
+	       	rangeLayout.setHeight(40);
+	       	
+	       	rangeLayout.setWindow(window);
+	       //	rangeLayout.add(t1);
+	       	rangeLayout.add(t2);
+	       	rangeLayout.add(firstRange);
+	       	rangeLayout.add(t3);
+			rangeLayout.add(secondRange);
+		  	rangeLayout.add(t4);
+			rangeLayout.add(r);
+			rangeLayout.add(g);
+			rangeLayout.add(b);
 			
-			r = new NumberBox(0);
-			g = new NumberBox(0);
-			b = new NumberBox(0);
+				
 		
+		}
+		
+		public LinearLayout getLayout()
+		{
+			return rangeLayout;
 		}
 		
 		
@@ -113,28 +173,45 @@ public class GUI implements WindowEventListener, LobbyListener
 	{
 		public ArrayList<ColourRule> colourRuleList;
 		public ArrayList<RangeContainer> rangeContainerList;
-		public int numRanges = 0;
 		
+		public int numRanges = 0;
 		public int id = 0;
 		
 		public Button addRangeButton;
 		public LinearLayout layout;
+		public LinearLayout rangesLayout;
+		public TextWidget t1; 
 		
-		
-		public ColourContainer(int id)
+		public ColourContainer(int id, Window window, String name)
 		{
 			this.id = id;
 			addRangeButton = new Button(new Vector2i(100,20), "Add Range");
-			layout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			layout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+			layout.setWindow(window);
+			layout.setFlag(Widget.WRAP);
+			layout.setHeight(50);
+			t1 = new TextWidget("Property: " + name);
+			layout.add(t1);
+			layout.add(addRangeButton);
+			
+			
+			
+			
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
+			
+			addRange(id);
+			
 		}
 		
-		public void addRange()
+		public void addRange(int id)
 		{
 			numRanges++;
-			RangeContainer rc = new RangeContainer(numRanges);
+			
+			RangeContainer rc = new RangeContainer(id, this.layout.getWindow());
 			rangeContainerList.add(rc);
 			
+			this.layout.add(rc.getLayout());
+		
 		}
 		
 		public LinearLayout getLayout()
@@ -388,7 +465,7 @@ public class GUI implements WindowEventListener, LobbyListener
     private Button 		simulateButton;
     
     private LinearLayout viewportsLayout;
-    private  LinearLayout masterSimulationLayout;
+    public  LinearLayout masterSimulationLayout;
     
     private Button 	playButton;
     private Button 	pauseButton;
@@ -499,10 +576,25 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Cell c;
 
 
-	private ArrayList<ColourContainer> colourContainerList;
+	private List<ColourContainer> colourContainerList;
 
 
 	private Button setColourRangesButton;
+
+
+	private Button backToMainMenuButton;
+
+
+	private LinearLayout colourPropertiesLayout;
+
+
+	private ScrollableContainer colourPropertiesContainer;
+
+
+	private TextWidget coloursInstructions;
+
+
+	private LinearLayout colourInstructionsLayout;
     
     public GUI(Server server)
     {
@@ -843,17 +935,28 @@ public class GUI implements WindowEventListener, LobbyListener
         coloursContainer.setContents(masterColoursLayout);
         
         
-        LinearLayout colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         colourInstructionsLayout.setHeight(35);
         colourInstructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         colourInstructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
         masterColoursLayout.add(colourInstructionsLayout);
 		   
-		TextWidget coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
+		coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
 		colourInstructionsLayout.add(coloursInstructions);
 		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
         
+		colourPropertiesContainer = new ScrollableContainer(new Vector2i(300,300));
+		colourPropertiesContainer.setFlag(Widget.FILL);
+		masterColoursLayout.add(colourPropertiesContainer);
 		
+		colourPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		colourPropertiesLayout.setHeight(400);
+		colourPropertiesLayout.setWidth(400);
+		
+		colourPropertiesLayout.setFlag(Widget.FILL);
+		colourPropertiesContainer.setContents(colourPropertiesLayout);	
+		
+
 		
 		
 		
@@ -1176,6 +1279,10 @@ public class GUI implements WindowEventListener, LobbyListener
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
         
+       backToMainMenuButton = new Button(new Vector2i(50, 15), "Back");
+       
+        masterSimulationLayout.add(backToMainMenuButton);
+        
        
         window.relayout();
     }
@@ -1351,60 +1458,7 @@ public class GUI implements WindowEventListener, LobbyListener
     }
     
     
-    public void createColoursTab()
-    {
-    	int numProperties = world.getInitialGeneration().getNumProperties();
-    	
-    	for (int i = 0 ; i < numProperties; i++)
-    	{
-    	   		
-    	LinearLayout colourPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-    	colourPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-    	
-    	colourPropertyLayout.setHeight(40);
-    	colourPropertyLayout.setWidth(250);
-    	colourPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
-    	    	
-    	masterColoursLayout.add(colourPropertyLayout);
-    	
-    	colourContainerList = new ArrayList<GUI.ColourContainer>();
-    	  	
-    	
-    	ColourContainer c = new ColourContainer(i);
-    	    	
-    	colourContainerList.add(c);
-    	
-    	
-    	masterColoursLayout.add(c.getLayout());
-    	
-    	colourPropertyLayout.add(c.getAddRangeButton());
-    	
-    	
-    	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
-    	colourPropertyLayout.add(t);
-    	
-    	TextWidget t1 = new TextWidget("Range: ");
-    	colourPropertyLayout.add(t1);
-    	
-    	NumberBox firstRange = new NumberBox(40);
-    	firstRange.setValue(0);
-    	colourPropertyLayout.add(firstRange);
-    	
-    	TextWidget t3 = new TextWidget(" - ");
-    	colourPropertyLayout.add(t3);
-    	
-    	NumberBox secondRange = new NumberBox(40);
-    	secondRange.setValue(0);
-    	colourPropertyLayout.add(secondRange);
-    	
-    	
-    	
-    	
-    	}
-    	setColourRangesButton = new Button(new Vector2i(100,20), "Set Colours");
-    	
-    	
-    }
+   
     
    
     
@@ -1571,13 +1625,12 @@ public class GUI implements WindowEventListener, LobbyListener
         	if (colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
-	        	{
+	        	{System.out.println("CHECK BUTTON FOR ID:" + c.id);
 	        		if (event.target == c.addRangeButton)
 	        		{
-	        			
-	        		RangeContainer rc = new RangeContainer(c.id);
-	        		c.rangeContainerList.add(rc);
 	        		
+	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
+	        		c.addRange(c.id);
 	        		
 	        		
 	        		
@@ -1597,6 +1650,9 @@ public class GUI implements WindowEventListener, LobbyListener
         		
         		for (ColourContainer c : colourContainerList)
 	        	{
+        			ColourRule cr = new ColourRule();
+        			
+        			
         			for (RangeContainer r : c.rangeContainerList)
         			{
         				
@@ -1604,11 +1660,13 @@ public class GUI implements WindowEventListener, LobbyListener
         				float green = (float) (r.g.getValue(0) / 255.0);
         				float blue = (float) (r.b.getValue(0) / 255.0);
         				
-        				ColourRule cr = new ColourRule();
+        				
         				cr.addRange(new Range(r.firstRange.getValue(0), r.secondRange.getValue(0), new Colour(red,green,blue)));        				
         				
-        				colourRules.setColourRule(c.id, cr);
+        				
+        				System.out.println("ADDING RANGE FOR ID: " + r.id + " RGB: " + red + ":" + green + ":" + blue);
         			}
+        			colourRules.setColourRule(c.id, cr);
 	        	} 
         		
         		
@@ -1665,6 +1723,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 saveRuleCodeToWorld();
                 updatePreview();
                 createPreviewTab();
+                createColoursTab();
                
             }
             else if (event.target == clearRulesButton)
@@ -1694,7 +1753,6 @@ public class GUI implements WindowEventListener, LobbyListener
                 if (compiler.getErrorCount() == 0)
                 {
 
-                    createColoursTab();
 
                 	saveRuleCodeToWorld();                	
 
@@ -1829,6 +1887,14 @@ public class GUI implements WindowEventListener, LobbyListener
             	currentGeneration = 0;
             	updateSimulationScreen(true);
             }
+            else if (event.target == backToMainMenuButton)
+            {
+            //	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
+            //	server.sendEvent(serverEvent);
+            	
+            //	masterView.setIndex(1);
+            }
+            
             else if (event.target == playButton)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.START_SIMULATION);
