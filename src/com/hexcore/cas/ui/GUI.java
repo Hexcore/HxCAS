@@ -35,6 +35,7 @@ import com.hexcore.cas.rulesystems.CodeGen;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.ui.GUI.RangeContainer;
+import com.hexcore.cas.ui.GUI.Viewport.Type;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -46,6 +47,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
+import com.hexcore.cas.ui.toolkit.Grid3DWidget.Slice;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
@@ -154,6 +156,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	{
 		enum Type {TWO_D, THREE_D};
 		
+		public Grid			grid;
 		public Container	container;
 		public GridWidget	gridWidget;
 		public Type 		type;
@@ -180,6 +183,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		public void recreate(Grid grid, Window window)
 		{
+			this.grid = grid;
+			
 			Grid3DWidget temp3DWidget = null;
 			Grid2DWidget temp2DWidget = null;
 			
@@ -258,6 +263,29 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	gridWidget.setFlag(Widget.FILL);
 	    	container.setContents(gridWidget);
 		}
+		
+		void updateControlPanel(LinearLayout controlPanel, Button addSliceButton)
+		{
+			controlPanel.clear();
+			
+			if (this.type == Viewport.Type.THREE_D && grid != null)
+			{
+				Grid3DWidget grid3DWidget = (Grid3DWidget)gridWidget;
+								
+				for (Slice slice : grid3DWidget.getSlices())
+				{
+					DropDownBox colourProperty = new DropDownBox(new Vector2i(100, 20));
+					
+					for (int i = 0; i < grid.getNumProperties(); i++)
+						colourProperty.addItem("Property " + i);
+					
+					colourProperty.setSelected(slice.colourProperty);
+					controlPanel.add(colourProperty);
+				}
+			
+				controlPanel.add(addSliceButton);
+			}
+		}
 	}
 
 	static class ClientEntry implements Comparable<ClientEntry>
@@ -283,6 +311,7 @@ public class GUI implements WindowEventListener, LobbyListener
     
     //OUR VIEWPORTS//
     public ArrayList<Viewport> viewports;
+    public Viewport selectedViewport;
     ////////////////
 
     public Set<ClientEntry> availableClients;   
@@ -388,7 +417,8 @@ public class GUI implements WindowEventListener, LobbyListener
     private Button 		simulateButton;
     
     private LinearLayout viewportsLayout;
-    private  LinearLayout masterSimulationLayout;
+    private LinearLayout controlLayout;
+    private LinearLayout masterSimulationLayout;
     
     private Button 	playButton;
     private Button 	pauseButton;
@@ -503,6 +533,9 @@ public class GUI implements WindowEventListener, LobbyListener
 
 
 	private Button setColourRangesButton;
+
+
+	private Button addSliceButton;
     
     public GUI(Server server)
     {
@@ -959,11 +992,11 @@ public class GUI implements WindowEventListener, LobbyListener
         topLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(topLayout);
 	   
-	        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
 	        topLayout.add(controlLayout);
         
-	        	Button addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
+	        	addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
 	        	controlLayout.add(addSliceButton);
 	        	
 	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
@@ -1565,7 +1598,16 @@ public class GUI implements WindowEventListener, LobbyListener
     @Override
     public void handleWindowEvent(Event event)
     {
-        if (event.type == Event.Type.ACTION)
+    	if (event.type == Event.Type.GAINED_FOCUS)
+    	{
+        	for (Viewport viewport : viewports)
+        		if ((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
+    			{
+    				selectedViewport = viewport;
+    				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
+    			}
+    	}
+    	else if (event.type == Event.Type.ACTION)
         {
         	
         	if (colourContainerList != null)
@@ -1861,6 +1903,17 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	viewports.add(viewport);
             }
+            else if (event.target == addSliceButton)
+            {
+        		if (selectedViewport != null && selectedViewport.type == Type.THREE_D)
+        		{
+        			Slice slice = new Slice(1, 1.0f);
+        			Grid3DWidget gw = (Grid3DWidget)selectedViewport.gridWidget;
+        			gw.addSlice(slice);
+        			
+        			selectedViewport.updateControlPanel(controlLayout, addSliceButton);
+        		}
+            }
             
             //PREVIEW GRID
             
@@ -2125,14 +2178,12 @@ public class GUI implements WindowEventListener, LobbyListener
             
         }
         else if (event.type == Event.Type.CHANGE)
-        {
+        {        	
             if (event.target == generationSlider)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
-            
-           
             //PREVIEW GRID
             else if (event.target == previewViewport.gridWidget)
             {

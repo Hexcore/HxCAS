@@ -171,6 +171,9 @@ public abstract class Widget
 		if (event.type == Event.Type.GAINED_FOCUS)
 		{
 			focused = true;
+			
+			Event newEvent = new Event(Event.Type.GAINED_FOCUS);
+			window.sendWindowEvent(newEvent);
 		}
 		else if (event.type == Event.Type.LOST_FOCUS)
 		{
