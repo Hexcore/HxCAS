@@ -11,6 +11,7 @@ import com.hexcore.cas.test.WaterFlow;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
+import com.hexcore.cas.ui.toolkit.ColourPickerDialog;
 import com.hexcore.cas.ui.toolkit.Container;
 import com.hexcore.cas.ui.toolkit.Dialog;
 import com.hexcore.cas.ui.toolkit.DropDownBox;
@@ -112,6 +113,8 @@ public class UITestApplication implements WindowEventListener
 	public TextWidget	dialogTitle;
 	public TextWidget	dialogMessage;
 	public Button		dialogOKButton;
+	
+	public ColourPickerDialog colourDialog;
 	
 	public String	currentThemeName = "light";
 	public String	themeName = currentThemeName;
@@ -420,6 +423,9 @@ public class UITestApplication implements WindowEventListener
 		dialogOKButton = new Button(new Vector2i(120, 30), "OK");
 		dialogOKButton.setFlag(Widget.CENTER_HORIZONTAL);
 		dialogLayout.add(dialogOKButton);
+		
+		// Colour picker dialog
+		colourDialog = new ColourPickerDialog(window);
 	}
 	
 	static public void main(String args[])
@@ -478,7 +484,7 @@ public class UITestApplication implements WindowEventListener
 			}
 			else if (event.target == helpButton)
 			{
-				mainPanel.toggleVisibility();
+				window.showModalDialog(colourDialog);
 			}
 			else if (event.target == quitButton)
 			{
