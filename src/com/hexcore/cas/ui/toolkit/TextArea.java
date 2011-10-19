@@ -92,7 +92,7 @@ public class TextArea extends TextBox
 	{
 		Vector2i pos = this.position.add(position);
 		
-		window.setClipping(gl, pos, size);
+		window.addClipRectangle(gl, pos, size);
 		
 		if (flowedText != null)
 			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash, textOffset.y);
@@ -100,7 +100,7 @@ public class TextArea extends TextBox
 		if (maxHeight > size.y)
 			window.getTheme().renderVerticalScrollbar(gl, pos, size, textOffset.y, maxHeight, size.y);
 
-		window.resetView(gl);
+		window.removeClipRectangle(gl);
 	}
 	
 	@Override

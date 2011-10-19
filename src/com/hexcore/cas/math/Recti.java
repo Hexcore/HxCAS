@@ -30,6 +30,12 @@ public class Recti
 		this.position.set(position);
 		this.size.set(size);
 	}
+
+	public Recti(int x, int y, int w, int h)
+	{
+		this.position.set(x, y);
+		this.size.set(w, h);
+	}
 	
 	public Recti(Recti rect)
 	{
@@ -46,6 +52,17 @@ public class Recti
 	
 	public void		setPosition(Vector2i position) {this.position.set(position);}
 	public void		setSize(Vector2i size) {this.size.set(size);}
+	
+	public Recti	intersect(Recti other)
+	{
+		Vector2i s = new Vector2i(position);
+		Vector2i e = position.add(size);
+		if (s.x < other.position.x) s.x = other.position.x;
+		if (s.y < other.position.y) s.y = other.position.y;
+		if (e.x > other.position.x + other.size.x) e.x = other.position.x + other.size.x;
+		if (e.y > other.position.y + other.size.y) e.y = other.position.y + other.size.y;
+		return new Recti(s, e.subtract(s));
+	}
 	
 	public static Recti getBoundingBox(Vector2i[] points)
 	{

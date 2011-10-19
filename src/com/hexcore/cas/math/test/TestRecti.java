@@ -113,4 +113,28 @@ public class TestRecti
 		assertEquals(12, box.size.x);
 		assertEquals(8, box.size.y);	
 	}
+	
+	@Test
+	public void testIntersect()
+	{
+		Recti current = new Recti(0, 0, 1000, 1000);
+		
+		current = current.intersect(new Recti(50, 50, 250, 250));
+		assertEquals(50, current.position.x);
+		assertEquals(50, current.position.y);
+		assertEquals(250, current.size.x);
+		assertEquals(250, current.size.y);
+
+		current = current.intersect(new Recti(20, 20, 100, 100));
+		assertEquals(50, current.position.x);
+		assertEquals(50, current.position.y);
+		assertEquals(70, current.size.x);
+		assertEquals(70, current.size.y);
+		
+		current = current.intersect(new Recti(60, 60, 70, 70));
+		assertEquals(60, current.position.x);
+		assertEquals(60, current.position.y);
+		assertEquals(60, current.size.x);
+		assertEquals(60, current.size.y);
+	}
 }

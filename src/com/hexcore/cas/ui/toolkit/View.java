@@ -72,11 +72,11 @@ public class View extends Widget
 		
 		Vector2i pos = this.position.add(position);
 		
-		window.setClipping(gl, pos, size);
+		window.addClipRectangle(gl, pos, size);
 		if (background != null) Graphics.renderRectangle(gl, pos, size, 0, background);
 		Widget contents = getWidget();
 		if (contents != null) contents.render(gl, pos);
-		window.resetView(gl);
+		window.removeClipRectangle(gl);
 		
 		//window.renderBorder(gl, pos, size, new Colour(0.0f, 0.5f, 1.0f));
 	}
