@@ -7,7 +7,7 @@ ruleset set8
 	property another;
 	property again;
 
-	type Land : 0
+	type Land
 	{
 		var n1 = 5;
 		var n2 = 6;

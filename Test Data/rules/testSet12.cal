@@ -1,0 +1,21 @@
+ruleset set12
+{
+	typecount 3;
+	property alive;
+
+	type Land
+	{
+		self.alive = 15;
+	}
+	
+	type Water
+	{
+		self.alive = 20;
+	}
+	
+	type Fire
+	{
+		self.alive = 30;
+		self.type = 0;
+	}
+}

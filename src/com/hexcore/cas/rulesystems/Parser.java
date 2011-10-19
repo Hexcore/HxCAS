@@ -83,8 +83,7 @@ static int typeCountActual = 0;
 static boolean postOpQueued = false;
 static PostOpE postOpType;
 static boolean valid = true;
-
-static TreeSet<Integer> typeIndices = new TreeSet<Integer>();
+static int typeCount = 0;
 
 static public int getErrorCount()
 {
@@ -218,10 +217,10 @@ static public void reset()
 
 	static void CAL() {
 		table = new SymbolTable();
-		typeIndices.clear();
+		typeCount = 0;
 		
 		RuleSet();
-		if(typeIndices.size() != typeCountExpected)
+		if(typeCount != typeCountExpected)
 		{
 			SemanticError("Mismatch between declared and actual type count");
 		}
@@ -277,9 +276,14 @@ static public void reset()
 		String name;
 		name = "";
 		
-		Expect(identifier_Sym);
-		name = token.val;
-		
+		if (la.kind == identifier_Sym) {
+			Get();
+			name = token.val;
+			
+		} else if (la.kind == type_Sym) {
+			Get();
+			name = "type";
+		} else SynErr(41);
 		return name;
 	}
 
@@ -308,30 +312,23 @@ static public void reset()
 		entry.name = name;
 		entry.type = TableEntry.doubleType;
 		entry.kind = TableEntry.Property;
-		entry.offset = CodeGen.declareProperty(name);
+		if(valid)
+			entry.offset = CodeGen.declareProperty(name);
 		table.insert(entry);
 		
 		Expect(semicolon_Sym);
 	}
 
 	static void TypeSpec() {
-		int value = 0;
 		table.pushScope();  												
 		
 		Expect(type_Sym);
 		Expect(identifier_Sym);
-		Expect(colon_Sym);
-		value  = IntConst();
-		if(typeIndices.contains(new Integer(value)))
-		{
-			SemanticError("Duplicate type ID");
-		}
-		if(typeIndices.size() >= typeCountExpected)
+		if(typeCount >= typeCountExpected)
 		{
 			SemanticError("Too many types");
 		}
-		typeIndices.add(new Integer(value));
-		
+		typeCount++;
 		if(valid)
 			CodeGen.initType();
 		
@@ -412,13 +409,13 @@ static public void reset()
 	static void Statement() {
 		if (la.kind == lbrace_Sym) {
 			Block();
-		} else if (la.kind == identifier_Sym) {
+		} else if (la.kind == identifier_Sym || la.kind == type_Sym) {
 			AssignCall();
 		} else if (la.kind == if_Sym) {
 			IfStatement();
 		} else if (la.kind == var_Sym) {
 			VarDeclaration();
-		} else SynErr(41);
+		} else SynErr(42);
 	}
 
 	static void Block() {
@@ -505,7 +502,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(42);
+		} else SynErr(43);
 		Expect(semicolon_Sym);
 	}
 
@@ -654,7 +651,7 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(43);
+		} else SynErr(44);
 		return op;
 	}
 
@@ -793,7 +790,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(44); break;
+		default: SynErr(45); break;
 		}
 		return op;
 	}
@@ -845,7 +842,7 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(45);
+		} else SynErr(46);
 		return op;
 	}
 
@@ -897,7 +894,7 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(46);
+		} else SynErr(47);
 		return op;
 	}
 
@@ -912,7 +909,7 @@ static public void reset()
 		ConstantRecord con;
 		TableEntry entry = null;
 		
-		if (la.kind == identifier_Sym) {
+		if (la.kind == identifier_Sym || la.kind == type_Sym) {
 			entry = Designator(false);
 			p.type = entry.type;
 			p.kind = TableEntry.Variable;
@@ -984,7 +981,7 @@ static public void reset()
 			p.kind = TableEntry.Constant;
 			
 			Expect(rparen_Sym);
-		} else SynErr(47);
+		} else SynErr(48);
 		return p;
 	}
 
@@ -998,7 +995,7 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.intType;		
-		} else SynErr(48);
+		} else SynErr(49);
 		return con;
 	}
 
@@ -1015,9 +1012,9 @@ static public void reset()
 
 	private static boolean[][] set = {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x}
 
 	};
@@ -1177,14 +1174,15 @@ class Errors {
 			case 38: s = "\"%\" expected"; break;
 			case 39: s = "\"&&\" expected"; break;
 			case 40: s = "??? expected"; break;
-			case 41: s = "invalid Statement"; break;
-			case 42: s = "invalid AssignCall"; break;
-			case 43: s = "invalid PostOp"; break;
-			case 44: s = "invalid RelOp"; break;
-			case 45: s = "invalid AddOp"; break;
-			case 46: s = "invalid MulOp"; break;
-			case 47: s = "invalid Primary"; break;
-			case 48: s = "invalid Constant"; break;
+			case 41: s = "invalid Ident"; break;
+			case 42: s = "invalid Statement"; break;
+			case 43: s = "invalid AssignCall"; break;
+			case 44: s = "invalid PostOp"; break;
+			case 45: s = "invalid RelOp"; break;
+			case 46: s = "invalid AddOp"; break;
+			case 47: s = "invalid MulOp"; break;
+			case 48: s = "invalid Primary"; break;
+			case 49: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

@@ -7,7 +7,7 @@ ruleset set7
 	property another;
 	property again;
 
-	type Land : 0
+	type Land
 	{
 
 	}

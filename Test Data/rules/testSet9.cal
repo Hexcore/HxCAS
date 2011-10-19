@@ -5,7 +5,7 @@ ruleset set9
 	property land;
 
 
-	type Land : 0
+	type Land
 	{
 		self.land = neighbours[0].land + 1;
 	}
