@@ -1,9 +1,10 @@
 package com.hexcore.cas.model.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -19,9 +20,9 @@ public class TestColourRuleSetParser
 	@Test
 	public void test()
 	{
-		Map<String, Integer> properties = new HashMap<String, Integer>();
-		properties.put("water", 0);
-		properties.put("land", 1);
+		List<String> properties = new ArrayList<String>();
+		properties.add("water");
+		properties.add("land");
 		
 		ColourRuleSetParser parser = new ColourRuleSetParser();
 		ColourRuleSet ruleSet = parser.parse("Test Data/colourruleset/test.crs", properties);
