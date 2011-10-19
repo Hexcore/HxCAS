@@ -133,6 +133,9 @@ public class ScrollableContainer extends Container
 			
 			Graphics.renderBorder(gl, pos.subtract(1, 1), size.add(2, 2), 0, borderFill);
 		}
+		
+		if (window.isDebugLayout())
+			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));
 	}
 	
 	@Override

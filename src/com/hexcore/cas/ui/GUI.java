@@ -91,14 +91,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	    		
 	    	
 	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i));
+	    		
 	    	
 	    		colourPropertiesLayout.add(c.getLayout());
-
 	    		colourContainerList.add(c);
+	    
 	    	
 	    	
 	    	}
-	    	setColourRangesButton = new Button(new Vector2i(100,40), "Set Colours");
+	    	
+	    	
+	    	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
 	    	colourPropertiesLayout.add(setColourRangesButton);
 	    	
 	    	
@@ -143,7 +146,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	       	rangeLayout.setHeight(40);
 	       	
 	       	rangeLayout.setWindow(window);
-	       //	rangeLayout.add(t1);
 	       	rangeLayout.add(t2);
 	       	rangeLayout.add(firstRange);
 	       	rangeLayout.add(t3);
@@ -178,22 +180,32 @@ public class GUI implements WindowEventListener, LobbyListener
 		public int id = 0;
 		
 		public Button addRangeButton;
+		public Button removeRangeButton;
+		
 		public LinearLayout layout;
 		public LinearLayout rangesLayout;
+		public LinearLayout rangeButtonsLayout;
 		public TextWidget t1; 
 		
 		public ColourContainer(int id, Window window, String name)
 		{
 			this.id = id;
-			addRangeButton = new Button(new Vector2i(100,20), "Add Range");
+			
+			addRangeButton = new Button(new Vector2i(30,25), "+");
+			removeRangeButton = new Button(new Vector2i(30,25), "-");
+			rangeButtonsLayout =  new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeButtonsLayout.setWindow(window);
+			rangeButtonsLayout.setFlag(Widget.WRAP);
+			
 			layout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 			layout.setWindow(window);
 			layout.setFlag(Widget.WRAP);
 			layout.setHeight(50);
 			t1 = new TextWidget("Property: " + name);
 			layout.add(t1);
-			layout.add(addRangeButton);
-			
+			rangeButtonsLayout.add(addRangeButton);
+			rangeButtonsLayout.add(removeRangeButton);
+			layout.add(rangeButtonsLayout);
 			
 			
 			
@@ -212,6 +224,15 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			this.layout.add(rc.getLayout());
 		
+		}
+		
+		
+		public void removeRange()
+		{
+			numRanges--;
+			rangeContainerList.remove(numRanges);
+			
+			
 		}
 		
 		public LinearLayout getLayout()
@@ -837,16 +858,7 @@ public class GUI implements WindowEventListener, LobbyListener
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
         
-        LinearLayout instructionsCALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        instructionsCALLayout.setHeight(35);
-        instructionsCALLayout.setFlag(Widget.CENTER_HORIZONTAL);
-        instructionsCALLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-        masterRulesLayout.add(instructionsCALLayout);
-		   
-		TextWidget CALInstructions = new TextWidget("Inform the compiler of the cells and their properties that your world will support.");
-		instructionsCALLayout.add(CALInstructions);
-		instructionsCALLayout.setWidth(CALInstructions.getWidth()+ 20);
-        
+  
         
         LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         CALLayout.setFlag(Widget.FILL);
@@ -953,11 +965,13 @@ public class GUI implements WindowEventListener, LobbyListener
 		colourPropertiesLayout.setHeight(400);
 		colourPropertiesLayout.setWidth(400);
 		
-		colourPropertiesLayout.setFlag(Widget.FILL);
+		colourPropertiesLayout.setFlag(Widget.WRAP);
 		colourPropertiesContainer.setContents(colourPropertiesLayout);	
 		
 
-		
+		TextWidget noColourSetText = new TextWidget("NO COLOUR RANGE PROPERTIES AVAILABLE. APPLY WORLD CHANGES FIRST.");
+		noColourSetText.setPosition(new Vector2i(colourPropertiesLayout.getWidth()/2, colourPropertiesLayout.getHeight()/2));
+		colourPropertiesLayout.add(noColourSetText);
 		
 		
         
@@ -1631,10 +1645,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		
 	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
 	        		c.addRange(c.id);
+	        		window.relayout();
 	        		
 	        		
 	        		
 	        		}	
+	        		
+	        		if (event.target == c.removeRangeButton)
+	        		{
+	        			System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
+	        			c.removeRange();
+	        		}
 	        		
 	        			
 	        			
