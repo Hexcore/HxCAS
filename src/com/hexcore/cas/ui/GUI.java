@@ -47,6 +47,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
+import com.hexcore.cas.ui.toolkit.Grid3DWidget.Slice;
 import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
@@ -247,117 +248,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 	}
 	
-	
-	public static class Viewport
-	{
-		enum Type {TWO_D, THREE_D};
-		
-		public Container	container;
-		public GridWidget	gridWidget;
-		public Type 		type;
-		
-		public ColourRuleSet	colourRuleSet;
-		
-		public Viewport(Container container, Type type, ColourRuleSet colourRuleSet)
-		{
-			this.container = container;
-			this.type = type;
-			this.colourRuleSet = colourRuleSet;
-		}
-
-		public void switchDimension(Grid grid, Window window)
-		{			
-			if (this.type == Viewport.Type.THREE_D)
-				type =  Viewport.Type.TWO_D;
-				
-			else			
-				type =  Viewport.Type.THREE_D;
-			
-			recreate(grid, window);
-		}
-		
-		public void recreate(Grid grid, Window window)
-		{
-			Grid3DWidget temp3DWidget = null;
-			Grid2DWidget temp2DWidget = null;
-			
-	    	switch (grid.getType())
-			{
-				case RECTANGLE:
-					if (type == Viewport.Type.THREE_D)
-					{
-						temp3DWidget = new RectangleGrid3DWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-												
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp3DWidget);
-						gridWidget = temp3DWidget;
-					}
-					else
-					{
-						temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-						temp2DWidget.setColourProperty(1);
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp2DWidget);
-						gridWidget = temp2DWidget;
-					}	
-					break;
-				case HEXAGON:
-					if (type == Viewport.Type.THREE_D)
-					{
-						temp3DWidget = new HexagonGrid3DWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp3DWidget);
-						gridWidget = temp3DWidget;
-					}
-					else
-					{
-						temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-						temp2DWidget.setColourProperty(1);
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp2DWidget);
-						gridWidget = temp2DWidget;
-					}	
-					break;
-				case TRIANGLE:
-					if (type == Viewport.Type.THREE_D)
-					{
-						temp3DWidget = new TriangleGrid3DWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp3DWidget);
-						gridWidget = temp3DWidget;
-					}
-					else
-					{
-						temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-						temp2DWidget.setColourProperty(1);
-						if (gridWidget != null)
-							if (gridWidget.hasFocus()) 
-								window.requestFocus(temp2DWidget);
-						gridWidget = temp2DWidget;
-					}	
-					break;
-    			
-			}
-	    	
-	    	if (temp3DWidget != null)
-	    	{
-				for (int index = 1; index < 2; index++)
-					temp3DWidget.addSlice(index, 10.0f);
-	    	}
-	    	
-	    	gridWidget.setColourRuleSet(colourRuleSet);
-	    	gridWidget.setFlag(Widget.FILL);
-	    	container.setContents(gridWidget);
-		}
-	}
-
 	static class ClientEntry implements Comparable<ClientEntry>
 	{
 		InetSocketAddress address;
@@ -381,6 +271,7 @@ public class GUI implements WindowEventListener, LobbyListener
     
     //OUR VIEWPORTS//
     public ArrayList<Viewport> viewports;
+    public Viewport selectedViewport;
     ////////////////
 
     public Set<ClientEntry> availableClients;   
@@ -486,7 +377,8 @@ public class GUI implements WindowEventListener, LobbyListener
     private Button 		simulateButton;
     
     private LinearLayout viewportsLayout;
-    public  LinearLayout masterSimulationLayout;
+    private LinearLayout controlLayout;
+    private LinearLayout masterSimulationLayout;
     
     private Button 	playButton;
     private Button 	pauseButton;
@@ -577,44 +469,28 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button	removeClientButton;
 	private Button	removeAllClientsButton;
 
-
 	private LinearLayout masterWorldPreviewLayout;
 
-
 	private LinearLayout leftLayout;
-
 
 	private LinearLayout rightLayout;
 	private Container previewWindowContainer;
 	private Viewport previewViewport;
 	private ArrayList<LinearLayout> rightLayouts;
 
-
 	private Button setCellValueButton;
-
 
 	private ArrayList<NumberBox> numberboxList;
 	private Cell c;
 
-
-	private List<ColourContainer> colourContainerList;
-
-
-	private Button setColourRangesButton;
-
-
+	private Button addSliceButton;
 	private Button backToMainMenuButton;
 
-
+	private List<ColourContainer> colourContainerList;
+	private Button setColourRangesButton;
 	private LinearLayout colourPropertiesLayout;
-
-
 	private ScrollableContainer colourPropertiesContainer;
-
-
 	private TextWidget coloursInstructions;
-
-
 	private LinearLayout colourInstructionsLayout;
     
     public GUI(Server server)
@@ -1076,11 +952,11 @@ public class GUI implements WindowEventListener, LobbyListener
         topLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(topLayout);
 	   
-	        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
 	        topLayout.add(controlLayout);
         
-	        	Button addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
+	        	addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
 	        	controlLayout.add(addSliceButton);
 	        	
 	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
@@ -1633,7 +1509,16 @@ public class GUI implements WindowEventListener, LobbyListener
     @Override
     public void handleWindowEvent(Event event)
     {
-        if (event.type == Event.Type.ACTION)
+    	if (event.type == Event.Type.GAINED_FOCUS)
+    	{
+        	for (Viewport viewport : viewports)
+        		if ((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
+    			{
+    				selectedViewport = viewport;
+    				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
+    			}
+    	}
+    	else if (event.type == Event.Type.ACTION)
         {
         	
         	if (colourContainerList != null)
@@ -1948,6 +1833,17 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	viewports.add(viewport);
             }
+            else if (event.target == addSliceButton)
+            {
+        		if (selectedViewport != null && selectedViewport.type == Viewport.Type.THREE_D)
+        		{
+        			Slice slice = new Slice(1, 10.0f);
+        			Grid3DWidget gw = (Grid3DWidget)selectedViewport.gridWidget;
+        			gw.addSlice(slice);
+        			
+        			selectedViewport.updateControlPanel(controlLayout, addSliceButton);
+        		}
+            }
             
             //PREVIEW GRID
             
@@ -2212,14 +2108,28 @@ public class GUI implements WindowEventListener, LobbyListener
             
         }
         else if (event.type == Event.Type.CHANGE)
-        {
+        {        	
+        	if (selectedViewport != null)
+        	{
+        		for (int i = 0; i < selectedViewport.propertyDropDownBoxes.size(); i++)
+        		{
+        			DropDownBox selection = selectedViewport.propertyDropDownBoxes.get(i);
+        			int index = selection.getSelected();
+        			
+        			if (selectedViewport.type == Viewport.Type.THREE_D)
+        			{
+        				System.out.println("Changed slice property");
+        				Grid3DWidget grid3DWidget = (Grid3DWidget)selectedViewport.gridWidget;
+        				grid3DWidget.setSlice(i, index, index);
+        			}
+        		}
+        	}
+        	
             if (event.target == generationSlider)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
-            
-           
             //PREVIEW GRID
             else if (event.target == previewViewport.gridWidget)
             {

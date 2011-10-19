@@ -93,7 +93,10 @@ public class DropDownBox extends Widget
 				
 				if ((rect.position.x <= event.position.x) && (rect.position.y <= event.position.y) &&
 						(rect.position.x + rect.size.x >= event.position.x) && (rect.position.y + rect.size.y >= event.position.y))
+				{
 					mouseoverItem = i;
+					handled = true;
+				}
 			}
 		}
 		

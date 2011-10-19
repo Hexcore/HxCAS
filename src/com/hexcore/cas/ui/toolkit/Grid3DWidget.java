@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -21,7 +22,7 @@ import com.jogamp.common.nio.Buffers;
 
 public class Grid3DWidget extends GridWidget
 {
-	public class Slice
+	public static class Slice
 	{
 		public int		colourProperty;
 		public int		heightProperty;
@@ -169,6 +170,12 @@ public class Grid3DWidget extends GridWidget
 		dirty = true;
 	}
 	
+	public void addSlice(Slice slice)
+	{
+		slices.add(slice);
+		dirty = true;
+	}
+	
 	public void addSlice(int heightProperty, float scale)
 	{
 		slices.add(new Slice(heightProperty, scale));
@@ -181,10 +188,22 @@ public class Grid3DWidget extends GridWidget
 		dirty = true;
 	}
 	
+	public void setSlice(int index, int colourProperty, int heightProperty)
+	{
+		slices.get(index).colourProperty = colourProperty;
+		slices.get(index).heightProperty = heightProperty;
+		dirty = true;
+	}
+	
 	public void clearSlices()
 	{
 		slices.clear();
 		dirty = true;
+	}
+	
+	public List<Slice> getSlices()
+	{
+		return slices;
 	}
 	
 	@Override

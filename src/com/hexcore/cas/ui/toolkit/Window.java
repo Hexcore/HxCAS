@@ -438,11 +438,13 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			return;
 		}
 		
+		boolean handled = false;
 		if (focusedWidget != null)
-			focusedWidget.receiveEventExtras(event, focusedWidget.getRealPosition());
+			handled = focusedWidget.receiveEventExtras(event, focusedWidget.getRealPosition());
 		
-		for (Widget component : components)
-			component.receiveEvent(event);
+		if (!handled)
+			for (Widget component : components)
+				component.receiveEvent(event);
 	}
 		
 	////

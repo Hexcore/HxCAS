@@ -38,7 +38,7 @@ public class TriangleGrid3DWidget extends Grid3DWidget
 				Cell 		cell = grid.getCell(x, y);				
 				Vector2f 	p = new Vector2f(x * r, y * h);
 								
-				if ((x & 1) == (y & 1)) // Checker-board pattern
+				if ((x & 1) != (y & 1)) // Checker-board pattern
 					addColumn(p, cell, downTriangle);
 				else
 					addColumn(p, cell, upTriangle);

@@ -109,7 +109,7 @@ public class HexagonGridWidget extends Grid2DWidget
 			if (p.y < 0) y--;
 			
 			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
-			{
+			{				
 				Event changeEvent = new Event(Event.Type.CHANGE);
 				changeEvent.target = this;
 				window.sendWindowEvent(changeEvent);
