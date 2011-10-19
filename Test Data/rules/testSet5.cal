@@ -6,7 +6,7 @@ ruleset set4
 	property water;
 	
 
-	type Land : 0
+	type Land
 	{
 
 	}

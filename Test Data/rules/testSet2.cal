@@ -6,7 +6,7 @@ ruleset set2
 	property water;
 	
 
-	type Land : 0
+	type Land
 	{
 		var num;
 		

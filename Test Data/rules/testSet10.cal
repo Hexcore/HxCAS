@@ -5,7 +5,7 @@ ruleset set10
 	property land;
 
 
-	type Land : 0
+	type Land
 	{
 		self.land = max(neighbours.land);
 	}

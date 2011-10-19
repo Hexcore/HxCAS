@@ -20,8 +20,7 @@ static int typeCountActual = 0;
 static boolean postOpQueued = false;
 static PostOpE postOpType;
 static boolean valid = true;
-
-static TreeSet<Integer> typeIndices = new TreeSet<Integer>();
+static int typeCount = 0;
 
 static public int getErrorCount()
 {
@@ -99,11 +98,11 @@ PRODUCTIONS
 	/***** File Root *****/
 	CAL										(. 	
 												table = new SymbolTable();
-												typeIndices.clear();
+												typeCount = 0;
 											.)				
   	=
   	RuleSet									(. 	
-  												if(typeIndices.size() != typeCountExpected)
+  												if(typeCount != typeCountExpected)
   												{
   													SemanticError("Mismatch between declared and actual type count");
   												}
@@ -211,22 +210,16 @@ PRODUCTIONS
   	
   	
   	TypeSpec								(.
-  												int value = 0;
   												table.pushScope();  												
   											.)
   	=
-  	"type" identifier ":"
-  	IntConst< out value >					(.
-  												if(typeIndices.contains(new Integer(value)))
-  												{
-  													SemanticError("Duplicate type ID");
-  												}
-  												if(typeIndices.size() >= typeCountExpected)
+  	"type" identifier
+  											(.
+  												if(typeCount >= typeCountExpected)
   												{
   													SemanticError("Too many types");
   												}
-  												typeIndices.add(new Integer(value));
-  												
+  												typeCount++;
   												if(valid)
   													CodeGen.initType();
   											.)
@@ -853,6 +846,9 @@ PRODUCTIONS
   	identifier								(.
   												name = token.val;
   											.)
+  											
+  	|
+  	"type"									(. name = "type"; .)
   	.
 	/********************************/
   	

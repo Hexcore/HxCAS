@@ -45,6 +45,15 @@ public class TestByteCode extends TestCase
 		
 		in = new File("Test Data/rules/testSet9.cal");
 		assertTrue(in.exists());
+		
+		in = new File("Test Data/rules/testSet10.cal");
+		assertTrue(in.exists());
+		
+		in = new File("Test Data/rules/testSet11.cal");
+		assertTrue(in.exists());
+		
+		in = new File("Test Data/rules/testSet12.cal");
+		assertTrue(in.exists());
 	}
 
 	
@@ -275,6 +284,54 @@ public class TestByteCode extends TestCase
 		assertEquals(0.0, c.getValue(1));
 		assertEquals(0.0, c.getValue(2));
 
+	}
+	
+	public void testMultipleTypeDeclarations()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet12.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		Cell c0 = new Cell(new double[]{0,0});
+		Cell c1 = new Cell(new double[]{1,0});
+		Cell c2 = new Cell(new double[]{2,0});
+		
+		//New Cell Test
+		assertEquals(0.0, c0.getValue(0));
+		assertEquals(0.0, c0.getValue(1));
+		assertEquals(1.0, c1.getValue(0));
+		assertEquals(0.0, c1.getValue(1));
+		assertEquals(2.0, c2.getValue(0));
+		assertEquals(0.0, c2.getValue(1));
+		
+		//Run once
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.run(c2, null);
+		
+		//Post run test
+		assertEquals(0.0, c0.getValue(0));
+		assertEquals(15.0, c0.getValue(1));
+		assertEquals(1.0, c1.getValue(0));
+		assertEquals(20.0, c1.getValue(1));
+		assertEquals(0.0, c2.getValue(0));
+		assertEquals(30.0, c2.getValue(1));
+		
+		//Run again
+		rule.run(c0, null);
+		rule.run(c2, null);
+		rule.run(c1, null);
+		
+		assertEquals(0.0, c0.getValue(0));
+		assertEquals(15.0, c0.getValue(1));
+		assertEquals(1.0, c1.getValue(0));
+		assertEquals(20.0, c1.getValue(1));
+		assertEquals(0.0, c2.getValue(0));
+		assertEquals(15.0, c2.getValue(1));
+		
 	}
 	
 }
