@@ -1,5 +1,8 @@
 package com.hexcore.cas.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.Grid;
@@ -34,11 +37,14 @@ public class Viewport
 	
 	public ColourRuleSet	colourRuleSet;
 	
+	public List<DropDownBox>	propertyDropDownBoxes;
+	
 	public Viewport(Container container, Type type, ColourRuleSet colourRuleSet)
 	{
 		this.container = container;
 		this.type = type;
 		this.colourRuleSet = colourRuleSet;
+		this.propertyDropDownBoxes = new ArrayList<DropDownBox>();
 	}
 
 	public void switchDimension(Grid grid, Window window)
@@ -138,6 +144,7 @@ public class Viewport
 	void updateControlPanel(LinearLayout controlPanel, Button addSliceButton)
 	{
 		controlPanel.clear();
+		propertyDropDownBoxes.clear();
 		
 		if (this.type == Viewport.Type.THREE_D && grid != null)
 		{
@@ -152,6 +159,7 @@ public class Viewport
 				
 				colourProperty.setSelected(slice.colourProperty);
 				controlPanel.add(colourProperty);
+				propertyDropDownBoxes.add(colourProperty);
 			}
 		
 			controlPanel.add(addSliceButton);

@@ -188,6 +188,13 @@ public class Grid3DWidget extends GridWidget
 		dirty = true;
 	}
 	
+	public void setSlice(int index, int colourProperty, int heightProperty)
+	{
+		slices.get(index).colourProperty = colourProperty;
+		slices.get(index).heightProperty = heightProperty;
+		dirty = true;
+	}
+	
 	public void clearSlices()
 	{
 		slices.clear();

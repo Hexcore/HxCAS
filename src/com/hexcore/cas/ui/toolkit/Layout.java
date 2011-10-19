@@ -1,6 +1,7 @@
 package com.hexcore.cas.ui.toolkit;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -15,12 +16,12 @@ import com.hexcore.cas.math.Vector2i;
  */
 public class Layout extends Widget
 {
-	protected String			themeClass = "";
-	protected Fill 				background = null;
-	protected Fill				border = null;
-	protected ArrayList<Widget>	components;
+	protected String		themeClass = "";
+	protected Fill 			background = null;
+	protected Fill			border = null;
+	protected List<Widget>	components;
 	
-	protected Vector2i			lastMouse;
+	protected Vector2i		lastMouse;
 	
 	public Layout(Vector2i size)
 	{
@@ -36,7 +37,6 @@ public class Layout extends Widget
 		lastMouse = new Vector2i();
 	}
 			
-	
 	public void clear()
 	{
 		components.clear();
@@ -45,28 +45,31 @@ public class Layout extends Widget
 	@Override
 	public void relayout()
 	{
-		for (Widget component : components)
+		synchronized(components)
 		{
-			Vector2i cPos = component.getPosition(), cSize = component.getSize();
-			
-			if (component.isSet(FILL_HORIZONTAL))
+			for (Widget component : components)
 			{
-				cPos.x = component.getMargin().x; 
-				cSize.x = size.x - component.getMargin().x * 2; 
+				Vector2i cPos = component.getPosition(), cSize = component.getSize();
+				
+				if (component.isSet(FILL_HORIZONTAL))
+				{
+					cPos.x = component.getMargin().x; 
+					cSize.x = size.x - component.getMargin().x * 2; 
+				}
+				else if (component.isSet(CENTER_HORIZONTAL))
+					cPos.x = (size.x - cSize.x) / 2;
+				
+				if (component.isSet(FILL_VERTICAL))
+				{
+					cPos.y = component.getMargin().y; 
+					cSize.y = size.y - component.getMargin().y * 2; 
+				}
+				else if (component.isSet(CENTER_VERTICAL))
+					cPos.y = (size.y - cSize.y) / 2;
 			}
-			else if (component.isSet(CENTER_HORIZONTAL))
-				cPos.x = (size.x - cSize.x) / 2;
 			
-			if (component.isSet(FILL_VERTICAL))
-			{
-				cPos.y = component.getMargin().y; 
-				cSize.y = size.y - component.getMargin().y * 2; 
-			}
-			else if (component.isSet(CENTER_VERTICAL))
-				cPos.y = (size.y - cSize.y) / 2;
+			for (Widget component : components) component.relayout();
 		}
-		
-		for (Widget component : components) component.relayout();
 	}
 	
 	@Override
@@ -77,7 +80,11 @@ public class Layout extends Widget
 		super.update(position, delta);
 		
 		Vector2i pos = this.position.add(position);
-		for (Widget component : components) component.update(pos, delta);
+		
+		synchronized(components)
+		{
+			for (Widget component : components) component.update(pos, delta);
+		}
 	}
 	
 	@Override
@@ -92,8 +99,11 @@ public class Layout extends Widget
 		else if ((window != null) && !themeClass.isEmpty())
 			Graphics.renderRectangle(gl, pos, size, 0, window.getTheme().getFill(themeClass, "background", Fill.NONE));
 		
-		for (Widget component : components)
-			component.render(gl, pos);
+		synchronized(components)
+		{
+			for (Widget component : components)
+				component.render(gl, pos);
+		}
 				
 		if (border != null)
 			Graphics.renderBorder(gl, pos, size, 0, border);	
@@ -112,8 +122,11 @@ public class Layout extends Widget
 			lastMouse = event.position;
 		}
 		
-		for (Widget component : components)
-			component.receiveEvent(event, position);
+		synchronized(components)
+		{
+			for (Widget component : components)
+				component.receiveEvent(event, position);
+		}
 		
 		return false;
 	}
@@ -140,8 +153,11 @@ public class Layout extends Widget
 	
 	public void add(Widget component) 
 	{
-		components.add(component); 
-		component.setParent(this);
+		synchronized(components)
+		{
+			components.add(component); 
+			component.setParent(this);
+		}
 		
 		if (window == null)
 			relayout();
