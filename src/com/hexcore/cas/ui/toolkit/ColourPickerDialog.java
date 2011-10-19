@@ -7,6 +7,6 @@ public class ColourPickerDialog extends Dialog
 	public ColourPickerDialog(Window window)
 	{
 		super(window, new Vector2i(400, 300));
-		setContents(new ColourPicker());
+		setContents(new ColourPicker(window));
 	}
 }

@@ -6,17 +6,17 @@ import javax.media.opengl.GL2;
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 
-public class ColourPicker extends Layout
+public class ColourPicker extends Widget
 {
 	private float	hueAngle = 0.0f;
 	private float	ba = 0.0f, bb = 0.0f, bc = 0.0f;
 	
 	private boolean wheelActive = false;
 	private boolean triangleActive = false;
-	
-	public ColourPicker()
+		
+	public ColourPicker(Window window)
 	{
-		super(new Vector2i(350, 250));
+		super(new Vector2i(240, 300));
 	}
 		
 	Colour getColour() 
