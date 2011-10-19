@@ -518,6 +518,11 @@ public class UITestApplication implements WindowEventListener
 						break;				
 				}
 			}
+			else if (colourDialog.isApplyButton(event.target))
+			{
+				window.closeModalDialog();
+				windowLayout.setBackground(new Fill(colourDialog.getColour()));
+			}
 		}
 		else if (event.type == Event.Type.CHANGE)
 		{

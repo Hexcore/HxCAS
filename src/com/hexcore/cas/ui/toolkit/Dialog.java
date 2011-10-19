@@ -28,5 +28,8 @@ public class Dialog extends Container
 		window.getTheme().renderDialog(gl, pos, size);
 
 		if (contents != null) contents.render(gl, pos);
+		
+		if (window.isDebugLayout())
+			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));
 	}
 }
