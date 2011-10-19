@@ -62,6 +62,11 @@ public class Vector2f
 		return "Vector2f<" + x + ", " + y + ">";
 	}
 	
+	public float length()
+	{
+		return (float)Math.sqrt(x*x + y*y);
+	}
+	
 	public void normalise()
 	{
 		float l = 1.0f / (float)Math.sqrt(x*x + y*y);

@@ -111,4 +111,9 @@ public class Vector2i
 	{
 		return new Vector2i(Math.max(a.x, b.x), Math.max(a.y, b.y));
 	}
+
+	public float length()
+	{
+		return (float)Math.sqrt(x*x + y*y);
+	}
 }
