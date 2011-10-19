@@ -52,7 +52,7 @@ public class ListWidget extends Widget
 		Text.Size	textSize = Text.Size.SMALL;
 		int			textHeight = theme.calculateTextHeight(textSize);
 		
-		window.setClipping(gl, pos, size);
+		window.addClipRectangle(gl, pos, size);
 		
 		int		borderRadius = theme.getInteger("List", "border-radius", 0);
 		Fill	backgroundFill = theme.getFill("List", "background");
@@ -102,7 +102,7 @@ public class ListWidget extends Widget
 		
 		Graphics.renderBorder(gl, pos, size, borderRadius, borderFill);
 		
-		window.resetView(gl);
+		window.removeClipRectangle(gl);
 	}
 	
 	@Override

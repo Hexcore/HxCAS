@@ -105,7 +105,7 @@ public class ScrollableContainer extends Container
 		
 		if (contents != null)
 		{
-			window.setClipping(gl, pos, size);
+			window.addClipRectangle(gl, pos, size);
 			
 			if (background != null) 
 				Graphics.renderRectangle(gl, pos, size, 0, background);
@@ -113,7 +113,7 @@ public class ScrollableContainer extends Container
 				Graphics.renderRectangle(gl, pos, size, 0, window.getTheme().getFill(themeClass, "background", Fill.NONE));
 			
 			contents.render(gl, pos.subtract(scrollPos));
-			window.resetView(gl);
+			window.removeClipRectangle(gl);
 						
 			if (verticalScrollbar)
 				window.getTheme().renderVerticalScrollbar(gl, pos, size, scrollPos.y, maxSize.y, viewSize.y);

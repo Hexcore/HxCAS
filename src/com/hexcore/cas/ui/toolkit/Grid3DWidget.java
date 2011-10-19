@@ -264,7 +264,7 @@ public class Grid3DWidget extends GridWidget
 		
 		renderVertexBuffer(gl);
 		
-		window.resetView(gl2);
+		window.removeClipRectangle(gl2);
 		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glDisable(GL.GL_DEPTH_TEST);
 	}

@@ -80,7 +80,7 @@ public class Container extends Widget
 		if (!visible) return;
 		
 		Vector2i pos = this.position.add(position);
-		window.setClipping(gl, pos, size);
+		window.addClipRectangle(gl, pos, size);
 		
 		if (background != null) 
 			Graphics.renderRectangle(gl, pos, size, 0, background);
@@ -94,7 +94,7 @@ public class Container extends Widget
 		else if ((window != null) && !themeClass.isEmpty())
 			Graphics.renderBorder(gl, pos, size, 0, window.getTheme().getFill(themeClass, "border", Fill.NONE));
 		
-		window.resetView(gl);
+		window.removeClipRectangle(gl);
 		
 		if (window.isDebugLayout())
 			Graphics.renderBorder(gl, pos, size, new Colour(0.0f, 1.0f, 0.5f));

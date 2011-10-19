@@ -100,10 +100,10 @@ public class TabbedView extends View
 		else
 			Graphics.renderRectangle(gl, innerPos.subtract(0, tabHeight / 2), innerSize.add(0, tabHeight / 2), 0, background);
 		
-		window.setClipping(gl, innerPos, innerSize);
+		window.addClipRectangle(gl, innerPos, innerSize);
 		Widget contents = getWidget();
 		if (contents != null) contents.render(gl, innerPos);
-		window.resetView(gl);
+		window.removeClipRectangle(gl);
 		
 		// Render tabs
 		int	tabsWidth = 0;

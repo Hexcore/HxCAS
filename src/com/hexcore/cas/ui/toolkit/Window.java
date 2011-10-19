@@ -21,6 +21,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,6 +35,7 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.swing.SwingUtilities;
 
+import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -48,7 +50,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private Widget		focusedWidget = null;
 	private Dialog		modalDialog = null;
 	
-	private ArrayList<WindowEventListener>	eventListeners;
+	private List<WindowEventListener>	eventListeners;
 	
 	private boolean[]		keyState;
 	private Timer			keyRepeatTimer = new Timer("KeyRepeatFilter");
@@ -58,6 +60,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private boolean	initDone = false;
 	private boolean	debugLayout = false;
 	private boolean	fullscreen = false;
+	
+	private List<Recti>	clipRectangles = new ArrayList<Recti>();
 	
 	public Window(String title, Theme theme)
 	{
@@ -211,30 +215,57 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		gl2.glViewport(position.x, this.size.y - (height + position.y), width, height);
 	}
 	
-	public void setClipping(GL gl, Vector2i position, Vector2i size)
+	private void clip(final GL gl, final Recti rect)
 	{
 		GL2 gl2 = gl.getGL2();
-		
-		gl2.glViewport(position.x, this.size.y - (size.y + position.y), size.x, size.y);
-		
+		gl2.glViewport(rect.position.x, this.size.y - (rect.size.y + rect.position.y), rect.size.x, rect.size.y);
         gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl2.glLoadIdentity();
-        gl2.glOrtho(position.x, position.x + size.x, position.y + size.y, position.y, -1000.0, 1000.0);
+        gl2.glOrtho(rect.position.x, rect.position.x + rect.size.x, 
+        		rect.position.y + rect.size.y, rect.position.y, -1000.0, 1000.0);
         gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl2.glLoadIdentity();
 	}
 	
-	public void resetView(GL gl)
+	private void resetClip(GL gl)
 	{
 		GL2 gl2 = gl.getGL2();
-		
 		gl2.glViewport(0, 0, size.x, size.y);
-		
         gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl2.glLoadIdentity();
         gl2.glOrtho(0.0, size.x, size.y, 0.0, -1000.0, 1000.0);
         gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
         gl2.glLoadIdentity();
+	}
+	
+	public void addClipRectangle(GL gl, Vector2i position, Vector2i size)
+	{
+		Recti rect = new Recti(position, size);
+		clipRectangles.add(rect);
+		
+		Recti current = clipRectangles.get(0);
+		for (int i = 1; i < clipRectangles.size(); i++)
+			current = current.intersect(clipRectangles.get(i));
+		
+		clip(gl, current);
+	}
+	
+	public void removeClipRectangle(GL gl)
+	{	
+		if (clipRectangles.isEmpty()) return;
+		
+		clipRectangles.remove(clipRectangles.size() - 1);
+		
+		if (clipRectangles.isEmpty())
+			resetClip(gl);
+		else
+		{
+			Recti current = clipRectangles.get(0);
+			for (int i = 1; i < clipRectangles.size(); i++)
+				current = current.intersect(clipRectangles.get(i));
+			
+			clip(gl, current);
+		}
 	}
 	
 	public void showModalDialog(Dialog dialog)
