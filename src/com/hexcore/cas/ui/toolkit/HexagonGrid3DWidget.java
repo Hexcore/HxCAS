@@ -37,7 +37,7 @@ public class HexagonGrid3DWidget extends Grid3DWidget
 				Cell 		cell = grid.getCell(x, y);
 				Vector2f	p = new Vector2f(x*(s+h), y*r*2);
 				
-				if ((x & 1) == 1) p.inc(0, r);
+				if ((x & 1) == 0) p.inc(0, r);
 				
 				addColumn(p, cell, hexagon);
 			}
