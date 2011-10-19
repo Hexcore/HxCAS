@@ -312,7 +312,8 @@ static public void reset()
 		entry.name = name;
 		entry.type = TableEntry.doubleType;
 		entry.kind = TableEntry.Property;
-		entry.offset = CodeGen.declareProperty(name);
+		if(valid)
+			entry.offset = CodeGen.declareProperty(name);
 		table.insert(entry);
 		
 		Expect(semicolon_Sym);
