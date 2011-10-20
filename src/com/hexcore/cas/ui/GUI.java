@@ -1058,8 +1058,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
 	        topLayout.add(controlLayout);
         
-	        	addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
-	        	controlLayout.add(addSliceButton);
+	        addSliceButton = new Button(new Vector2i(100, 50), "Add slice");
 	        	
 	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 	        viewportsLayout.setFlag(Widget.FILL);
@@ -1613,9 +1612,6 @@ public class GUI implements WindowEventListener, LobbyListener
     	
     	return false;
     }
-
-  
-    
     
     @Override
     public void handleWindowEvent(Event event)
@@ -1623,11 +1619,15 @@ public class GUI implements WindowEventListener, LobbyListener
     	if (event.type == Event.Type.GAINED_FOCUS)
     	{
         	for (Viewport viewport : viewports)
+        	{
+        		viewport.container.setBackground(new Fill(Colour.BLACK));
         		if ((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
     			{
+        			viewport.container.setBackground(new Fill(new Colour(0.8f, 0.2f, 0.2f)));
     				selectedViewport = viewport;
     				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
     			}
+        	}
     	}
     	else if (event.type == Event.Type.ACTION)
         {
