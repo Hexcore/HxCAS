@@ -22,6 +22,20 @@ public class ColourRuleSet
 	
 	public int getNumProperties() {return colourRules.length;}
 	
+	public void resize(int numProperties)
+	{
+		ColourRule[] newColourRules = new ColourRule[numProperties];
+		
+		int i = 0;
+		for (; i < Math.min(numProperties, colourRules.length); i++)
+			newColourRules[i] = colourRules[i];
+		
+		for (; i < numProperties; i++)
+			newColourRules[i] = new ColourRule();		
+		
+		colourRules = newColourRules;
+	}
+	
 	public ColourRule getColourRule(int propertyIndex)
 	{
 		if ((propertyIndex < 0) || (propertyIndex >= colourRules.length)) return null;

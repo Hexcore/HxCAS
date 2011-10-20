@@ -83,37 +83,28 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
 {	
-	 public void createColoursTab()
-	    {
-	    	int numProperties = world.getInitialGeneration().getNumProperties();
-		 	if (numProperties > 0)
-		 	{
-		 	colourPropertiesLayout.clear();
-		 
-	    	colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
-	    	
-	    	for (int i = 0 ; i < numProperties; i++)
-	    	{
-	    	   		
-	    
-	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));
-	    		
-	    	
-	    		colourPropertiesLayout.add(c.getLayout());
-	    		colourContainerList.add(c);
-	    
-	    		
-	    		
-	    	
-	    	}
-	    	
-	    	
-	   
-	    
-	   
-	    	
-		 	}
-	    }
+	public void createColoursTab()
+	{
+		int numProperties = world.getInitialGeneration().getNumProperties();
+		
+		if (numProperties != colourRules.getNumProperties())
+			colourRules.resize(numProperties);
+
+		if (numProperties > 0)
+		{
+			colourPropertiesLayout.clear();
+			 
+			colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
+			
+			for (int i = 0 ; i < numProperties; i++)
+			{
+				ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));	
+				colourPropertiesLayout.add(c.getLayout());
+				colourContainerList.add(c);
+			}
+		}
+	}
+	
 	public static class RangeContainer
 	{
 		int id;
