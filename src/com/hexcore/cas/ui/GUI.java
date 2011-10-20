@@ -25,6 +25,8 @@ import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRule.Range;
 import com.hexcore.cas.model.ColourRuleSet;
+import com.hexcore.cas.model.ColourRuleSetParser;
+import com.hexcore.cas.model.ColourRuleSetWriter;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.GridType;
 import com.hexcore.cas.model.HexagonGrid;
@@ -1394,6 +1396,11 @@ public class GUI implements WindowEventListener, LobbyListener
     	CALTextArea.setText(ruleCode);
     	saveRuleCodeToWorld();
     	
+    	ColourRuleSetParser parser = new ColourRuleSetParser();
+    	colourRules = parser.parse(world.getColourCode(), CodeGen.getPropertyList());
+    	
+    	if (colourRules == null) colourRules = new ColourRuleSet(grid.getNumProperties());
+    	
     	updatePreview();
     }
     
@@ -1444,6 +1451,12 @@ public class GUI implements WindowEventListener, LobbyListener
             world.reset();
             world.setWorldGenerations(new Grid[] {grid});
         }
+    }
+    
+    public void saveColourCodeToWorld()
+    {
+    	ColourRuleSetWriter writer = new ColourRuleSetWriter();
+    	world.setColourCode(writer.write(colourRules, "main", CodeGen.getPropertyList()));
     }
     	
     public void createPreviewTab()
@@ -1689,7 +1702,7 @@ public class GUI implements WindowEventListener, LobbyListener
         			colourRules.setColourRule(c.id, cr);
 	        	} 
         		
-        		
+        		saveColourCodeToWorld();
         	}
         	
             if (event.target == createWorldButton)
