@@ -251,6 +251,11 @@ PRODUCTIONS
   														SemanticError("Cannot mix scalar and array types in assignment");
   													}
   													
+  													if(entry.immutable)
+  													{
+  														SemError("Cannot assign to immutable symbol");
+  													}
+  													
   													if(valid)
   													{
 	  													if(entry.kind == TableEntry.Variable)
@@ -268,6 +273,11 @@ PRODUCTIONS
   		| PostOp< out T >						(. 
   													if(!TableEntry.isArith(entry.type))
   														SemanticError("Cannot perform a post operation on a boolan type.");
+  														
+  													if(entry.immutable)
+  													{
+  														SemError("Cannot alter immutable symbol");
+  													}
   														
   													if(entry.kind != TableEntry.Variable)
   													{
@@ -448,6 +458,7 @@ PRODUCTIONS
   														entry.kind = TableEntry.Variable;
   														entry.name = name;
   														entry.type = TableEntry.intType;
+  														entry.immutable = true;
   														table.insert(entry);
   														entry.offset = CodeGen.declareLoopVariables();
   													}
@@ -627,6 +638,7 @@ PRODUCTIONS
   	[
   	PostOp< out T >							(.
   												if(!TableEntry.isArith(type)) SemanticError("Cannot perform a post operation on a boolan type.");
+  								
   												if(p.kind != TableEntry.Variable)
   												{
   													SemanticError("Can only perform post operations on a variable.");
