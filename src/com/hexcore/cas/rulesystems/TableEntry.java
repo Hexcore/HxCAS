@@ -21,6 +21,7 @@ public class TableEntry
 	public int 				offset;
 	public int				argType;
 	public String			name;
+	public boolean			immutable = false;
 	
 	public TableEntry 		nextEntry;
 	

@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ClipboardOwner
@@ -287,9 +288,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void requestTooltip(Widget widget)
 	{
-		if (widget.getTooltip().isEmpty()) return;
 		if (widget == wantsTooltip) return;
-		
 		wantsTooltip = widget;
 	}
 	
@@ -472,7 +471,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		}
 		else if (focusedWidget != null) 
 			focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
-		else if (wantsTooltip != null && wantsTooltip.mouseover)
+		else if (wantsTooltip != null && wantsTooltip.mouseover && !wantsTooltip.getTooltip().isEmpty())
 		{
 			long diff = System.nanoTime() - lastMouseMove;
 			
