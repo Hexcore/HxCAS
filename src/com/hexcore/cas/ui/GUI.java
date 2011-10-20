@@ -752,7 +752,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         
         worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
-        worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
+        worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         worldLayout.add(worldHeaderLayout);
 
         
@@ -1325,25 +1325,24 @@ public class GUI implements WindowEventListener, LobbyListener
         toggleShowButton.setFlag(Widget.FILL_HORIZONTAL);
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
-        
+
         LinearLayout backToMainMenuLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         backToMainMenuLayout.setMargin(new Vector2i(0,0));
-        backToMainMenuLayout.setFlag(Widget.WRAP);
+        backToMainMenuLayout.setFlag(Widget.WRAP | Widget.CENTER_HORIZONTAL);
         worldHeaderLayout.add(backToMainMenuLayout);
        
         backToMainMenuButton = new Button(new Vector2i(60, 30), "Back");
+        backToMainMenuButton.setMargin(new Vector2i(0,0));
         backToMainMenuLayout.add(backToMainMenuButton);
-        
-        
-        LinearLayout headerLogoLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        headerLogoLayout.setMargin(new Vector2i(0,0));
-        headerLogoLayout.setFlag(Widget.WRAP);
-        headerLogoLayout.setFlag(Widget.CENTER_HORIZONTAL);
-        worldHeaderLayout.add(headerLogoLayout);
+
+        Container headerLogoContainer = new Container(new Vector2i(10, 10));
+        headerLogoContainer.setMargin(new Vector2i(0,0));
+        headerLogoContainer.setFlag(Widget.FILL);
+        worldHeaderLayout.add(headerLogoContainer);
         
         ImageWidget headerLogo = new ImageWidget(theme.getImage("headers", "logo.png"));
-        headerLogo.setFlag(Widget.CENTER_HORIZONTAL);
-        headerLogoLayout.add(headerLogo);
+        headerLogo.setFlag(Widget.CENTER);
+        headerLogoContainer.setContents(headerLogo);
        
         window.relayout();
     }
