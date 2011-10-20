@@ -1,0 +1,19 @@
+ruleset Flood
+{
+	typecount 1;
+	property water;
+	property land;
+
+	type Default
+	{
+		var n0 = (neighbours[0].land + neighbours[0].water) - self.land;
+		var n1 = (neighbours[1].land + neighbours[1].water) - self.land;
+		var n2 = (neighbours[2].land + neighbours[2].water) - self.land;
+		var n3 = (neighbours[3].land + neighbours[3].water) - self.land;
+		var n4 = (neighbours[4].land + neighbours[4].water) - self.land;
+		var n5 = (neighbours[5].land + neighbours[5].water) - self.land;
+		
+		if(((self.water < n0) && (neighbours[0].water != 0)) || ((self.water < n1) && (neighbours[1].water != 0)) || ((self.water < n2) && (neighbours[2].water != 0)) || ((self.water < n3) && (neighbours[3].water != 0)) || ((self.water < n4) && (neighbours[4].water != 0)) || ((self.water < n5) && (neighbours[5].water != 0)))
+			self.water = self.water + 1;
+	}
+}

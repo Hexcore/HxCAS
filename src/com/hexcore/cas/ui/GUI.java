@@ -83,39 +83,29 @@ import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
 {	
-	 public void createColoursTab()
-	    { 
+	public void createColoursTab()
+	{
+		int numProperties = world.getInitialGeneration().getNumProperties();
 		
-		 
-	    	int numProperties = world.getInitialGeneration().getNumProperties();
-		 	if (numProperties > 0)
-		 	{
-		 	colourPropertiesLayout.clear();
-		 
-	    	colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
-	    	
-	    	for (int i = 0 ; i < numProperties; i++)
-	    	{
-	    	   		
-	    
-	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));
-	    		
-	    	
-	    		colourPropertiesLayout.add(c.getLayout());
-	    		colourContainerList.add(c);
-	    
-	    		
-	    		
-	    	
-	    	}
-	    	
-	    	
-	   
-	    
-	   
-	    	
-		 	}
-	    }
+		if (numProperties != colourRules.getNumProperties())
+			colourRules.resize(numProperties);
+
+		if (numProperties > 0)
+		{
+			colourPropertiesLayout.clear();
+			 
+			colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
+			
+			for (int i = 0 ; i < numProperties; i++)
+			{
+				ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));	
+				colourPropertiesLayout.add(c.getLayout());
+				colourContainerList.add(c);
+			}
+		}
+	}
+	
+
 	public static class RangeContainer
 	{
 		int id;
@@ -1486,30 +1476,32 @@ public class GUI implements WindowEventListener, LobbyListener
 	        propertyValues.setFlag(Widget.WRAP);
 	        propertyValuesContainer.setContents(propertyValues);
         
-        editorApplyButton = new Button(new Vector2i(150, 40), "Apply");
+        editorApplyButton = new Button(new Vector2i(180, 40), "Apply");
     	editorApplyButton.setFlag(Widget.CENTER_HORIZONTAL);
         worldEditorRightLayout.add(editorApplyButton);
         
         
         LinearLayout heightMapLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        heightMapLayout.setFlag(Widget.WRAP);
-        heightMapLayout.setFlag(Widget.CENTER);
+        heightMapLayout.setMargin(new Vector2i(0, 0));
+        heightMapLayout.setFlag(Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
         worldEditorRightLayout.add(heightMapLayout);
         
-        TextWidget label1 = new TextWidget("Property:");
-        heightMapLayout.add(label1);
-        
-        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
-        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
-        heightMapLayout.add(heightMapPropertySelector);
-                   
-        
-        importHeightMapButton = new Button(new Vector2i(180,40), "Import Heightmap");
-        heightMapLayout.add(importHeightMapButton);
-        
-        
-        
-        
+	        TextWidget label1 = new TextWidget("Property:");
+	        heightMapLayout.add(label1);
+	        
+	        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
+	        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
+	        heightMapLayout.add(heightMapPropertySelector);
+	        
+	        heightMapIndexNumberBox = new NumberBox(40);
+	        heightMapIndexNumberBox.setFlag(Widget.FILL_HORIZONTAL);
+	        heightMapIndexNumberBox.setValue(0);
+	        heightMapLayout.add(heightMapIndexNumberBox);
+	        
+	        importHeightMapButton = new Button(new Vector2i(150,40), "Import Heightmap");
+	        importHeightMapButton.setFlag(Widget.FILL_HORIZONTAL);
+	        heightMapLayout.add(importHeightMapButton); 
+
     }
     
     public void reconstructViewportLayout()
@@ -1700,14 +1692,17 @@ public class GUI implements WindowEventListener, LobbyListener
     		case LOOK:
     			Log.debug(TAG, "LOOK");
     			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(true);
+    			editorApplyButton.setVisible(true);
     			break;
     		case BRUSH:
     			Log.debug(TAG, "BRUSH");
     			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(false);
+    			editorApplyButton.setVisible(false);
     			break;
     		case FILL:
     			Log.debug(TAG, "FILL");
     			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(false);
+    			editorApplyButton.setVisible(false);
     			break;
     	}
     }
