@@ -31,12 +31,14 @@ public class ColourRuleSet
 	public Colour getColour(int propertyIndex, double value)
 	{
 		if ((propertyIndex < 0) || (propertyIndex >= colourRules.length)) return Colour.BLACK;
+		if (colourRules[propertyIndex] == null) return Colour.BLACK;
 		return colourRules[propertyIndex].getColour(value);
 	}
 	
 	public Colour getColour(Cell cell, int propertyIndex)
 	{
 		if ((propertyIndex < 0) || (propertyIndex >= colourRules.length)) return Colour.BLACK;
+		if (colourRules[propertyIndex] == null) return Colour.BLACK;
 		return colourRules[propertyIndex].getColour(cell.getValue(propertyIndex));
 	}	
 	

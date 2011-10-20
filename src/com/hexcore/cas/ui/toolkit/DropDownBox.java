@@ -29,6 +29,8 @@ public class DropDownBox extends Widget
 	
 	public void		addItem(String text) {items.add(text);}
 	
+	public void		clear() {items.clear();}
+	
 	public void 	setSelected(int index) {selected = index;}
 	public int 		getSelected() {return selected;}
 	

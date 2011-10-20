@@ -50,6 +50,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
+import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
@@ -495,11 +496,12 @@ public class GUI implements WindowEventListener, LobbyListener
 
 	private LinearLayout masterWorldPreviewLayout;
 
-	private LinearLayout leftLayout;
-
-	private LinearLayout rightLayout;
+	private LinearLayout worldEditorLeftLayout;
+	private LinearLayout worldEditorRightLayout;
 	private Container previewWindowContainer;
 	private Viewport previewViewport;
+	private DropDownBox	worldEditorPropertySelector;
+	
 	private ArrayList<LinearLayout> rightLayouts;
 
 	private Button setCellValueButton;
@@ -966,26 +968,28 @@ public class GUI implements WindowEventListener, LobbyListener
         masterWorldPreviewLayout.setFlag(Widget.FILL);
         worldPreviewContainer.setContents(masterWorldPreviewLayout);
         
-        leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        leftLayout.setWidth(500);
-        leftLayout.setFlag(Widget.FILL_VERTICAL);
-        masterWorldPreviewLayout.add(leftLayout);
+        worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorLeftLayout.setWidth(500);
+        worldEditorLeftLayout.setFlag(Widget.FILL_VERTICAL);
+        masterWorldPreviewLayout.add(worldEditorLeftLayout);
         
-        rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        rightLayout.setFlag(Widget.FILL);
-        masterWorldPreviewLayout.add(rightLayout);
+        worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorRightLayout.setFlag(Widget.FILL);
+        masterWorldPreviewLayout.add(worldEditorRightLayout);
        
         previewWindowContainer = new Container(new Vector2i(100,100));
         previewWindowContainer.setFlag(Widget.FILL);
         previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         
         previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
-        leftLayout.add(previewViewport.container);
+        worldEditorLeftLayout.add(previewViewport.container);
         
+        worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        worldEditorRightLayout.add(worldEditorPropertySelector);
         
         setCellValueButton = new Button(new Vector2i(70,43), "SET");
     	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-        rightLayout.add(setCellValueButton);
+        worldEditorRightLayout.add(setCellValueButton);
     	
         
         
@@ -1453,6 +1457,13 @@ public class GUI implements WindowEventListener, LobbyListener
             world.reset();
             world.setWorldGenerations(new Grid[] {grid});
         }
+        
+        worldEditorPropertySelector.clear();
+        
+        for (String propertyName : CodeGen.getPropertyList())
+        	worldEditorPropertySelector.addItem(propertyName);
+        		
+        worldEditorPropertySelector.setSelected(1);
     }
     
     public void saveColourCodeToWorld()
@@ -1464,6 +1475,36 @@ public class GUI implements WindowEventListener, LobbyListener
     public void createPreviewTab()
     {
     	previewViewport.recreate(world.getInitialGeneration(), window, colourRules);
+    	
+    	int numProperties = world.getInitialGeneration().getNumProperties();
+    	
+    	worldEditorRightLayout.clear();
+    	
+    	worldEditorRightLayout.add(worldEditorPropertySelector);
+    	
+    	setCellValueButton = new Button(new Vector2i(70,43), "SET");
+     	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
+        worldEditorRightLayout.add(setCellValueButton);
+    	
+    	numberboxList = new ArrayList<NumberBox>();
+    	
+    	for (int i = 0 ; i < numProperties; i++)
+    	{
+        	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
+        	cellPropertyLayout.setHeight(40);
+        	cellPropertyLayout.setWidth(250);
+        	cellPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        	worldEditorRightLayout.add(cellPropertyLayout);
+        	
+        	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
+        	cellPropertyLayout.add(t);
+        	
+        	NumberBox n = new NumberBox(40);
+        	cellPropertyLayout.add(n);
+        	
+        	numberboxList.add(n);
+    	}
     }
     
     public void updatePreview()
@@ -2269,6 +2310,14 @@ public class GUI implements WindowEventListener, LobbyListener
                 createColoursTab();
         		updatePreview();
         	}
+        	else if (event.target == worldEditorPropertySelector)
+        	{
+        		createPreviewTab();
+        		
+        		GridWidget gw = previewViewport.gridWidget; 
+        		gw.clearSlices();
+        		gw.addSlice(worldEditorPropertySelector.getSelected(), 10.0f);
+        	}
         	else if (event.target == generationSlider)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
@@ -2280,46 +2329,9 @@ public class GUI implements WindowEventListener, LobbyListener
 				Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
 				
 				c = world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell());
-				
-            	int numProperties = world.getInitialGeneration().getNumProperties();
             	
-            	System.out.println(numProperties);
-            	
-            	rightLayout.clear();
-            	
-            	 setCellValueButton = new Button(new Vector2i(70,43), "SET");
-             	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-                 rightLayout.add(setCellValueButton);
-            	
-            	numberboxList = new ArrayList<NumberBox>();
-            	
-            	
-            	for (int i = 0 ; i < numProperties; i++)
-            	{
-            	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-            	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-            	
-            	cellPropertyLayout.setHeight(40);
-            	cellPropertyLayout.setWidth(250);
-            	cellPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
-            	rightLayout.add(cellPropertyLayout);
-            	
-            
-            	
-            	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
-            	cellPropertyLayout.add(t);
-            	
-            	NumberBox n = new NumberBox(40);
-            	n.setValue((int) c.getValue(i));
-            	cellPropertyLayout.add(n);
-            	
-            	numberboxList.add(n);
-            	
-            	
-            	}
-            	
-            	
-            	
+            	for (int i = 0 ; i < numberboxList.size(); i++)
+            		numberboxList.get(i).setValue((int)c.getValue(i));
 			}
         }
     }
