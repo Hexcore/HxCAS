@@ -1502,6 +1502,19 @@ public class GUI implements WindowEventListener, LobbyListener
         
     }
     
+    public void reconstructViewportLayout()
+    {
+    	viewportsLayout.clear();
+    	
+    	for(Viewport v : viewports)
+    	{
+    		viewportsLayout.add(v.container);
+        	
+    	}
+    	
+    }
+    
+    
     public void startWorldEditor(World world)
     {
     	this.world = world;
@@ -2219,7 +2232,17 @@ public class GUI implements WindowEventListener, LobbyListener
             
             else if (event.target == removeViewportButton)
             {
-            	viewports.remove(viewports.size());
+            	
+            	
+            	System.out.println("VIEWPORT:::::::::::::::::::;;" + viewports.size());
+            	
+            	if (viewports.size() > 1)
+            	{
+            			Viewport v = viewports.get(viewports.size() -1 );
+            			v = null;
+                 		viewports.remove(viewports.size() - 1);
+                 		reconstructViewportLayout();
+            	}
             }
             
             else if (event.target == addSliceButton)
