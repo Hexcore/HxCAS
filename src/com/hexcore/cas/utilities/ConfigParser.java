@@ -20,7 +20,12 @@ public abstract class ConfigParser
 	protected boolean expect(String expected)
 	{
 		ConfigScanner.Symbol symbol = scanner.getSymbol();
-		if (!expected.equals(symbol.text))
+		if (symbol == null)
+		{
+			error("Expected '" + expected + "' - Reached end of file");
+			return false;		
+		}
+		else if (!expected.equals(symbol.text))
 		{
 			error("Expected '" + expected + "' - Got '" + symbol.text + "'");
 			return false;
@@ -31,7 +36,12 @@ public abstract class ConfigParser
 	protected boolean expect(String expected, String msg)
 	{		
 		ConfigScanner.Symbol symbol = scanner.getSymbol();
-		if (!expected.equals(symbol.text))
+		if (symbol == null)
+		{
+			error("Expected '" + expected + "' - Reached end of file");
+			return false;		
+		}
+		else if (!expected.equals(symbol.text))
 		{
 			error("Expected '" + expected + "' - Got '" + symbol.text + "' - " + msg);
 			return false;

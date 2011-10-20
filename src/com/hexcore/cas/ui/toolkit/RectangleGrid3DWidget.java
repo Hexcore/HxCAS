@@ -26,7 +26,7 @@ public class RectangleGrid3DWidget extends Grid3DWidget
 		rect[3] = new Vector2f(0.0f, s);
 		
 		if (reallyDirty.getAndSet(false))
-			setupVertexBuffer(gl, 3);
+			setupVertexBuffer(gl, 4);
 		
 		resetVertexBuffer(gl, 4);
 

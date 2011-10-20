@@ -121,6 +121,10 @@ public class TextBox extends Widget
 		if (event.type == Event.Type.LOST_FOCUS)
 		{
 			selecting = false;
+			
+			Event changeEvent = new Event(Event.Type.CHANGE);
+			changeEvent.target = this;
+			window.sendWindowEvent(changeEvent);
 		}
 		else if (event.type == Event.Type.MOUSE_MOTION)
 		{	
@@ -163,11 +167,6 @@ public class TextBox extends Widget
 			
 			int startIndex = Math.min(cursorIndex, selectIndex);
 			int endIndex = Math.max(cursorIndex, selectIndex);
-					
-			if (event.type == Event.Type.KEY_PRESS)
-				System.out.println("Pressed " + event.button + " " + event.pressed);
-			else if (event.type == Event.Type.KEY_TYPED)
-				System.out.println("Typed " + event.button + " " + event.pressed);
 			
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
@@ -260,10 +259,6 @@ public class TextBox extends Widget
 				}
 				else
 					handled = false;
-				
-				Event changeEvent = new Event(Event.Type.CHANGE);
-				changeEvent.target = this;
-				window.sendWindowEvent(changeEvent);
 			}
 			else
 				handled = false;

@@ -26,6 +26,8 @@ import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRule.Range;
 import com.hexcore.cas.model.ColourRuleSet;
+import com.hexcore.cas.model.ColourRuleSetParser;
+import com.hexcore.cas.model.ColourRuleSetWriter;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.GridType;
 import com.hexcore.cas.model.HexagonGrid;
@@ -49,6 +51,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
+import com.hexcore.cas.ui.toolkit.GridWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
@@ -346,8 +349,6 @@ public class GUI implements WindowEventListener, LobbyListener
     public CheckBox		wrapCheckBox;
     public DropDownBox	cellShapeDropDownBox;
     
-    public Button		submitButton;
-    
     public Grid3DWidget	grid3DViewer = null;
     public Grid2DWidget	gridViewer = null;
 
@@ -505,11 +506,12 @@ public class GUI implements WindowEventListener, LobbyListener
 
 	private LinearLayout masterWorldPreviewLayout;
 
-	private LinearLayout leftLayout;
-
-	private LinearLayout rightLayout;
+	private LinearLayout worldEditorLeftLayout;
+	private LinearLayout worldEditorRightLayout;
 	private Container previewWindowContainer;
 	private Viewport previewViewport;
+	private DropDownBox	worldEditorPropertySelector;
+	
 	private ArrayList<LinearLayout> rightLayouts;
 
 	private Button setCellValueButton;
@@ -775,7 +777,7 @@ public class GUI implements WindowEventListener, LobbyListener
         LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
         buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-        buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP);
         worldLayout.add(buttonHeaderLayout);
             
             backButton = new Button(new Vector2i(100, 50), "Main Menu");
@@ -787,11 +789,6 @@ public class GUI implements WindowEventListener, LobbyListener
             saveWorldButton.setWidth(165);
             saveWorldButton.setHeight(35);
             buttonHeaderLayout.add(saveWorldButton);
-            
-            submitButton = new Button(new Vector2i(145,50), "Apply Changes");
-            submitButton.setWidth(165);
-            submitButton.setHeight(35);
-            buttonHeaderLayout.add(submitButton);
             
             simulateButton = new Button(new Vector2i(100, 50), "Simulate");
             simulateButton.setWidth(165);
@@ -981,26 +978,28 @@ public class GUI implements WindowEventListener, LobbyListener
         masterWorldPreviewLayout.setFlag(Widget.FILL);
         worldPreviewContainer.setContents(masterWorldPreviewLayout);
         
-        leftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        leftLayout.setWidth(500);
-        leftLayout.setFlag(Widget.FILL_VERTICAL);
-        masterWorldPreviewLayout.add(leftLayout);
+        worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorLeftLayout.setFlag(Widget.FILL);
+        masterWorldPreviewLayout.add(worldEditorLeftLayout);
         
-        rightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        rightLayout.setFlag(Widget.FILL);
-        masterWorldPreviewLayout.add(rightLayout);
+        worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
+        masterWorldPreviewLayout.add(worldEditorRightLayout);
        
         previewWindowContainer = new Container(new Vector2i(100,100));
         previewWindowContainer.setFlag(Widget.FILL);
         previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
         
         previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
-        leftLayout.add(previewViewport.container);
+        worldEditorLeftLayout.add(previewViewport.container);
         
+        worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        worldEditorPropertySelector.setFlag(Widget.WRAP_HORIZONTAL);
+        worldEditorRightLayout.add(worldEditorPropertySelector);
         
         setCellValueButton = new Button(new Vector2i(70,43), "SET");
     	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-        rightLayout.add(setCellValueButton);
+        worldEditorRightLayout.add(setCellValueButton);
     	
         
         
@@ -1073,8 +1072,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
 	        topLayout.add(controlLayout);
         
-	        	addSliceButton = new Button(new Vector2i(100, 50), "Add Slice");
-	        	controlLayout.add(addSliceButton);
+	        addSliceButton = new Button(new Vector2i(100, 50), "Add slice");
 	        	
 	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 	        viewportsLayout.setFlag(Widget.FILL);
@@ -1404,6 +1402,21 @@ public class GUI implements WindowEventListener, LobbyListener
     	CALTextArea.setText(ruleCode);
     	saveRuleCodeToWorld();
     	
+    	Log.debug(TAG, world.getColourCode());
+    	
+    	ColourRuleSetParser parser = new ColourRuleSetParser();
+    	colourRules = parser.parseString(world.getColourCode(), CodeGen.getPropertyList());
+    	
+    	if (colourRules == null)
+    	{
+    		Log.warning(TAG, "Invalid colour code");
+    		
+    		colourRules = new ColourRuleSet(grid.getNumProperties());
+    		
+    		for (int i = 0; i < grid.getNumProperties(); i++)
+    			colourRules.setColourRule(i, new ColourRule());
+    	}
+    	
     	updatePreview();
     }
     
@@ -1429,8 +1442,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         grid.setWrappable(wrapCheckBox.isChecked());
         
-        world.reset();
-        world.setWorldGenerations(new Grid[] {grid});
+        world.resetTo(grid);
     }
     
     public void saveRuleCodeToWorld()
@@ -1455,13 +1467,51 @@ public class GUI implements WindowEventListener, LobbyListener
             world.reset();
             world.setWorldGenerations(new Grid[] {grid});
         }
+        
+        worldEditorPropertySelector.clear();
+        
+        for (String propertyName : CodeGen.getPropertyList())
+        	worldEditorPropertySelector.addItem(propertyName);
+        		
+        worldEditorPropertySelector.setSelected(1);
+    }
+    
+    public void saveColourCodeToWorld()
+    {
+    	ColourRuleSetWriter writer = new ColourRuleSetWriter();
+    	world.setColourCode(writer.write(colourRules, "main", CodeGen.getPropertyList()));
     }
     	
     public void createPreviewTab()
     {
+    	previewViewport.recreate(world.getInitialGeneration(), window, colourRules);
     	
-    	previewViewport.recreate(world.getInitialGeneration(), window);
-          
+    	int numProperties = world.getInitialGeneration().getNumProperties();
+    	
+    	worldEditorRightLayout.clear();
+    	worldEditorRightLayout.add(worldEditorPropertySelector);
+    	
+    	numberboxList = new ArrayList<NumberBox>();
+    	
+    	for (int i = 0 ; i < numProperties; i++)
+    	{
+        	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
+        	cellPropertyLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
+        	worldEditorRightLayout.add(cellPropertyLayout);
+        	
+        	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
+        	cellPropertyLayout.add(t);
+        	
+        	NumberBox n = new NumberBox(40);
+        	cellPropertyLayout.add(n);
+        	
+        	numberboxList.add(n);
+    	}
+    	
+    	setCellValueButton = new Button(new Vector2i(70,43), "Apply");
+    	setCellValueButton.setWidth(250);
+        worldEditorRightLayout.add(setCellValueButton);
     }
     
     public void updatePreview()
@@ -1544,7 +1594,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			else
     			{
 	   				for (Viewport viewport : viewports) 
-	   					viewport.recreate(grid, window);
+	   					viewport.recreate(grid, window, colourRules);
     			}
     		}
     	}
@@ -1608,9 +1658,6 @@ public class GUI implements WindowEventListener, LobbyListener
     	
     	return false;
     }
-
-  
-    
     
     @Override
     public void handleWindowEvent(Event event)
@@ -1623,6 +1670,12 @@ public class GUI implements WindowEventListener, LobbyListener
     				selectedViewport = viewport;
     				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
     			}
+
+        	for (Viewport viewport : viewports)
+        		if (viewport == selectedViewport)
+        			viewport.container.setBackground(new Fill(new Colour(0.8f, 0.2f, 0.2f)));
+        		else
+        			viewport.container.setBackground(new Fill(Colour.BLACK));
     	}
     	else if (event.type == Event.Type.ACTION)
         {
@@ -1700,7 +1753,7 @@ public class GUI implements WindowEventListener, LobbyListener
         			colourRules.setColourRule(c.id, cr);
 	        	} 
         		
-        		
+        		saveColourCodeToWorld();
         	}
         	
             if (event.target == createWorldButton)
@@ -1758,21 +1811,6 @@ public class GUI implements WindowEventListener, LobbyListener
             else if (event.target == backButton)
             {
                 masterView.setIndex(0);
-            }
-            else if (event.target == submitButton)
-            {            	
-                if(( worldSizeXNumberBox.getValue(5) < 5) || ( worldSizeYNumberBox.getValue(5) < 5))
-                {
-                    window.showModalDialog(dialog);
-                    return;
-                }
-                
-                savePropertiesToWorld();
-                saveRuleCodeToWorld();
-                updatePreview();
-                createPreviewTab();
-                createColoursTab();
-               
             }
             else if (event.target == clearRulesButton)
             {
@@ -1971,7 +2009,7 @@ public class GUI implements WindowEventListener, LobbyListener
             	viewportsLayout.add(container);
             	
             	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D, colourRules);
-            	viewport.recreate(currentGrid, window);
+            	viewport.recreate(currentGrid, window, colourRules);
             	
             	viewports.add(viewport);
             }
@@ -1980,9 +2018,7 @@ public class GUI implements WindowEventListener, LobbyListener
         		if (selectedViewport != null)
         		{
         			Slice slice = new Slice(1, 10.0f);
-        			Grid3DWidget gw = (Grid3DWidget)selectedViewport.gridWidget;
-        			gw.addSlice(slice);
-        			
+        			selectedViewport.gridWidget.addSlice(slice);
         			selectedViewport.updateControlPanel(controlLayout, addSliceButton);
         		}
             }
@@ -2267,8 +2303,29 @@ public class GUI implements WindowEventListener, LobbyListener
         			}
         		}
         	}
-        	
-            if (event.target == generationSlider)
+        	else if (event.target == worldSizeXNumberBox 
+        			|| event.target == worldSizeYNumberBox
+        			|| event.target == wrapCheckBox
+        			|| event.target == cellShapeDropDownBox)
+        	{
+                if (worldSizeXNumberBox.getValue(5) < 5) worldSizeXNumberBox.setValue(5);	
+                if (worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
+
+                savePropertiesToWorld();
+                saveRuleCodeToWorld();
+                createPreviewTab();
+                createColoursTab();
+        		updatePreview();
+        	}
+        	else if (event.target == worldEditorPropertySelector)
+        	{
+        		createPreviewTab();
+        		
+        		GridWidget gw = previewViewport.gridWidget; 
+        		gw.clearSlices();
+        		gw.addSlice(worldEditorPropertySelector.getSelected(), 10.0f);
+        	}
+        	else if (event.target == generationSlider)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
@@ -2279,46 +2336,9 @@ public class GUI implements WindowEventListener, LobbyListener
 				Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
 				
 				c = world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell());
-				
-            	int numProperties = world.getInitialGeneration().getNumProperties();
             	
-            	System.out.println(numProperties);
-            	
-            	rightLayout.clear();
-            	
-            	 setCellValueButton = new Button(new Vector2i(70,43), "SET");
-             	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-                 rightLayout.add(setCellValueButton);
-            	
-            	numberboxList = new ArrayList<NumberBox>();
-            	
-            	
-            	for (int i = 0 ; i < numProperties; i++)
-            	{
-            	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-            	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-            	
-            	cellPropertyLayout.setHeight(40);
-            	cellPropertyLayout.setWidth(250);
-            	cellPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
-            	rightLayout.add(cellPropertyLayout);
-            	
-            
-            	
-            	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
-            	cellPropertyLayout.add(t);
-            	
-            	NumberBox n = new NumberBox(40);
-            	n.setValue((int) c.getValue(i));
-            	cellPropertyLayout.add(n);
-            	
-            	numberboxList.add(n);
-            	
-            	
-            	}
-            	
-            	
-            	
+            	for (int i = 0 ; i < numberboxList.size(); i++)
+            		numberboxList.get(i).setValue((int)c.getValue(i));
 			}
         }
     }

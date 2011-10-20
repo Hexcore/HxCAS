@@ -24,10 +24,20 @@ public class ColourRuleSetParser extends ConfigParser
 		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';', '-'});
 	}
 	
-	public ColourRuleSet parse(String filename, List<String> properties)
-	{	
+	public ColourRuleSet parseString(String code, List<String> properties)
+	{
+		scanner.readString(code);
+		return parse(properties);
+	}
+	
+	public ColourRuleSet parseFile(String filename, List<String> properties)
+	{
 		scanner.readFile(filename);
-		
+		return parse(properties);
+	}	
+	
+	private ColourRuleSet parse(List<String> properties)
+	{
 		String			ruleSetName;
 		ColourRuleSet	ruleSet = new ColourRuleSet(properties.size());
 		
@@ -114,11 +124,13 @@ public class ColourRuleSetParser extends ConfigParser
 	
 	private ColourRule.Range readRange()
 	{
-		int first = 0, second = 0;
+		float first = 0, second = 0;
 		
 		Symbol symbol = scanner.getSymbol();
 		if (symbol.type == Symbol.Type.INTEGER)
 			first = symbol.integer;
+		else if (symbol.type == Symbol.Type.DECIMAL)
+			first = symbol.decimal;
 		else
 		{
 			error("Expected an integer specifying the start of the range, got '" + symbol.text + "'");
@@ -135,6 +147,8 @@ public class ColourRuleSetParser extends ConfigParser
 		symbol = scanner.getSymbol();
 		if (symbol.type == Symbol.Type.INTEGER)
 			second = symbol.integer;
+		else if (symbol.type == Symbol.Type.DECIMAL)
+			second = symbol.decimal;
 		else
 		{
 			error("Expected an integer specifying the end of the range, got '" + symbol.text + "'");

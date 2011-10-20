@@ -50,7 +50,7 @@ public class NumberBox extends TextBox
 		if (focused)
 		{
 			if (event.type == Event.Type.KEY_TYPED && !event.hasModifier(Event.CTRL))
-				if ((event.button =='\b') || (event.button == 127))
+				if ((event.button =='\b') || (event.button == 127) || (event.button == '\n'))
 					handled = false;
 				else if ((event.button < '0') || (event.button > '9'))
 					handled = true;

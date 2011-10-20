@@ -9,7 +9,7 @@ import com.hexcore.cas.math.Vector2i;
 public class ColourPicker extends Widget
 {
 	private float	hueAngle = 0.0f;
-	private float	ba = 0.0f, bb = 0.0f, bc = 0.0f;
+	private float	ba = 1.0f, bb = 0.0f, bc = 0.0f;
 	
 	private boolean wheelActive = false;
 	private boolean triangleActive = false;

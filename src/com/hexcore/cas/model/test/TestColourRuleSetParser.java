@@ -25,7 +25,7 @@ public class TestColourRuleSetParser
 		properties.add("land");
 		
 		ColourRuleSetParser parser = new ColourRuleSetParser();
-		ColourRuleSet ruleSet = parser.parse("Test Data/colourruleset/test.crs", properties);
+		ColourRuleSet ruleSet = parser.parseFile("Test Data/colourruleset/test.crs", properties);
 		
 		assertEquals(ruleSet.getNumProperties(), 2);
 		

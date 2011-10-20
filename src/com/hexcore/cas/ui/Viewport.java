@@ -57,12 +57,13 @@ public class Viewport
 		else			
 			type = Viewport.Type.THREE_D;
 		
-		recreate(grid, window);
+		recreate(grid, window, colourRuleSet);
 	}
 	
-	public void recreate(Grid grid, Window window)
+	public void recreate(Grid grid, Window window, ColourRuleSet colourRules)
 	{
 		this.grid = grid;
+		this.colourRuleSet = colourRules;
 		
 		Grid3DWidget temp3DWidget = null;
 		Grid2DWidget temp2DWidget = null;
