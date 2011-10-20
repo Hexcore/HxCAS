@@ -1967,7 +1967,7 @@ public class GUI implements WindowEventListener, LobbyListener
             }
             else if (event.target == addSliceButton)
             {
-        		if (selectedViewport != null && selectedViewport.type == Viewport.Type.THREE_D)
+        		if (selectedViewport != null)
         		{
         			Slice slice = new Slice(1, 10.0f);
         			Grid3DWidget gw = (Grid3DWidget)selectedViewport.gridWidget;
