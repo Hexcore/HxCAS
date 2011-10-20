@@ -31,9 +31,12 @@ public class ColourPicker extends Widget
 		Vector2i pos = this.position.add(position);
 		
 		GL2 gl2 = gl.getGL2();
+		Theme theme = window.getTheme();
+		int borderRadius = theme.getInteger("ColourPicker", "border-radius", 0);
+		Fill backgroundFill = theme.getFill("ColourPicker", "background", new Fill(new Colour(0.75f, 0.75f, 0.75f)));
 		
 		// Draw background
-		Graphics.renderRectangle(gl2, pos, new Vector2i(220, 220), 8, new Fill(new Colour(0.75f, 0.75f, 0.75f)));
+		Graphics.renderRectangle(gl2, pos, new Vector2i(220, 220), borderRadius, backgroundFill);
 		
 		// Draw hue circle
 		gl2.glBegin(GL.GL_TRIANGLE_STRIP);
@@ -127,7 +130,7 @@ public class ColourPicker extends Widget
 		gl2.glEnd();
 		
 		// Draw colour square
-		Graphics.renderRectangle(gl2, pos.add(0, 230), new Vector2i(220, 50), 8, new Fill(getColour()));
+		Graphics.renderRectangle(gl2, pos.add(0, 230), new Vector2i(220, 50), borderRadius, new Fill(getColour()));
 	}
 	
 	@Override	
