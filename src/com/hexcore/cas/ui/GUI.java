@@ -2197,6 +2197,12 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	viewports.add(viewport);
             }
+            
+            else if (event.target == removeViewportButton)
+            {
+            	viewports.remove(viewports.size());
+            }
+            
             else if (event.target == addSliceButton)
             {
         		if (selectedViewport != null)
