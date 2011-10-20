@@ -19,7 +19,7 @@ public class ColourPicker extends Widget
 		super(new Vector2i(240, 285));
 	}
 		
-	Colour getColour() 
+	public Colour getColour() 
 	{
 		Colour col = hueAngleToColour(hueAngle);
 		return new Colour(bb + ba * col.r, bb + ba * col.g, bb + ba * col.b);

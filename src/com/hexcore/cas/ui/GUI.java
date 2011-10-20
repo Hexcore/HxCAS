@@ -39,6 +39,7 @@ import com.hexcore.cas.ui.GUI.RangeContainer;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
+import com.hexcore.cas.ui.toolkit.ColourPicker;
 import com.hexcore.cas.ui.toolkit.Container;
 import com.hexcore.cas.ui.toolkit.Dialog;
 import com.hexcore.cas.ui.toolkit.DiscreteSliderWidget;
@@ -103,18 +104,46 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	
 	    	}
 	    	
-	    //	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	    //	colourButtonsLayout.setHeight(200);
-	   // 	colourButtonsLayout.setWidth(200);
-	   // 	rightColoursLayout.add(colourButtonsLayout);
+	    	
+	    LinearLayout innerRightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	    innerRightColourLayout.setFlag(Widget.WRAP);
+	    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+	    	
+	   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	   	colourButtonsLayout.setFlag(Widget.WRAP);
+	   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourButtonsLayout);
+	    
+	
 	    	
 	   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
-	    colourPropertiesLayout.add(setColourRangesButton);
+	   	colourButtonsLayout.add(setColourRangesButton);
 	    	
-	    //	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
-	    //	colourButtonsLayout.add(resetColourRangesButton);
-	    	
-	    	
+	  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
+	  	colourButtonsLayout.add(resetColourRangesButton);
+	    
+	    colourPicker = new ColourPicker(window);
+	    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourPicker);
+	    
+	    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.WRAP);
+	    rightColourLayout.add(cpRGBLayout);
+	    
+	    cpRNumberBox = new NumberBox(40);
+	    cpRNumberBox.setValue(0);
+	    cpRGBLayout.add(cpRNumberBox);
+	   
+	    cpGNumberBox = new NumberBox(40);
+	    cpGNumberBox.setValue(0);
+	    cpRGBLayout.add(cpGNumberBox);
+	    
+	    cpBNumberBox = new NumberBox(40);
+	    cpBNumberBox.setValue(0);
+	    cpRGBLayout.add(cpBNumberBox);
+	    
+	   
 	    	
 		 	}
 	    }
@@ -128,14 +157,20 @@ public class GUI implements WindowEventListener, LobbyListener
 		public NumberBox g;
 		public NumberBox b;
 		
+		public NumberBox r2;
+		public NumberBox g2;
+		public NumberBox b2;
+		
 		public TextWidget t;
 		public TextWidget t1;
 		public TextWidget t2;
 		public TextWidget t3;
 		public TextWidget t4;
+		public TextWidget t5;
 		
 		public LinearLayout rangeLayout;
 		public LinearLayout rangeColourLayout;
+		public LinearLayout rangeColourLayout2;
 		
 		public RangeContainer(int id, Window window)
 		{
@@ -154,12 +189,22 @@ public class GUI implements WindowEventListener, LobbyListener
 			b = new NumberBox(40);
 			b.setFlag(Widget.CENTER_VERTICAL);
 			
+			
+			r2 = new NumberBox(40);
+			r2.setFlag(Widget.CENTER_VERTICAL);
+			g2 = new NumberBox(40);
+			g2.setFlag(Widget.CENTER_VERTICAL);
+			b2 = new NumberBox(40);
+			b2.setFlag(Widget.CENTER_VERTICAL);
+			
 	       	t2 = new TextWidget("Range: ");
 	       	t2.setFlag(Widget.CENTER_VERTICAL);
 	       	t3 = new TextWidget(" - ");
 	       	t3.setFlag(Widget.CENTER_VERTICAL);
-	    	t4 = new TextWidget("RGB Value:");
+	    	t4 = new TextWidget("Gradient:");
 	    	t4.setFlag(Widget.CENTER_VERTICAL);
+	    	t5 = new TextWidget(" - :");
+	    	t5.setFlag(Widget.CENTER_VERTICAL);
 	       	
 	    	
 	    	
@@ -184,6 +229,20 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeColourLayout.setWidth(32);
 	    	rangeColourLayout.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
 	    	rangeLayout.add(rangeColourLayout);
+			
+			rangeLayout.add(t5);
+			
+			rangeLayout.add(r2);
+			rangeLayout.add(g2);
+			rangeLayout.add(b2);
+			
+			rangeColourLayout2 = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeColourLayout2.setMargin(new Vector2i(25,8));
+			rangeColourLayout2.setHeight(32);
+			rangeColourLayout2.setWidth(32);
+	    	rangeColourLayout2.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
+	    	rangeLayout.add(rangeColourLayout2);
+			
 		
 		}
 		
@@ -535,6 +594,27 @@ public class GUI implements WindowEventListener, LobbyListener
 
 
 	private Button resetColourRangesButton;
+
+
+	private LinearLayout rightColourLayout;
+
+
+	private LinearLayout leftColourLayout;
+
+
+	private NumberBox cpRNumberBox;
+
+
+	private NumberBox cpGNumberBox;
+
+
+	private NumberBox cpBNumberBox;
+
+
+	private LinearLayout cpRGBLayout;
+
+
+	private ColourPicker colourPicker;
     
     public GUI(Server server)
     {
@@ -646,10 +726,12 @@ public class GUI implements WindowEventListener, LobbyListener
         
         
         
-        LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(100, 30), LinearLayout.Direction.HORIZONTAL);
-        worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
+        LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
+        worldHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
         worldLayout.add(worldHeaderLayout);
 
+        ImageWidget headerLogo = new ImageWidget(theme.getImage("headers", "logo.png"));
+        worldHeaderLayout.add(headerLogo);
 		worldLayout.add(tabbedWorldView);
 		
 		propertiesContainer = new Container(new Vector2i(100, 100));    
@@ -865,10 +947,22 @@ public class GUI implements WindowEventListener, LobbyListener
         masterColoursLayout.setFlag(Widget.FILL);
         coloursContainer.setContents(masterColoursLayout);
         
+        
+        leftColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        leftColourLayout.setFlag(Widget.FILL);
+        masterColoursLayout.add(leftColourLayout);
+        
+        rightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        rightColourLayout.setFlag(Widget.FILL);
+   //     rightColourLayout.setWidth(350);
+        masterColoursLayout.add(rightColourLayout);
+        
+        
         LinearLayout propertyColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertyColourLayout.setFlag(Widget.FILL);
-        masterColoursLayout.add(propertyColourLayout);
-		ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
+        leftColourLayout.add(propertyColourLayout);
+		
+        ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
 		propertyColourHeader.setMargin(new Vector2i(150,10));
 		propertyColourLayout.add(propertyColourHeader);
         
@@ -2166,6 +2260,20 @@ public class GUI implements WindowEventListener, LobbyListener
         }
         else if (event.type == Event.Type.CHANGE)
         {
+        	if (cpRNumberBox != null && cpGNumberBox != null && cpBNumberBox != null)
+        	{
+        		if (event.target == colourPicker)
+		        {
+		        	Colour rgb = colourPicker.getColour();
+		        			
+		        	cpRNumberBox.setValue((int) (rgb.r * 255.0f));
+		        	cpGNumberBox.setValue((int) (rgb.g * 255.0f));
+		           	cpBNumberBox.setValue((int) (rgb.b * 255.0f));
+		        }
+        	}
+    	  
+    	        	
+        	
         	if (colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
