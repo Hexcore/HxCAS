@@ -94,8 +94,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	for (int i = 0 ; i < numProperties; i++)
 	    	{
 	    	   		
-	    		
-	    	
+	    
 	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));
 	    		
 	    	
@@ -216,7 +215,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		public LinearLayout rangeButtonsLayout;
 		public TextWidget t1; 
 		
-		public ColourContainer(int id, Window window, String name, ColourRule colourRule)
+		public ColourContainer(int id, Window window, String name, ColourRule c)
 		{
 			this.id = id;
 			
@@ -244,27 +243,72 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
 			
-			Iterator<Range> it = colourRule.ranges.iterator();
-			
-			while (it.hasNext())
-			{
-			Range r = it.next();
-			addRange(id, r);
+			if (c != null)
+			{ System.out.println("LOOOOOOOL");
+				for (Range r : c.ranges)
+				{
+					if (r != null)
+					{
+						if (r.getType() == Range.Type.GRADIENT)
+							addRangeGradient(id, r);
+						else
+							addRangeSolid(id,r);
+					}
+				}
 			}
+			
+			
+			
+			
 		}
 		
-		public void addRange(int id, Range r )
+		public void addRangeGradient(int id, Range r )
 		{
 			numRanges++;
 			
 			RangeContainer rc = new RangeContainer(id, this.layout.getWindow());
 			rangeContainerList.add(rc);
 			
+			rc.colourBoxFrom.setColour(r.getColour(0));
+			rc.colourBoxTo.setColour(r.getColour(1));
+			rc.fromColour = r.getColour(0);
+			rc.toColour = r.getColour(1);
+			
 			this.layout.add(rc.getLayout());
 		
 		}
 		
+		public void addRangeSolid(int id, Range r )
+		{
+			numRanges++;
+			
+			RangeContainer rc = new RangeContainer(id, this.layout.getWindow());
+			rangeContainerList.add(rc);
+			
+			rc.colourBoxFrom.setColour(r.getColour(0));
+			rc.colourBoxTo.setColour(r.getColour(0));
+			rc.fromColour = r.getColour(0);
+			rc.toColour = r.getColour(0);
+			this.layout.add(rc.getLayout());
 		
+		}
+		
+		public void addRange(int id)
+		{
+			numRanges++;
+			
+			RangeContainer rc = new RangeContainer(id, this.layout.getWindow());
+			rangeContainerList.add(rc);
+			
+			rc.colourBoxFrom.setColour(new Colour(0.0f,0.0f,0.0f));
+			rc.colourBoxTo.setColour(new Colour(0.0f,0.0f,0.0f));
+			rc.fromColour = new Colour(0.0f,0.0f,0.0f);
+			rc.toColour = new Colour(0.0f,0.0f,0.0f);
+			this.layout.add(rc.getLayout());
+		
+		}
+		
+			
 		public void removeRange()
 		{
 			numRanges--;
@@ -1711,7 +1755,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		{
 	        		
 	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
-	        	//	c.addRange(c.id);
+	        		c.addRange(c.id);
 	        		window.relayout();
 	        		
 	        		
