@@ -12,7 +12,7 @@ public class ColourRuleSetWriter
 	
 	public String write(ColourRuleSet colourRuleSet, String name, List<String> properties)
 	{	
-		String str = "colourruleset " + name + "\n{\n";
+		String str = "colourset " + name + "\n{\n";
 		
 		for (int i = 0; i < colourRuleSet.getNumProperties(); i++)
 			str += writeProperty(colourRuleSet.getColourRule(i), properties.get(i));

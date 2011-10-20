@@ -1463,9 +1463,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	
     public void createPreviewTab()
     {
-    	
-    	previewViewport.recreate(world.getInitialGeneration(), window);
-          
+    	previewViewport.recreate(world.getInitialGeneration(), window, colourRules);
     }
     
     public void updatePreview()
@@ -1548,7 +1546,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			else
     			{
 	   				for (Viewport viewport : viewports) 
-	   					viewport.recreate(grid, window);
+	   					viewport.recreate(grid, window, colourRules);
     			}
     		}
     	}
@@ -1619,15 +1617,17 @@ public class GUI implements WindowEventListener, LobbyListener
     	if (event.type == Event.Type.GAINED_FOCUS)
     	{
         	for (Viewport viewport : viewports)
-        	{
-        		viewport.container.setBackground(new Fill(Colour.BLACK));
         		if ((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
     			{
-        			viewport.container.setBackground(new Fill(new Colour(0.8f, 0.2f, 0.2f)));
     				selectedViewport = viewport;
     				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
     			}
-        	}
+
+        	for (Viewport viewport : viewports)
+        		if (viewport == selectedViewport)
+        			viewport.container.setBackground(new Fill(new Colour(0.8f, 0.2f, 0.2f)));
+        		else
+        			viewport.container.setBackground(new Fill(Colour.BLACK));
     	}
     	else if (event.type == Event.Type.ACTION)
         {
@@ -1961,7 +1961,7 @@ public class GUI implements WindowEventListener, LobbyListener
             	viewportsLayout.add(container);
             	
             	Viewport viewport = new Viewport(container, Viewport.Type.THREE_D, colourRules);
-            	viewport.recreate(currentGrid, window);
+            	viewport.recreate(currentGrid, window, colourRules);
             	
             	viewports.add(viewport);
             }

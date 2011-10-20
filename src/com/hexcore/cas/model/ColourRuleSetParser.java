@@ -124,11 +124,13 @@ public class ColourRuleSetParser extends ConfigParser
 	
 	private ColourRule.Range readRange()
 	{
-		int first = 0, second = 0;
+		float first = 0, second = 0;
 		
 		Symbol symbol = scanner.getSymbol();
 		if (symbol.type == Symbol.Type.INTEGER)
 			first = symbol.integer;
+		else if (symbol.type == Symbol.Type.DECIMAL)
+			first = symbol.decimal;
 		else
 		{
 			error("Expected an integer specifying the start of the range, got '" + symbol.text + "'");
@@ -145,6 +147,8 @@ public class ColourRuleSetParser extends ConfigParser
 		symbol = scanner.getSymbol();
 		if (symbol.type == Symbol.Type.INTEGER)
 			second = symbol.integer;
+		else if (symbol.type == Symbol.Type.DECIMAL)
+			second = symbol.decimal;
 		else
 		{
 			error("Expected an integer specifying the end of the range, got '" + symbol.text + "'");
