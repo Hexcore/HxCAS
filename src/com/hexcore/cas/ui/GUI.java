@@ -221,7 +221,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			this.id = id;
 			
 			addRangeButton = new Button(new Vector2i(30,25), "+");
+			addRangeButton.setTooltip("Add a new colour range");
 			removeRangeButton = new Button(new Vector2i(30,25), "-");
+			removeRangeButton.setTooltip("Removes a colour range");
 			rangeButtonsLayout =  new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 			rangeButtonsLayout.setWindow(window);
 			rangeButtonsLayout.setFlag(Widget.WRAP);
@@ -245,7 +247,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
 			
 			if (c != null)
-			{ System.out.println("LOOOOOOOL");
+			{ 
 				for (Range r : c.ranges)
 				{
 					if (r != null)
@@ -1934,8 +1936,11 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		
 	        		if (event.target == c.removeRangeButton)
 	        		{
-	        			System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
-	        			c.removeRange();
+	        			if (!c.rangeContainerList.isEmpty())
+	        			{
+	        				c.removeRange();
+	        				createColoursTab();
+	        			}
 	        		}
 	        		
 	        			
