@@ -271,6 +271,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			rc.colourBoxFrom.setColour(r.getColour(0));
 			rc.colourBoxTo.setColour(r.getColour(1));
+			
+			rc.firstRange.setValue((int) r.from);
+			rc.secondRange.setValue((int) r.to);
 			rc.fromColour = r.getColour(0);
 			rc.toColour = r.getColour(1);
 			
@@ -287,6 +290,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			rc.colourBoxFrom.setColour(r.getColour(0));
 			rc.colourBoxTo.setColour(r.getColour(0));
+			
+			rc.firstRange.setValue((int) r.from);
+			rc.secondRange.setValue((int) r.to);
 			rc.fromColour = r.getColour(0);
 			rc.toColour = r.getColour(0);
 			this.layout.add(rc.getLayout());
@@ -302,6 +308,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			rc.colourBoxFrom.setColour(new Colour(0.0f,0.0f,0.0f));
 			rc.colourBoxTo.setColour(new Colour(0.0f,0.0f,0.0f));
+			
+			rc.firstRange.setValue(0);
+			rc.secondRange.setValue(0);
 			rc.fromColour = new Colour(0.0f,0.0f,0.0f);
 			rc.toColour = new Colour(0.0f,0.0f,0.0f);
 			this.layout.add(rc.getLayout());
@@ -1492,6 +1501,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			colourRules.setColourRule(i, new ColourRule());
     	}
     	
+    	createColoursTab();
     	updatePreview();
     }
     
