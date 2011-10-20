@@ -6,17 +6,17 @@ import javax.media.opengl.GL2;
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 
-public class ColourPicker extends Layout
+public class ColourPicker extends Widget
 {
 	private float	hueAngle = 0.0f;
 	private float	ba = 0.0f, bb = 0.0f, bc = 0.0f;
 	
 	private boolean wheelActive = false;
 	private boolean triangleActive = false;
-	
-	public ColourPicker()
+		
+	public ColourPicker(Window window)
 	{
-		super(new Vector2i(350, 250));
+		super(new Vector2i(240, 285));
 	}
 		
 	Colour getColour() 
@@ -33,7 +33,7 @@ public class ColourPicker extends Layout
 		GL2 gl2 = gl.getGL2();
 		
 		// Draw background
-		Graphics.renderRectangle(gl2, pos.add(10, 10), new Vector2i(220, 220), 8, new Fill(new Colour(0.75f, 0.75f, 0.75f)));
+		Graphics.renderRectangle(gl2, pos, new Vector2i(220, 220), 8, new Fill(new Colour(0.75f, 0.75f, 0.75f)));
 		
 		// Draw hue circle
 		gl2.glBegin(GL.GL_TRIANGLE_STRIP);
@@ -45,8 +45,8 @@ public class ColourPicker extends Layout
 			float sina = (float)Math.sin(a);
 			
 			gl2.glColor3f(col.r, col.g, col.b);
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
-			gl2.glVertex2f(pos.x + cosa * 100.0f + 120.0f, pos.y + sina * 100.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
+			gl2.glVertex2f(pos.x + cosa * 100.0f + 110.0f, pos.y + sina * 100.0f + 110.0f);
 		}
 		gl2.glEnd();
 		
@@ -57,13 +57,13 @@ public class ColourPicker extends Layout
 			
 			float cosa = (float)Math.cos(hueAngle - 0.01f);
 			float sina = (float)Math.sin(hueAngle - 0.01f);
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
-			gl2.glVertex2f(pos.x + cosa * 100.0f + 120.0f, pos.y + sina * 100.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
+			gl2.glVertex2f(pos.x + cosa * 100.0f + 110.0f, pos.y + sina * 100.0f + 110.0f);
 			
 			cosa = (float)Math.cos(hueAngle + 0.01f);
 			sina = (float)Math.sin(hueAngle + 0.01f);
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
-			gl2.glVertex2f(pos.x + cosa * 100.0f + 120.0f, pos.y + sina * 100.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
+			gl2.glVertex2f(pos.x + cosa * 100.0f + 110.0f, pos.y + sina * 100.0f + 110.0f);
 		}
 		gl2.glEnd();		
 		
@@ -77,26 +77,26 @@ public class ColourPicker extends Layout
 			float sina = (float)Math.sin(hueAngle);	
 			
 			gl2.glColor3f(col.r, col.g, col.b);
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
 			
 			cosa = (float)Math.cos(hueAngle + third);
 			sina = (float)Math.sin(hueAngle + third);	
 			
 			gl2.glColor3f(1.0f, 1.0f, 1.0f);
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
 			
 			cosa = (float)Math.cos(hueAngle + third + third);
 			sina = (float)Math.sin(hueAngle + third + third);	
 			
 			gl2.glColor3f(0.0f, 0.0f, 0.0f);			
-			gl2.glVertex2f(pos.x + cosa * 80.0f + 120.0f, pos.y + sina * 80.0f + 120.0f);
+			gl2.glVertex2f(pos.x + cosa * 80.0f + 110.0f, pos.y + sina * 80.0f + 110.0f);
 		}
 		gl2.glEnd();
 		
 		// Draw saturation/lightness indicator
 		gl2.glBegin(GL.GL_TRIANGLE_STRIP);
 		{
-			Vector2f p = new Vector2f(120.0f, 120.0f);
+			Vector2f p = new Vector2f(110.0f, 110.0f);
 			
 			float third = (float)(Math.PI * 2.0 / 3.0);
 			
@@ -127,7 +127,7 @@ public class ColourPicker extends Layout
 		gl2.glEnd();
 		
 		// Draw colour square
-		Graphics.renderRectangle(gl2, position.add(10, 240), new Vector2i(220, 50), 8, new Fill(getColour()));
+		Graphics.renderRectangle(gl2, pos.add(0, 230), new Vector2i(220, 50), 8, new Fill(getColour()));
 	}
 	
 	@Override	
@@ -135,25 +135,25 @@ public class ColourPicker extends Layout
 	{
 		boolean handled = super.handleEvent(event, position);
 		
-		Vector2i posFromCenter = event.position.subtract(position).subtract(120, 120);
-	
-		if (event.type == Event.Type.MOUSE_CLICK && event.pressed)
-		{
-			float distance = posFromCenter.length();
-			
-			if (distance <= 80.0f)
-				triangleActive = true;
-			else if (distance <= 100.0f) 
-				wheelActive = true;
-		}
-		else if (event.type == Event.Type.MOUSE_CLICK && !event.pressed)
-		{
-			wheelActive = false;
-			triangleActive = false;
-		}
-		
 		if (event.type == Event.Type.MOUSE_CLICK || event.type == Event.Type.MOUSE_MOTION)
 		{
+			Vector2i posFromCenter = event.position.subtract(position).subtract(110, 110);
+		
+			if (event.type == Event.Type.MOUSE_CLICK && event.pressed)
+			{
+				float distance = posFromCenter.length();
+				
+				if (distance <= 80.0f)
+					triangleActive = true;
+				else if (distance <= 100.0f) 
+					wheelActive = true;
+			}
+			else if (event.type == Event.Type.MOUSE_CLICK && !event.pressed)
+			{
+				wheelActive = false;
+				triangleActive = false;
+			}
+
 			if (wheelActive)
 			{
 				hueAngle = (float)Math.atan2(posFromCenter.y, posFromCenter.x);
