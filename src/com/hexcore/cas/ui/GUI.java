@@ -1459,6 +1459,16 @@ public class GUI implements WindowEventListener, LobbyListener
     	window.relayout();
     }
     
+    public void updateWorldSettings()
+    {
+    	currentGrid = world.getLastGeneration();
+    	
+    	loadPropertiesFromWorld();
+    	updateWorldEditorTab();
+    	updateWorldEditorTool();
+    	updatePreview();
+    }
+    
     public void loadPropertiesFromWorld()
     {
     	Grid grid = world.getInitialGeneration();
@@ -1569,15 +1579,14 @@ public class GUI implements WindowEventListener, LobbyListener
     	
     public void updateWorldEditorTab()
     {
-    	previewViewport.recreate(world.getInitialGeneration(), window, colourRules);
-    	
-    	int numProperties = world.getInitialGeneration().getNumProperties();
+    	currentGrid = world.getLastGeneration();
+    	previewViewport.recreate(currentGrid, window, colourRules);
     	
     	propertyValues.clear();
     	
     	numberboxList = new ArrayList<NumberBox>();
     	
-    	for (int i = 0 ; i < numProperties; i++)
+    	for (int i = 0 ; i < currentGrid.getNumProperties(); i++)
     	{
         	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         	cellPropertyLayout.setMargin(new Vector2i(0, 6));
@@ -2089,6 +2098,8 @@ public class GUI implements WindowEventListener, LobbyListener
             	server.sendEvent(serverEvent);
             	
             	masterView.setIndex(1);
+            	
+            	updateWorldSettings();
             }
             
             else if (event.target == playButton)
@@ -2471,12 +2482,13 @@ public class GUI implements WindowEventListener, LobbyListener
             {
 				Grid2DWidget temp2DWidget = (Grid2DWidget)previewViewport.gridWidget;
 				Vector2i pos = temp2DWidget.getSelectedCell();
+				currentGrid = world.getLastGeneration();
 				
 				switch (editorToolType)
 				{
 					case LOOK:
 					{
-						c = world.getInitialGeneration().getCell(pos);
+						c = currentGrid.getCell(pos);
 		            	
 		            	for (int i = 0 ; i < numberboxList.size(); i++)
 		            		numberboxList.get(i).setValue((int)c.getValue(i));
@@ -2484,7 +2496,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					case BRUSH:
 					{
-						c = world.getInitialGeneration().getCell(pos);
+						c = currentGrid.getCell(pos);
 		            	
 		            	for (int i = 0 ; i < numberboxList.size(); i++)
 		            		c.setValue(i, numberboxList.get(i).getValue(0));
@@ -2492,15 +2504,14 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					case FILL:
 					{
-						Grid grid = world.getInitialGeneration();
-						Cell cell = new Cell(grid.getNumProperties());
+						Cell cell = new Cell(currentGrid.getNumProperties());
 						
 		            	for (int i = 0 ; i < numberboxList.size(); i++)
 		            		cell.setValue(i, numberboxList.get(i).getValue(0));
 		            	
-		            	for (int y = 0 ; y < grid.getHeight(); y++)
-		            		for (int x = 0 ; x < grid.getWidth(); x++)
-		            			grid.setCell(x, y, cell);
+		            	for (int y = 0 ; y < currentGrid.getHeight(); y++)
+		            		for (int x = 0 ; x < currentGrid.getWidth(); x++)
+		            			currentGrid.setCell(x, y, cell);
 		            	break;	
 					}
 				}
