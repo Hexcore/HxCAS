@@ -30,8 +30,11 @@ import com.hexcore.cas.model.TriangleGrid;
 public class HeightMapConverter
 {
 	private static final String TAG = "HeightMapConverter";
-	public boolean makeGrid(String fileName, Grid grid, int width, int height, int propertyIndex)
+	public boolean loadHeightMap(String fileName, Grid grid, int propertyIndex)
 	{
+		int width = grid.getWidth();
+		int height = grid.getHeight();
+		
 		int[] pixels = new int[width*height];
 		BufferedImage heightMap = null;
 		int imgWidth = 0;
@@ -61,21 +64,24 @@ public class HeightMapConverter
 			return false;
 		}	
 		
-		//heightMap.get
-		//PixelGrabber pg = new PixelGrabber(heightMap, 0, 0, width, height, pixels, 0, width);
-		int index = 0;
 		for(int r = 0; r < height; r++)
 		{
 			for(int c = 0; c < width; c++)
 			{
 				int val = heightMap.getRGB(c, r);
-				System.out.println("Blue: " + (val & 0xff));
-				System.out.println("Green: " + ((val >> 8) & 0xff));
-				System.out.println("Red: " + ((val >> 16) & 0xff));
-				System.out.println("Alpha: " + ((val >> 24) & 0xff));
+				double cs = (double)(val & 0xff) / 255.0;
+				double cl = 0.0;
+				
+				if(cs <= 0.04045)
+					cl = cs / 12.92;
+				else cl = Math.pow(((cs + 0.055)/1.055), 2.4);
+				
+				double finalVal = Math.floor(cl * 255 + 0.5);
+				grid.getCell(c, r).setValue(propertyIndex, finalVal);				
+				
+				System.out.println("Value: " + finalVal);
 			}
 		}		
-		
 		
 		return true;
 	}
