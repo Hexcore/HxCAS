@@ -61,7 +61,11 @@ public class Grid2DWidget extends GridWidget
 	{
 		boolean handled = super.handleEvent(event, position);
 		
-		if (event.type == Event.Type.MOUSE_SCROLL)
+		if (event.type == Event.Type.LOST_FOCUS)
+		{
+			active = false;
+		}
+		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
 			zoom *= (1.0f - event.amount * 0.002f);
 			if (zoom < 0.01f) zoom = 0.01f;

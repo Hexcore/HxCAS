@@ -99,13 +99,15 @@ public class TriangleGridWidget extends Grid2DWidget
 	{
 		boolean handled = super.handleEvent(event, position);
 		
-		if ((event.type == Event.Type.MOUSE_CLICK) 
+		if ((event.type == Event.Type.MOUSE_CLICK || event.type == Event.Type.MOUSE_MOTION)
 				&& ((event.position.x < position.x) || (event.position.y < position.y) 
 				|| (event.position.x > position.x + size.x)
 				|| (event.position.y > position.y + size.y)))
 			return handled;
 		
-		if (event.type == Event.Type.MOUSE_CLICK)
+		if (event.type == Event.Type.MOUSE_CLICK) active = event.pressed;
+
+		if (active && (event.type == Event.Type.MOUSE_CLICK || event.type == Event.Type.MOUSE_MOTION))
 		{
 			Vector2i pos = event.position.subtract(position);
 			float s = cellSize * zoom;
@@ -128,11 +130,12 @@ public class TriangleGridWidget extends Grid2DWidget
 									
 			if (x >= 0 && y >= 0 && x < grid.getWidth() && y < grid.getHeight())
 			{
+				selectedCell.set(x, y);
+				
 				Event changeEvent = new Event(Event.Type.CHANGE);
 				changeEvent.target = this;
 				window.sendWindowEvent(changeEvent);	
 				
-				selectedCell.set(x, y);
 				window.requestFocus(this);
 			}
 		}
