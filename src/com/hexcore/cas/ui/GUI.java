@@ -1461,6 +1461,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			colourRules.setColourRule(i, new ColourRule());
     	}
     	
+    	createColoursTab();
     	updatePreview();
     }
     
