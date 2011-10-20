@@ -48,9 +48,15 @@ public class Grid3DWidget extends GridWidget
 	public Grid3DWidget(Vector2i position, Vector2i size, Grid grid, int cellSize)
 	{
 		super(position, size, grid, cellSize);
-		cameraPosition = new Vector3f(grid.getWidth() * cellSize / 2.0f, grid.getHeight() * cellSize / 2.0f + 100, 200);
-
+		resetCamera();
 		buffers = IntBuffer.allocate(4);
+	}
+	
+	public void resetCamera()
+	{
+		yaw = 0.0f;
+		pitch = 30.0f;
+		cameraPosition = new Vector3f(grid.getWidth() * cellSize / 2.0f, grid.getHeight() * cellSize / 2.0f + 100, 200);	
 	}
 	
 	public void setPosition(Vector3f position)

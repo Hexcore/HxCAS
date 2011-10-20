@@ -1590,6 +1590,7 @@ public class GUI implements WindowEventListener, LobbyListener
         	
         	NumberBox n = new NumberBox(60);
         	n.setFlag(Widget.FILL_HORIZONTAL);
+        	n.setValue(0);
         	cellPropertyLayout.add(n);
         	
         	numberboxList.add(n);
