@@ -332,6 +332,53 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		return pointers;
 	}
 	
+	public static Label[] initLoop(int index)
+	{
+		debug("Init loop with index: " + index);
+		
+		//Initialise variables (cnt, low, high)
+		executeVisitor.visitVarInsn(DSTORE, index+4);
+		executeVisitor.visitVarInsn(DSTORE, index+2);
+		executeVisitor.visitVarInsn(DLOAD, index+2);
+		executeVisitor.visitVarInsn(DSTORE, index);
+		
+		//Start of loop
+		Label endLabel = new Label();
+		Label loopLabel = new Label();
+		executeVisitor.visitLabel(loopLabel);
+		
+		//Comparison
+		
+		executeVisitor.visitVarInsn(DLOAD, index+4);
+		executeVisitor.visitVarInsn(DLOAD, index);
+		executeVisitor.visitInsn(DSUB);
+		executeVisitor.visitInsn(D2I);
+		executeVisitor.visitJumpInsn(IFLE, endLabel);
+		
+		Label[] labels = new Label[]{loopLabel, endLabel};
+		return labels;
+		
+	}
+	
+	public static void endLoop(Label[] labels, int index)
+	{
+		debug("Ending Loop index: " + index);
+		executeVisitor.visitVarInsn(DLOAD, index);
+		executeVisitor.visitLdcInsn(new Double(1.0));
+		executeVisitor.visitInsn(DADD);
+		executeVisitor.visitVarInsn(DSTORE, index);
+		executeVisitor.visitJumpInsn(GOTO, labels[0]);
+		executeVisitor.visitLabel(labels[1]);
+	}
+	
+	public static int declareLoopVariables()
+	{
+		debug("Declare loop var index: " + varIndex);
+		int result = varIndex;
+		varIndex += 6;
+		return result;
+	}
+	
 	public static void visitLabel(Label label)
 	{
 		debug("Label visit: " + label);
