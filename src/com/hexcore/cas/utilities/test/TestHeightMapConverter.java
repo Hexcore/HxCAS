@@ -13,10 +13,10 @@ public class TestHeightMapConverter extends TestCase
 	public void testSimpleJPG()
 	{
 		Cell c = new Cell(new double[]{0,0});
-		Grid g = new RectangleGrid(new Vector2i(2, 2), c);
+		Grid g = new RectangleGrid(new Vector2i(100, 100), c);
 		
 		
 		HeightMapConverter hc = new HeightMapConverter();
-		hc.loadHeightMap("Test Data/hm.jpg", g, 1);
+		hc.loadHeightMap("Test Data/heightmap.jpg", g, 1);
 	}
 }
