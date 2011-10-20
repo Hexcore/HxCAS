@@ -79,6 +79,8 @@ public class ThemeParser extends ConfigParser
 				"background", "border", "border-radius");
 		addTypeProperties("DialogFade", 
 				"background", "border");
+		addTypeProperties("ColourPicker", 
+				"background", "border-radius");		
 		addTypeProperties("Window", 
 				"background", "border");
 		

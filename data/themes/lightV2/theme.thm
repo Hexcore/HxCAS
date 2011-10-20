@@ -293,6 +293,12 @@ ScrollbarFill
 	background: rgba(0.7, 0.7, 0.7, 0.9);
 }
 
+ColourPicker
+{
+	background: rgb(0.75, 0.75, 0.75);
+	border-radius: 3;
+}
+
 .List
 {
 	background: rgb(1.0, 1.0, 1.0);
