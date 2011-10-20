@@ -1,5 +1,6 @@
 package com.hexcore.cas.utilities;
 
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageProducer;
@@ -50,7 +51,13 @@ public class HeightMapConverter
 			if(width != imgWidth || height != imgHeight)
 			{
 				Log.information("HeightMapConverter", "Scaling Image of: " + imgWidth + " x " + imgHeight + " to " + width + " x " + height);
-				heightMap = (BufferedImage) heightMap.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+				Image scaledImage = heightMap.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+				BufferedImage bImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+				Graphics g = bImage.createGraphics();
+				g.drawImage(scaledImage, 0, 0, width, height, null);
+				g.dispose();
+				
+				heightMap = bImage;
 			}
 		} 
 		catch (FileNotFoundException e)
