@@ -84,7 +84,9 @@ import com.hexcore.cas.utilities.Log;
 public class GUI implements WindowEventListener, LobbyListener
 {	
 	 public void createColoursTab()
-	    {
+	    { 
+		
+		 
 	    	int numProperties = world.getInitialGeneration().getNumProperties();
 		 	if (numProperties > 0)
 		 	{
@@ -309,8 +311,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			RangeContainer rc = new RangeContainer(id, this.layout.getWindow());
 			rangeContainerList.add(rc);
 			
-			rc.colourBoxFrom.setColour(new Colour(0.0f,0.0f,0.0f));
-			rc.colourBoxTo.setColour(new Colour(0.0f,0.0f,0.0f));
+			rc.colourBoxFrom.setColour(new Colour(255.0f,0.0f,0.0f));
+			rc.colourBoxTo.setColour(new Colour(255.0f,0.0f,0.0f));
 			
 			rc.firstRange.setValue(0);
 			rc.secondRange.setValue(0);
@@ -1500,14 +1502,9 @@ public class GUI implements WindowEventListener, LobbyListener
         heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
         heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
         heightMapLayout.add(heightMapPropertySelector);
+                   
         
-        
-        
-        heightMapIndexNumberBox = new NumberBox(40);
-        heightMapIndexNumberBox.setValue(0);
-        heightMapLayout.add(heightMapIndexNumberBox);
-        
-        importHeightMapButton = new Button(new Vector2i(150,40), "Import Heightmap");
+        importHeightMapButton = new Button(new Vector2i(180,40), "Import Heightmap");
         heightMapLayout.add(importHeightMapButton);
         
         
@@ -1648,6 +1645,13 @@ public class GUI implements WindowEventListener, LobbyListener
         	worldEditorPropertySelector.addItem(propertyName);
         		
         worldEditorPropertySelector.setSelected(1);
+        
+        heightMapPropertySelector.clear();
+        
+        for (String propertyName : CodeGen.getPropertyList())
+        	heightMapPropertySelector.addItem(propertyName);
+        		
+        heightMapPropertySelector.setSelected(1);
     }
     
     public void saveColourCodeToWorld()
@@ -1896,7 +1900,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			if (result.isValid())
     			{
     			HeightMapConverter hmc = new HeightMapConverter();
-    			hmc.loadHeightMap(result.getFullPath(), world.getLastGeneration(), heightMapIndexNumberBox.getValue(0));
+    			hmc.loadHeightMap(result.getFullPath(), world.getLastGeneration(), heightMapPropertySelector.getSelected());
     			}
     			else
     			{
@@ -1938,6 +1942,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		{
 	        		
 	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
+	        		
 	        		c.addRange(c.id);
 	        		window.relayout();
 	        		
@@ -1978,12 +1983,15 @@ public class GUI implements WindowEventListener, LobbyListener
         			   	cr.addRange(range);        				
         				
         				
-        			//	System.out.println("ADDING RANGE FOR ID: " + r.id + " RGB: " + red + ":" + green + ":" + blue);
+        				System.out.println("ADDING RANGE FOR ID: " + CodeGen.getPropertyList().get(r.id) + r.fromColour);
         			}
         			colourRules.setColourRule(c.id, cr);
 	        	} 
         		
         		saveColourCodeToWorld();
+        		
+        		
+        		
         	}
         	
             if (event.target == createWorldButton)
