@@ -12,7 +12,7 @@ public class ServerEvent
 	{
 		SHUTDOWN, CREATE_WORLD, LOAD_WORLD, SAVE_WORLD, READY_SIMULATION, 
 		START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION, STOP_SIMULATION, STEP_SIMULATION,
-		PING_CLIENTS, CLEAR_HISTORY;
+		PING_CLIENTS, CLEAR_HISTORY, SET_PLAYBACK_SPEED;
 	}
 	
 	public Type		type;
@@ -30,6 +30,9 @@ public class ServerEvent
 	
 	// CLEAR_HISTORY
 	public int genNumber;
+	
+	// SET_PLAYBACK_SPEED
+	public long milliseconds;
 	
 	public ServerEvent(Type type)
 	{
