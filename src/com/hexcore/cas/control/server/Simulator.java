@@ -5,6 +5,7 @@ import java.lang.management.MemoryMXBean;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
@@ -38,7 +39,7 @@ public class Simulator extends Thread
 	private byte[]	ruleByteCode = null;
 	
 	private long	startGenerationTime = 0;
-	private long	minimumGenerationTime = 0;
+	private AtomicLong	minimumGenerationTime = new AtomicLong(0);
 		
 	public Simulator(World world, int clientPort)
 	{
@@ -74,7 +75,7 @@ public class Simulator extends Thread
 	
 	public void setMinimumGenerationTime(long time)
 	{
-		minimumGenerationTime = time;
+		minimumGenerationTime.set(time);
 	}
 	
 	public boolean isFinished()
@@ -195,9 +196,9 @@ public class Simulator extends Thread
 			splitGrids();
 		}
 		
-		if (minimumGenerationTime > 0)
+		if (minimumGenerationTime.get() > 0)
 		{
-			long diff = minimumGenerationTime * 1000000 - (System.nanoTime() - startGenerationTime);
+			long diff = minimumGenerationTime.get() * 1000000 - (System.nanoTime() - startGenerationTime);
 			
 			if (diff > 0)
 			{
