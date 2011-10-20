@@ -48,7 +48,7 @@ public class TestColourRuleSetWriter
         ColourRuleSetWriter writer = new ColourRuleSetWriter();
         String result = writer.write(colourRules, "test", properties);
         
-        assertEquals("colourruleset test\n" + 
+        assertEquals("colourset test\n" + 
         		"{\n" + 
         		"	property type\n" + 
         		"	{\n" + 
@@ -61,12 +61,12 @@ public class TestColourRuleSetWriter
         		"	}\n" + 
         		"	property water\n" + 
         		"	{\n" + 
-        		"		0.0 - 15.1 : rgb(0.0, 0.5, 0.8) rgb(0.0, 0.5, 0.8);\n" + 
+        		"		0.0 - 15.1 : rgb(0.0, 0.5, 0.8) rgb(0.0, 0.25, 0.5);\n" + 
         		"	}\n" + 
         		"	property temp\n" + 
         		"	{\n" + 
-        		"		0.0 - 8.0 : rgb(0.5, 0.25, 0.0) rgb(0.5, 0.25, 0.0);\n" + 
-        		"		8.0 - 16.0 : rgb(0.0, 0.8, 0.5) rgb(0.0, 0.8, 0.5);\n" + 
+        		"		0.0 - 8.0 : rgb(0.5, 0.25, 0.0) rgb(0.0, 0.8, 0.5);\n" + 
+        		"		8.0 - 16.0 : rgb(0.0, 0.8, 0.5) rgb(0.4, 1.0, 0.8);\n" + 
         		"	}\n" + 
         		"}\n", result);
 	}

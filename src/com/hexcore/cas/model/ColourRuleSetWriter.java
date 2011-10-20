@@ -51,7 +51,7 @@ public class ColourRuleSetWriter
 	
 	private String writeColour(Colour colour)
 	{
-		DecimalFormat formater = new DecimalFormat("#.####");
+		DecimalFormat formater = new DecimalFormat("0.0###");
 		
 		String str = (colour.a < 1.0) ? "rgba(" : "rgb(";
 		str += formater.format(colour.r);

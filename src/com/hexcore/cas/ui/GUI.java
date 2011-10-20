@@ -1038,7 +1038,7 @@ public class GUI implements WindowEventListener, LobbyListener
         worldEditorLeftLayout.add(previewViewport.container);
         
         worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
-        worldEditorPropertySelector.setFlag(Widget.WRAP_HORIZONTAL);
+        worldEditorPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
         worldEditorRightLayout.add(worldEditorPropertySelector);
         
         setCellValueButton = new Button(new Vector2i(70,43), "SET");
