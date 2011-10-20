@@ -642,6 +642,9 @@ public class GUI implements WindowEventListener, LobbyListener
 	private LinearLayout simulationControlsLayout;
 	private LinearLayout topLayout;
 	private LinearLayout worldHeaderLayout;
+
+
+	private DropDownBox heightMapPropertySelector;
     
     public GUI(Server server)
     {
@@ -1492,6 +1495,15 @@ public class GUI implements WindowEventListener, LobbyListener
         heightMapLayout.setFlag(Widget.CENTER);
         worldEditorRightLayout.add(heightMapLayout);
         
+        TextWidget label1 = new TextWidget("Property:");
+        heightMapLayout.add(label1);
+        
+        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
+        heightMapLayout.add(heightMapPropertySelector);
+        
+        
+        
         heightMapIndexNumberBox = new NumberBox(40);
         heightMapIndexNumberBox.setValue(0);
         heightMapLayout.add(heightMapIndexNumberBox);
@@ -2068,6 +2080,9 @@ public class GUI implements WindowEventListener, LobbyListener
                 	Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
                 	world.setRuleCode("");
                 }
+                
+                createColoursTab();
+                
             }
             
             else if (event.target == saveCALFileButton)
