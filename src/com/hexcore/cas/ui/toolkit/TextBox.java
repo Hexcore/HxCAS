@@ -167,11 +167,6 @@ public class TextBox extends Widget
 			
 			int startIndex = Math.min(cursorIndex, selectIndex);
 			int endIndex = Math.max(cursorIndex, selectIndex);
-					
-			if (event.type == Event.Type.KEY_PRESS)
-				System.out.println("Pressed " + event.button + " " + event.pressed);
-			else if (event.type == Event.Type.KEY_TYPED)
-				System.out.println("Typed " + event.button + " " + event.pressed);
 			
 			handled = true;
 			if ((event.type == Event.Type.KEY_PRESS) && !event.pressed)
