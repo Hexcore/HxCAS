@@ -35,7 +35,6 @@ import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.CodeGen;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
-import com.hexcore.cas.ui.GUI.RangeContainer;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -49,8 +48,7 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
-import com.hexcore.cas.ui.toolkit.Grid3DWidget.Slice;
-import com.hexcore.cas.ui.toolkit.GridWidget;
+import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.Image;
@@ -1456,11 +1454,6 @@ public class GUI implements WindowEventListener, LobbyListener
           
     }
     
-    
-   
-    
-   
-    
     public void updatePreview()
     { 
     	Grid grid = world.getInitialGeneration();
@@ -1477,41 +1470,35 @@ public class GUI implements WindowEventListener, LobbyListener
     		case RECTANGLE:
 	            grid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	
 	            gridViewer = new RectangleGridWidget((RectangleGrid)grid, 16);
-	            gridViewer.setColourProperty(1);
-	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
 	            
     		case TRIANGLE:
 	        	grid3DViewer = new TriangleGrid3DWidget(new Vector2i(400, 300), (TriangleGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	            
 	            gridViewer = new TriangleGridWidget((TriangleGrid)grid, 32);
-	            gridViewer.setColourProperty(1);
-	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);      
 	            break;
 	            
             case HEXAGON:
 	            grid3DViewer = new HexagonGrid3DWidget(new Vector2i(400, 300), (HexagonGrid)grid, 24);
 	            grid3DViewer.setFlag(Widget.FILL);
-	            grid3DViewer.addSlice(1, 1, 16.0f);
 	            widget3DPreviewContainer.setContents(grid3DViewer);
 	    
 	            gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
-	            gridViewer.setColourProperty(1);
-	            gridViewer.setColourRuleSet(colourRules);
 	            widgetPreviewContainer.setContents(gridViewer);
 	            break;
         }
     	
-    	
+    	grid3DViewer.addSlice(1, 1, 16.0f);
+    	gridViewer.addSlice(1, 1, 16.0f);
+    	grid3DViewer.setColourRuleSet(colourRules);
+    	gridViewer.setColourRuleSet(colourRules);
     }
         
     public void updateSimulationScreen(boolean force)
@@ -2156,11 +2143,8 @@ public class GUI implements WindowEventListener, LobbyListener
 
 			else if (event.target == toggle3dButton)
 			{
-				for (Viewport viewport : viewports)
-				{	
-					if (viewport.gridWidget.hasFocus()) 
-						viewport.switchDimension(currentGrid, window);
-				} 
+				if (selectedViewport != null)
+					selectedViewport.switchDimension(currentGrid, window);
 			}
 			else if (event.target == toggleHideButton)
 			{
@@ -2172,11 +2156,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			}
 			else if (event.target == toggleWireframeButton)
 			{
-				for (Viewport viewport : viewports)
-				{	
-					if (viewport.gridWidget.hasFocus()) 
-						viewport.gridWidget.toggleDrawWireframe();
-				} 	 				 
+				if (selectedViewport != null)
+					selectedViewport.gridWidget.toggleDrawWireframe();	 				 
 			}
 
             // DISTRIBUTION BUTTONS

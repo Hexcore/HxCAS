@@ -6,6 +6,7 @@ import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 
 public class HexagonGridWidget extends Grid2DWidget
 {
@@ -61,9 +62,14 @@ public class HexagonGridWidget extends Grid2DWidget
 				if ((x & 1) == 0) p.inc(0, (int)r);
 				
 				if (colourRules != null)
-					colour = colourRules.getColour(cell, colourProperty);
-				else if (cell.getValue(colourProperty) > 0) 
-					colour = Colour.LIGHT_GREY;
+				{
+					if (!slices.isEmpty())
+						colour = colourRules.getColour(cell, slices.get(0).colourProperty);
+				
+					for (Slice slice : getSlices())
+						if (cell.getValue(slice.heightProperty) > 0.0)
+							colour = colourRules.getColour(cell, slice.colourProperty);
+				}
 					
 				Graphics.renderPolygon(gl, p, hexagon, false, colour);
 				if (drawWireframe) Graphics.renderPolygon(gl, p, hexagonBorder, true, cellBorderColour);

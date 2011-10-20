@@ -35,7 +35,12 @@ public class WorldSaver
 		 * Creates a ZIP file to persist the world, it's configuration,
 		 * it's rule set and it's generations. 
 		 */
-		File file = new File(world.getFilename());
+		int exindex = world.getFilename().indexOf(".caw");
+		File file = null;
+		if(exindex != -1)
+			file = new File(world.getFilename());
+		else
+			file = new File(world.getFilename() + ".caw");
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
 		
 		ZipEntry config = new ZipEntry("config.cac");
@@ -54,7 +59,7 @@ public class WorldSaver
 		ZipEntry colourCodeEntry = new ZipEntry("colours.cacp");
 		out.putNextEntry(colourCodeEntry);
 		out.write(world.getColourCode().getBytes());
-		out.closeEntry();		
+		out.closeEntry();
 		
 		List<Grid> generations = world.getGenerations();
 		for (int i = 0; i < generations.size(); i++)

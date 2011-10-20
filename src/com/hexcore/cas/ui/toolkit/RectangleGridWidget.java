@@ -6,6 +6,7 @@ import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.RectangleGrid;
+import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 
 public class RectangleGridWidget extends Grid2DWidget
 {
@@ -44,13 +45,18 @@ public class RectangleGridWidget extends Grid2DWidget
 		for (int y = 0; y < grid.getHeight(); y++)
 			for (int x = 0; x < grid.getWidth(); x++)
 			{
-				Cell 		cell = grid.getCell(x, y);
-				Colour		colour = Colour.DARK_GREY;
+				Cell 	cell = grid.getCell(x, y);
+				Colour	colour = Colour.DARK_GREY;
 				
 				if (colourRules != null)
-					colour = colourRules.getColour(cell, colourProperty);
-				else if (cell.getValue(colourProperty) > 0) 
-					colour = Colour.LIGHT_GREY;
+				{
+					if (!slices.isEmpty())
+						colour = colourRules.getColour(cell, slices.get(0).colourProperty);
+				
+					for (Slice slice : getSlices())
+						if (cell.getValue(slice.heightProperty) > 0.0)
+							colour = colourRules.getColour(cell, slice.colourProperty);
+				}
 					
 				Vector2i p = pos.add((int)(x * s), (int)(y * s));
 				Graphics.renderPolygon(gl, p, rectangle, false, colour);

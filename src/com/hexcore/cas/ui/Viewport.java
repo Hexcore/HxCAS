@@ -15,6 +15,7 @@ import com.hexcore.cas.ui.toolkit.DropDownBox;
 import com.hexcore.cas.ui.toolkit.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.GridWidget;
+import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
@@ -24,7 +25,7 @@ import com.hexcore.cas.ui.toolkit.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.TriangleGridWidget;
 import com.hexcore.cas.ui.toolkit.Widget;
 import com.hexcore.cas.ui.toolkit.Window;
-import com.hexcore.cas.ui.toolkit.Grid3DWidget.Slice;
+import com.hexcore.cas.utilities.Log;
 
 public class Viewport
 {
@@ -49,11 +50,12 @@ public class Viewport
 
 	public void switchDimension(Grid grid, Window window)
 	{			
+		Log.debug("Viewport", "Switch Dimension");
+		
 		if (this.type == Viewport.Type.THREE_D)
-			type =  Viewport.Type.TWO_D;
-			
+			type = Viewport.Type.TWO_D;
 		else			
-			type =  Viewport.Type.THREE_D;
+			type = Viewport.Type.THREE_D;
 		
 		recreate(grid, window);
 	}
@@ -80,7 +82,7 @@ public class Viewport
 				else
 				{
 					temp2DWidget = new RectangleGridWidget(new Vector2i(10, 10), (RectangleGrid)grid, 10);
-					temp2DWidget.setColourProperty(1);
+					
 					if (gridWidget != null)
 						if (gridWidget.hasFocus()) 
 							window.requestFocus(temp2DWidget);
@@ -100,7 +102,7 @@ public class Viewport
 				else
 				{
 					temp2DWidget = new HexagonGridWidget(new Vector2i(10, 10), (HexagonGrid)grid, 10);
-					temp2DWidget.setColourProperty(1);
+
 					if (gridWidget != null)
 						if (gridWidget.hasFocus()) 
 							window.requestFocus(temp2DWidget);
@@ -120,7 +122,7 @@ public class Viewport
 				else
 				{
 					temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
-					temp2DWidget.setColourProperty(1);
+
 					if (gridWidget != null)
 						if (gridWidget.hasFocus()) 
 							window.requestFocus(temp2DWidget);
@@ -130,11 +132,8 @@ public class Viewport
 			
 		}
     	
-    	if (temp3DWidget != null)
-    	{
-			for (int index = 1; index < 2; index++)
-				temp3DWidget.addSlice(index, 10.0f);
-    	}
+		for (int index = 1; index < 2; index++)
+			gridWidget.addSlice(index, 10.0f);
     	
     	gridWidget.setColourRuleSet(colourRuleSet);
     	gridWidget.setFlag(Widget.FILL);
@@ -146,11 +145,9 @@ public class Viewport
 		controlPanel.clear();
 		propertyDropDownBoxes.clear();
 		
-		if (this.type == Viewport.Type.THREE_D && grid != null)
-		{
-			Grid3DWidget grid3DWidget = (Grid3DWidget)gridWidget;
-							
-			for (Slice slice : grid3DWidget.getSlices())
+		if (grid != null)
+		{							
+			for (Slice slice : gridWidget.getSlices())
 			{
 				DropDownBox colourProperty = new DropDownBox(new Vector2i(100, 20));
 				

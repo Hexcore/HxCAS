@@ -22,31 +22,7 @@ import com.hexcore.cas.utilities.Log;
 import com.jogamp.common.nio.Buffers;
 
 public class Grid3DWidget extends GridWidget
-{
-	public static class Slice
-	{
-		public int		colourProperty;
-		public int		heightProperty;
-		public float	scale;
-		
-		public Slice(int property, float scale) 
-		{
-			this.colourProperty = property;
-			this.heightProperty = property;
-			this.scale = scale;
-		}		
-		
-		public Slice(int colourProperty, int heightProperty, float scale) 
-		{
-			this.colourProperty = colourProperty;
-			this.heightProperty = heightProperty;
-			this.scale = scale;
-		}
-	}
-	
-	// Options
-	protected ArrayList<Slice>	slices;
-	
+{	
 	// Camera
 	protected float		yaw = 0.0f, pitch = 30.0f;
 	protected Vector3f	cameraPosition;
@@ -73,8 +49,7 @@ public class Grid3DWidget extends GridWidget
 	{
 		super(position, size, grid, cellSize);
 		cameraPosition = new Vector3f(grid.getWidth() * cellSize / 2.0f, grid.getHeight() * cellSize / 2.0f + 100, 200);
-		slices = new ArrayList<Slice>();
-		
+
 		buffers = IntBuffer.allocate(4);
 	}
 	
@@ -172,6 +147,7 @@ public class Grid3DWidget extends GridWidget
 		dirty.set(true);
 	}
 	
+	@Override
 	public void addSlice(Slice slice)
 	{
 		slices.add(slice);
@@ -179,6 +155,7 @@ public class Grid3DWidget extends GridWidget
 		reallyDirty.set(true);
 	}
 	
+	@Override
 	public void addSlice(int heightProperty, float scale)
 	{
 		slices.add(new Slice(heightProperty, scale));
@@ -186,6 +163,7 @@ public class Grid3DWidget extends GridWidget
 		reallyDirty.set(true);
 	}	
 	
+	@Override
 	public void addSlice(int colourProperty, int heightProperty, float scale)
 	{
 		slices.add(new Slice(colourProperty, heightProperty, scale));
@@ -193,6 +171,7 @@ public class Grid3DWidget extends GridWidget
 		reallyDirty.set(true);
 	}
 	
+	@Override
 	public void setSlice(int index, int colourProperty, int heightProperty)
 	{
 		slices.get(index).colourProperty = colourProperty;
@@ -201,16 +180,12 @@ public class Grid3DWidget extends GridWidget
 		reallyDirty.set(true);
 	}
 	
+	@Override
 	public void clearSlices()
 	{
 		slices.clear();
 		dirty.set(true);
 		reallyDirty.set(true);
-	}
-	
-	public List<Slice> getSlices()
-	{
-		return slices;
 	}
 	
 	@Override
