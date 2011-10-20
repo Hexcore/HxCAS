@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -92,7 +93,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	   		
 	    		
 	    	
-	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i));
+	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i), colourRules.getColourRule(i));
 	    		
 	    	
 	    		colourPropertiesLayout.add(c.getLayout());
@@ -129,6 +130,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		public LinearLayout rangeLayout;
 		public ColourBox colourBoxFrom;
 		public ColourBox colourBoxTo;
+		
+		public String type = "gradient";
 		
 		public RangeContainer(int id, Window window)
 		{
@@ -210,7 +213,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		public LinearLayout rangeButtonsLayout;
 		public TextWidget t1; 
 		
-		public ColourContainer(int id, Window window, String name)
+		public ColourContainer(int id, Window window, String name, ColourRule colourRule)
 		{
 			this.id = id;
 			
@@ -219,6 +222,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeButtonsLayout =  new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 			rangeButtonsLayout.setWindow(window);
 			rangeButtonsLayout.setFlag(Widget.WRAP);
+			
+			
 			
 			layout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 			layout.setWindow(window);
@@ -236,11 +241,16 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
 			
-			addRange(id);
+			Iterator<Range> it = colourRule.ranges.iterator();
 			
+			while (it.hasNext())
+			{
+			Range r = it.next();
+			addRange(id, r);
+			}
 		}
 		
-		public void addRange(int id)
+		public void addRange(int id, Range r )
 		{
 			numRanges++;
 			
@@ -1648,7 +1658,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		{
 	        		
 	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
-	        		c.addRange(c.id);
+	        	//	c.addRange(c.id);
 	        		window.relayout();
 	        		
 	        		
