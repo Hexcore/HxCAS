@@ -6,6 +6,7 @@ import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.ui.toolkit.GridWidget.Slice;
 
 public class TriangleGridWidget extends Grid2DWidget
 {
@@ -61,9 +62,14 @@ public class TriangleGridWidget extends Grid2DWidget
 				Vector2i 	p = pos.add((int)(x * r), (int)(y * h));
 				
 				if (colourRules != null)
-					colour = colourRules.getColour(cell, colourProperty);
-				else if (cell.getValue(colourProperty) > 0) 
-					colour = Colour.LIGHT_GREY;
+				{
+					if (!slices.isEmpty())
+						colour = colourRules.getColour(cell, slices.get(0).colourProperty);
+				
+					for (Slice slice : getSlices())
+						if (cell.getValue(slice.heightProperty) > 0.0)
+							colour = colourRules.getColour(cell, slice.colourProperty);
+				}
 				
 				if ((x & 1) != (y & 1)) // Checker-board pattern
 				{

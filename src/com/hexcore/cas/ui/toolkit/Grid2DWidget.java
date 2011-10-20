@@ -4,12 +4,10 @@ import java.awt.event.KeyEvent;
 
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.math.Vector3f;
 import com.hexcore.cas.model.Grid;
 
 public class Grid2DWidget extends GridWidget
-{
-	protected int		colourProperty = 0; //< The property that is used to determine the colour to use
+{		
 	protected float		zoom = 1.0f;
 	protected Vector2f 	scroll = new Vector2f(0, 0);
 	
@@ -37,7 +35,6 @@ public class Grid2DWidget extends GridWidget
 	public boolean isSelectedDrawn() {return drawSelected;}	
 	public Vector2i getSelectedCell() { return selectedCell; }
 	
-	public void setColourProperty(int propertyIndex) { colourProperty = propertyIndex; }
 	public void setCellBorderColour(Colour colour) { cellBorderColour = colour; }
 	public void setSelectedCellBorderColour(Colour colour) { cellSelectedBorderColour = colour; }
 	
