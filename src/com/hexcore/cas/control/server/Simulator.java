@@ -36,6 +36,9 @@ public class Simulator extends Thread
 	
 	private Grid 	grid = null;
 	private byte[]	ruleByteCode = null;
+	
+	private long	startGenerationTime = 0;
+	private long	minimumGenerationTime = 0;
 		
 	public Simulator(World world, int clientPort)
 	{
@@ -67,6 +70,11 @@ public class Simulator extends Thread
 	public void setGrid(Grid g)
 	{
 		grid = g.clone();
+	}
+	
+	public void setMinimumGenerationTime(long time)
+	{
+		minimumGenerationTime = time;
 	}
 	
 	public boolean isFinished()
@@ -163,8 +171,8 @@ public class Simulator extends Thread
 		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		long usedHeap = bean.getHeapMemoryUsage().getUsed();
 		long maxHeap = bean.getHeapMemoryUsage().getMax();
-		System.out.println("Bean heap memory : " + usedHeap);
-		System.out.println("Bean heap memory MAX : " + maxHeap);
+		Log.debug(TAG, "Bean heap memory : " + usedHeap);
+		Log.debug(TAG, "Bean heap memory MAX : " + maxHeap);
 		if(usedHeap < maxHeap - (100 * 1024 * 1024))
 		{
 			world.addGeneration(grid.clone());
@@ -187,6 +195,23 @@ public class Simulator extends Thread
 			splitGrids();
 		}
 		
+		if (minimumGenerationTime > 0)
+		{
+			long diff = minimumGenerationTime * 1000000 - (System.nanoTime() - startGenerationTime);
+			
+			if (diff > 0)
+			{
+				try
+				{
+					Thread.sleep(diff / 1000000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
 		if (!paused.get()) startGeneration();
 	}
 	
@@ -222,6 +247,7 @@ public class Simulator extends Thread
 			
 			if (numOfGenerations > 0) numOfGenerations--;
 			
+			startGenerationTime = System.nanoTime();
 			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
 			informationProcessor.sendInitialGrids();
 		}

@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 
 public class TextArea extends TextBox
 {	
@@ -138,10 +139,11 @@ public class TextArea extends TextBox
 					cursorIndex++;
 				
 				selectIndex = cursorIndex;
+				handled = true;
 			}
 			else if (event.type == Event.Type.MOUSE_SCROLL)
 			{
-				textOffset.y = Math.max(Math.min(textOffset.y + event.amount, maxHeight - size.y), 0);
+				scroll(event.amount);
 				handled = false;
 			}
 			else
@@ -151,6 +153,22 @@ public class TextArea extends TextBox
 		if (handled) relayout();
 		if (!handled) handled = super.handleEvent(event, position);
 				
+		if (handled)
+		{
+			int lineHeight = window.getTheme().calculateTextHeight(textSize);
+			Vector2i padding = window.getTheme().getVector2i("TextBox", "padding", new Vector2i(3, 3));
+			Vector2i p = flowedText.getCursorLocation(cursorIndex);
+			int ypos = p.y * lineHeight - textOffset.y + padding.y;
+
+			if (ypos <= 0) scroll(ypos);
+			if (ypos + lineHeight >= size.y) scroll(ypos + lineHeight - size.y);
+		}
+		
 		return handled;
+	}
+	
+	private void scroll(int y)
+	{
+		textOffset.y = Math.max(Math.min(textOffset.y + y, maxHeight - size.y), 0);
 	}
 }

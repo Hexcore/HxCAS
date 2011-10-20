@@ -201,6 +201,18 @@ public class Server
 						break;
 					}
 					
+					case SET_PLAYBACK_SPEED:
+					{
+						serverLock.lock();
+						
+						if (!activeSimulation.getAndSet(true)) initSimulation();
+						
+						simulate.setMinimumGenerationTime(event.milliseconds);
+						
+						serverLock.unlock();
+						break;
+					}
+					
 					case PING_CLIENTS:
 					{
 						lobby.ping();
