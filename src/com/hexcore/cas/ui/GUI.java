@@ -106,43 +106,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	}
 	    	
 	    	
-	    LinearLayout innerRightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	    innerRightColourLayout.setFlag(Widget.WRAP);
-	    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-	    	
-	   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-	   	colourButtonsLayout.setFlag(Widget.WRAP);
-	   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-	    rightColourLayout.add(colourButtonsLayout);
-	    
-	
-	    	
-	   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
-	   	colourButtonsLayout.add(setColourRangesButton);
-	    	
-	  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
-	  	colourButtonsLayout.add(resetColourRangesButton);
-	    
-	    colourPicker = new ColourPicker(window);
-	    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
-	    rightColourLayout.add(colourPicker);
-	    
-	    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-	    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
-	    cpRGBLayout.setFlag(Widget.WRAP);
-	    rightColourLayout.add(cpRGBLayout);
-	    
-	    cpRNumberBox = new NumberBox(40);
-	    cpRNumberBox.setValue(0);
-	    cpRGBLayout.add(cpRNumberBox);
 	   
-	    cpGNumberBox = new NumberBox(40);
-	    cpGNumberBox.setValue(0);
-	    cpRGBLayout.add(cpGNumberBox);
-	    
-	    cpBNumberBox = new NumberBox(40);
-	    cpBNumberBox.setValue(0);
-	    cpRGBLayout.add(cpBNumberBox);
 	    
 	   
 	    	
@@ -958,7 +922,43 @@ public class GUI implements WindowEventListener, LobbyListener
 		noColourSetText.setPosition(new Vector2i(colourPropertiesLayout.getWidth()/2, colourPropertiesLayout.getHeight()/2));
 		colourPropertiesLayout.add(noColourSetText);
 		
+		 LinearLayout innerRightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		    innerRightColourLayout.setFlag(Widget.WRAP);
+		    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		    	
+		   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		   	colourButtonsLayout.setFlag(Widget.WRAP);
+		   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		    rightColourLayout.add(colourButtonsLayout);
+		    
 		
+		    	
+		   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
+		   	colourButtonsLayout.add(setColourRangesButton);
+		    	
+		  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
+		  	colourButtonsLayout.add(resetColourRangesButton);
+		    
+		    colourPicker = new ColourPicker(window);
+		    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
+		    rightColourLayout.add(colourPicker);
+		    
+		    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		    cpRGBLayout.setFlag(Widget.WRAP);
+		    rightColourLayout.add(cpRGBLayout);
+		    
+		    cpRNumberBox = new NumberBox(40);
+		    cpRNumberBox.setValue(0);
+		    cpRGBLayout.add(cpRNumberBox);
+		   
+		    cpGNumberBox = new NumberBox(40);
+		    cpGNumberBox.setValue(0);
+		    cpRGBLayout.add(cpGNumberBox);
+		    
+		    cpBNumberBox = new NumberBox(40);
+		    cpBNumberBox.setValue(0);
+		    cpRGBLayout.add(cpBNumberBox);
         
         ///
         
