@@ -136,6 +136,8 @@ public class Simulator extends Thread
 
 		Log.information(TAG, "Starting simulation...");
 		setGrid(world.getLastGeneration());
+		Log.information(TAG, "Generations: " + world.getNumGenerations());
+		Log.information(TAG, "Grid: " + grid.getWidth() + "x" + grid.getHeight());
 		numOfGenerations = gN;
 		
 		informationProcessor.sendByteCode(ruleByteCode);

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 /**
  * Class World
  * Contains all information about a world.
@@ -105,6 +106,8 @@ public class World
 	
 	public void resetTo(Grid g)
 	{
+		Log.debug("World", "Grid: " + g.getWidth() + "x" + g.getHeight());
+		
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
 	}

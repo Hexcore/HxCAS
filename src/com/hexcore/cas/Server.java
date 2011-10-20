@@ -117,8 +117,6 @@ public class Server
 						
 						ui.startWorldEditor(world);
 						
-						if (!activeSimulation.getAndSet(true)) initSimulation();
-						
 						serverLock.unlock();
 						break;
 					}
