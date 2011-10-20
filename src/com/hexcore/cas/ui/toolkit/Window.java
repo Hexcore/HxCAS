@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ClipboardOwner
@@ -62,6 +63,11 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	private boolean	fullscreen = false;
 	
 	private List<Recti>	clipRectangles = new ArrayList<Recti>();
+
+	// Tooltip
+	Widget		wantsTooltip;
+	long		lastMouseMove;
+	Vector2i	mousePos;
 	
 	public Window(String title, Theme theme)
 	{
@@ -280,6 +286,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		modalDialog = null;
 	}
 	
+	public void requestTooltip(Widget widget)
+	{
+		if (widget == wantsTooltip) return;
+		wantsTooltip = widget;
+	}
+	
 	public void giveUpFocus(Widget widget)
 	{
 		if (widget != focusedWidget) return;
@@ -459,6 +471,21 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		}
 		else if (focusedWidget != null) 
 			focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
+		else if (wantsTooltip != null && wantsTooltip.mouseover && !wantsTooltip.getTooltip().isEmpty())
+		{
+			long diff = System.nanoTime() - lastMouseMove;
+			
+			if (diff > 1000000000)
+			{
+				Vector2i 	pos = mousePos.add(16, 16);
+				String		tooltip = wantsTooltip.getTooltip();
+				Vector2i 	textSize = theme.calculateTextSize(tooltip, Text.Size.SMALL);
+				
+				Graphics.renderRectangle(gl, pos, textSize.add(8, 8), Colour.WHITE);
+				Graphics.renderBorder(gl, pos, textSize.add(8, 8), Colour.BLACK);
+				theme.renderText(gl, wantsTooltip.getTooltip(), pos.add(4, 4), Colour.BLACK, Text.Size.SMALL);
+			}
+		}
 	}
 			
 	private void sendEvent(Event event)
@@ -495,6 +522,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void mouseDragged(MouseEvent e)
 	{
+		lastMouseMove = System.nanoTime();
+		mousePos = new Vector2i(e.getX(), e.getY());
+		
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.setModifiers(e);
@@ -504,6 +534,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void mouseMoved(MouseEvent e)
 	{
+		lastMouseMove = System.nanoTime();
+		mousePos = new Vector2i(e.getX(), e.getY());
+		
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.setModifiers(e);
@@ -519,6 +552,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void mouseEntered(MouseEvent e)
 	{
+		lastMouseMove = System.nanoTime();
+		mousePos = new Vector2i(e.getX(), e.getY());
+		
 		Event event = new Event(Event.Type.MOUSE_MOTION);
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.setModifiers(e);
@@ -534,6 +570,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		lastMouseMove = System.nanoTime();
+		mousePos = new Vector2i(e.getX(), e.getY());
+		
 		Event event = new Event(Event.Type.MOUSE_CLICK);
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.button = e.getButton();
@@ -545,6 +584,9 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
+		lastMouseMove = System.nanoTime();
+		mousePos = new Vector2i(e.getX(), e.getY());
+		
 		Event event = new Event(Event.Type.MOUSE_CLICK);
 		event.position = new Vector2i(e.getX(), e.getY());
 		event.button = e.getButton();
