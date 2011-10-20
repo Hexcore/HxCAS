@@ -230,6 +230,7 @@ PRODUCTIONS
   	 Block
   	 | AssignCall
   	 | IfStatement
+  	 | Loop
   	 | VarDeclaration 
   	.
   	/*******************************/
@@ -426,6 +427,56 @@ PRODUCTIONS
   												.)
   	.
   	/*********************************/
+  	
+  	
+  	/********** Loop *********/
+  	Loop										(.
+  													int type1 = 0, type2 = 0;
+  													String name = "";
+  													Label[] loopLabels = null;
+  													TableEntry entry = new TableEntry();
+  												.)
+  	=
+  	"loop" Ident< out name > 					(.
+  													if(table.find(name).type != TableEntry.noType)
+  													{
+  														SemError("Redeclared identifier");
+  													}
+  													
+  													if(valid)
+  													{  														
+  														entry.kind = TableEntry.Variable;
+  														entry.name = name;
+  														entry.type = TableEntry.intType;
+  														table.insert(entry);
+  														entry.offset = CodeGen.declareLoopVariables();
+  													}
+  												.)
+  	"from" Expression< out type1 > 
+  	"to" Expression< out type2 >				(.
+  													if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
+  													{
+  														SemError("Loop bounds must be arithmetic expressions");
+  													}
+  													
+  													if(TableEntry.isArray(type1) || TableEntry.isArray(type2))
+  													{
+  														SemError("Loop bounds must be scalar");
+  													}
+  													
+  													if(valid)
+  													{
+  														loopLabels = CodeGen.initLoop(entry.offset);
+  													}
+  												.)
+  	"{"
+  		Statement
+  	"}"											(.
+  													if(valid)
+  														CodeGen.endLoop(loopLabels, entry.offset);
+  												.)
+  	.
+  	/*************************/
   	
   	
   	
