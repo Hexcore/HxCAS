@@ -1482,21 +1482,20 @@ public class GUI implements WindowEventListener, LobbyListener
         
         
         LinearLayout heightMapLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        heightMapLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         heightMapLayout.setMargin(new Vector2i(0, 0));
         heightMapLayout.setFlag(Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
         worldEditorRightLayout.add(heightMapLayout);
         
+        	ImageWidget heightMapWidgetHeader = new ImageWidget(theme.getImage("headers", "heightmap_widget_header.png"));
+        	heightMapLayout.add(heightMapWidgetHeader);
+        	
 	        TextWidget label1 = new TextWidget("Property:");
 	        heightMapLayout.add(label1);
 	        
 	        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
 	        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
 	        heightMapLayout.add(heightMapPropertySelector);
-	        
-	        heightMapIndexNumberBox = new NumberBox(40);
-	        heightMapIndexNumberBox.setFlag(Widget.FILL_HORIZONTAL);
-	        heightMapIndexNumberBox.setValue(0);
-	        heightMapLayout.add(heightMapIndexNumberBox);
 	        
 	        importHeightMapButton = new Button(new Vector2i(150,40), "Import Heightmap");
 	        importHeightMapButton.setFlag(Widget.FILL_HORIZONTAL);
