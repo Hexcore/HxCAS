@@ -41,7 +41,7 @@ public class ColourRuleSetWriter
 				break;
 			case GRADIENT:
 				str += writeColour(range.getColour(0)) + " ";
-				str += writeColour(range.getColour(0));
+				str += writeColour(range.getColour(1));
 				break;
 		}
 		
