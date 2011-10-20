@@ -35,6 +35,7 @@ public class ThemeParser extends ConfigParser
 		validStates.add("vertical");
 		validStates.add("horizontal");
 		validStates.add("selected");
+		validStates.add("toggled");
 		
 		validTypeProperties = new HashMap<String, Set<String>>();
 		addTypeProperties("Button", 

@@ -75,7 +75,8 @@ public class Theme
 		FOCUS ("focus"), 
 		HOVER ("hover"), 
 		ACTIVE ("active"), 
-		SELECTED ("selected");
+		SELECTED ("selected"),
+		TOGGLED ("toggled");
 		
 		public final String name;
 		

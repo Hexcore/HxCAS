@@ -44,6 +44,16 @@ Button : active
 	text-shadow-offset: 0 -1;
 }
 
+Button : toggled
+{
+	background: vertical rgb(0.75, 0.75, 0.75) rgb(0.85, 0.85, 0.85);
+	border: rgb(0.6, 0.6, 0.6) rgb(0.7, 0.7, 0.7);
+	text-offset: 1 1;
+	text-colour: rgb(1.0, 1.0, 1.0);
+	text-shadow-colour: rgb(1.0, 1.0, 1.0);
+	text-shadow-offset: 0 -1;
+}
+
 DialogFade
 {
 	background: image("widgets","fade_dialog.png");
