@@ -103,6 +103,12 @@ public class World
 		worldGenerations.add(g.clone());
 	}
 	
+	public void resetTo(Grid g)
+	{
+		worldGenerations.clear();
+		worldGenerations.add(g.clone());
+	}
+	
 	public void setRuleCode(String ruleCode)
 	{
 		this.ruleCode = ruleCode;
