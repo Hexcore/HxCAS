@@ -29,6 +29,9 @@ public class HexagonGrid3DWidget extends Grid3DWidget
 		hexagon[4] = new Vector2f(h+s,	0.0f);
 		hexagon[5] = new Vector2f(h,	0.0f);
 		
+		if (reallyDirty.getAndSet(false))
+			setupVertexBuffer(gl, 6);
+			
 		resetVertexBuffer(gl, 6);
 		
 		for (int y = 0; y < grid.getHeight(); y++)
