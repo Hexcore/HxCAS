@@ -6,6 +6,7 @@ import java.util.List;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 
 
 /*
@@ -156,6 +157,12 @@ public class Layout extends Widget
 	
 	public void add(Widget component) 
 	{
+		if (component == this)
+		{
+			Log.error("Layout", "Adding layout to itself");
+			return;
+		}
+		
 		synchronized(components)
 		{
 			components.add(component); 

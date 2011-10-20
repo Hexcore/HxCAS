@@ -3,6 +3,7 @@ package com.hexcore.cas.ui.toolkit;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 
 /*
  * Only contains one component, a decorator in design patterns.
@@ -134,6 +135,12 @@ public class Container extends Widget
 	
 	public void setContents(Widget component) 
 	{
+		if (component == this)
+		{
+			Log.error("Container", "Adding container to itself");
+			return;
+		}
+		
 		this.contents = component;
 		if (component != null) component.setParent(this);
 		relayout();
