@@ -39,7 +39,10 @@ public class Layout extends Widget
 			
 	public void clear()
 	{
-		components.clear();
+		synchronized(components)
+		{
+			components.clear();
+		}
 	}
 	
 	@Override

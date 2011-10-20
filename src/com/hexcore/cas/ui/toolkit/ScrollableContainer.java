@@ -149,7 +149,7 @@ public class ScrollableContainer extends Container
 		}
 		else if (event.type == Event.Type.MOUSE_SCROLL)
 		{
-			if (contents.receiveEvent(event, position)) return true;
+			if (contents.receiveEvent(event, position.subtract(scrollPos))) return true;
 			scroll(0, event.amount);
 			return true;
 		}
@@ -175,9 +175,7 @@ public class ScrollableContainer extends Container
 		}
 		
 		if (!handled)
-		{
-			handled = contents.receiveEvent(event, position);
-		}
+			handled = contents.receiveEvent(event, position.subtract(scrollPos));
 		
 		return handled;
 	}
