@@ -58,7 +58,7 @@ public class HexagonGridWidget extends Grid2DWidget
 				Colour		colour = Colour.DARK_GREY;
 				Vector2i	p = pos.add((int)(x*(s+h)), (int)(y*r*2));
 				
-				if ((x & 1) == 1) p.inc(0, (int)r);
+				if ((x & 1) == 0) p.inc(0, (int)r);
 				
 				if (colourRules != null)
 					colour = colourRules.getColour(cell, colourProperty);
@@ -72,7 +72,7 @@ public class HexagonGridWidget extends Grid2DWidget
 		if (drawSelected)
 		{
 			Vector2i	p = pos.add((int)(selectedCell.x*(s+h)), (int)(selectedCell.y*r*2));
-			if ((selectedCell.x & 1) == 1) p.inc(0, (int)r);	
+			if ((selectedCell.x & 1) == 0) p.inc(0, (int)r);	
 			
 			Graphics.renderPolygon(gl, p, hexagonBorder, true, cellSelectedBorderColour);
 		}
@@ -102,7 +102,7 @@ public class HexagonGridWidget extends Grid2DWidget
 			int y = (int)(pos.y / (r*2));
 			
 			Vector2i p = new Vector2i((int)(x*(s+h)), (int)(y*r*2));
-			if ((x & 1) == 1) p.inc(0, (int)r);	
+			if ((x & 1) == 0) p.inc(0, (int)r);	
 			
 			p = pos.subtract(p);
 			

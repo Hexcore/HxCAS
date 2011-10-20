@@ -156,7 +156,15 @@ public class ColourPicker extends Widget
 
 			if (wheelActive)
 			{
+				float oldHueAngle = hueAngle;
 				hueAngle = (float)Math.atan2(posFromCenter.y, posFromCenter.x);
+				
+				if (hueAngle != oldHueAngle)
+				{
+					Event newEvent = new Event(Event.Type.CHANGE);
+					newEvent.target = this;
+					window.sendWindowEvent(newEvent);
+				}
 			}
 			else if (triangleActive)
 			{
@@ -187,6 +195,10 @@ public class ColourPicker extends Widget
 					ba = a;
 					bb = b;
 					bc = c;
+					
+					Event newEvent = new Event(Event.Type.CHANGE);
+					newEvent.target = this;
+					window.sendWindowEvent(newEvent);
 				}
 			}
 		}

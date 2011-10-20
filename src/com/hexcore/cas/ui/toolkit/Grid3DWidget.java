@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -60,7 +61,8 @@ public class Grid3DWidget extends GridWidget
 	protected FloatBuffer	colourBufferData = null;
 	protected FloatBuffer	normalBufferData = null;
 	protected FloatBuffer	lineBufferData = null;
-	protected boolean		dirty = true;
+	protected AtomicBoolean	reallyDirty = new AtomicBoolean(true);
+	protected AtomicBoolean	dirty = new AtomicBoolean(true);
 	
 	public Grid3DWidget(Vector2i size, Grid grid, int cellSize)
 	{
@@ -153,52 +155,57 @@ public class Grid3DWidget extends GridWidget
 	public void setGrid(Grid grid)
 	{
 		this.grid = grid;
-		dirty = true;
+		dirty.set(true);
 	}
 
 	@Override
 	public void setColourRuleSet(ColourRuleSet ruleSet)
 	{
 		colourRules = ruleSet;
-		dirty = true;
+		dirty.set(true);
 	}
 	
 	@Override
 	public void setDrawWireframe(boolean state)
 	{
 		drawWireframe = state;
-		dirty = true;
+		dirty.set(true);
 	}
 	
 	public void addSlice(Slice slice)
 	{
 		slices.add(slice);
-		dirty = true;
+		dirty.set(true);
+		reallyDirty.set(true);
 	}
 	
 	public void addSlice(int heightProperty, float scale)
 	{
 		slices.add(new Slice(heightProperty, scale));
-		dirty = true;
+		dirty.set(true);
+		reallyDirty.set(true);
 	}	
 	
 	public void addSlice(int colourProperty, int heightProperty, float scale)
 	{
 		slices.add(new Slice(colourProperty, heightProperty, scale));
-		dirty = true;
+		dirty.set(true);
+		reallyDirty.set(true);
 	}
 	
 	public void setSlice(int index, int colourProperty, int heightProperty)
 	{
 		slices.get(index).colourProperty = colourProperty;
 		slices.get(index).heightProperty = heightProperty;
-		dirty = true;
+		dirty.set(true);
+		reallyDirty.set(true);
 	}
 	
 	public void clearSlices()
 	{
 		slices.clear();
-		dirty = true;
+		dirty.set(true);
+		reallyDirty.set(true);
 	}
 	
 	public List<Slice> getSlices()
@@ -259,8 +266,7 @@ public class Grid3DWidget extends GridWidget
         gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, (new Vector3f(0.25f, 0.5f, 1.0f)).toFloatBuffer(0.0f));
         gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, Colour.WHITE.toFloatBuffer());
 
-		if (dirty) loadGeometry(gl);
-		dirty = false;
+		if (dirty.getAndSet(false)) loadGeometry(gl);
 		
 		renderVertexBuffer(gl);
 		

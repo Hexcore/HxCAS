@@ -30,6 +30,9 @@ public class TriangleGrid3DWidget extends Grid3DWidget
 		upTriangle[1] = new Vector2f(r+r,	h);
 		upTriangle[2] = new Vector2f(0.0f,	h);
 		
+		if (reallyDirty.getAndSet(false))
+			setupVertexBuffer(gl, 3);
+		
 		resetVertexBuffer(gl, 3);
 				
 		for (int y = 0; y < grid.getHeight(); y++)
