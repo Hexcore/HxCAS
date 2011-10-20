@@ -636,6 +636,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button resetCameraButton;
 
 
+	private SliderWidget playbackSpeedSlider;
 	private LinearLayout simulationControlsLayout;
 	private LinearLayout topLayout;
 	private LinearLayout worldHeaderLayout;
@@ -1162,15 +1163,16 @@ public class GUI implements WindowEventListener, LobbyListener
         innerDetailsLayout.add(detailsImage);
         
         LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
+        playbackLayout.setFlag(Widget.WRAP_HORIZONTAL);
         playbackLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(playbackLayout);
         
         LinearLayout innerPlaybackLayout = new LinearLayout(new Vector2i(205, 25), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        innerPlaybackLayout.setFlag(Widget.WRAP_HORIZONTAL | Widget.CENTER_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout);
         
         LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(205, 40), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout2.setFlag(Widget.CENTER_HORIZONTAL);
+        innerPlaybackLayout2.setFlag(Widget.WRAP_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout2);
 
         Button stepBackwardButton = new Button(this.window.getTheme().getImage("icons", "step_backward_icon.png"));
@@ -1193,16 +1195,22 @@ public class GUI implements WindowEventListener, LobbyListener
         stepForwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepForwardButton);
 
-        TextWidget playbackSpeedHeader = new TextWidget("Playback Speed (secs/gen):");
-        playbackLayout.add(playbackSpeedHeader);
+        LinearLayout innerPlaybackLayout3 = new LinearLayout(new Vector2i(205, 40), LinearLayout.Direction.VERTICAL);
+        innerPlaybackLayout3.setMargin(new Vector2i(2, 0));
+        innerPlaybackLayout3.setFlag(Widget.WRAP);
+        innerPlaybackLayout2.add(innerPlaybackLayout3);
+
+        TextWidget playbackSpeedHeader = new TextWidget("Playback Speed:");
+        playbackSpeedHeader.setMargin(new Vector2i(0, 0));
+        innerPlaybackLayout3.add(playbackSpeedHeader);
         
-        SliderWidget playbackSpeedSlider = new SliderWidget(100);
-        playbackSpeedSlider.setShowValuePlaces(3);
-        playbackSpeedSlider.setMaximum(5);
+        playbackSpeedSlider = new SliderWidget(100);
+        playbackSpeedSlider.setShowValuePlaces(2);
+        playbackSpeedSlider.setMaximum(1);
         playbackSpeedSlider.setFlag(Widget.FILL_HORIZONTAL);
         playbackSpeedSlider.setShowValue(true);
-        playbackLayout.add(playbackSpeedSlider);
-
+        innerPlaybackLayout3.add(playbackSpeedSlider);
+        
         ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
         playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerPlaybackLayout.add(playbackImage);
@@ -2561,6 +2569,12 @@ public class GUI implements WindowEventListener, LobbyListener
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
+        	else if (event.target == playbackSpeedSlider)
+        	{
+                ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SET_PLAYBACK_SPEED);
+                serverEvent.milliseconds = (int)(playbackSpeedSlider.getValue() * 1000.0);
+                server.sendEvent(serverEvent);	
+        	}
             // WORLD EDITOR TAB
             else if (event.target == previewViewport.gridWidget)
             {
