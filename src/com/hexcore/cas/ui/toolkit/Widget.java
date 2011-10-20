@@ -30,7 +30,7 @@ public abstract class Widget
 	protected Window	window;
 	protected int		flags;
 	
-	protected String	tooltip;
+	protected String	tooltip = "";
 	
 	Widget(Vector2i size)
 	{
@@ -49,6 +49,11 @@ public abstract class Widget
 	{
 		this.tooltip = tooltip;
 	}
+	
+	public String getTooltip()
+	{
+		return tooltip;
+	}	
 		
 	public void setX(int position)
 	{
