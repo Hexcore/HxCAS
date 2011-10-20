@@ -969,12 +969,11 @@ public class GUI implements WindowEventListener, LobbyListener
         worldPreviewContainer.setContents(masterWorldPreviewLayout);
         
         worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        worldEditorLeftLayout.setWidth(500);
-        worldEditorLeftLayout.setFlag(Widget.FILL_VERTICAL);
+        worldEditorLeftLayout.setFlag(Widget.FILL);
         masterWorldPreviewLayout.add(worldEditorLeftLayout);
         
         worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        worldEditorRightLayout.setFlag(Widget.FILL);
+        worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
         masterWorldPreviewLayout.add(worldEditorRightLayout);
        
         previewWindowContainer = new Container(new Vector2i(100,100));
@@ -985,6 +984,7 @@ public class GUI implements WindowEventListener, LobbyListener
         worldEditorLeftLayout.add(previewViewport.container);
         
         worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        worldEditorPropertySelector.setFlag(Widget.WRAP_HORIZONTAL);
         worldEditorRightLayout.add(worldEditorPropertySelector);
         
         setCellValueButton = new Button(new Vector2i(70,43), "SET");
@@ -1479,12 +1479,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	int numProperties = world.getInitialGeneration().getNumProperties();
     	
     	worldEditorRightLayout.clear();
-    	
     	worldEditorRightLayout.add(worldEditorPropertySelector);
-    	
-    	setCellValueButton = new Button(new Vector2i(70,43), "SET");
-     	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-        worldEditorRightLayout.add(setCellValueButton);
     	
     	numberboxList = new ArrayList<NumberBox>();
     	
@@ -1492,9 +1487,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	{
         	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-        	cellPropertyLayout.setHeight(40);
-        	cellPropertyLayout.setWidth(250);
-        	cellPropertyLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        	cellPropertyLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         	worldEditorRightLayout.add(cellPropertyLayout);
         	
         	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
@@ -1505,6 +1498,10 @@ public class GUI implements WindowEventListener, LobbyListener
         	
         	numberboxList.add(n);
     	}
+    	
+    	setCellValueButton = new Button(new Vector2i(70,43), "Apply");
+    	setCellValueButton.setWidth(250);
+        worldEditorRightLayout.add(setCellValueButton);
     }
     
     public void updatePreview()
