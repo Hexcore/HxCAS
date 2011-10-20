@@ -117,6 +117,13 @@ public class SymbolTable
 		sumEntry.argType = TableEntry.doubleType;
 		insert(sumEntry);
 		
+		TableEntry randomEntry = new TableEntry();
+		randomEntry.type = TableEntry.doubleType;
+		randomEntry.kind = TableEntry.sFunction;
+		randomEntry.name = "random";
+		randomEntry.argType = TableEntry.doubleType;
+		insert(randomEntry);
+		
 		TableEntry countEntry = new TableEntry();
 		countEntry.type = TableEntry.intType;
 		countEntry.kind = TableEntry.aFunction;

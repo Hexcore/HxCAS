@@ -67,6 +67,11 @@ public class StdLib
 		return values.length;
 	}
 	
+	public static double random(double val)
+	{
+		return Math.random() * val;
+	}
+	
 	public int exists(Cell c)
 	{
 		return c == null ? 0 : 1;
