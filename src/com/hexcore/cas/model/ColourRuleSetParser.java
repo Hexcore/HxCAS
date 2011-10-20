@@ -1,5 +1,6 @@
 package com.hexcore.cas.model;
 
+import java.util.List;
 import java.util.Map;
 
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -20,10 +21,10 @@ public class ColourRuleSetParser extends ConfigParser
 {
 	public ColourRuleSetParser()
 	{
-		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
+		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';', '-'});
 	}
 	
-	public ColourRuleSet parse(String filename, Map<String, Integer> properties)
+	public ColourRuleSet parse(String filename, List<String> properties)
 	{	
 		scanner.readFile(filename);
 		
@@ -57,7 +58,7 @@ public class ColourRuleSetParser extends ConfigParser
 		return ruleSet;
 	}
 	
-	private void readColourRule(ColourRuleSet ruleSet, Map<String, Integer> properties)
+	private void readColourRule(ColourRuleSet ruleSet, List<String> properties)
 	{
 		String 		ruleName;
 		ColourRule	rule = new ColourRule();
@@ -98,9 +99,13 @@ public class ColourRuleSetParser extends ConfigParser
 				
 		if (rule != null)
 		{
-			Integer index = properties.get(ruleName);
+			int index = -1;
 			
-			if (index == null)
+			for (int i = 0; i < properties.size(); i++)
+				if (properties.get(i).equals(ruleName))
+					index = i;
+			
+			if (index == -1)
 				error("Invalid property name '" + ruleName + "', property doesn't exist in rule");
 			else
 				ruleSet.setColourRule(index, rule);
@@ -121,7 +126,7 @@ public class ColourRuleSetParser extends ConfigParser
 			return null;
 		}	
 		
-		if (!expect(".."))
+		if (!expect("-"))
 		{
 			fastForward(";");
 			return null;

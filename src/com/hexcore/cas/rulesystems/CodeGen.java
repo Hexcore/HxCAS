@@ -102,7 +102,8 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		derefProperty(0);		//Self.type
 		
 		executeVisitor.visitInsn(D2I);
-		executeVisitor.visitLookupSwitchInsn(defaultLabel, frameworkIndices, frameworkLabels);
+		executeVisitor.visitTableSwitchInsn(0, numTypes-1, defaultLabel, frameworkLabels);
+		//executeVisitor.visitLookupSwitchInsn(defaultLabel, frameworkIndices, frameworkLabels);
 	}
 	
 	public static void initType()

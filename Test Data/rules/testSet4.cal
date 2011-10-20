@@ -5,7 +5,7 @@ ruleset set4
 	property land;
 	
 
-	type Land : 0
+	type Land
 	{
 
 	}

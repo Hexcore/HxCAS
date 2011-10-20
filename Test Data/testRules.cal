@@ -6,7 +6,7 @@ ruleset Flood
 	property water;
 	
 
-	type Land : 0
+	type Land
 	{
 		self.land = self.land + 1;
 	}

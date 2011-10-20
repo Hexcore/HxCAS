@@ -316,7 +316,7 @@ public class Simulator extends Thread
 	
 	private void calculateSplits()
 	{
-		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 4, 8);
+		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 4, 1);
 		clientWorkables = new Recti[splits.length];
 		Log.information(TAG, "Split size: " + splits.length);
 		

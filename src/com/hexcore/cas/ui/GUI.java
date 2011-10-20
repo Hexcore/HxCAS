@@ -80,10 +80,11 @@ public class GUI implements WindowEventListener, LobbyListener
 {	
 	 public void createColoursTab()
 	    {
-		 
+	    	int numProperties = world.getInitialGeneration().getNumProperties();
+		 	if (numProperties > 0)
+		 	{
 		 	colourPropertiesLayout.clear();
 		 
-	    	int numProperties = world.getInitialGeneration().getNumProperties();
 	    	colourContainerList = Collections.synchronizedList(new ArrayList<GUI.ColourContainer>());
 	    	
 	    	for (int i = 0 ; i < numProperties; i++)
@@ -92,17 +93,30 @@ public class GUI implements WindowEventListener, LobbyListener
 	    		
 	    	
 	    		ColourContainer c = new ColourContainer(i, window, CodeGen.getPropertyList().get(i));
+	    		
 	    	
 	    		colourPropertiesLayout.add(c.getLayout());
-
 	    		colourContainerList.add(c);
-	    	
+	    
+	    		
+	    		
 	    	
 	    	}
-	    	setColourRangesButton = new Button(new Vector2i(100,40), "Set Colours");
-	    	colourPropertiesLayout.add(setColourRangesButton);
+	    	
+	    //	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	    //	colourButtonsLayout.setHeight(200);
+	   // 	colourButtonsLayout.setWidth(200);
+	   // 	rightColoursLayout.add(colourButtonsLayout);
+	    	
+	   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
+	    colourPropertiesLayout.add(setColourRangesButton);
+	    	
+	    //	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
+	    //	colourButtonsLayout.add(resetColourRangesButton);
 	    	
 	    	
+	    	
+		 	}
 	    }
 	public static class RangeContainer
 	{
@@ -121,7 +135,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		public TextWidget t4;
 		
 		public LinearLayout rangeLayout;
-		
+		public LinearLayout rangeColourLayout;
 		
 		public RangeContainer(int id, Window window)
 		{
@@ -130,21 +144,31 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			
 			firstRange = new NumberBox(40);
+			firstRange.setFlag(Widget.CENTER_VERTICAL);
 			secondRange = new NumberBox(40);
+			secondRange.setFlag(Widget.CENTER_VERTICAL);
 			r = new NumberBox(40);
+			r.setFlag(Widget.CENTER_VERTICAL);
 			g = new NumberBox(40);
+			g.setFlag(Widget.CENTER_VERTICAL);
 			b = new NumberBox(40);
+			b.setFlag(Widget.CENTER_VERTICAL);
 			
 	       	t2 = new TextWidget("Range: ");
+	       	t2.setFlag(Widget.CENTER_VERTICAL);
 	       	t3 = new TextWidget(" - ");
+	       	t3.setFlag(Widget.CENTER_VERTICAL);
 	    	t4 = new TextWidget("RGB Value:");
+	    	t4.setFlag(Widget.CENTER_VERTICAL);
 	       	
+	    	
+	    	
 	       	rangeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-	       	rangeLayout.setFlag(Widget.WRAP);
-	       	rangeLayout.setHeight(40);
+	       	//rangeLayout.setFlag(Widget.WRAP);
+	       	rangeLayout.setHeight(50);
+	       	rangeLayout.setWidth(500);
 	       	
 	       	rangeLayout.setWindow(window);
-	       //	rangeLayout.add(t1);
 	       	rangeLayout.add(t2);
 	       	rangeLayout.add(firstRange);
 	       	rangeLayout.add(t3);
@@ -154,7 +178,12 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeLayout.add(g);
 			rangeLayout.add(b);
 			
-				
+			rangeColourLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeColourLayout.setMargin(new Vector2i(25,8));
+			rangeColourLayout.setHeight(32);
+			rangeColourLayout.setWidth(32);
+	    	rangeColourLayout.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
+	    	rangeLayout.add(rangeColourLayout);
 		
 		}
 		
@@ -179,22 +208,33 @@ public class GUI implements WindowEventListener, LobbyListener
 		public int id = 0;
 		
 		public Button addRangeButton;
+		public Button removeRangeButton;
+		
 		public LinearLayout layout;
 		public LinearLayout rangesLayout;
+		public LinearLayout rangeButtonsLayout;
 		public TextWidget t1; 
 		
 		public ColourContainer(int id, Window window, String name)
 		{
 			this.id = id;
-			addRangeButton = new Button(new Vector2i(100,20), "Add Range");
+			
+			addRangeButton = new Button(new Vector2i(30,25), "+");
+			removeRangeButton = new Button(new Vector2i(30,25), "-");
+			rangeButtonsLayout =  new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeButtonsLayout.setWindow(window);
+			rangeButtonsLayout.setFlag(Widget.WRAP);
+			
 			layout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 			layout.setWindow(window);
 			layout.setFlag(Widget.WRAP);
+			layout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 			layout.setHeight(50);
 			t1 = new TextWidget("Property: " + name);
 			layout.add(t1);
-			layout.add(addRangeButton);
-			
+			rangeButtonsLayout.add(addRangeButton);
+			rangeButtonsLayout.add(removeRangeButton);
+			layout.add(rangeButtonsLayout);
 			
 			
 			
@@ -213,6 +253,15 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			this.layout.add(rc.getLayout());
 		
+		}
+		
+		
+		public void removeRange()
+		{
+			numRanges--;
+			rangeContainerList.remove(numRanges);
+			
+			
 		}
 		
 		public LinearLayout getLayout()
@@ -471,6 +520,21 @@ public class GUI implements WindowEventListener, LobbyListener
 	private ScrollableContainer colourPropertiesContainer;
 	private TextWidget coloursInstructions;
 	private LinearLayout colourInstructionsLayout;
+
+
+	private Button saveWorldButton;
+
+
+	private LinearLayout colourButtonsLayout;
+
+
+	private LinearLayout leftColoursLayout;
+
+
+	private LinearLayout rightColoursLayout;
+
+
+	private Button resetColourRangesButton;
     
     public GUI(Server server)
     {
@@ -690,7 +754,7 @@ public class GUI implements WindowEventListener, LobbyListener
             backButton.setHeight(35);
             buttonHeaderLayout.add(backButton);
             
-            Button saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
+            saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
             saveWorldButton.setWidth(165);
             saveWorldButton.setHeight(35);
             buttonHeaderLayout.add(saveWorldButton);
@@ -713,16 +777,7 @@ public class GUI implements WindowEventListener, LobbyListener
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
         
-        LinearLayout instructionsCALLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        instructionsCALLayout.setHeight(35);
-        instructionsCALLayout.setFlag(Widget.CENTER_HORIZONTAL);
-        instructionsCALLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-        masterRulesLayout.add(instructionsCALLayout);
-		   
-		TextWidget CALInstructions = new TextWidget("Inform the compiler of the cells and their properties that your world will support.");
-		instructionsCALLayout.add(CALInstructions);
-		instructionsCALLayout.setWidth(CALInstructions.getWidth()+ 20);
-        
+  
         
         LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         CALLayout.setFlag(Widget.FILL);
@@ -806,34 +861,33 @@ public class GUI implements WindowEventListener, LobbyListener
         coloursContainer.setFlag(Widget.FILL);
         tabbedWorldView.add(coloursContainer, "Colour Ranges");
         
-        masterColoursLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        masterColoursLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         masterColoursLayout.setFlag(Widget.FILL);
         coloursContainer.setContents(masterColoursLayout);
         
+        LinearLayout propertyColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        propertyColourLayout.setFlag(Widget.FILL);
+        masterColoursLayout.add(propertyColourLayout);
+		ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
+		propertyColourHeader.setMargin(new Vector2i(150,10));
+		propertyColourLayout.add(propertyColourHeader);
         
-        colourInstructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        colourInstructionsLayout.setHeight(35);
-        colourInstructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-        colourInstructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-        masterColoursLayout.add(colourInstructionsLayout);
-		   
-		coloursInstructions = new TextWidget("Create the colour ranges for each cell property you have defined");
-		colourInstructionsLayout.add(coloursInstructions);
-		colourInstructionsLayout.setWidth(coloursInstructions.getWidth()+ 20);
-        
-		colourPropertiesContainer = new ScrollableContainer(new Vector2i(300,300));
+		colourPropertiesContainer = new ScrollableContainer(new Vector2i(560,333));
 		colourPropertiesContainer.setFlag(Widget.FILL);
-		masterColoursLayout.add(colourPropertiesContainer);
+		propertyColourLayout.add(colourPropertiesContainer);
 		
 		colourPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		colourPropertiesLayout.setHeight(400);
-		colourPropertiesLayout.setWidth(400);
+		colourPropertiesLayout.setBackground(new Fill(new Colour(0.52f, 0.527f, 0.52f)));
 		
-		colourPropertiesLayout.setFlag(Widget.FILL);
+		colourPropertiesLayout.setHeight(800);
+		colourPropertiesLayout.setWidth(700);
+		colourPropertiesLayout.setFlag(Widget.WRAP);
 		colourPropertiesContainer.setContents(colourPropertiesLayout);	
 		
 
-		
+		TextWidget noColourSetText = new TextWidget("NO COLOUR RANGE PROPERTIES AVAILABLE. APPLY WORLD CHANGES FIRST.");
+		noColourSetText.setPosition(new Vector2i(colourPropertiesLayout.getWidth()/2, colourPropertiesLayout.getHeight()/2));
+		colourPropertiesLayout.add(noColourSetText);
 		
 		
         
@@ -1516,10 +1570,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		
 	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
 	        		c.addRange(c.id);
+	        		window.relayout();
 	        		
 	        		
 	        		
 	        		}	
+	        		
+	        		if (event.target == c.removeRangeButton)
+	        		{
+	        			System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
+	        			c.removeRange();
+	        		}
 	        		
 	        			
 	        			
@@ -1580,6 +1641,23 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 refreshClients();
             }
+            
+            else if (event.target == saveWorldButton)
+            {
+                FileSelectResult result = window.askUserForFileToSave("world");
+                
+                if (result.isValid())
+                {
+                	
+                	world.setFileName(result.getFullPath());
+                    
+                	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SAVE_WORLD);
+                    server.sendEvent(serverEvent);
+                }
+                
+                refreshClients();
+            }
+            
             else if (event.target == helpButton)
             {
             	
@@ -2087,7 +2165,27 @@ public class GUI implements WindowEventListener, LobbyListener
             
         }
         else if (event.type == Event.Type.CHANGE)
-        {        	
+        {
+        	if (colourContainerList != null)
+        	{
+	        	for (ColourContainer c : colourContainerList)
+	        	{
+	        		for (RangeContainer r: c.rangeContainerList)
+	        		{
+	        			if ((event.target == r.r) ||(event.target == r.g) ||(event.target == r.b))
+	        			{
+	        				r.rangeColourLayout.setBackground(new Fill(new Colour(r.r.getValue(0) / 255.0f, r.g.getValue(0) / 255.0f, r.b.getValue(0) / 255.0f)));
+	        			}
+	        			
+	        		}
+	        			
+	        	}
+        	}
+        	
+        	
+        	
+        	
+        	
         	if (selectedViewport != null)
         	{
         		for (int i = 0; i < selectedViewport.propertyDropDownBoxes.size(); i++)

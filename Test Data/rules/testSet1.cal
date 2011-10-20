@@ -6,7 +6,7 @@ ruleset set1
 	property water;
 	
 
-	type Land : 0
+	type Land
 	{
 		self.land = self.land + 1;
 		self.water = self.land + 1;
