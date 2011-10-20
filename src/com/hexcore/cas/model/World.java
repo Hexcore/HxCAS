@@ -33,6 +33,20 @@ public class World
 		worldGenerations.add(gen);
 	}
 	
+	public boolean clearHistory(int genNumber)
+	{
+		if(worldGenerations.size() <= genNumber)
+		{
+			return false;
+		}
+		else
+		{
+			for(int i = 0; i < genNumber; i++)
+				worldGenerations.remove(0);
+			return true;
+		}
+	}
+	
 	public int getNumGenerations()
 	{
 		return worldGenerations.size();

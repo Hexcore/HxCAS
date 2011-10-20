@@ -215,6 +215,16 @@ public class Server
 						break;
 					}
 					
+					case CLEAR_HISTORY:
+					{
+						serverLock.lock();
+						
+						boolean result = world.clearHistory(event.genNumber);
+						
+						serverLock.unlock();
+						break;
+					}
+					
 					case SHUTDOWN:
 					{
 						Log.information(TAG, "Got shutdown message");
