@@ -1590,6 +1590,7 @@ public class GUI implements WindowEventListener, LobbyListener
         	
         	NumberBox n = new NumberBox(60);
         	n.setFlag(Widget.FILL_HORIZONTAL);
+        	n.setValue(0);
         	cellPropertyLayout.add(n);
         	
         	numberboxList.add(n);
@@ -1784,6 +1785,10 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     	else if (event.type == Event.Type.ACTION)
         {
+    		
+    		
+    		
+    		
     		if (colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
@@ -2408,7 +2413,12 @@ public class GUI implements WindowEventListener, LobbyListener
         }
         else if (event.type == Event.Type.CHANGE)
         {
-        	
+        	if (event.target == colourPicker)
+			{
+        	cpRNumberBox.setValue((int) (colourPicker.getColour().r * 255));
+			cpGNumberBox.setValue((int) (colourPicker.getColour().g * 255));
+			cpBNumberBox.setValue((int) (colourPicker.getColour().b * 255));
+			}
         	
         	
         	

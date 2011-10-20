@@ -89,6 +89,8 @@ public class HexagonGridWidget extends Grid2DWidget
 	{
 		boolean handled = super.handleEvent(event, position);
 		
+		if (event.type == Event.Type.MOUSE_CLICK && !event.pressed) active = false;
+		
 		if ((event.type == Event.Type.MOUSE_CLICK || event.type == Event.Type.MOUSE_MOTION)
 				&& ((event.position.x < position.x) || (event.position.y < position.y) 
 				|| (event.position.x > position.x + size.x)
