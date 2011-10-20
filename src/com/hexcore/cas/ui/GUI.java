@@ -1328,7 +1328,7 @@ public class GUI implements WindowEventListener, LobbyListener
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
         
-       backToMainMenuButton = new Button(new Vector2i(50, 15), "Back");
+       backToMainMenuButton = new Button(new Vector2i(60, 30), "Back");
        
         masterSimulationLayout.add(backToMainMenuButton);
         
@@ -2019,10 +2019,10 @@ public class GUI implements WindowEventListener, LobbyListener
             }
             else if (event.target == backToMainMenuButton)
             {
-            //	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
-            //	server.sendEvent(serverEvent);
+            	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
+            	server.sendEvent(serverEvent);
             	
-            //	masterView.setIndex(1);
+            	masterView.setIndex(1);
             }
             
             else if (event.target == playButton)

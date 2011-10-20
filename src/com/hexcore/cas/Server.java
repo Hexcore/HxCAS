@@ -195,9 +195,6 @@ public class Server
 						{
 							simulate.disconnect();
 							simulate = null;
-							
-							client.client.stop();
-							client = null;
 						}
 						
 						serverLock.unlock();
@@ -238,6 +235,12 @@ public class Server
 		lobby.disconnect();
 		if (simulate != null) simulate.disconnect();
 		
+		if (client != null)
+		{
+			client.client.stop();
+			client = null;
+		}
+		
 		try
 		{
 			Thread.sleep(300);
@@ -256,10 +259,13 @@ public class Server
 		{
 			Log.information(TAG, "No network clients found, starting local client");
 			
-			client = new ClientThread();
-			client.start();
-			
-			Thread.sleep(100); // Wait for client to start
+			if (client == null)
+			{
+				client = new ClientThread();
+				client.start();
+				
+				Thread.sleep(100); // Wait for client to start
+			}
 			
 			clients.add(new InetSocketAddress("localhost", client.client.getPort()));
 		}
@@ -304,7 +310,7 @@ public class Server
 		public void run()
 		{
 			client = new Client();
-			client.start(false);
+			client.start(false, false);
 		}
 	}
 }

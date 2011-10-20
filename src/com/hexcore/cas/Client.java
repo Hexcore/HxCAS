@@ -22,7 +22,7 @@ public class Client
 	public static void main(String[] args)
 	{
 		Client instance = new Client();
-		instance.start(true);
+		instance.start(true, true);
 	}
 	
 	public int getPort()
@@ -35,16 +35,19 @@ public class Client
 		running.set(false);
 	}
 	
-	public void start(boolean textUserInterface)
+	public void start(boolean textUserInterface, boolean enableBeacon)
 	{
 		if (textUserInterface) System.out.println("== Hexcore CAS Client - " + VERSION + " ==");
 		
 		Log.information(TAG, "Loading configuration...");
 		config = new Configuration("data/config.txt");
 		
-		Log.information(TAG, "Setting up beacon...");
-		beacon = new Beacon(config.getInteger("Network.Beacon", "port", 3118));
-		beacon.start();
+		if (enableBeacon)
+		{
+			Log.information(TAG, "Setting up beacon...");
+			beacon = new Beacon(config.getInteger("Network.Beacon", "port", 3118));
+			beacon.start();
+		}
 		
 		Log.information(TAG, "Setting up client overseer...");
 		clientPort = config.getInteger("Network.Client", "port", 3119);
@@ -81,7 +84,7 @@ public class Client
 				{
 					try
 					{
-						Thread.sleep(1000);
+						Thread.sleep(200);
 					}
 					catch (InterruptedException e)
 					{
@@ -91,19 +94,19 @@ public class Client
 			}
 		}
 		
-		Log.information(TAG, "Shutting down...");
-		beacon.disconnect();
+		Log.information(TAG, "Client shutting down...");
+		if (enableBeacon) beacon.disconnect();
 		overseer.stopRunning();
 		
 		try
 		{
-			Thread.sleep(1000);
+			Thread.sleep(200);
 		}
 		catch (InterruptedException e)
 		{
 			e.printStackTrace();
 		}
 		
-		System.exit(0);
+		if (textUserInterface) System.exit(0);
 	}
 }

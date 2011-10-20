@@ -77,7 +77,7 @@ public class ClientOverseer extends Thread
 	{
 		valid = false;
 		busy = false;
-		informationProcessor.disconnect();
+		if (informationProcessor != null) informationProcessor.disconnect();
 	}
 	
 	public void setRule(Rule rule)
