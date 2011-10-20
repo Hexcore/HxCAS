@@ -38,7 +38,11 @@ public class ClickableWidget extends Widget
 			handled = true;
 		}
 		else if (event.type == Event.Type.MOUSE_MOTION)
-			window.requestTooltip(this);
+		{
+			if ((position.x <= event.position.x) && (position.y <= event.position.y) &&
+					(position.x + this.size.x >= event.position.x) && (position.y + this.size.y >= event.position.y))
+				window.requestTooltip(this);
+		}
 		
 		return handled;
 	}
