@@ -221,7 +221,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			this.id = id;
 			
 			addRangeButton = new Button(new Vector2i(30,25), "+");
+			addRangeButton.setTooltip("Add a new colour range");
 			removeRangeButton = new Button(new Vector2i(30,25), "-");
+			removeRangeButton.setTooltip("Removes a colour range");
 			rangeButtonsLayout =  new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 			rangeButtonsLayout.setWindow(window);
 			rangeButtonsLayout.setFlag(Widget.WRAP);
@@ -245,7 +247,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
 			
 			if (c != null)
-			{ System.out.println("LOOOOOOOL");
+			{ 
 				for (Range r : c.ranges)
 				{
 					if (r != null)
@@ -1501,6 +1503,19 @@ public class GUI implements WindowEventListener, LobbyListener
         
     }
     
+    public void reconstructViewportLayout()
+    {
+    	viewportsLayout.clear();
+    	
+    	for(Viewport v : viewports)
+    	{
+    		viewportsLayout.add(v.container);
+        	
+    	}
+    	
+    }
+    
+    
     public void startWorldEditor(World world)
     {
     	this.world = world;
@@ -1920,8 +1935,11 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		
 	        		if (event.target == c.removeRangeButton)
 	        		{
-	        			System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
-	        			c.removeRange();
+	        			if (!c.rangeContainerList.isEmpty())
+	        			{
+	        				c.removeRange();
+	        				createColoursTab();
+	        			}
 	        		}
 	        		
 	        			
@@ -2215,6 +2233,22 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	viewports.add(viewport);
             }
+            
+            else if (event.target == removeViewportButton)
+            {
+            	
+            	
+            	System.out.println("VIEWPORT:::::::::::::::::::;;" + viewports.size());
+            	
+            	if (viewports.size() > 1)
+            	{
+            			Viewport v = viewports.get(viewports.size() -1 );
+            			v = null;
+                 		viewports.remove(viewports.size() - 1);
+                 		reconstructViewportLayout();
+            	}
+            }
+            
             else if (event.target == addSliceButton)
             {
         		if (selectedViewport != null)
