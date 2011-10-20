@@ -17,6 +17,6 @@ public class TestHeightMapConverter extends TestCase
 		
 		
 		HeightMapConverter hc = new HeightMapConverter();
-		hc.makeGrid("Test Data/hm.jpg", g, 2, 2, 1);
+		hc.loadHeightMap("Test Data/hm.jpg", g, 1);
 	}
 }
