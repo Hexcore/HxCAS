@@ -39,6 +39,7 @@ import com.hexcore.cas.ui.GUI.RangeContainer;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
+import com.hexcore.cas.ui.toolkit.ColourPicker;
 import com.hexcore.cas.ui.toolkit.Container;
 import com.hexcore.cas.ui.toolkit.Dialog;
 import com.hexcore.cas.ui.toolkit.DiscreteSliderWidget;
@@ -103,18 +104,46 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	
 	    	}
 	    	
-	    //	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	    //	colourButtonsLayout.setHeight(200);
-	   // 	colourButtonsLayout.setWidth(200);
-	   // 	rightColoursLayout.add(colourButtonsLayout);
+	    	
+	    LinearLayout innerRightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	    innerRightColourLayout.setFlag(Widget.WRAP);
+	    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+	    	
+	   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	   	colourButtonsLayout.setFlag(Widget.WRAP);
+	   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourButtonsLayout);
+	    
+	
 	    	
 	   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
-	    colourPropertiesLayout.add(setColourRangesButton);
+	   	colourButtonsLayout.add(setColourRangesButton);
 	    	
-	    //	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
-	    //	colourButtonsLayout.add(resetColourRangesButton);
-	    	
-	    	
+	  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
+	  	colourButtonsLayout.add(resetColourRangesButton);
+	    
+	    colourPicker = new ColourPicker(window);
+	    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourPicker);
+	    
+	    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.WRAP);
+	    rightColourLayout.add(cpRGBLayout);
+	    
+	    cpRNumberBox = new NumberBox(40);
+	    cpRNumberBox.setValue(0);
+	    cpRGBLayout.add(cpRNumberBox);
+	   
+	    cpGNumberBox = new NumberBox(40);
+	    cpGNumberBox.setValue(0);
+	    cpRGBLayout.add(cpGNumberBox);
+	    
+	    cpBNumberBox = new NumberBox(40);
+	    cpBNumberBox.setValue(0);
+	    cpRGBLayout.add(cpBNumberBox);
+	    
+	   
 	    	
 		 	}
 	    }
@@ -535,6 +564,27 @@ public class GUI implements WindowEventListener, LobbyListener
 
 
 	private Button resetColourRangesButton;
+
+
+	private LinearLayout rightColourLayout;
+
+
+	private LinearLayout leftColourLayout;
+
+
+	private NumberBox cpRNumberBox;
+
+
+	private NumberBox cpGNumberBox;
+
+
+	private NumberBox cpBNumberBox;
+
+
+	private LinearLayout cpRGBLayout;
+
+
+	private ColourPicker colourPicker;
     
     public GUI(Server server)
     {
@@ -646,10 +696,12 @@ public class GUI implements WindowEventListener, LobbyListener
         
         
         
-        LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(100, 30), LinearLayout.Direction.HORIZONTAL);
-        worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
+        LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
+        worldHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
         worldLayout.add(worldHeaderLayout);
 
+        ImageWidget headerLogo = new ImageWidget(theme.getImage("headers", "logo.png"));
+        worldHeaderLayout.add(headerLogo);
 		worldLayout.add(tabbedWorldView);
 		
 		propertiesContainer = new Container(new Vector2i(100, 100));    
@@ -865,10 +917,22 @@ public class GUI implements WindowEventListener, LobbyListener
         masterColoursLayout.setFlag(Widget.FILL);
         coloursContainer.setContents(masterColoursLayout);
         
+        
+        leftColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        leftColourLayout.setFlag(Widget.FILL);
+        masterColoursLayout.add(leftColourLayout);
+        
+        rightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        rightColourLayout.setFlag(Widget.FILL);
+   //     rightColourLayout.setWidth(350);
+        masterColoursLayout.add(rightColourLayout);
+        
+        
         LinearLayout propertyColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertyColourLayout.setFlag(Widget.FILL);
-        masterColoursLayout.add(propertyColourLayout);
-		ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
+        leftColourLayout.add(propertyColourLayout);
+		
+        ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
 		propertyColourHeader.setMargin(new Vector2i(150,10));
 		propertyColourLayout.add(propertyColourHeader);
         
@@ -2166,6 +2230,20 @@ public class GUI implements WindowEventListener, LobbyListener
         }
         else if (event.type == Event.Type.CHANGE)
         {
+        	if (cpRNumberBox != null && cpGNumberBox != null && cpBNumberBox != null)
+        	{
+        		if (event.target == colourPicker)
+		        {
+		        	Colour rgb = colourPicker.getColour();
+		        			
+		        	cpRNumberBox.setValue((int) (rgb.r * 255.0f));
+		        	cpGNumberBox.setValue((int) (rgb.g * 255.0f));
+		           	cpBNumberBox.setValue((int) (rgb.b * 255.0f));
+		        }
+        	}
+    	  
+    	        	
+        	
         	if (colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
