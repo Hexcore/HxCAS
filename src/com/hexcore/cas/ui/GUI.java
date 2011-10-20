@@ -157,14 +157,20 @@ public class GUI implements WindowEventListener, LobbyListener
 		public NumberBox g;
 		public NumberBox b;
 		
+		public NumberBox r2;
+		public NumberBox g2;
+		public NumberBox b2;
+		
 		public TextWidget t;
 		public TextWidget t1;
 		public TextWidget t2;
 		public TextWidget t3;
 		public TextWidget t4;
+		public TextWidget t5;
 		
 		public LinearLayout rangeLayout;
 		public LinearLayout rangeColourLayout;
+		public LinearLayout rangeColourLayout2;
 		
 		public RangeContainer(int id, Window window)
 		{
@@ -183,12 +189,22 @@ public class GUI implements WindowEventListener, LobbyListener
 			b = new NumberBox(40);
 			b.setFlag(Widget.CENTER_VERTICAL);
 			
+			
+			r2 = new NumberBox(40);
+			r2.setFlag(Widget.CENTER_VERTICAL);
+			g2 = new NumberBox(40);
+			g2.setFlag(Widget.CENTER_VERTICAL);
+			b2 = new NumberBox(40);
+			b2.setFlag(Widget.CENTER_VERTICAL);
+			
 	       	t2 = new TextWidget("Range: ");
 	       	t2.setFlag(Widget.CENTER_VERTICAL);
 	       	t3 = new TextWidget(" - ");
 	       	t3.setFlag(Widget.CENTER_VERTICAL);
-	    	t4 = new TextWidget("RGB Value:");
+	    	t4 = new TextWidget("Gradient:");
 	    	t4.setFlag(Widget.CENTER_VERTICAL);
+	    	t5 = new TextWidget(" - :");
+	    	t5.setFlag(Widget.CENTER_VERTICAL);
 	       	
 	    	
 	    	
@@ -213,6 +229,20 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeColourLayout.setWidth(32);
 	    	rangeColourLayout.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
 	    	rangeLayout.add(rangeColourLayout);
+			
+			rangeLayout.add(t5);
+			
+			rangeLayout.add(r2);
+			rangeLayout.add(g2);
+			rangeLayout.add(b2);
+			
+			rangeColourLayout2 = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+			rangeColourLayout2.setMargin(new Vector2i(25,8));
+			rangeColourLayout2.setHeight(32);
+			rangeColourLayout2.setWidth(32);
+	    	rangeColourLayout2.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
+	    	rangeLayout.add(rangeColourLayout2);
+			
 		
 		}
 		
