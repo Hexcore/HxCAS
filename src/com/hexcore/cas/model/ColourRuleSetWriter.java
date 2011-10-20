@@ -1,5 +1,6 @@
 package com.hexcore.cas.model;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import com.hexcore.cas.ui.toolkit.Colour;
@@ -50,11 +51,13 @@ public class ColourRuleSetWriter
 	
 	private String writeColour(Colour colour)
 	{
+		DecimalFormat formater = new DecimalFormat("#.####");
+		
 		String str = (colour.a < 1.0) ? "rgba(" : "rgb(";
-		str += colour.r;
-		str += ", " + colour.g;
-		str += ", " + colour.b;
-		if (colour.a < 1.0) str += ", " + colour.a;
+		str += formater.format(colour.r);
+		str += ", " + formater.format(colour.g);
+		str += ", " + formater.format(colour.b);
+		if (colour.a < 1.0) str += ", " + formater.format(colour.a);
 		return str + ")";
 	}
 }
