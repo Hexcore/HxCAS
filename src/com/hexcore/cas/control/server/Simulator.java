@@ -1,7 +1,8 @@
 package com.hexcore.cas.control.server;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -157,7 +158,20 @@ public class Simulator extends Thread
 	{
 		threadWorkID = 0;
 		
-		world.addGeneration(grid.clone());
+		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
+		long usedHeap = bean.getHeapMemoryUsage().getUsed();
+		long maxHeap = bean.getHeapMemoryUsage().getMax();
+		System.out.println("Bean heap memory : " + usedHeap);
+		System.out.println("Bean heap memory MAX : " + maxHeap);
+		if(usedHeap < maxHeap - (100 * 1024 * 1024))
+		{
+			world.addGeneration(grid.clone());
+		}
+		else
+		{
+			System.out.println("Out of memory!  Pausing system...");
+			paused.set(true);
+		}
 		
 		splitGrids();
 		

@@ -12,7 +12,7 @@ public class ServerEvent
 	{
 		SHUTDOWN, CREATE_WORLD, LOAD_WORLD, SAVE_WORLD, READY_SIMULATION, 
 		START_SIMULATION, PAUSE_SIMULATION, RESET_SIMULATION, STOP_SIMULATION, STEP_SIMULATION,
-		PING_CLIENTS;
+		PING_CLIENTS, CLEAR_HISTORY;
 	}
 	
 	public Type		type;
@@ -27,6 +27,9 @@ public class ServerEvent
 	
 	// LOAD_WORLD
 	public String		filename;
+	
+	// CLEAR_HISTORY
+	public int genNumber;
 	
 	public ServerEvent(Type type)
 	{
