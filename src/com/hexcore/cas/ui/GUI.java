@@ -1419,8 +1419,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         grid.setWrappable(wrapCheckBox.isChecked());
         
-        world.reset();
-        world.setWorldGenerations(new Grid[] {grid});
+        world.resetTo(grid);
     }
     
     public void saveRuleCodeToWorld()
