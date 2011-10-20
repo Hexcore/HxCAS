@@ -39,6 +39,7 @@ import com.hexcore.cas.ui.GUI.RangeContainer;
 import com.hexcore.cas.ui.toolkit.Button;
 import com.hexcore.cas.ui.toolkit.CheckBox;
 import com.hexcore.cas.ui.toolkit.Colour;
+import com.hexcore.cas.ui.toolkit.ColourBox;
 import com.hexcore.cas.ui.toolkit.ColourPicker;
 import com.hexcore.cas.ui.toolkit.Container;
 import com.hexcore.cas.ui.toolkit.Dialog;
@@ -153,13 +154,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		public NumberBox firstRange;
 		public NumberBox secondRange;
 		
-		public NumberBox r;
-		public NumberBox g;
-		public NumberBox b;
-		
-		public NumberBox r2;
-		public NumberBox g2;
-		public NumberBox b2;
+		public Colour fromColour;
+		public Colour toColour;
 		
 		public TextWidget t;
 		public TextWidget t1;
@@ -169,41 +165,30 @@ public class GUI implements WindowEventListener, LobbyListener
 		public TextWidget t5;
 		
 		public LinearLayout rangeLayout;
-		public LinearLayout rangeColourLayout;
-		public LinearLayout rangeColourLayout2;
+		public ColourBox colourBoxFrom;
+		public ColourBox colourBoxTo;
 		
 		public RangeContainer(int id, Window window)
 		{
 			this.id = id;
 			
-			
+			fromColour = new Colour(0.0f,0.0f,0.0f);
+			toColour = new Colour(0.0f,0.0f,0.0f);
 			
 			firstRange = new NumberBox(40);
 			firstRange.setFlag(Widget.CENTER_VERTICAL);
 			secondRange = new NumberBox(40);
 			secondRange.setFlag(Widget.CENTER_VERTICAL);
-			r = new NumberBox(40);
-			r.setFlag(Widget.CENTER_VERTICAL);
-			g = new NumberBox(40);
-			g.setFlag(Widget.CENTER_VERTICAL);
-			b = new NumberBox(40);
-			b.setFlag(Widget.CENTER_VERTICAL);
-			
-			
-			r2 = new NumberBox(40);
-			r2.setFlag(Widget.CENTER_VERTICAL);
-			g2 = new NumberBox(40);
-			g2.setFlag(Widget.CENTER_VERTICAL);
-			b2 = new NumberBox(40);
-			b2.setFlag(Widget.CENTER_VERTICAL);
-			
+		
+				
+				
 	       	t2 = new TextWidget("Range: ");
 	       	t2.setFlag(Widget.CENTER_VERTICAL);
 	       	t3 = new TextWidget(" - ");
 	       	t3.setFlag(Widget.CENTER_VERTICAL);
 	    	t4 = new TextWidget("Gradient:");
 	    	t4.setFlag(Widget.CENTER_VERTICAL);
-	    	t5 = new TextWidget(" - :");
+	    	t5 = new TextWidget(" - ");
 	    	t5.setFlag(Widget.CENTER_VERTICAL);
 	       	
 	    	
@@ -211,7 +196,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	       	rangeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 	       	//rangeLayout.setFlag(Widget.WRAP);
 	       	rangeLayout.setHeight(50);
-	       	rangeLayout.setWidth(500);
+	       	rangeLayout.setWidth(440);
 	       	
 	       	rangeLayout.setWindow(window);
 	       	rangeLayout.add(t2);
@@ -219,29 +204,18 @@ public class GUI implements WindowEventListener, LobbyListener
 	       	rangeLayout.add(t3);
 			rangeLayout.add(secondRange);
 		  	rangeLayout.add(t4);
-			rangeLayout.add(r);
-			rangeLayout.add(g);
-			rangeLayout.add(b);
-			
-			rangeColourLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-			rangeColourLayout.setMargin(new Vector2i(25,8));
-			rangeColourLayout.setHeight(32);
-			rangeColourLayout.setWidth(32);
-	    	rangeColourLayout.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
-	    	rangeLayout.add(rangeColourLayout);
-			
+
+			colourBoxFrom = new ColourBox(new Vector2i(32,32));
+			colourBoxFrom.setColour(fromColour);
+			rangeLayout.add(colourBoxFrom);
+		  	
+						
 			rangeLayout.add(t5);
 			
-			rangeLayout.add(r2);
-			rangeLayout.add(g2);
-			rangeLayout.add(b2);
-			
-			rangeColourLayout2 = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-			rangeColourLayout2.setMargin(new Vector2i(25,8));
-			rangeColourLayout2.setHeight(32);
-			rangeColourLayout2.setWidth(32);
-	    	rangeColourLayout2.setBackground(new Fill(new Colour(r.getValue(0)/255.0f, g.getValue(0)/255.0f , b.getValue(0)/255.0f)));
-	    	rangeLayout.add(rangeColourLayout2);
+					
+			colourBoxTo = new ColourBox(new Vector2i(32,32));
+			colourBoxTo.setColour(toColour);
+			rangeLayout.add(colourBoxTo);
 			
 		
 		}
@@ -289,7 +263,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			layout.setFlag(Widget.WRAP);
 			layout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 			layout.setHeight(50);
-			t1 = new TextWidget("Property: " + name);
+			t1 = new TextWidget("Property: " + name, Text.Size.MEDIUM);
+		
 			layout.add(t1);
 			rangeButtonsLayout.add(addRangeButton);
 			rangeButtonsLayout.add(removeRangeButton);
@@ -971,7 +946,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		propertyColourLayout.add(colourPropertiesContainer);
 		
 		colourPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		colourPropertiesLayout.setBackground(new Fill(new Colour(0.52f, 0.527f, 0.52f)));
+		//colourPropertiesLayout.setBackground(new Fill(new Colour(0.52f, 0.527f, 0.52f)));
 		
 		colourPropertiesLayout.setHeight(800);
 		colourPropertiesLayout.setWidth(700);
@@ -1654,6 +1629,29 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     	else if (event.type == Event.Type.ACTION)
         {
+    		if (colourContainerList != null)
+        	{
+	        	for (ColourContainer c : colourContainerList)
+	        	{
+	        		for (RangeContainer r: c.rangeContainerList)
+	        		{
+	        			if (event.target == r.colourBoxFrom)
+	        				{
+	        				r.fromColour = colourPicker.getColour();
+	        				r.colourBoxFrom.setColour(colourPicker.getColour());
+	        				}
+	        			
+	        			if (event.target == r.colourBoxTo)
+	        				{
+	        				r.toColour = colourPicker.getColour();
+	        				r.colourBoxTo.setColour(colourPicker.getColour());
+	        				}
+	        			
+	        		}
+	        			
+	        	}
+        	}
+    		
         	
         	if (colourContainerList != null)
         	{
@@ -1695,16 +1693,12 @@ public class GUI implements WindowEventListener, LobbyListener
         			
         			for (RangeContainer r : c.rangeContainerList)
         			{
+        				Range range = new Range(r.firstRange.getValue(0), r.secondRange.getValue(0), r.fromColour, r.toColour);
         				
-        				float red = (float) (r.r.getValue(0) / 255.0);
-        				float green = (float) (r.g.getValue(0) / 255.0);
-        				float blue = (float) (r.b.getValue(0) / 255.0);
-        				
-        				
-        				cr.addRange(new Range(r.firstRange.getValue(0), r.secondRange.getValue(0), new Colour(red,green,blue)));        				
+        			   	cr.addRange(range);        				
         				
         				
-        				System.out.println("ADDING RANGE FOR ID: " + r.id + " RGB: " + red + ":" + green + ":" + blue);
+        			//	System.out.println("ADDING RANGE FOR ID: " + r.id + " RGB: " + red + ":" + green + ":" + blue);
         			}
         			colourRules.setColourRule(c.id, cr);
 	        	} 
@@ -2257,38 +2251,11 @@ public class GUI implements WindowEventListener, LobbyListener
 				 }
 			 }
             
+            
         }
         else if (event.type == Event.Type.CHANGE)
         {
-        	if (cpRNumberBox != null && cpGNumberBox != null && cpBNumberBox != null)
-        	{
-        		if (event.target == colourPicker)
-		        {
-		        	Colour rgb = colourPicker.getColour();
-		        			
-		        	cpRNumberBox.setValue((int) (rgb.r * 255.0f));
-		        	cpGNumberBox.setValue((int) (rgb.g * 255.0f));
-		           	cpBNumberBox.setValue((int) (rgb.b * 255.0f));
-		        }
-        	}
-    	  
-    	        	
         	
-        	if (colourContainerList != null)
-        	{
-	        	for (ColourContainer c : colourContainerList)
-	        	{
-	        		for (RangeContainer r: c.rangeContainerList)
-	        		{
-	        			if ((event.target == r.r) ||(event.target == r.g) ||(event.target == r.b))
-	        			{
-	        				r.rangeColourLayout.setBackground(new Fill(new Colour(r.r.getValue(0) / 255.0f, r.g.getValue(0) / 255.0f, r.b.getValue(0) / 255.0f)));
-	        			}
-	        			
-	        		}
-	        			
-	        	}
-        	}
         	
         	
         	
