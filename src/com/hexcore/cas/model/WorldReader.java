@@ -109,20 +109,20 @@ public class WorldReader
 		{
 			case 'r':
 			case 'R':
-				worldGenerations = new RectangleGrid[zip.size() - 2];
-				for(int i = 0; i < zip.size() - 2; i++)
+				worldGenerations = new RectangleGrid[zip.size() - 3];
+				for(int i = 0; i < zip.size() - 3; i++)
 					worldGenerations[i] = new RectangleGrid(gridSize, cell);
 				break;
 			case 'h':
 			case 'H':
-				worldGenerations = new HexagonGrid[zip.size() - 2];
-				for(int i = 0; i < zip.size() - 2; i++)
+				worldGenerations = new HexagonGrid[zip.size() - 3];
+				for(int i = 0; i < zip.size() - 3; i++)
 					worldGenerations[i] = new HexagonGrid(gridSize, cell);
 				break;
 			case 't':
 			case 'T':
-				worldGenerations = new TriangleGrid[zip.size() - 2];
-				for(int i = 0; i < zip.size() - 2; i++)
+				worldGenerations = new TriangleGrid[zip.size() - 3];
+				for(int i = 0; i < zip.size() - 3; i++)
 					worldGenerations[i] = new TriangleGrid(gridSize, cell);
 				break;
 			default:
@@ -138,7 +138,7 @@ public class WorldReader
 			if (config.getName().endsWith(".car"))
 				ruleCode = getStringFromStream(zip.getInputStream(config));
 			else if (config.getName().endsWith(".cacp"))
-				colourCode = getStringFromStream(zip.getInputStream(config));	
+				colourCode = getStringFromStream(zip.getInputStream(config));
 		}
 		
 		if (ruleCode == null)
@@ -203,6 +203,8 @@ public class WorldReader
 		world.setRuleCode(ruleCode);
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(worldGenerations);
+		
+		System.out.println("Number of generations from World Loader : " + world.getNumGenerations());
 		
 		return true;
 	}

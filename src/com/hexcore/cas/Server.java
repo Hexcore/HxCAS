@@ -96,6 +96,7 @@ public class Server
 												
 						world.addGeneration(grid);						
 						world.setRuleCode("ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}");
+						world.setColourCode(" ");
 						
 						ui.startWorldEditor(world);
 
@@ -108,16 +109,11 @@ public class Server
 						serverLock.lock();
 						
 						world = new World();
-						WorldReader reader = new WorldReader(world);
+						//WorldReader reader = new WorldReader(world);
 						
-						try
-						{
-							reader.readWorld(event.filename);
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}
+						//reader.readWorld(event.filename);
+						world.setFileName(event.filename);
+						world.load();
 						
 						ui.startWorldEditor(world);
 						
@@ -131,11 +127,12 @@ public class Server
 					{
 						serverLock.lock();
 						
-						WorldSaver saver = new WorldSaver();
+						//WorldSaver saver = new WorldSaver();
 						
 						try
 						{
-							saver.saveWorld(world);
+							//saver.saveWorld(world);
+							world.save();
 							Log.information(TAG, "Saved world");
 						}
 						catch (IOException e)
