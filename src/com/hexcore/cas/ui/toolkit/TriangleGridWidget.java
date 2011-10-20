@@ -65,7 +65,7 @@ public class TriangleGridWidget extends Grid2DWidget
 				else if (cell.getValue(colourProperty) > 0) 
 					colour = Colour.LIGHT_GREY;
 				
-				if ((x & 1) == (y & 1)) // Checker-board pattern
+				if ((x & 1) != (y & 1)) // Checker-board pattern
 				{
 					Graphics.renderPolygon(gl, p, downTriangle, false, colour);
 					if (drawWireframe) Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellBorderColour);
@@ -81,7 +81,7 @@ public class TriangleGridWidget extends Grid2DWidget
 		{
 			Vector2i 	p = pos.add((int)(selectedCell.x * r), (int)(selectedCell.y * h));
 			
-			if ((selectedCell.x & 1) == (selectedCell.y & 1)) // Checker-board pattern
+			if ((selectedCell.x & 1) != (selectedCell.y & 1)) // Checker-board pattern
 				Graphics.renderPolygon(gl, p, downTriangleBorder, true, cellSelectedBorderColour);
 			else
 				Graphics.renderPolygon(gl, p, upTriangleBorder, true, cellSelectedBorderColour);
@@ -115,7 +115,7 @@ public class TriangleGridWidget extends Grid2DWidget
 			
 			System.out.println(fx + " " + fy);
 			
-			if ((x & 1) == (y & 1))
+			if ((x & 1) != (y & 1))
 				x = x - (fy > fx ? 1 : 0);
 			else
 				x = x - ((1.0 - fy) > fx ? 1 : 0);
