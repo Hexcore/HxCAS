@@ -583,7 +583,7 @@ public class GUI implements WindowEventListener, LobbyListener
         colourRules.setColourRule(3, colourRule);  
 
         theme = new Theme();
-        window = new Window("Cellular Automata Simulator - v1.0", 1024, 700, theme);
+        window = new Window("Cellular Automata Simulator - v1.0", 1366, 748, theme);
         
         window.addListener(this);
         window.show();
@@ -1967,7 +1967,7 @@ public class GUI implements WindowEventListener, LobbyListener
             }
             else if (event.target == addSliceButton)
             {
-        		if (selectedViewport != null && selectedViewport.type == Viewport.Type.THREE_D)
+        		if (selectedViewport != null)
         		{
         			Slice slice = new Slice(1, 10.0f);
         			Grid3DWidget gw = (Grid3DWidget)selectedViewport.gridWidget;
