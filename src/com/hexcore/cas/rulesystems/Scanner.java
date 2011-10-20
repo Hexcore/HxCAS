@@ -67,8 +67,8 @@ public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
-	static final int maxT = 36;
-	static final int noSym = 36;
+	static final int maxT = 39;
+	static final int noSym = 39;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
@@ -91,22 +91,25 @@ public class Scanner {
 	static final int point_Sym = 18;
 	static final int if_Sym = 19;
 	static final int else_Sym = 20;
-	static final int var_Sym = 21;
-	static final int comma_Sym = 22;
-	static final int plus_Sym = 23;
-	static final int minus_Sym = 24;
-	static final int equalequal_Sym = 25;
-	static final int bangequal_Sym = 26;
-	static final int greater_Sym = 27;
-	static final int less_Sym = 28;
-	static final int greaterequal_Sym = 29;
-	static final int lessequal_Sym = 30;
-	static final int barbar_Sym = 31;
-	static final int star_Sym = 32;
-	static final int slash_Sym = 33;
-	static final int percent_Sym = 34;
-	static final int andand_Sym = 35;
-	static final int NOT_SYM = 36;
+	static final int loop_Sym = 21;
+	static final int from_Sym = 22;
+	static final int to_Sym = 23;
+	static final int var_Sym = 24;
+	static final int comma_Sym = 25;
+	static final int plus_Sym = 26;
+	static final int minus_Sym = 27;
+	static final int equalequal_Sym = 28;
+	static final int bangequal_Sym = 29;
+	static final int greater_Sym = 30;
+	static final int less_Sym = 31;
+	static final int greaterequal_Sym = 32;
+	static final int lessequal_Sym = 33;
+	static final int barbar_Sym = 34;
+	static final int star_Sym = 35;
+	static final int slash_Sym = 36;
+	static final int percent_Sym = 37;
+	static final int andand_Sym = 38;
+	static final int NOT_SYM = 39;
 	// pragmas
 
 	static short[] start = {
@@ -254,6 +257,9 @@ public class Scanner {
 		else if (lit.compareTo("type") == 0) t.kind = type_Sym;
 		else if (lit.compareTo("if") == 0) t.kind = if_Sym;
 		else if (lit.compareTo("else") == 0) t.kind = else_Sym;
+		else if (lit.compareTo("loop") == 0) t.kind = loop_Sym;
+		else if (lit.compareTo("from") == 0) t.kind = from_Sym;
+		else if (lit.compareTo("to") == 0) t.kind = to_Sym;
 		else if (lit.compareTo("var") == 0) t.kind = var_Sym;
 	}
 
