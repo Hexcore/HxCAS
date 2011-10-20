@@ -16,6 +16,9 @@ public class Button extends ClickableWidget
 	private Image	icon;
 	private Image	hoverIcon;
 	
+	private boolean toggles = false;
+	private boolean toggleState = false;
+	
 	public Button(Image icon)
 	{
 		this(new Vector2i(0, 0), icon.getSize().add(16, 16), "", "");
@@ -57,6 +60,11 @@ public class Button extends ClickableWidget
 		this.description = description;
 		this.icon = null;
 	}
+	
+	public void setToggles(boolean state) {toggles = state;}
+	
+	public void setToggleState(boolean state) {toggleState = state;}
+	public boolean getToggleState() {return toggleState;}
 
 	@Override
 	public void render(GL gl, Vector2i position)
@@ -71,6 +79,8 @@ public class Button extends ClickableWidget
 		
 		if (active && mouseover)
 			state = Theme.ButtonState.ACTIVE;
+		else if (toggles || toggleState)
+			state = Theme.ButtonState.TOGGLED;
 		else if (mouseover)
 			state = Theme.ButtonState.HOVER;
 		else if (focused)

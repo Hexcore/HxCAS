@@ -1422,12 +1422,16 @@ public class GUI implements WindowEventListener, LobbyListener
         worldEditorRightLayout.add(toolLayout);
         
         	editorLookButton = new Button(window.getTheme().getImage("icons", "zoom_icon.png"));
+        	editorLookButton.setToggles(true);
+        	editorLookButton.setToggleState(true);
         	toolLayout.add(editorLookButton);
         	
         	editorBrushButton = new Button(window.getTheme().getImage("icons", "brush_icon.png"));
+        	editorLookButton.setToggles(false);
         	toolLayout.add(editorBrushButton);
         	
         	editorFillButton = new Button(window.getTheme().getImage("icons", "fill_icon.png"));
+        	editorLookButton.setToggles(false);
         	toolLayout.add(editorFillButton);
         
     	// Property values
@@ -2131,16 +2135,25 @@ public class GUI implements WindowEventListener, LobbyListener
             else if (event.target == editorLookButton)
             {
             	editorToolType = EditorToolType.LOOK;
+            	editorLookButton.setToggleState(true);
+            	editorBrushButton.setToggleState(false);
+            	editorFillButton.setToggleState(false);
             	updateWorldEditorTool();
             }
             else if (event.target == editorBrushButton)
             {
-            	editorToolType = EditorToolType.BRUSH;    
+            	editorToolType = EditorToolType.BRUSH; 
+            	editorLookButton.setToggleState(false);
+            	editorBrushButton.setToggleState(true);
+            	editorFillButton.setToggleState(false);
             	updateWorldEditorTool();
             }
             else if (event.target == editorFillButton)
             {
             	editorToolType = EditorToolType.FILL;  
+            	editorLookButton.setToggleState(false);
+            	editorBrushButton.setToggleState(false);
+            	editorFillButton.setToggleState(true);
             	updateWorldEditorTool();
             }
             // VIEWPORT CAMERA
