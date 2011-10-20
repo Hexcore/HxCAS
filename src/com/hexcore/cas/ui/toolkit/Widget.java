@@ -30,6 +30,8 @@ public abstract class Widget
 	protected Window	window;
 	protected int		flags;
 	
+	protected String	tooltip;
+	
 	Widget(Vector2i size)
 	{
 		this(new Vector2i(0, 0), size);
@@ -41,6 +43,11 @@ public abstract class Widget
 		this.size = size;
 		this.margin = new Vector2i(-1, -1);
 		this.padding = new Vector2i(0, 0);
+	}
+	
+	public void setTooltip(String tooltip)
+	{
+		this.tooltip = tooltip;
 	}
 		
 	public void setX(int position)

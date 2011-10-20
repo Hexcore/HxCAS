@@ -1168,33 +1168,37 @@ public class GUI implements WindowEventListener, LobbyListener
         LinearLayout innerPlaybackLayout2 = new LinearLayout(new Vector2i(205, 40), LinearLayout.Direction.HORIZONTAL);
         innerPlaybackLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         playbackLayout.add(innerPlaybackLayout2);
-        
-        LinearLayout innerPlaybackLayout3 = new LinearLayout(new Vector2i(225, 35), LinearLayout.Direction.HORIZONTAL);
-        innerPlaybackLayout3.setFlag(Widget.CENTER_HORIZONTAL);
-        playbackLayout.add(innerPlaybackLayout3);
-        
-        
+
         Button stepBackwardButton = new Button(this.window.getTheme().getImage("icons", "step_backward_icon.png"));
         stepBackwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepBackwardButton);
+        
         playButton = new Button(this.window.getTheme().getImage("icons", "play_icon.png"));
         playButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(playButton);
+        
         pauseButton = new Button(this.window.getTheme().getImage("icons", "pause_icon.png"));
         pauseButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(pauseButton);
+        
         resetButton = new Button(this.window.getTheme().getImage("icons", "reset_icon.png"));
         resetButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(resetButton);
+        
         stepForwardButton = new Button(window.getTheme().getImage("icons", "step_forward_icon.png"));
         stepForwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepForwardButton);
-        TextWidget playbackSpeedHeader = new TextWidget("Playback Speed:");
-        innerPlaybackLayout3.add(playbackSpeedHeader);
-        SliderWidget playbackSpeedSlider = new SliderWidget(1);
-        playbackSpeedSlider.setFlag(Widget.CENTER);
+        
+        TextWidget playbackSpeedHeader = new TextWidget("Playback Speed (secs/gen):");
+        playbackLayout.add(playbackSpeedHeader);
+        
+        SliderWidget playbackSpeedSlider = new SliderWidget(100);
+        playbackSpeedSlider.setShowValuePlaces(3);
+        playbackSpeedSlider.setMaximum(5);
+        playbackSpeedSlider.setFlag(Widget.FILL_HORIZONTAL);
         playbackSpeedSlider.setShowValue(true);
-        innerPlaybackLayout3.add(playbackSpeedSlider);
+        playbackLayout.add(playbackSpeedSlider);
+        
         ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
         playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerPlaybackLayout.add(playbackImage);
