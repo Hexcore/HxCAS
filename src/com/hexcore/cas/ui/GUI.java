@@ -631,6 +631,14 @@ public class GUI implements WindowEventListener, LobbyListener
 
 
 	private NumberBox heightMapIndexNumberBox;
+
+
+	private Button resetCameraButton;
+
+
+	private LinearLayout simulationControlsLayout;
+	private LinearLayout topLayout;
+	private LinearLayout worldHeaderLayout;
     
     public GUI(Server server)
     {
@@ -742,12 +750,11 @@ public class GUI implements WindowEventListener, LobbyListener
         
         
         
-        LinearLayout worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
-        worldHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
+        worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL);
         worldLayout.add(worldHeaderLayout);
 
-        ImageWidget headerLogo = new ImageWidget(theme.getImage("headers", "logo.png"));
-        worldHeaderLayout.add(headerLogo);
+        
 		worldLayout.add(tabbedWorldView);
 		
 		propertiesContainer = new Container(new Vector2i(100, 100));    
@@ -1088,7 +1095,7 @@ public class GUI implements WindowEventListener, LobbyListener
         masterView.add(masterSimulationLayout);
         masterSimulationLayout.add(worldHeaderLayout);
         
-        LinearLayout topLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        topLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         topLayout.setMargin(new Vector2i(0, 0));
         topLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(topLayout);
@@ -1127,12 +1134,13 @@ public class GUI implements WindowEventListener, LobbyListener
         generationSlider.setShowValue(true);
         sliderLayout.add(generationSlider);
         
-        LinearLayout simulationControlsLayout = new LinearLayout(new Vector2i(100, 150), LinearLayout.Direction.HORIZONTAL);
-        simulationControlsLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
+        simulationControlsLayout = new LinearLayout(new Vector2i(100, 150), LinearLayout.Direction.HORIZONTAL);
+        simulationControlsLayout.setFlag(Widget.WRAP);
+        simulationControlsLayout.setFlag(Widget.CENTER_HORIZONTAL);
         
         masterSimulationLayout.add(simulationControlsLayout);
         
-        LinearLayout detailsLayout = new LinearLayout(new Vector2i(250, 150), LinearLayout.Direction.VERTICAL);
+        LinearLayout detailsLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
         detailsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(detailsLayout);
         
@@ -1147,17 +1155,13 @@ public class GUI implements WindowEventListener, LobbyListener
         iterationsText = new TextWidget("Generations: 0");
         innerDetailsLayout2.add(iterationsText);
         
-       // numPropertiesText = new TextWidget("Num Properties: ");
-       // innerDetailsLayout2.add(numPropertiesText);
-        
-        numCellsText = new TextWidget("Num. Cells: ");
-        innerDetailsLayout2.add(numCellsText);
+           
         
         ImageWidget detailsImage = new ImageWidget(this.window.getTheme().getImage("headers", "details_header.png"));
         detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerDetailsLayout.add(detailsImage);
         
-        LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 150), LinearLayout.Direction.VERTICAL);
+        LinearLayout playbackLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
         playbackLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(playbackLayout);
         
@@ -1188,7 +1192,7 @@ public class GUI implements WindowEventListener, LobbyListener
         stepForwardButton = new Button(window.getTheme().getImage("icons", "step_forward_icon.png"));
         stepForwardButton.setMargin(new Vector2i(5, 0));
         innerPlaybackLayout2.add(stepForwardButton);
-        
+
         TextWidget playbackSpeedHeader = new TextWidget("Playback Speed (secs/gen):");
         playbackLayout.add(playbackSpeedHeader);
         
@@ -1198,27 +1202,25 @@ public class GUI implements WindowEventListener, LobbyListener
         playbackSpeedSlider.setFlag(Widget.FILL_HORIZONTAL);
         playbackSpeedSlider.setShowValue(true);
         playbackLayout.add(playbackSpeedSlider);
-        
+
         ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
         playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerPlaybackLayout.add(playbackImage);
         
         
         
-        LinearLayout cameraLayout = new LinearLayout(new Vector2i(270, 150), LinearLayout.Direction.VERTICAL);
+        LinearLayout cameraLayout = new LinearLayout(new Vector2i(470, 90), LinearLayout.Direction.VERTICAL);
         cameraLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(cameraLayout);
         LinearLayout innerCameraLayout = new LinearLayout(new Vector2i(190, 25), LinearLayout.Direction.HORIZONTAL);
         innerCameraLayout.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout);
         
-        LinearLayout innerCameraLayout2 = new LinearLayout(new Vector2i(245, 40), LinearLayout.Direction.HORIZONTAL);
+        LinearLayout innerCameraLayout2 = new LinearLayout(new Vector2i(445, 40), LinearLayout.Direction.HORIZONTAL);
         innerCameraLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout2);
         
-        LinearLayout innerCameraLayout3 = new LinearLayout(new Vector2i(160, 40), LinearLayout.Direction.HORIZONTAL);
-        innerCameraLayout3.setFlag(Widget.CENTER_HORIZONTAL);
-        cameraLayout.add(innerCameraLayout3);
+      
         
         zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
         zoomInButton.setMargin(new Vector2i(5, 0));
@@ -1247,20 +1249,23 @@ public class GUI implements WindowEventListener, LobbyListener
         
         yawLeftButton = new Button(window.getTheme().getImage("icons", "yaw_left_icon.png"));
         yawLeftButton.setMargin(new Vector2i(5, 0));
-        innerCameraLayout3.add(yawLeftButton);
+        innerCameraLayout2.add(yawLeftButton);
         
         yawRightButton = new Button(window.getTheme().getImage("icons", "yaw_right_icon.png"));
         yawRightButton.setMargin(new Vector2i(5, 0));
-        innerCameraLayout3.add(yawRightButton);
+        innerCameraLayout2.add(yawRightButton);
         
         pitchUpButton = new Button(window.getTheme().getImage("icons", "pitch_up_icon.png"));
         pitchUpButton.setMargin(new Vector2i(5, 0));
-        innerCameraLayout3.add(pitchUpButton);
+        innerCameraLayout2.add(pitchUpButton);
         
         pitchDownButton = new Button(window.getTheme().getImage("icons", "pitch_down_icon.png"));
         pitchDownButton.setMargin(new Vector2i(5, 0));
+        innerCameraLayout2.add(pitchDownButton);
         
-        innerCameraLayout3.add(pitchDownButton);
+        resetCameraButton = new Button(window.getTheme().getImage("icons", "reset_camera_icon.png"));
+        resetCameraButton.setMargin(new Vector2i(5, 0));
+        innerCameraLayout2.add(resetCameraButton);
         
         
         ImageWidget cameraImage = new ImageWidget(window.getTheme().getImage("headers", "camera_header.png"));
@@ -1313,10 +1318,24 @@ public class GUI implements WindowEventListener, LobbyListener
         toggleShowButton.setVisible(false);
         masterSimulationLayout.add(toggleShowButton);
         
-       backToMainMenuButton = new Button(new Vector2i(60, 30), "Back");
+        LinearLayout backToMainMenuLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        backToMainMenuLayout.setMargin(new Vector2i(0,0));
+        backToMainMenuLayout.setFlag(Widget.WRAP);
+        worldHeaderLayout.add(backToMainMenuLayout);
        
-        masterSimulationLayout.add(backToMainMenuButton);
+        backToMainMenuButton = new Button(new Vector2i(60, 30), "Back");
+        backToMainMenuLayout.add(backToMainMenuButton);
         
+        
+        LinearLayout headerLogoLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        headerLogoLayout.setMargin(new Vector2i(0,0));
+        headerLogoLayout.setFlag(Widget.WRAP);
+        headerLogoLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        worldHeaderLayout.add(headerLogoLayout);
+        
+        ImageWidget headerLogo = new ImageWidget(theme.getImage("headers", "logo.png"));
+        headerLogo.setFlag(Widget.CENTER_HORIZONTAL);
+        headerLogoLayout.add(headerLogo);
        
         window.relayout();
     }
@@ -1820,6 +1839,21 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     	else if (event.type == Event.Type.ACTION)
         {
+    		if (event.target == resetCameraButton)
+    		{
+    			for (Viewport viewport : viewports)
+	        	{
+					if (viewport.gridWidget.hasFocus())
+					{
+						if (viewport.type == Viewport.Type.THREE_D)
+						{
+							Grid3DWidget temp3DWidget = (Grid3DWidget) viewport.gridWidget;
+							temp3DWidget.resetCamera();
+						}
+					}
+	        	}
+    			
+    		}
     		
     		if (event.target == importHeightMapButton)
     		{
@@ -2376,11 +2410,21 @@ public class GUI implements WindowEventListener, LobbyListener
 			}
 			else if (event.target == toggleHideButton)
 			{
-				 				 
+				controlLayout.setVisible(false);
+				simulationControlsLayout.setVisible(false);
+				toggleShowButton.setVisible(true);
+				worldHeaderLayout.setVisible(false);
+				backToMainMenuButton.setVisible(false);
+				window.relayout();
 			}
 			else if (event.target == toggleShowButton)
 			{
-				 				 
+				controlLayout.setVisible(true);
+				simulationControlsLayout.setVisible(true);
+				toggleShowButton.setVisible(false);
+				worldHeaderLayout.setVisible(true);
+				backToMainMenuButton.setVisible(true);
+				window.relayout();
 			}
 			else if (event.target == toggleWireframeButton)
 			{
