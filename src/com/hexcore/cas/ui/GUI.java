@@ -329,6 +329,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 	}
 	
+	enum EditorToolType {LOOK, BRUSH, FILL};
+	
 	static class ClientEntry implements Comparable<ClientEntry>
 	{
 		InetSocketAddress address;
@@ -420,9 +422,6 @@ public class GUI implements WindowEventListener, LobbyListener
  
     // DISTRIBUTION TAB
     public Container 	distributionContainer;
-
-    // INITIAL STATE TAB
-    public Container 	worldPreviewContainer;
 
     // MAIN MENU
     public LinearLayout    headerLayout;
@@ -548,17 +547,27 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button	removeClientButton;
 	private Button	removeAllClientsButton;
 
+	// World editor
 	private LinearLayout masterWorldPreviewLayout;
-
 	private LinearLayout worldEditorLeftLayout;
 	private LinearLayout worldEditorRightLayout;
 	private Container previewWindowContainer;
 	private Viewport previewViewport;
 	private DropDownBox	worldEditorPropertySelector;
 	
+	private EditorToolType editorToolType = EditorToolType.LOOK;
+	
+	private Button	editorLookButton;
+	private Button	editorBrushButton;
+	private Button	editorFillButton;
+	
+	private ScrollableContainer propertyValuesContainer;
+	private LinearLayout propertyValues;
+	
+	private Button editorApplyButton;	
+	
+	
 	private ArrayList<LinearLayout> rightLayouts;
-
-	private Button setCellValueButton;
 
 	private ArrayList<NumberBox> numberboxList;
 	private Cell c;
@@ -1009,49 +1018,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		    cpBNumberBox.setValue(0);
 		    cpRGBLayout.add(cpBNumberBox);
         
-        ///
-        
-        
-        
-        worldPreviewContainer = new Container(new Vector2i(100, 100));
-        worldPreviewContainer.setFlag(Widget.FILL);
-        tabbedWorldView.add(worldPreviewContainer, "World Editor");
-        
-        
-        masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        masterWorldPreviewLayout.setFlag(Widget.FILL);
-        worldPreviewContainer.setContents(masterWorldPreviewLayout);
-        
-        worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        worldEditorLeftLayout.setFlag(Widget.FILL);
-        masterWorldPreviewLayout.add(worldEditorLeftLayout);
-        
-        worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
-        masterWorldPreviewLayout.add(worldEditorRightLayout);
-       
-        previewWindowContainer = new Container(new Vector2i(100,100));
-        previewWindowContainer.setFlag(Widget.FILL);
-        previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f)));
-        
-        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
-        worldEditorLeftLayout.add(previewViewport.container);
-        
-        worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
-        worldEditorPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
-        worldEditorRightLayout.add(worldEditorPropertySelector);
-        
-        setCellValueButton = new Button(new Vector2i(70,43), "SET");
-    	setCellValueButton.setFlag(Widget.CENTER_HORIZONTAL);
-        worldEditorRightLayout.add(setCellValueButton);
-    	
-        
-        
-        //
-        
-        
-        //
-        
+        createWorldEditorTab();        
 
         dialog = new Dialog(window, new Vector2i(400, 200));
         
@@ -1409,11 +1376,71 @@ public class GUI implements WindowEventListener, LobbyListener
         controlLayout.add(refreshServerButton);
     }
     
+    
+    public void createWorldEditorTab()
+    {
+        masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        masterWorldPreviewLayout.setMargin(new Vector2i(0, 0));
+        masterWorldPreviewLayout.setFlag(Widget.FILL);
+        tabbedWorldView.add(masterWorldPreviewLayout, "World Editor");
+        
+        worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorLeftLayout.setFlag(Widget.FILL);
+        masterWorldPreviewLayout.add(worldEditorLeftLayout);
+        
+        	// Preview window
+	        previewWindowContainer = new Container(new Vector2i(100,100));
+	        previewWindowContainer.setFlag(Widget.FILL);
+	        previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f))); 
+	        
+	        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
+	        worldEditorLeftLayout.add(previewViewport.container);
+        
+        worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
+        masterWorldPreviewLayout.add(worldEditorRightLayout);
+               
+        TextWidget label = new TextWidget("Display property");
+        worldEditorRightLayout.add(label);
+        
+        worldEditorPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        worldEditorPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
+        worldEditorRightLayout.add(worldEditorPropertySelector);
+        
+        // Tools
+        LinearLayout toolLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        toolLayout.setFlag(Widget.WRAP | Widget.CENTER_HORIZONTAL);
+        worldEditorRightLayout.add(toolLayout);
+        
+        	editorLookButton = new Button(window.getTheme().getImage("icons", "zoom_icon.png"));
+        	toolLayout.add(editorLookButton);
+        	
+        	editorBrushButton = new Button(window.getTheme().getImage("icons", "brush_icon.png"));
+        	toolLayout.add(editorBrushButton);
+        	
+        	editorFillButton = new Button(window.getTheme().getImage("icons", "fill_icon.png"));
+        	toolLayout.add(editorFillButton);
+        
+    	// Property values
+        propertyValuesContainer = new ScrollableContainer(new Vector2i(20, 20));
+        propertyValuesContainer.setFlag(Widget.FILL);
+        worldEditorRightLayout.add(propertyValuesContainer);
+	        
+	        propertyValues = new LinearLayout(LinearLayout.Direction.VERTICAL);
+	        propertyValues.setMargin(new Vector2i(0, 0));
+	        propertyValues.setFlag(Widget.WRAP);
+	        propertyValuesContainer.setContents(propertyValues);
+        
+        editorApplyButton = new Button(new Vector2i(150, 40), "Apply");
+    	editorApplyButton.setFlag(Widget.CENTER_HORIZONTAL);
+        worldEditorRightLayout.add(editorApplyButton);	
+    }
+    
     public void startWorldEditor(World world)
     {
     	this.world = world;
     	loadPropertiesFromWorld();
-    	createPreviewTab();
+    	updateWorldEditorTab();
     	
     	masterView.setIndex(1); 	
     	window.relayout();
@@ -1526,36 +1553,56 @@ public class GUI implements WindowEventListener, LobbyListener
     	world.setColourCode(writer.write(colourRules, "main", CodeGen.getPropertyList()));
     }
     	
-    public void createPreviewTab()
+    public void updateWorldEditorTab()
     {
     	previewViewport.recreate(world.getInitialGeneration(), window, colourRules);
     	
     	int numProperties = world.getInitialGeneration().getNumProperties();
     	
-    	worldEditorRightLayout.clear();
-    	worldEditorRightLayout.add(worldEditorPropertySelector);
+    	propertyValues.clear();
     	
     	numberboxList = new ArrayList<NumberBox>();
     	
     	for (int i = 0 ; i < numProperties; i++)
     	{
-        	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        	LinearLayout cellPropertyLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        	cellPropertyLayout.setMargin(new Vector2i(0, 6));
         	cellPropertyLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
-        	cellPropertyLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
-        	worldEditorRightLayout.add(cellPropertyLayout);
+        	cellPropertyLayout.setFlag(Widget.WRAP);
+        	propertyValues.add(cellPropertyLayout);
         	
         	TextWidget t = new TextWidget(CodeGen.getPropertyList().get(i));
         	cellPropertyLayout.add(t);
         	
-        	NumberBox n = new NumberBox(40);
+        	NumberBox n = new NumberBox(60);
+        	n.setFlag(Widget.FILL_HORIZONTAL);
         	cellPropertyLayout.add(n);
         	
         	numberboxList.add(n);
     	}
     	
-    	setCellValueButton = new Button(new Vector2i(70,43), "Apply");
-    	setCellValueButton.setWidth(250);
-        worldEditorRightLayout.add(setCellValueButton);
+    	updateWorldEditorTool();
+    }
+    
+    public void updateWorldEditorTool()
+    {
+    	if (previewViewport == null || previewViewport.type != Viewport.Type.TWO_D) return;
+    	
+    	switch (editorToolType)
+    	{
+    		case LOOK:
+    			Log.debug(TAG, "LOOK");
+    			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(true);
+    			break;
+    		case BRUSH:
+    			Log.debug(TAG, "BRUSH");
+    			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(false);
+    			break;
+    		case FILL:
+    			Log.debug(TAG, "FILL");
+    			((Grid2DWidget)previewViewport.gridWidget).setDrawSelected(false);
+    			break;
+    	}
     }
     
     public void updatePreview()
@@ -2066,11 +2113,23 @@ public class GUI implements WindowEventListener, LobbyListener
         			selectedViewport.updateControlPanel(controlLayout, addSliceButton);
         		}
             }
-            
-            //PREVIEW GRID
-            
+            // WORLD EDITOR GRID
+            else if (event.target == editorLookButton)
+            {
+            	editorToolType = EditorToolType.LOOK;
+            	updateWorldEditorTool();
+            }
+            else if (event.target == editorBrushButton)
+            {
+            	editorToolType = EditorToolType.BRUSH;    
+            	updateWorldEditorTool();
+            }
+            else if (event.target == editorFillButton)
+            {
+            	editorToolType = EditorToolType.FILL;  
+            	updateWorldEditorTool();
+            }
             // VIEWPORT CAMERA
-            
             else if (event.target == zoomOutButton)
             {
             	for (Viewport viewport : viewports)
@@ -2305,7 +2364,7 @@ public class GUI implements WindowEventListener, LobbyListener
             
 			///PREVIEW
                       
-			 else if (event.target == setCellValueButton)
+			 else if (event.target == editorApplyButton)
 			 {
 				 int numProperties = world.getInitialGeneration().getNumProperties();
 				 
@@ -2357,13 +2416,13 @@ public class GUI implements WindowEventListener, LobbyListener
 
                 savePropertiesToWorld();
                 saveRuleCodeToWorld();
-                createPreviewTab();
+                updateWorldEditorTab();
                 createColoursTab();
         		updatePreview();
         	}
         	else if (event.target == worldEditorPropertySelector)
         	{
-        		createPreviewTab();
+        		updateWorldEditorTab();
         		
         		GridWidget gw = previewViewport.gridWidget; 
         		gw.clearSlices();
@@ -2374,15 +2433,44 @@ public class GUI implements WindowEventListener, LobbyListener
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);
             }
-            //PREVIEW GRID
+            // WORLD EDITOR TAB
             else if (event.target == previewViewport.gridWidget)
             {
-				Grid2DWidget temp2DWidget = (Grid2DWidget) previewViewport.gridWidget;
+				Grid2DWidget temp2DWidget = (Grid2DWidget)previewViewport.gridWidget;
+				Vector2i pos = temp2DWidget.getSelectedCell();
 				
-				c = world.getInitialGeneration().getCell(temp2DWidget.getSelectedCell());
-            	
-            	for (int i = 0 ; i < numberboxList.size(); i++)
-            		numberboxList.get(i).setValue((int)c.getValue(i));
+				switch (editorToolType)
+				{
+					case LOOK:
+					{
+						c = world.getInitialGeneration().getCell(pos);
+		            	
+		            	for (int i = 0 ; i < numberboxList.size(); i++)
+		            		numberboxList.get(i).setValue((int)c.getValue(i));
+		            	break;
+					}
+					case BRUSH:
+					{
+						c = world.getInitialGeneration().getCell(pos);
+		            	
+		            	for (int i = 0 ; i < numberboxList.size(); i++)
+		            		c.setValue(i, numberboxList.get(i).getValue(0));
+		            	break;	
+					}
+					case FILL:
+					{
+						Grid grid = world.getInitialGeneration();
+						Cell cell = new Cell(grid.getNumProperties());
+						
+		            	for (int i = 0 ; i < numberboxList.size(); i++)
+		            		cell.setValue(i, numberboxList.get(i).getValue(0));
+		            	
+		            	for (int y = 0 ; y < grid.getHeight(); y++)
+		            		for (int x = 0 ; x < grid.getWidth(); x++)
+		            			grid.setCell(x, y, cell);
+		            	break;	
+					}
+				}
 			}
         }
     }

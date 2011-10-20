@@ -27,16 +27,16 @@ public class Grid2DWidget extends GridWidget
 		super(position, size, grid, cellSize);
 	}	
 		
-	public float getZoom() { return zoom; }
-	public void setZoom(float zoom) { this.zoom = zoom; }
-	public void changeZoom(float amount) { this.zoom += zoom; }
+	public float getZoom() {return zoom;}
+	public void setZoom(float zoom) {this.zoom = zoom;}
+	public void changeZoom(float amount) {this.zoom += zoom;}
 	
-	public void setDrawSelected(boolean state) { state = drawSelected; }
+	public void setDrawSelected(boolean state) {drawSelected = state;}
 	public boolean isSelectedDrawn() {return drawSelected;}	
-	public Vector2i getSelectedCell() { return selectedCell; }
+	public Vector2i getSelectedCell() {return selectedCell;}
 	
-	public void setCellBorderColour(Colour colour) { cellBorderColour = colour; }
-	public void setSelectedCellBorderColour(Colour colour) { cellSelectedBorderColour = colour; }
+	public void setCellBorderColour(Colour colour) {cellBorderColour = colour;}
+	public void setSelectedCellBorderColour(Colour colour) {cellSelectedBorderColour = colour;}
 	
 	@Override
 	public void update(Vector2i position, float delta)
