@@ -37,6 +37,8 @@ public class ClickableWidget extends Widget
 			
 			handled = true;
 		}
+		else if (event.type == Event.Type.MOUSE_MOTION)
+			window.requestTooltip(this);
 		
 		return handled;
 	}

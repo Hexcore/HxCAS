@@ -708,7 +708,7 @@ public class GUI implements WindowEventListener, LobbyListener
         mainLayout.add(buttonBarLayout);
         
         createWorldButton = new Button(new Vector2i(300, 50), "Create World");
-        
+        createWorldButton.setTooltip("Creates a new world");
         createWorldButton.setIcon(theme.getImage("icons", "create_icon.png"), theme.getImage("icons", "create_icon-white.png"));
         createWorldButton.setFlag(Widget.CENTER_HORIZONTAL);
         buttonBarLayout.add(createWorldButton);
