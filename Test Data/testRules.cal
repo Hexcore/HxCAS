@@ -11,38 +11,3 @@ ruleset Flood
 		self.land = self.land + 1;
 	}
 }
-
-
-colourset colours
-{
-	property bla
-	{
-		0 to 5 : rgb(0.5, 0.1, 0.2);
-		5 to 10 : rgb(0.3, 0.1, 0.2);
-	}
-	
-	property another
-	{
-		0 to 5 : rgb(0.5, 0.1, 0.2);
-		5 to 10 : rgb(0.3, 0.1, 0.2);
-	}
-}
-
-/*
-colourset colours2
-{
-	property bla
-	{
-		0 to 5 : rgb(0.5, 0.1, 0.2);
-		5 to 10 : rgb(0.3, 0.1, 0.2);
-	}
-	
-	property another
-	{
-		0 to 5 : rgb(0.5, 0.1, 0.2);
-		5 to 10 : rgb(0.3, 0.1, 0.2);
-	}
-}*/
-
-
-

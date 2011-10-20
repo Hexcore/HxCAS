@@ -95,7 +95,7 @@ IGNORE CHR(0) .. CHR(31)
 
 
 PRODUCTIONS
-	/***** File Root *****/
+	/********* File Root *********/
 	CAL										(. 	
 												table = new SymbolTable();
 												typeCount = 0;
@@ -112,12 +112,13 @@ PRODUCTIONS
   													CodeGen.endExecute();
   													CodeGen.endClass();
   												}
-  											.)						
-  	[ColourSet]
+  											.)
   	.
+  	/*****************************/
   	
   	
-	/***** RuleSet *****/
+  	
+	/********** RuleSet **********/
   	RuleSet									(.
   												String name = "";
   												table.pushScope();
@@ -132,13 +133,17 @@ PRODUCTIONS
   												}
   											.)
   	"{"
-  	TypeCount
-  	Property {Property}
-  	TypeSpec {TypeSpec}
+	  	TypeCount
+	  	Property {Property}
+	  	TypeSpec {TypeSpec}
   	"}"
   	.
+  	/*****************************/
   	
   	
+  	
+  	
+  	/********** Type Count Declaration **********/
   	TypeCount								(. int value = 0; .)
   	=
   	"typecount" IntConst< out value >		(.
@@ -153,14 +158,7 @@ PRODUCTIONS
   											.)
   	";"
   	.
-  	
-  	ColourSet
-  	=
-  	"colourset" identifier
-  	"{"
-  		{PropertySpec}
-  	"}"
-  	.
+	/********************************************/
   	
   	
   	/********** Cell Property **********/
@@ -180,36 +178,11 @@ PRODUCTIONS
   	.
   	/***********************************/
   	
-  
-  	PropertySpec
-  	=
-  	"property" identifier
-  	"{"
-  		RangeSet {RangeSet}
-  	"}"
-  	.
   	
-  	RangeSet								(. int value1, value2; .)
-  	=
-  	IntConst< out value1 >
-   	"to"
-   	IntConst< out value2 >
-  	":"
-  	Colour
-  	";"
-  	.
   	
-  	Colour									(. double value = 0.0;	.)
-  	=
-  	"rgb("
-  	DoubleConst< out value >
-  	 "," DoubleConst< out value >
-  	 "," DoubleConst< out value >
-  	")"
-  	.
   
   	
-  	
+  	/********** Type Specification **********/
   	TypeSpec								(.
   												table.pushScope();  												
   											.)
@@ -233,15 +206,22 @@ PRODUCTIONS
   													CodeGen.endType();
   											.)
   	.
+  	/****************************************/
   	
   	
   	
+  	
+  	/********** Statement Block **********/
   	Block 
   	=
   	"{"										(. table.pushScope(); .)
   		{Statement}
   	"}"										(. table.popScope(); .)
   	.
+  	/*************************************/
+  	
+  	
+  	
   	
   	
   	/********** STATEMENT **********/
@@ -331,6 +311,9 @@ PRODUCTIONS
   	/*************************************************/
   	
   	
+  	
+  	
+  	/********** Declared Designator *********/
   	Designator<. out TableEntry entry, boolean attr .>	(.
 			  													int type = TableEntry.noType;
 			  													int typeE = TableEntry.noType;
@@ -402,16 +385,20 @@ PRODUCTIONS
   													.)
   	]
   	.
+  	/****************************************/
   	
   	
   	
+  	/********** Cell Attribute *********/
   	Attribute<. out TableEntry entry .>
   	=
   	Designator< out entry, true >
   	.
+  	/***********************************/
   	
   	
   	
+  	/********** If Statement *********/
   	IfStatement									(. int type = TableEntry.noType; .)
   	=
   	"if" "("
@@ -438,9 +425,11 @@ PRODUCTIONS
   														CodeGen.visitLabel(pointers[1]);
   												.)
   	.
+  	/*********************************/
   	
   	
   	
+  	/********** Variable Declaration *********/
   	VarDeclaration
   	=
  	"var"
@@ -450,6 +439,9 @@ PRODUCTIONS
 	}
 	";"
 	.
+  	
+  	/*****************************************/
+  	
   	
   	
   	/********** Expression **********/
@@ -530,6 +522,9 @@ PRODUCTIONS
   	/******************************************/
   	
   	
+  	
+  	
+  	
   	/********** Terms **********/
   	Term<. out int type .>					(.
   												int type1, type2;
@@ -565,6 +560,9 @@ PRODUCTIONS
   	}
   	.
   	/**********************************/
+  	
+  	
+  	
   	
   	
   	
