@@ -1396,10 +1396,20 @@ public class GUI implements WindowEventListener, LobbyListener
     	CALTextArea.setText(ruleCode);
     	saveRuleCodeToWorld();
     	
-    	ColourRuleSetParser parser = new ColourRuleSetParser();
-    	colourRules = parser.parse(world.getColourCode(), CodeGen.getPropertyList());
+    	Log.debug(TAG, world.getColourCode());
     	
-    	if (colourRules == null) colourRules = new ColourRuleSet(grid.getNumProperties());
+    	ColourRuleSetParser parser = new ColourRuleSetParser();
+    	colourRules = parser.parseString(world.getColourCode(), CodeGen.getPropertyList());
+    	
+    	if (colourRules == null)
+    	{
+    		Log.warning(TAG, "Invalid colour code");
+    		
+    		colourRules = new ColourRuleSet(grid.getNumProperties());
+    		
+    		for (int i = 0; i < grid.getNumProperties(); i++)
+    			colourRules.setColourRule(i, new ColourRule());
+    	}
     	
     	updatePreview();
     }

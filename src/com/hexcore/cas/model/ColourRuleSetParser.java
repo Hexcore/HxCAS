@@ -24,10 +24,20 @@ public class ColourRuleSetParser extends ConfigParser
 		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';', '-'});
 	}
 	
-	public ColourRuleSet parse(String filename, List<String> properties)
-	{	
+	public ColourRuleSet parseString(String code, List<String> properties)
+	{
+		scanner.readString(code);
+		return parse(properties);
+	}
+	
+	public ColourRuleSet parseFile(String filename, List<String> properties)
+	{
 		scanner.readFile(filename);
-		
+		return parse(properties);
+	}	
+	
+	private ColourRuleSet parse(List<String> properties)
+	{
 		String			ruleSetName;
 		ColourRuleSet	ruleSet = new ColourRuleSet(properties.size());
 		
