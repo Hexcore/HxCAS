@@ -338,8 +338,6 @@ public class GUI implements WindowEventListener, LobbyListener
     public CheckBox		wrapCheckBox;
     public DropDownBox	cellShapeDropDownBox;
     
-    public Button		submitButton;
-    
     public Grid3DWidget	grid3DViewer = null;
     public Grid2DWidget	gridViewer = null;
 
@@ -767,7 +765,7 @@ public class GUI implements WindowEventListener, LobbyListener
         LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
         buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-        buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL);
+        buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP);
         worldLayout.add(buttonHeaderLayout);
             
             backButton = new Button(new Vector2i(100, 50), "Main Menu");
@@ -779,11 +777,6 @@ public class GUI implements WindowEventListener, LobbyListener
             saveWorldButton.setWidth(165);
             saveWorldButton.setHeight(35);
             buttonHeaderLayout.add(saveWorldButton);
-            
-            submitButton = new Button(new Vector2i(145,50), "Apply Changes");
-            submitButton.setWidth(165);
-            submitButton.setHeight(35);
-            buttonHeaderLayout.add(submitButton);
             
             simulateButton = new Button(new Vector2i(100, 50), "Simulate");
             simulateButton.setWidth(165);
@@ -1771,21 +1764,6 @@ public class GUI implements WindowEventListener, LobbyListener
             {
                 masterView.setIndex(0);
             }
-            else if (event.target == submitButton)
-            {            	
-                if(( worldSizeXNumberBox.getValue(5) < 5) || ( worldSizeYNumberBox.getValue(5) < 5))
-                {
-                    window.showModalDialog(dialog);
-                    return;
-                }
-                
-                savePropertiesToWorld();
-                saveRuleCodeToWorld();
-                updatePreview();
-                createPreviewTab();
-                createColoursTab();
-               
-            }
             else if (event.target == clearRulesButton)
             {
                 CALTextArea.clear();
@@ -2277,8 +2255,21 @@ public class GUI implements WindowEventListener, LobbyListener
         			}
         		}
         	}
-        	
-            if (event.target == generationSlider)
+        	else if (event.target == worldSizeXNumberBox 
+        			|| event.target == worldSizeYNumberBox
+        			|| event.target == wrapCheckBox
+        			|| event.target == cellShapeDropDownBox)
+        	{
+                if (worldSizeXNumberBox.getValue(5) < 5) worldSizeXNumberBox.setValue(5);	
+                if (worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
+
+                savePropertiesToWorld();
+                saveRuleCodeToWorld();
+                createPreviewTab();
+                createColoursTab();
+        		updatePreview();
+        	}
+        	else if (event.target == generationSlider)
             {
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.PAUSE_SIMULATION);
                 server.sendEvent(serverEvent);

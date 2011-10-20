@@ -121,6 +121,10 @@ public class TextBox extends Widget
 		if (event.type == Event.Type.LOST_FOCUS)
 		{
 			selecting = false;
+			
+			Event changeEvent = new Event(Event.Type.CHANGE);
+			changeEvent.target = this;
+			window.sendWindowEvent(changeEvent);
 		}
 		else if (event.type == Event.Type.MOUSE_MOTION)
 		{	
@@ -260,10 +264,6 @@ public class TextBox extends Widget
 				}
 				else
 					handled = false;
-				
-				Event changeEvent = new Event(Event.Type.CHANGE);
-				changeEvent.target = this;
-				window.sendWindowEvent(changeEvent);
 			}
 			else
 				handled = false;
