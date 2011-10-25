@@ -37,6 +37,5 @@ public class DoubleNode extends Node
 		buf.putDouble(value);
 		out.write('f');
 		out.write(buf.array());
-		out.write('e');
 	}
 }

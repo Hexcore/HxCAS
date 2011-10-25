@@ -91,7 +91,7 @@ public class TestMessage
 		for (int i = 0; i < 8; i++)
 			assertEquals(comp[i], bytes[i+8]);
 		
-		assertTrue(output.endsWith("ee;."));
+		assertTrue(output.endsWith("e;."));
 	}
 	
 	@Test
