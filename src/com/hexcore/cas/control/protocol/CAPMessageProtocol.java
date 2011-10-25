@@ -172,7 +172,6 @@ public class CAPMessageProtocol extends Thread
 		
 		expect('f');
 		for (int i = 0; i < 8; i++) buf.put(nextByte());
-		expect('e');
 		
 		buf.rewind();
 		return new DoubleNode(buf.getDouble());
