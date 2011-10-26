@@ -17,8 +17,6 @@ Features
  * Homogeneous and Heterogeneous worlds
  * Square, Hexagonal and Triangular cell shapes
 
- 
- 
  Compilation Prerequisites
  -------------------------
  The project includes Eclipse project settings. The project has been
@@ -34,8 +32,7 @@ Features
  following platforms:
  * Windows 64bit
  * Linux 64bit
- 
- 
+
  Compilation Types
  -----------------
  HxCAS can be compiled in two ways from Eclipse:
