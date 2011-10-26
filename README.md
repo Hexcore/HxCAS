@@ -54,3 +54,8 @@ Features
  Upon invocation ANT will run CoCo on the CAL.atg grammar file generating the 
  abovementioned source files and move them into their correct locations before 
  performing a full compile on all source.
+ 
+ Running HxCAS
+ -------------
+ The main HxCAS program can be started in Eclipse by running Server.java.
+ Outside of Eclipse Server.bat (Windows) or Server.sh (Linux) can be run.
