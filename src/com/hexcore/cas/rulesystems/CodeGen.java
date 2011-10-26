@@ -455,11 +455,10 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		implementPropertyCountFunction();
 		implementPropertyListFunction();
 		debug("End class");
+		
+		
 		//End class
 		cw.visitEnd();
-		
-		//TODO: Remove file saving
-		toFile(name);
 	}
 	
 	public static byte[] getCode()
