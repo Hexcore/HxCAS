@@ -72,6 +72,11 @@ public class StdLib
 		return Math.random() * val;
 	}
 	
+	public static int round(double val)
+	{
+		return (int) Math.round(val);
+	}
+	
 	public int exists(Cell c)
 	{
 		return c == null ? 0 : 1;

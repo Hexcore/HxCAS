@@ -124,6 +124,13 @@ public class SymbolTable
 		randomEntry.argType = TableEntry.doubleType;
 		insert(randomEntry);
 		
+		TableEntry roundEntry = new TableEntry();
+		roundEntry.type = TableEntry.intType;
+		roundEntry.kind = TableEntry.sFunction;
+		roundEntry.name = "round";
+		roundEntry.argType = TableEntry.doubleType;
+		insert(roundEntry);
+		
 		TableEntry countEntry = new TableEntry();
 		countEntry.type = TableEntry.intType;
 		countEntry.kind = TableEntry.aFunction;
