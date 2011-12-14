@@ -30,6 +30,7 @@ public abstract class Widget
 	protected Window	window;
 	protected int		flags;
 	
+	protected String	name = "";
 	protected String	tooltip = "";
 	
 	Widget(Vector2i size)
@@ -45,6 +46,20 @@ public abstract class Widget
 		this.padding = new Vector2i(0, 0);
 	}
 	
+	Widget(String name, Vector2i size)
+	{
+		this(name, new Vector2i(0, 0), size);
+	}
+	
+	Widget(String name, Vector2i position, Vector2i size)
+	{
+		this.name = name;
+		this.position = position;
+		this.size = size;
+		this.margin = new Vector2i(-1, -1);
+		this.padding = new Vector2i(0, 0);
+	}	
+	
 	public void setTooltip(String tooltip)
 	{
 		this.tooltip = tooltip;
@@ -54,6 +69,22 @@ public abstract class Widget
 	{
 		return tooltip;
 	}	
+	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public Widget findByName(String name)
+	{
+		if (this.name.equals(name)) return this;
+		return null;
+	}
 		
 	public void setX(int position)
 	{

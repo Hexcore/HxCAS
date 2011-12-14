@@ -3,8 +3,8 @@ package com.hexcore.cas.ui.test;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
-import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.HexagonGrid;
+import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.test.GameOfLife;
 import com.hexcore.cas.test.WaterFlow;
@@ -19,8 +19,8 @@ import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.HexagonGridWidget;
-import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.ImageWidget;
+import com.hexcore.cas.ui.toolkit.LayoutParser;
 import com.hexcore.cas.ui.toolkit.LinearLayout;
 import com.hexcore.cas.ui.toolkit.ListWidget;
 import com.hexcore.cas.ui.toolkit.NumberBox;
@@ -119,6 +119,8 @@ public class UITestApplication implements WindowEventListener
 	public String	currentThemeName = "light";
 	public String	themeName = currentThemeName;
 	
+	private LayoutParser layoutParser = new LayoutParser();
+	
 	UITestApplication()
 	{
 		waterFlowGrid = new HexagonGrid(new Vector2i(128, 128), 3);
@@ -176,134 +178,27 @@ public class UITestApplication implements WindowEventListener
 	public void initialise()
 	{
 		theme.loadTheme(themeName);
-		
+			
 		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		windowLayout.setFlag(Widget.FILL);
 		windowLayout.setMargin(new Vector2i(0, 0));
 		window.add(windowLayout);
 		
-		headerLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
-		headerLayout.setFlag(Widget.FILL_HORIZONTAL);
-		headerLayout.setMargin(new Vector2i(0, 0));
-		headerLayout.setThemeClass("Header");
-		windowLayout.add(headerLayout);
-						
-		headingImage = new ImageWidget(window.getTheme().getImage("headers", "logo.png"));
-		headingImage.setFlag(Widget.CENTER);
-		headingImage.setPadding(new Vector2i(10, 10));
-		headerLayout.add(headingImage);		
-		
-		headingContainer = new Container(new Vector2i(100, 100));
-		headingContainer.setFlag(Widget.FILL);
-		headerLayout.add(headingContainer);
-		
-		headingLabel = new TextWidget("Cellular Automata Simulator", Text.Size.LARGE, Colour.BLACK);
-		headingLabel.setFlag(Widget.CENTER);
-		headingContainer.setContents(headingLabel);
-
-		mainLayout = new LinearLayout(new Vector2i(100, 100), LinearLayout.Direction.HORIZONTAL);
-		mainLayout.setFlag(Widget.FILL);
-		windowLayout.add(mainLayout);
-		
-		buttonBarLayout = new LinearLayout(new Vector2i(220, 50), LinearLayout.Direction.VERTICAL);
-		buttonBarLayout.setMargin(new Vector2i(0, 0));
-		buttonBarLayout.setFlag(Widget.FILL_VERTICAL);
-		mainLayout.add(buttonBarLayout);
-		
-		createWorldButton = new Button(new Vector2i(100, 50), "Create New World");
-		createWorldButton.setFlag(Widget.FILL_HORIZONTAL);
-		buttonBarLayout.add(createWorldButton);
-		
-		loadWorldButton = new Button(new Vector2i(100, 50), "Load World");
-		loadWorldButton.setFlag(Widget.FILL_HORIZONTAL);
-		buttonBarLayout.add(loadWorldButton);
-		
-		optionsButton = new Button(new Vector2i(100, 50), "Options");
-		optionsButton.setFlag(Widget.FILL_HORIZONTAL);
-		buttonBarLayout.add(optionsButton);
-				
-		helpButton = new Button(new Vector2i(100, 50), "Help");
-		helpButton.setFlag(Widget.FILL_HORIZONTAL);
-		helpButton.setIcon(theme.getImage("icons", "info_icon.png"), theme.getImage("icons", "info_icon-white.png"));
-		buttonBarLayout.add(helpButton);
-		
-		quitButton = new Button(new Vector2i(100, 50), "Quit");
-		quitButton.setFlag(Widget.FILL_HORIZONTAL);
-		quitButton.setIcon(theme.getImage("icons", "on-off_icon.png"), theme.getImage("icons", "on-off_icon-white.png"));
-		buttonBarLayout.add(quitButton);
+		headerLayout = (LinearLayout)layoutParser.parse("header", windowLayout);
+		mainLayout = (LinearLayout)layoutParser.parse("main", windowLayout);
 		
 		mainPanel = new Panel(new Vector2i(10, 10));
 		mainPanel.setFlag(Widget.FILL);
 		mainLayout.add(mainPanel);
 		
-		mainView = new View(new Vector2i(10, 10));
-		mainView.setMargin(new Vector2i(0, 0));
-		mainView.setFlag(Widget.FILL);
-		mainPanel.setContents(mainView);
+		mainView = (View)layoutParser.parse("view", mainPanel);
 		
-		outerLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		outerLayout.setMargin(new Vector2i(0, 0));
-		outerLayout.setFlag(Widget.FILL);
-		//outerLayout.setFlag(Widget.WRAP);
-		mainView.add(outerLayout);
-		
-		innerLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		innerLayout.setSize(new Vector2i(128, 128));
-		innerLayout.setFlag(Widget.FILL_VERTICAL);
-		innerLayout.setFlag(Widget.WRAP_HORIZONTAL);
-		outerLayout.add(innerLayout);
-		
-		nameTextBox = new TextBox(100);
-		nameTextBox.setFlag(Widget.FILL_HORIZONTAL);
-		nameTextBox.setText("Benny");
-		innerLayout.add(nameTextBox);
-
-		nameTextBox2 = new TextBox(100);
-		nameTextBox2.setFlag(Widget.FILL_HORIZONTAL);
-		nameTextBox2.setText("Benny2");
-		innerLayout.add(nameTextBox2);
-		
-		valueBox = new NumberBox(100);
-		valueBox.setFlag(Widget.FILL_HORIZONTAL);
-		valueBox.setValue(10);
-		innerLayout.add(valueBox);		
-		
-		checkBox = new CheckBox(new Vector2i(100, 20), "Can fly");
-		checkBox.setFlag(Widget.FILL_HORIZONTAL);
-		innerLayout.add(checkBox);
-		
-		themeLabel = new TextWidget("Choose a theme:");
-		themeLabel.setFlag(Widget.FILL_HORIZONTAL);
-		innerLayout.add(themeLabel);	
-		
-		dropDownBox = new DropDownBox(new Vector2i(200, 20));
-		dropDownBox.addItem("light");
-		dropDownBox.addItem("lightV2");
-		dropDownBox.addItem("blue");
-		dropDownBox.setSelected(0);
-		innerLayout.add(dropDownBox);
-		
-		slider = new SliderWidget(100);
-		slider.setFlag(Widget.FILL_HORIZONTAL);
-		slider.setShowValue(true);
-		innerLayout.add(slider);
-		
-		wrenchButton = new Button(theme.getImage("icons", "wrench_icon.png"));
-		innerLayout.add(wrenchButton);	
-		
-		paragraph = new TextWidget("This text is going to fill the whole width of this container and then start overflowing to the next line.\nThis is always on a new line.\n\nIt works!");
-		paragraph.setFlag(Widget.FILL_HORIZONTAL);
-		paragraph.setFlowed(true);
-		innerLayout.add(paragraph);
-		
-		listWidget = new ListWidget(new Vector2i(50, 50));
-		listWidget.setFlag(Widget.FILL);
-		listWidget.addItem("First");
-		listWidget.addItem("Second");
-		listWidget.addItem("Third");
-		innerLayout.add(listWidget);
-		
-		/** A list **/		
+		checkBox = (CheckBox)mainView.findByName("canFly");
+		nameTextBox = (TextBox)mainView.findByName("name");
+		dropDownBox = (DropDownBox)mainView.findByName("themeSelector");
+				
+		/*
+		/// A list	
 		listScroll = new ScrollableContainer(new Vector2i(50, 50));
 		listScroll.setFlag(Widget.FILL);
 		listScroll.setThemeClass("List");
@@ -319,21 +214,10 @@ public class UITestApplication implements WindowEventListener
 			TextWidget text = new TextWidget(i + "^2 = " + (i * i));
 			list.add(text);
 		}
-		/***********/
-		
-		description = new TextArea(200, 10);
-		description.setFlag(Widget.FILL);
-		description.setLineNumbers(true);
-		outerLayout.add(description);
-		
-		gridViewLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		gridViewLayout.setFlag(Widget.FILL);
-		mainView.add(gridViewLayout);
-		
-		tabbedView = new TabbedView(new Vector2i(30, 30));
-		tabbedView.setFlag(Widget.FILL);
-		gridViewLayout.add(tabbedView);
+		///////////
+		*/ 
 
+		/*
 		// Hexagon Grid
 		gridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
 		gridViewerContainer.setFlag(Widget.FILL);
@@ -400,6 +284,7 @@ public class UITestApplication implements WindowEventListener
 		waterGrid3DViewer.addSlice(2, 2, 15.0f);
 		waterGrid3DViewer.addSlice(1, 1, 15.0f);
 		tabbedView.add(waterGrid3DViewer, "Water Flow");
+		*/
 		
 		window.relayout();
 		
@@ -464,17 +349,19 @@ public class UITestApplication implements WindowEventListener
 	{
 		if (event.type == Event.Type.ACTION)
 		{
-			if (event.target == createWorldButton)
+			String name = event.target.getName();
+			
+			if (name.equals("createWorld"))
 			{
 				mainView.setIndex(1 - mainView.getIndex());
 				
 				window.setFullscreen(mainView.getIndex() == 1);
 			}
-			else if (event.target == loadWorldButton)
+			else if (name.equals("loadWorld"))
 			{
 				System.out.println(window.askUserForFileToSave("Load a world", "txt"));
 			}
-			else if (event.target == optionsButton)
+			else if (name.equals("options"))
 			{
 				window.showModalDialog(dialog);
 			}
@@ -482,11 +369,11 @@ public class UITestApplication implements WindowEventListener
 			{
 				window.closeModalDialog();
 			}
-			else if (event.target == helpButton)
+			else if (name.equals("help"))
 			{
 				window.showModalDialog(colourDialog);
 			}
-			else if (event.target == quitButton)
+			else if (name.equals("quit"))
 			{
 				window.exit();
 			}

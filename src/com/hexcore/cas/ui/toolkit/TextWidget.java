@@ -4,7 +4,7 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 
-public class TextWidget extends Widget
+public class TextWidget extends Widget implements CaptionWidget
 {
 	private String		caption;
 	private Text.Size	textSize;
@@ -40,6 +40,9 @@ public class TextWidget extends Widget
 		this.flowedText = null;
 	}
 	
+	public void setTextSize(Text.Size size) {this.textSize = size; relayout();}
+	public void setTextColour(Colour colour) {this.colour = colour; relayout();}
+	 
 	public void 	setFlowed(boolean state) {flowed = state;}
 	public boolean	isFlowed() {return flowed;}
 	

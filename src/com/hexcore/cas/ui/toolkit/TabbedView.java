@@ -14,6 +14,11 @@ public class TabbedView extends View
 	protected int						hovered = -1;
 	protected boolean active;
 	
+	public TabbedView()
+	{
+		this(new Vector2i());
+	}
+	
 	public TabbedView(Vector2i size)
 	{
 		super(size);

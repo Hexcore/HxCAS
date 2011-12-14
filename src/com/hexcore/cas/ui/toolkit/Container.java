@@ -21,6 +21,11 @@ public class Container extends Widget
 	protected Fill background = null;
 	protected Fill border = null;
 	
+	public Container()
+	{
+		super(new Vector2i(0, 0));
+	}	
+	
 	public Container(Vector2i size)
 	{
 		super(size);
@@ -29,6 +34,14 @@ public class Container extends Widget
 	public Container(Vector2i position, Vector2i size)
 	{
 		super(position, size);
+	}
+	
+	@Override
+	public Widget findByName(String name)
+	{
+		if (this.name.equals(name)) return this;
+		if (contents != null) return contents.findByName(name);
+		return null;
 	}
 	
 	@Override

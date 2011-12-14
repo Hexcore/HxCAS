@@ -1,0 +1,100 @@
+widget View
+{
+    margin: 0;
+    alignment: fill;
+    
+    widget LinearLayout : horizontal
+    {
+        margin: 0;
+        alignment: fill;
+        
+        widget LinearLayout : vertical
+        {
+            alignment: fill left;
+            shrink-wrap: horizontal; 
+            
+            widget TextBox
+            {
+                text: "Benny";
+                name: "name";
+                alignment: top fill;
+            }
+            
+            widget TextBox
+            {
+                text: "Benny2";
+                name: "name2";
+                alignment: top fill;
+            }     
+            
+            widget NumberBox
+            {
+                value: 10;
+                name: "valueBox";
+                alignment: top fill;
+            }    
+            
+            widget CheckBox
+            {
+                caption: "Can fly?";
+                name: "canFly";
+                alignment: top fill;
+            }  
+            
+            widget Text
+            {
+                caption: "Choose a theme:";
+                alignment: top fill;
+            }
+            
+            widget DropDownBox
+            {
+                name: "themeSelector";
+                width: 200;
+                selected: 0;
+                items: "light", "lightV2", "blue";
+            }
+            
+            widget Slider
+            {
+                alignment: top fill;
+            }
+            
+            widget Button
+            {
+                icon: image("icons", "wrench_icon.png");
+            }
+            
+            widget Text
+            {
+                caption: "This text is going to fill the whole width of this container and then start overflowing to the next line.
+This is always on a new line.
+                
+It works!";
+                alignment: top fill;
+                text-wrap: wrap;
+            }
+            
+            widget List
+            {
+                alignment: fill;
+            }
+        }
+        
+        widget TextArea
+        {
+            alignment: fill;
+            line-numbers: true;
+        }
+    }
+    
+    widget LinearLayout : vertical
+    {
+        alignment: fill;
+        
+        widget TabbedView
+        {
+            alignment: fill;
+        }
+    }
+}

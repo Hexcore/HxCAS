@@ -1,0 +1,58 @@
+widget LinearLayout : horizontal
+{
+    alignment: fill;
+
+    widget LinearLayout : vertical
+    {
+        width: 220;
+        alignment: fill left;
+        margin: 0;
+    
+        widget Button
+        {
+            name: "createWorld";
+            caption: "Create New World";
+            width: 100;
+            height: 50;
+            alignment: top fill;
+        }
+        
+        widget Button
+        {
+            name: "loadWorld";
+            caption: "Load World";
+            width: 100;
+            height: 50;
+            alignment: top fill;
+        }
+        
+        widget Button
+        {
+            name: "options";
+            caption: "Options";
+            width: 100;
+            height: 50;
+            alignment: top fill;
+        }
+        
+        widget Button
+        {
+            name: "help";
+            caption: "Help";
+            icon: image("icons", "info_icon.png");
+            width: 100;
+            height: 50;
+            alignment: top fill;
+        }    
+    
+        widget Button
+        {
+            name: "quit";
+            caption: "Quit";
+            icon: image("icons", "on-off_icon.png");
+            width: 100;
+            height: 50;
+            alignment: top fill;
+        }
+    }
+}

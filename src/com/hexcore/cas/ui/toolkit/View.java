@@ -13,6 +13,11 @@ public class View extends Widget
 	
 	protected Fill 	background = null;
 	
+	public View()
+	{
+		this(new Vector2i(0, 0));
+	}	
+	
 	public View(Vector2i size)
 	{
 		super(size);
@@ -23,6 +28,20 @@ public class View extends Widget
 	{
 		super(position, size);
 		widgets = new ArrayList<Widget>();
+	}
+	
+	@Override
+	public Widget findByName(String name)
+	{
+		if (this.name.equals(name)) return this;
+		
+		for (Widget w : widgets)
+		{
+			Widget widget = w.findByName(name);
+			if (widget != null) return widget;
+		}
+		
+		return null;
 	}
 	
 	@Override

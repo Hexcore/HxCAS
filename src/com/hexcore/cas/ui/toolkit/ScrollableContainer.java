@@ -16,6 +16,15 @@ public class ScrollableContainer extends Container
 	private DragState	dragState = DragState.NONE;
 	private Vector2i	dragStart;
 	
+	public ScrollableContainer()
+	{
+		super();
+		scrollPos = new Vector2i();
+		dragStart = new Vector2i();
+		viewSize = new Vector2i();
+		maxSize = new Vector2i();
+	}	
+	
 	public ScrollableContainer(Vector2i size)
 	{
 		super(size);

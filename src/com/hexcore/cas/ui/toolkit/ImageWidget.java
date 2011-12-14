@@ -8,6 +8,11 @@ public class ImageWidget extends Widget
 {
 	private Image	image;
 	
+	public ImageWidget()
+	{
+		this(new Vector2i(), new Image());
+	}	
+	
 	public ImageWidget(Image image)
 	{
 		this(new Vector2i(), image);

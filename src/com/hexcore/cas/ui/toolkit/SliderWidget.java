@@ -7,12 +7,17 @@ import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
 public class SliderWidget extends ClickableWidget
 {
-	protected boolean showValue = false;
+	protected boolean showValue = true;
 	protected int showValuePlaces = 0;
 	
 	protected float minimum;
 	protected float maximum;
 	protected float value;
+	
+	public SliderWidget()
+	{
+		this(100, 0.0f, 100.0f, 0.0f);
+	}
 	
 	public SliderWidget(int width)
 	{

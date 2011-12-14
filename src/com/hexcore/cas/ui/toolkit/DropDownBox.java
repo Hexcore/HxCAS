@@ -13,6 +13,18 @@ public class DropDownBox extends Widget
 	private int					mouseoverItem = -1;
 	private ArrayList<String>	items;
 	
+	public DropDownBox()
+	{
+		super(new Vector2i(200, 20));
+		items = new ArrayList<String>();
+	}
+	
+	public DropDownBox(int width)
+	{
+		super(new Vector2i(width, 20));
+		items = new ArrayList<String>();
+	}	
+	
 	public DropDownBox(Vector2i size)
 	{
 		super(size);

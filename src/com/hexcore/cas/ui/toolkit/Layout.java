@@ -24,26 +24,38 @@ public class Layout extends Widget
 	
 	protected Vector2i		lastMouse;
 	
+	public Layout()
+	{
+		this(new Vector2i(0, 0));
+	}	
+	
 	public Layout(Vector2i size)
 	{
 		super(size);
 		components = new ArrayList<Widget>();
 		lastMouse = new Vector2i();
 	}
-	
-	public Layout()
-	{
-		super(new Vector2i(0, 0));
-		components = new ArrayList<Widget>();
-		lastMouse = new Vector2i();
-	}
-			
+				
 	public void clear()
 	{
 		synchronized(components)
 		{
 			components.clear();
 		}
+	}
+	
+	@Override
+	public Widget findByName(String name)
+	{
+		if (this.name.equals(name)) return this;
+		
+		for (Widget component : components)
+		{
+			Widget widget = component.findByName(name);
+			if (widget != null) return widget;
+		}
+		
+		return null;
 	}
 	
 	@Override

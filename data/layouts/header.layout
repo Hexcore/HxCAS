@@ -1,0 +1,25 @@
+widget LinearLayout : horizontal
+{
+    height: 100;
+    alignment: top fill;
+    margin: 0;
+    
+    widget Image
+    {
+        padding: 10 10;
+        alignment: center;
+        image: image("headers", "logo.png");
+    }
+    
+    widget Container
+    {
+        alignment: fill;
+        
+        widget Text
+        {
+            caption: "Cellular Automata Simulator";
+            text-size: huge;
+            alignment: center;
+        }
+    }          
+}

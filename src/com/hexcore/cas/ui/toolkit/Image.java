@@ -18,6 +18,12 @@ public class Image
 	private  String 	filename;
 	private Texture 	texture;
 	
+	public Image()
+	{
+		this.filename = "";
+		this.texture = null;
+	}
+	
 	public Image(String filename)
 	{
 		this.filename = filename;

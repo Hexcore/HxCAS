@@ -9,7 +9,13 @@ public abstract class ConfigParser
 	
 	public ConfigParser()
 	{
+		reset();
+	}
+	
+	public void reset()
+	{
 		scanner = new ConfigScanner();
+		errors = 0;
 	}
 	
 	public int getNumErrors()
@@ -49,6 +55,17 @@ public abstract class ConfigParser
 		return true;
 	}
 
+	protected int expectInteger()
+	{
+		ConfigScanner.Symbol symbol = scanner.getSymbol();
+		if (symbol.type != ConfigScanner.Symbol.Type.INTEGER)
+		{
+			error("Expected a integer value");
+			return 0;
+		}	
+		return symbol.integer;
+	}
+	
 	protected float expectDecimal()
 	{
 		ConfigScanner.Symbol symbol = scanner.getSymbol();

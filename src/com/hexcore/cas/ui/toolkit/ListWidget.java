@@ -21,6 +21,11 @@ public class ListWidget extends Widget
 	private int					mouseoverItem = -1;
 	private ArrayList<Entry>	items = new ArrayList<Entry>();
 	
+	public ListWidget()
+	{
+		super(new Vector2i());
+	}	
+	
 	public ListWidget(Vector2i size)
 	{
 		super(size);

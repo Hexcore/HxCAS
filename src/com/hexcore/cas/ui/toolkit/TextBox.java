@@ -22,6 +22,11 @@ public class TextBox extends Widget
 	protected float		cursorFlash = 0.0f;
 	protected Vector2i	textOffset;
 
+	public TextBox()
+	{
+		this(100);
+	}	
+	
 	public TextBox(int width)
 	{
 		super(new Vector2i(width, 10));

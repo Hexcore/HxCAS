@@ -6,7 +6,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Theme.BorderShape;
 import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
-public class Button extends ClickableWidget
+public class Button extends ClickableWidget implements CaptionWidget
 {
 	private String	caption;
 	private String	description;
@@ -31,18 +31,27 @@ public class Button extends ClickableWidget
 		setIcon(icon, hoverIcon);
 	}
 	
+	public Button()
+	{
+		this(new Vector2i(0, 0), new Vector2i(165, 35), "", "");
+	}
+	
+	public Button(String caption)
+	{
+		this(new Vector2i(0, 0), new Vector2i(165, 35), caption, "");
+	}
+	
 	public Button(Vector2i size, String caption)
 	{
 		this(new Vector2i(0, 0), size, caption, "");
 	}
 	
-	/// L added this
 	public Button(Vector2i size, String caption, int id)
 	{
 		this(new Vector2i(0, 0), size, caption, "");
 		this.id = id;
 	}
-	///////////
+	
 	public Button(Vector2i size, String caption, String description)
 	{
 		this(new Vector2i(0, 0), size, caption, description);
@@ -59,6 +68,13 @@ public class Button extends ClickableWidget
 		this.caption = caption;
 		this.description = description;
 		this.icon = null;
+	}
+	
+	@Override
+	public void relayout()
+	{
+		if ((caption.length() == 0) && (icon != null)) 
+			setSize(icon.getSize().add(16, 16));
 	}
 	
 	public void setToggles(boolean state) {toggles = state;}
