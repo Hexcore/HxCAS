@@ -37,6 +37,9 @@ import javax.swing.SwingUtilities;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.toolkit.widgets.Dialog;
+import com.hexcore.cas.ui.toolkit.widgets.Layout;
+import com.hexcore.cas.ui.toolkit.widgets.Widget;
 import com.hexcore.cas.utilities.Log;
 import com.jogamp.opengl.util.FPSAnimator;
 

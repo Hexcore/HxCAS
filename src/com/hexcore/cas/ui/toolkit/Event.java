@@ -3,6 +3,7 @@ package com.hexcore.cas.ui.toolkit;
 import java.awt.event.InputEvent;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.toolkit.widgets.Widget;
 
 public class Event
 {
