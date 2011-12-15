@@ -55,4 +55,11 @@ widget LinearLayout : horizontal
             alignment: top fill;
         }
     }
+    
+    widget Panel
+    {
+        alignment: fill;
+        
+        include "UITest/view";
+    }
 }

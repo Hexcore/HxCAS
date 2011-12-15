@@ -14,7 +14,7 @@ import com.hexcore.cas.utilities.Log;
  * components and a Container is used to decorate a Layout.
  * 
  */
-public class Container extends Widget
+public class Container extends Widget implements StyledWidget
 {
 	protected String themeClass = "";
 	protected Widget contents = null;

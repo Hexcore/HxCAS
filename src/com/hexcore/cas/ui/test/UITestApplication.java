@@ -179,79 +179,37 @@ public class UITestApplication implements WindowEventListener
 	{
 		theme.loadTheme(themeName);
 			
-		windowLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		windowLayout.setFlag(Widget.FILL);
-		windowLayout.setMargin(new Vector2i(0, 0));
-		window.add(windowLayout);
+		windowLayout = (LinearLayout)layoutParser.parse("UITest/window", window);
 		
-		headerLayout = (LinearLayout)layoutParser.parse("header", windowLayout);
-		mainLayout = (LinearLayout)layoutParser.parse("main", windowLayout);
-		
-		mainPanel = new Panel(new Vector2i(10, 10));
-		mainPanel.setFlag(Widget.FILL);
-		mainLayout.add(mainPanel);
-		
-		mainView = (View)layoutParser.parse("view", mainPanel);
+		mainView = (View)windowLayout.findByName("mainView");
 		
 		checkBox = (CheckBox)mainView.findByName("canFly");
 		nameTextBox = (TextBox)mainView.findByName("name");
 		dropDownBox = (DropDownBox)mainView.findByName("themeSelector");
-				
-		/*
-		/// A list	
-		listScroll = new ScrollableContainer(new Vector2i(50, 50));
-		listScroll.setFlag(Widget.FILL);
-		listScroll.setThemeClass("List");
-		innerLayout.add(listScroll);
-		
-		list = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		list.setMargin(new Vector2i(0, 0));
-		list.setFlag(Widget.WRAP);
-		listScroll.setContents(list);
-		
-		for (int i = 1; i <= 30; i++)
-		{
-			TextWidget text = new TextWidget(i + "^2 = " + (i * i));
-			list.add(text);
-		}
-		///////////
-		*/ 
+		tabbedView = (TabbedView)mainView.findByName("tabbedView");
+		nextIterationButton = (Button)mainView.findByName("nextIteration");
 
-		/*
 		// Hexagon Grid
-		gridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
-		gridViewerContainer.setFlag(Widget.FILL);
-		gridViewerContainer.setBackground(new Fill(Colour.BLACK));
-		tabbedView.add(gridViewerContainer, "Hexagon");
-		
+		gridViewerContainer = (ScrollableContainer)mainView.findByName("hexGridViewerContainer");
+
 		gridViewer = new HexagonGridWidget((HexagonGrid)gameOfLife.getGrid(), 16);
 		gridViewer.setColourRuleSet(colourRules);
 		gridViewerContainer.setContents(gridViewer);
 		
 		// Rectangle Grid
-		rectGridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
-		rectGridViewerContainer.setFlag(Widget.FILL);
-		rectGridViewerContainer.setBackground(new Fill(Colour.BLACK));
-		tabbedView.add(rectGridViewerContainer, "Rectangle");
-		
+		rectGridViewerContainer = (ScrollableContainer)mainView.findByName("rectGridViewerContainer");
+
 		rectGridViewer = new RectangleGridWidget((RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGridViewer.setColourRuleSet(colourRules);
 		rectGridViewerContainer.setContents(rectGridViewer);
 	
 		// Triangle Grid
-		triGridViewerContainer = new ScrollableContainer(new Vector2i(30, 30));
-		triGridViewerContainer.setFlag(Widget.FILL);
-		triGridViewerContainer.setBackground(new Fill(Colour.BLACK));
-		tabbedView.add(triGridViewerContainer, "Triangle");
-		
+		triGridViewerContainer = (ScrollableContainer)mainView.findByName("triGridViewerContainer");
+
 		triGridViewer = new TriangleGridWidget((TriangleGrid)triGameOfLife.getGrid(), 32);
 		triGridViewer.setColourRuleSet(colourRules);
 		triGridViewerContainer.setContents(triGridViewer);	
-		
-		nextIterationButton = new Button(new Vector2i(150, 50), "Next");
-		nextIterationButton.setIcon(theme.getImage("icons", "arrow_right_icon.png"));
-		gridViewLayout.add(nextIterationButton);
-		
+	
 		// 3D Rectangle Grid
 		rectGrid3DViewer = new RectangleGrid3DWidget(new Vector2i(400, 300), (RectangleGrid)rectGameOfLife.getGrid(), 24);
 		rectGrid3DViewer.setFlag(Widget.FILL);
@@ -284,7 +242,6 @@ public class UITestApplication implements WindowEventListener
 		waterGrid3DViewer.addSlice(2, 2, 15.0f);
 		waterGrid3DViewer.addSlice(1, 1, 15.0f);
 		tabbedView.add(waterGrid3DViewer, "Water Flow");
-		*/
 		
 		window.relayout();
 		

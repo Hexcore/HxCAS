@@ -7,6 +7,11 @@ import com.hexcore.cas.math.Vector2i;
 
 public class Panel extends Container
 {	
+	public Panel() 
+	{
+		super(new Vector2i());
+	}
+	
 	public Panel(Vector2i size)
 	{
 		super(size);

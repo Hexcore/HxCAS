@@ -1,5 +1,6 @@
 widget View
 {
+    name: "mainView";
     margin: 0;
     alignment: fill;
     
@@ -94,7 +95,41 @@ It works!";
         
         widget TabbedView
         {
+            name: "tabbedView";
             alignment: fill;
+            
+            tab "Hexagon"
+            widget ScrollableContainer
+            {
+                name: "hexGridViewerContainer";
+                alignment: fill;
+                background: rgb(0.0, 0.0, 0.0);
+            }
+            
+            tab "Rectangle"
+            widget ScrollableContainer
+            {
+                name: "rectGridViewerContainer";
+                alignment: fill;
+                background: rgb(0.0, 0.0, 0.0);
+            }
+            
+            tab "Triangle"
+            widget ScrollableContainer
+            {
+                name: "triGridViewerContainer";
+                alignment: fill;
+                background: rgb(0.0, 0.0, 0.0);
+            }        
+        }
+        
+        widget Button
+        {
+            caption: "Next";
+            name: "nextIteration";
+            width: 150;
+            height: 50;
+            icon: image("icons", "arrow_right_icon.png");
         }
     }
 }

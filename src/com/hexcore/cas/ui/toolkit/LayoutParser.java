@@ -36,16 +36,30 @@ public class LayoutParser extends GUIToolkitParser
 		scanner.addSymbols(new char[] {':', '{', '}', ',', '(', ')', ';'});
 		scanner.readFile("data/layouts/" + layoutName + ".layout");
 		
-		if (scanner.isValid()) return readWidget(parent);		
+		if (scanner.isValid()) return readWidget(parent);
 		return null;
 	}
 	
 	private Widget readWidget(Widget parent)
 	{
+		Symbol symbol = scanner.peakSymbol();
+		String tabName = "Tab";
+		
+		if (symbol.text.equals("tab"))
+		{
+			expect("tab");
+			
+			if (!(parent instanceof TabbedView))
+				error("Tab names are only allowed for TabView's");
+				
+			symbol = scanner.getSymbol();
+			tabName = symbol.text;
+		}
+		
 		expect("widget");
 		
 		Widget widget = null;
-		Symbol symbol = scanner.getSymbol();
+		symbol = scanner.getSymbol();
 		
 		// Create widget
 		if (symbol.text.equals("Container"))
@@ -56,6 +70,10 @@ public class LayoutParser extends GUIToolkitParser
 		{
 			widget = new ScrollableContainer();
 		}
+		else if (symbol.text.equals("Panel"))
+		{
+			widget = new Panel();
+		}		
 		else if (symbol.text.equals("View"))
 		{
 			widget = new View();
@@ -137,7 +155,9 @@ public class LayoutParser extends GUIToolkitParser
 		// Add to parent
 		if (widget != null)
 		{
-			if (parent instanceof Layout)
+			if (parent instanceof TabbedView)
+				((TabbedView)parent).add(widget, tabName);
+			else if (parent instanceof Layout)
 				((Layout)parent).add(widget);
 			else if (parent instanceof Container)
 				((Container)parent).setContents(widget);
@@ -159,7 +179,16 @@ public class LayoutParser extends GUIToolkitParser
 			{
 				symbol = scanner.peakSymbol();
 				
-				if (symbol.text.equals("widget"))
+				if (symbol.text.equals("include"))
+				{
+					expect("include");
+					
+					String layoutName = scanner.getSymbol().text;
+					LayoutParser parser = new LayoutParser();
+					parser.parse(layoutName, widget);
+					expect(";");
+				}
+				else if (symbol.text.equals("widget") || symbol.text.equals("tab"))
 					readWidget(widget);
 				else if (symbol.text.equals("}"))
 					break;
@@ -253,11 +282,26 @@ public class LayoutParser extends GUIToolkitParser
 			}
 			else
 			{
-				error("This widget is not a Image Widget");
+				error("This widget does not have an image property");
 				fastForward(";");
 				return;
 			}
 		}
+		else if (name.equals("background"))
+		{
+			if (widget instanceof StyledWidget)
+			{
+				StyledWidget styledWidget = (StyledWidget)widget;
+				Fill background = readFill(theme.getName());
+				if (background != null) styledWidget.setBackground(background);
+			}
+			else
+			{
+				error("This widget does not have a background property");
+				fastForward(";");
+				return;
+			}
+		}		
 		else if (name.equals("text-size"))
 		{
 			if (widget instanceof TextWidget)

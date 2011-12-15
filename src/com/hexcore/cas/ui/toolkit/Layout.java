@@ -15,7 +15,7 @@ import com.hexcore.cas.utilities.Log;
  *  
  *  Can be derived to implement positioning of contained components. e.g. LinearLayout
  */
-public class Layout extends Widget
+public class Layout extends Widget implements StyledWidget
 {
 	protected String		themeClass = "";
 	protected Fill 			background = null;
