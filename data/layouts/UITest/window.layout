@@ -1,0 +1,8 @@
+widget LinearLayout : vertical
+{
+    alignment: fill;
+    margin: 0;
+    
+    include "UITest/header";
+    include "UITest/mainPanel";
+}
