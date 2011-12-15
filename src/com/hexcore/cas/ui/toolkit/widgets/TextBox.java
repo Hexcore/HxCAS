@@ -8,8 +8,6 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.FlowedText;
 import com.hexcore.cas.ui.toolkit.Text;
-import com.hexcore.cas.ui.toolkit.Event.Type;
-import com.hexcore.cas.ui.toolkit.Text.Size;
 
 public class TextBox extends Widget
 {    

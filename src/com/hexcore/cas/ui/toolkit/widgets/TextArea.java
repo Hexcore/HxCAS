@@ -7,9 +7,6 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Text;
-import com.hexcore.cas.ui.toolkit.Event.Type;
-import com.hexcore.cas.ui.toolkit.Text.Size;
-import com.hexcore.cas.utilities.Log;
 
 public class TextArea extends TextBox
 {	

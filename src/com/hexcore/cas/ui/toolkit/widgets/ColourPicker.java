@@ -11,7 +11,6 @@ import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Graphics;
 import com.hexcore.cas.ui.toolkit.Theme;
 import com.hexcore.cas.ui.toolkit.Window;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 
 public class ColourPicker extends Widget
 {

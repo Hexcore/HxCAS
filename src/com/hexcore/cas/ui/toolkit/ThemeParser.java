@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.hexcore.cas.ui.toolkit.Theme.Property;
-import com.hexcore.cas.utilities.ConfigParser;
 import com.hexcore.cas.utilities.ConfigScanner;
 import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 

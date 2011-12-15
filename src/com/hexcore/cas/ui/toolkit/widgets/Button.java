@@ -9,17 +9,13 @@ import com.hexcore.cas.ui.toolkit.Graphics;
 import com.hexcore.cas.ui.toolkit.Image;
 import com.hexcore.cas.ui.toolkit.Text;
 import com.hexcore.cas.ui.toolkit.Theme;
-import com.hexcore.cas.ui.toolkit.Text.Size;
 import com.hexcore.cas.ui.toolkit.Theme.BorderShape;
-import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
 public class Button extends ClickableWidget implements CaptionWidget
 {
 	private String	caption;
 	private String	description;
-	
-	private int id;
-	
+		
 	private Image	icon;
 	private Image	hoverIcon;
 	
@@ -52,13 +48,7 @@ public class Button extends ClickableWidget implements CaptionWidget
 	{
 		this(new Vector2i(0, 0), size, caption, "");
 	}
-	
-	public Button(Vector2i size, String caption, int id)
-	{
-		this(new Vector2i(0, 0), size, caption, "");
-		this.id = id;
-	}
-	
+
 	public Button(Vector2i size, String caption, String description)
 	{
 		this(new Vector2i(0, 0), size, caption, description);

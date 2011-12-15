@@ -10,7 +10,6 @@ import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Graphics;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 import com.hexcore.cas.utilities.Log;
 
 

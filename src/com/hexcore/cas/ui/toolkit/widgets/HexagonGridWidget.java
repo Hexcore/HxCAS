@@ -9,8 +9,6 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Graphics;
-import com.hexcore.cas.ui.toolkit.Event.Type;
-import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
 
 public class HexagonGridWidget extends Grid2DWidget
 {

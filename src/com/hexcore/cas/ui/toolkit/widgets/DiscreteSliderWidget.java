@@ -5,9 +5,6 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Text;
-import com.hexcore.cas.ui.toolkit.Theme;
-import com.hexcore.cas.ui.toolkit.Event.Type;
-import com.hexcore.cas.ui.toolkit.Text.Size;
 import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
 public class DiscreteSliderWidget extends ClickableWidget

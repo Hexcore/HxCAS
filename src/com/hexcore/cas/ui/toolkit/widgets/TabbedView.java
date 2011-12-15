@@ -7,8 +7,6 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Graphics;
-import com.hexcore.cas.ui.toolkit.Theme;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 import com.hexcore.cas.ui.toolkit.Theme.BorderShape;
 import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 

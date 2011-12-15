@@ -2,7 +2,6 @@ package com.hexcore.cas.ui.toolkit.widgets;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 
 public class NumberBox extends TextBox
 {

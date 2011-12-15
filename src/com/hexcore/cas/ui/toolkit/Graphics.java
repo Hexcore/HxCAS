@@ -299,7 +299,7 @@ public class Graphics
 		gl2.glEnd();
 	}
 	
-	protected static void applyColour(GL2 gl, Colour colour)
+	public static void applyColour(GL2 gl, Colour colour)
 	{
 		if (colour == null)
 			gl.glColor4f(0.0f, 0.0f, 0.0f, 0.0f);

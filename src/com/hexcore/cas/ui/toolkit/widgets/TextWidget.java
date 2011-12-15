@@ -7,7 +7,6 @@ import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.FlowedText;
 import com.hexcore.cas.ui.toolkit.Graphics;
 import com.hexcore.cas.ui.toolkit.Text;
-import com.hexcore.cas.ui.toolkit.Text.Size;
 
 public class TextWidget extends Widget implements CaptionWidget
 {

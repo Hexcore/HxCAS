@@ -9,8 +9,6 @@ import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Graphics;
-import com.hexcore.cas.ui.toolkit.Event.Type;
-import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
 
 public class RectangleGridWidget extends Grid2DWidget
 {

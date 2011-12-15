@@ -7,7 +7,6 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 
 public class Grid2DWidget extends GridWidget
 {		

@@ -4,7 +4,6 @@ import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
-import com.hexcore.cas.ui.toolkit.Event.Type;
 
 public class CheckBox extends ClickableWidget implements CaptionWidget
 {
