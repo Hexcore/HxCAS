@@ -1,12 +1,10 @@
 package com.hexcore.cas.control.protocol.test;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.DictNode;
@@ -15,9 +13,9 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 
-public class TestMessage 
+public class TestMessage extends TestCase 
 {
-	@Test
+	
 	public void testEmptyMessage()
 	{
 		DictNode	header = new DictNode();
@@ -40,7 +38,7 @@ public class TestMessage
 		assertTrue(output.equals("#de;de."));
 	}
 	
-	@Test
+	
 	public void testIntMessage()
 	{
 		DictNode	header = new DictNode();
@@ -63,7 +61,7 @@ public class TestMessage
 		assertTrue(output.equals("#d3:numi10ee;."));
 	}
 	
-	@Test
+	
 	public void testDoubleMessage()
 	{
 		DictNode	header = new DictNode();
@@ -94,7 +92,7 @@ public class TestMessage
 		assertTrue(output.endsWith("e;."));
 	}
 	
-	@Test
+	
 	public void testListMessage()
 	{
 		ListNode	list1 = new ListNode();
@@ -127,7 +125,7 @@ public class TestMessage
 		assertTrue(output.equals("#d5:firstli1ei2ee3:numi10e6:secondli3ei4eee;."));
 	}
 	
-	@Test
+	
 	public void testDictionaryIntMessage()
 	{
 		DictNode	header = new DictNode();

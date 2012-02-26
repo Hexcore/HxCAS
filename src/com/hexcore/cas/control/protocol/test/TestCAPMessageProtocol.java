@@ -1,24 +1,22 @@
 package com.hexcore.cas.control.protocol.test;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
+import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
 import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
-import com.hexcore.cas.control.protocol.ByteNode;
 
-public class TestCAPMessageProtocol 
+public class TestCAPMessageProtocol extends TestCase
 {
-	@Test
+	
 	public void testCommunication()
 	{
 		Socket clientSocket = null;

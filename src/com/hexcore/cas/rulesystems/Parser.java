@@ -1,8 +1,6 @@
 package com.hexcore.cas.rulesystems;
 
-import library.*;
 import java.util.ArrayList;
-import java.util.TreeSet;
 import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
@@ -463,6 +461,11 @@ static public void reset()
 		Expect(lparen_Sym);
 		type  = Expression();
 		Expect(rparen_Sym);
+		if (!TableEntry.isBool(type))
+		{
+			SemanticError("Expected a boolean result for the if statement's expression");
+		}
+		
 		Label[] pointers = null;	
 		if(valid)
 		{	

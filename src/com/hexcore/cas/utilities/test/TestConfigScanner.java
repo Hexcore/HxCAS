@@ -1,18 +1,14 @@
 package com.hexcore.cas.utilities.test;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.utilities.ConfigScanner;
 import com.hexcore.cas.utilities.ConfigScanner.Symbol;
-import com.hexcore.cas.utilities.ConfigScanner.Symbol.Type;
 
-public class TestConfigScanner
+public class TestConfigScanner extends TestCase
 {
 	private final static float EPSILON = 0.0001f;
 	
-	@Test
 	public void test1()
 	{
 		String		test1 = "10 hello there 6 : 10";
@@ -32,7 +28,6 @@ public class TestConfigScanner
 		assertSame(null, symbol);
 	}
 		
-	@Test
 	public void test2()
 	{
 		String		test1 = "string 10 5.6";
@@ -59,7 +54,7 @@ public class TestConfigScanner
 		assertSame(null, symbol);	
 	}
 	
-	@Test
+	
 	public void test3()
 	{
 		String		test1 = "string{10}5.6;{}10.";
@@ -112,7 +107,7 @@ public class TestConfigScanner
 		assertSame(null, symbol);	
 	}
 	
-	@Test
+	
 	public void test4()
 	{
 		String		test1 = "string\n10  5\n 5.6";
@@ -148,7 +143,7 @@ public class TestConfigScanner
 		assertSame(null, symbol);	
 	}
 	
-	@Test
+	
 	public void test5()
 	{
 		String		test1 = "string\n\"Hello\nWorld!\"\n 5.6\n\"\"";
@@ -182,7 +177,7 @@ public class TestConfigScanner
 		assertSame(null, symbol);	
 	}
 	
-	@Test
+	
 	public void test6()
 	{
 		ConfigScanner scanner = new ConfigScanner();
@@ -209,7 +204,7 @@ public class TestConfigScanner
 		assertSame(null, symbol);	
 	}
 	
-	@Test
+	
 	public void test7()
 	{
 		ConfigScanner scanner = new ConfigScanner();

@@ -13,8 +13,6 @@ import com.hexcore.cas.control.discovery.Lobby;
 import com.hexcore.cas.control.server.Simulator;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
-import com.hexcore.cas.model.WorldReader;
-import com.hexcore.cas.model.WorldSaver;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
@@ -222,9 +220,7 @@ public class Server
 					case CLEAR_HISTORY:
 					{
 						serverLock.lock();
-						
-						boolean result = world.clearHistory(event.genNumber);
-						
+						world.clearHistory(event.genNumber);
 						serverLock.unlock();
 						break;
 					}

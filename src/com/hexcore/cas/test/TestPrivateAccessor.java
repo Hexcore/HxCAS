@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 public class TestPrivateAccessor extends TestCase
 {
+	@SuppressWarnings("unused")
 	private class PrivateTestClass
 	{
 		private String privateString1;

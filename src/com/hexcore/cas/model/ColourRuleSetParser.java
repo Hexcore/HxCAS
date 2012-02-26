@@ -1,7 +1,6 @@
 package com.hexcore.cas.model;
 
 import java.util.List;
-import java.util.Map;
 
 import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.utilities.ConfigParser;
@@ -38,7 +37,9 @@ public class ColourRuleSetParser extends ConfigParser
 	
 	private ColourRuleSet parse(List<String> properties)
 	{
-		String			ruleSetName;
+		@SuppressWarnings("unused")
+		String			ruleSetName = "";
+		
 		ColourRuleSet	ruleSet = new ColourRuleSet(properties.size());
 		
 		if (!expect("colourset")) return null;

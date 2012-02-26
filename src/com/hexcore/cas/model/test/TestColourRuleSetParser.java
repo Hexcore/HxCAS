@@ -1,23 +1,20 @@
 package com.hexcore.cas.model.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.ColourRuleSetParser;
 import com.hexcore.cas.ui.toolkit.Colour;
 
-public class TestColourRuleSetParser
+public class TestColourRuleSetParser extends TestCase
 {
 	private static final double EPSILON = 0.0001f;
 	
-	@Test
+	
 	public void test()
 	{
 		List<String> properties = new ArrayList<String>();

@@ -1,17 +1,15 @@
 package com.hexcore.cas.math.test;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.math.Rectf;
 import com.hexcore.cas.math.Vector2f;
 
-public class TestRectf
+public class TestRectf extends TestCase
 {
 	static final float epsilon = 0.0001f;
 	
-	@Test
+	
 	public void testRectf()
 	{
 		Vector2f 	zero = new Vector2f(0.0f, 0.0f);
@@ -21,7 +19,7 @@ public class TestRectf
 		assertTrue(zero.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testRectfVector2f()
 	{
 		Vector2f 	zero = new Vector2f(0.0f, 0.0f);
@@ -32,7 +30,7 @@ public class TestRectf
 		assertTrue(size.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testRectfVector2fVector2f()
 	{
 		Vector2f	size = new Vector2f(3.3f, 7.7f);
@@ -43,7 +41,7 @@ public class TestRectf
 		assertTrue(size.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testGetters()
 	{
 		Vector2f	size = new Vector2f(3.3f, 7.7f);
@@ -59,7 +57,7 @@ public class TestRectf
 		assertEquals(size.y, rect.getHeight(), epsilon);
 	}
 	
-	@Test
+	
 	public void testSetters()
 	{
 		Vector2f	size = new Vector2f(3.3f, 7.7f);
@@ -78,7 +76,7 @@ public class TestRectf
 		assertEquals(size.y, rect.getHeight(), epsilon);
 	}
 	
-	@Test
+	
 	public void testGetBoundingBox()
 	{
 		// Test 1

@@ -1,13 +1,11 @@
 package com.hexcore.cas.rulesystems.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
-import org.junit.Test;
 
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.rulesystems.Rule;
@@ -15,7 +13,7 @@ import com.hexcore.cas.rulesystems.RuleLoader;
 
 public class TestRuleLoader
 {
-	@Test
+	
 	public void test()
 	{
 		try

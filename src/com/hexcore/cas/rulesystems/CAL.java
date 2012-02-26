@@ -4,10 +4,6 @@ package com.hexcore.cas.rulesystems;
    PDT  30 April 2003 (p.terry@ru.ac.za)
    Modify this to suit your own purposes - hints are given below! */
 
-//  ----------------------- you may need to change the "import" clauses:
-
-import java.io.*;
-
 public class CAL {
 
 	public static void main (String[] args) {

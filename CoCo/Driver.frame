@@ -32,10 +32,6 @@ Coco/R itself) does not fall under the GNU General Public License.
    PDT  30 April 2003 (p.terry@ru.ac.za)
    Modify this to suit your own purposes - hints are given below! */
 
-//  ----------------------- you may need to change the "import" clauses:
-
-import java.io.*;
-
 public class -->class {
 
 	public static void main (String[] args) {

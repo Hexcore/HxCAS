@@ -29,7 +29,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static ArrayList<String> properties;
 	
 	private static Label[] frameworkLabels;
-	private static int[] frameworkIndices;
 	private static Label defaultLabel;
 	private static int currentFrameworkIndex = 0;
 	private static boolean debugEnabled = true;
@@ -88,7 +87,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	{
 		debug("initFramework: " + numTypes + " types");
 		currentFrameworkIndex = 0;
-		frameworkIndices = new int[numTypes];
 		frameworkLabels = new Label[numTypes];
 		for(int i = 0; i < numTypes; i++)
 		{
@@ -103,7 +101,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		
 		executeVisitor.visitInsn(D2I);
 		executeVisitor.visitTableSwitchInsn(0, numTypes-1, defaultLabel, frameworkLabels);
-		//executeVisitor.visitLookupSwitchInsn(defaultLabel, frameworkIndices, frameworkLabels);
 	}
 	
 	public static void initType()

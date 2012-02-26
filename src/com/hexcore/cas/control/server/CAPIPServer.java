@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +31,7 @@ public class CAPIPServer
 	
 	private List<ClientInfo> clients = null;
 	private Lock clientListLock;
-	
-	private boolean running = false;
-	
+		
 	private Simulator parent = null;
 	private int currGen = 0;
 	private int gridsDone = 0;
@@ -71,7 +68,6 @@ public class CAPIPServer
 	public void disconnect()
 	{
 		Log.information(TAG, "Disconnecting clients");
-		running = false;
 		
 		clientListLock.lock();
 		for (ClientInfo client : clients) client.disconnect();
@@ -443,7 +439,6 @@ public class CAPIPServer
 	public void start()
 	{	
 		Log.information(TAG, "Running...");
-		running = true;
 		
 		for (ClientInfo client : clients)
 			client.start();
@@ -482,7 +477,10 @@ public class CAPIPServer
 	{
 		InetSocketAddress address = null;
 		CAPMessageProtocol protocol = null;
+		
+		@SuppressWarnings("unused")
 		int	status = 0;
+		
 		boolean accepted = false;
 		boolean running = false;
 		int cores = 0;

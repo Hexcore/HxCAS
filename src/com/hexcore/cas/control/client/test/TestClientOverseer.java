@@ -1,13 +1,10 @@
 package com.hexcore.cas.control.client.test;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.control.client.CAPIPClient;
 import com.hexcore.cas.control.client.ClientOverseer;
@@ -18,17 +15,13 @@ import com.hexcore.cas.control.protocol.DoubleNode;
 import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
-import com.hexcore.cas.math.Recti;
-import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.utilities.Log;
 
-public class TestClientOverseer
+public class TestClientOverseer extends TestCase
 {
 	private static final int TEST_CLIENT_PORT = 3229;
 	
-	@Test
+	
 	public void testClientOverseer()
 	{				
 		// Create client overseer

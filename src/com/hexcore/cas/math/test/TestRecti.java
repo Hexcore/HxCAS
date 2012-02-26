@@ -1,15 +1,13 @@
 package com.hexcore.cas.math.test;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 
-public class TestRecti
+public class TestRecti extends TestCase
 {
-	@Test
+	
 	public void testRecti()
 	{
 		Vector2i 	zero = new Vector2i(0, 0);
@@ -19,7 +17,7 @@ public class TestRecti
 		assertTrue(zero.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testRectiVector2i()
 	{
 		Vector2i 	zero = new Vector2i(0, 0);
@@ -30,7 +28,7 @@ public class TestRecti
 		assertTrue(size.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testRectiVector2iVector2i()
 	{
 		Vector2i	size = new Vector2i(3, 7);
@@ -41,7 +39,7 @@ public class TestRecti
 		assertTrue(size.equals(rect.size));
 	}
 	
-	@Test
+	
 	public void testGetters()
 	{
 		Vector2i	size = new Vector2i(3, 7);
@@ -57,7 +55,7 @@ public class TestRecti
 		assertEquals(size.y, rect.getHeight());
 	}
 	
-	@Test
+	
 	public void testSetters()
 	{
 		Vector2i	size = new Vector2i(3, 7);
@@ -76,7 +74,7 @@ public class TestRecti
 		assertEquals(size.y, rect.getHeight());
 	}
 	
-	@Test
+	
 	public void testGetBoundingBox()
 	{
 		// Test 1
@@ -114,7 +112,7 @@ public class TestRecti
 		assertEquals(8, box.size.y);	
 	}
 	
-	@Test
+	
 	public void testIntersect()
 	{
 		Recti current = new Recti(0, 0, 1000, 1000);

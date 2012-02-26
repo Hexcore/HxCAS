@@ -1,14 +1,13 @@
 package com.hexcore.cas.model.test;
 
 import junit.framework.TestCase;
-import org.junit.Test;
 
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.ui.toolkit.Colour;
 
 public class TestColourRule extends TestCase
 {
-	@Test
+	
 	public void testRangeSolid()
 	{
 		Colour colour = new Colour(0.8f, 0.5f, 0.2f);
@@ -24,7 +23,7 @@ public class TestColourRule extends TestCase
 		assertTrue(range.getColourAt(55.0f).equals(colour));
 	}	
 	
-	@Test
+	
 	public void testRangeGradient()
 	{
 		Colour firstColour = new Colour(0.8f, 0.5f, 0.2f);
@@ -50,7 +49,7 @@ public class TestColourRule extends TestCase
 		assertTrue(range.getColourAt(100.0f).equals(secondColour));		
 	}		
 	
-	@Test
+	
 	public void testColourRule()
 	{
 		Colour a = new Colour(0.4f, 0.9f, 0.1f);
@@ -80,7 +79,7 @@ public class TestColourRule extends TestCase
 		assertTrue(rule.getColour(60.0f).equals(Colour.BLACK));	
 	}
 	
-	@Test
+	
 	public void testColourRuleClosestRange()
 	{
 		Colour a = new Colour(0.4f, 0.9f, 0.1f);

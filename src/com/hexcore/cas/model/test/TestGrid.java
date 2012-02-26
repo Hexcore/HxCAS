@@ -1,13 +1,11 @@
 package com.hexcore.cas.model.test;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.GridType;
-
-import junit.framework.TestCase;
 
 public class TestGrid extends TestCase
 {
@@ -167,7 +165,7 @@ public class TestGrid extends TestCase
 		assertEquals(false, grid2.isWrappable());
 	}	
 	
-	@Test
+	
 	public void testGetCell()
 	{
 		Vector2i	size = new Vector2i(2, 2);
@@ -187,7 +185,7 @@ public class TestGrid extends TestCase
 		assertEquals(10.0, grid.getCell(pos2).getValue(0));	
 	}
 	
-	@Test
+	
 	public void testSetCellArray()
 	{
 		Vector2i	size = new Vector2i(2, 2);
@@ -205,7 +203,7 @@ public class TestGrid extends TestCase
 		assertEquals(3.0, grid.getCell(1, 1).getValue(2));	
 	}
 	
-	@Test
+	
 	public void testSetCell()
 	{	
 		Vector2i	size = new Vector2i(5, 5);

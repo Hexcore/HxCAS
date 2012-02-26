@@ -1,20 +1,18 @@
 package com.hexcore.cas.model.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.model.ColourRuleSetWriter;
 import com.hexcore.cas.ui.toolkit.Colour;
 
-public class TestColourRuleSetWriter
+public class TestColourRuleSetWriter extends TestCase
 {
-	@Test
+	
 	public void test()
 	{
         ColourRuleSet colourRules = new ColourRuleSet(4);

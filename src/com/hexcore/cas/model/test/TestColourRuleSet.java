@@ -1,31 +1,29 @@
 package com.hexcore.cas.model.test;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.model.ColourRuleSet;
 import com.hexcore.cas.ui.toolkit.Colour;
 
-public class TestColourRuleSet
+public class TestColourRuleSet extends TestCase
 {
-	@Test
+	
 	public void testColourRuleSet()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);
 		assertEquals(3, ruleSet.colourRules.length);
 	}
 
-	@Test
+	
 	public void testGetNumProperties()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);
 		assertEquals(3, ruleSet.getNumProperties());
 	}
 	
-	@Test
+	
 	public void testSetColourRule()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);
@@ -42,7 +40,7 @@ public class TestColourRuleSet
 		assertSame(rule2, ruleSet.colourRules[1]);
 	}
 
-	@Test
+	
 	public void testGetColourRule()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);
@@ -59,7 +57,7 @@ public class TestColourRuleSet
 		assertSame(rule2, ruleSet.getColourRule(1));		
 	}
 
-	@Test
+	
 	public void testGetColourIntDouble()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);
@@ -76,7 +74,7 @@ public class TestColourRuleSet
 		assertTrue(Colour.BLUE.equals(ruleSet.getColour(1, 25.0f)));
 	}
 
-	@Test
+	
 	public void testGetColourCellInt()
 	{
 		ColourRuleSet ruleSet = new ColourRuleSet(3);

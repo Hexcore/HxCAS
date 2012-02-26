@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -47,6 +46,7 @@ import com.hexcore.cas.ui.toolkit.Text.Size;
 import com.hexcore.cas.ui.toolkit.Theme;
 import com.hexcore.cas.ui.toolkit.Window;
 import com.hexcore.cas.ui.toolkit.Window.FileSelectResult;
+import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.ui.toolkit.widgets.Button;
 import com.hexcore.cas.ui.toolkit.widgets.CheckBox;
 import com.hexcore.cas.ui.toolkit.widgets.ColourBox;
@@ -58,6 +58,7 @@ import com.hexcore.cas.ui.toolkit.widgets.DropDownBox;
 import com.hexcore.cas.ui.toolkit.widgets.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.GridWidget;
+import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.widgets.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.ImageWidget;
@@ -76,8 +77,6 @@ import com.hexcore.cas.ui.toolkit.widgets.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.View;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
-import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
-import com.hexcore.cas.ui.toolkit.WindowEventListener;
 import com.hexcore.cas.utilities.HeightMapConverter;
 import com.hexcore.cas.utilities.Log;
 
@@ -470,8 +469,6 @@ public class GUI implements WindowEventListener, LobbyListener
     private Button addViewportButton;
     
     private TextWidget	iterationsText;
-    private TextWidget	timeText;
-    private TextWidget	numCellsText;
     
     private DiscreteSliderWidget 	generationSlider;
         
@@ -570,9 +567,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	private Button editorApplyButton;	
 	
-	
-	private ArrayList<LinearLayout> rightLayouts;
-
 	private ArrayList<NumberBox> numberboxList;
 	private Cell c;
 
@@ -583,20 +577,12 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button setColourRangesButton;
 	private LinearLayout colourPropertiesLayout;
 	private ScrollableContainer colourPropertiesContainer;
-	private TextWidget coloursInstructions;
-	private LinearLayout colourInstructionsLayout;
 
 
 	private Button saveWorldButton;
 
 
 	private LinearLayout colourButtonsLayout;
-
-
-	private LinearLayout leftColoursLayout;
-
-
-	private LinearLayout rightColoursLayout;
 
 
 	private Button resetColourRangesButton;
@@ -622,10 +608,6 @@ public class GUI implements WindowEventListener, LobbyListener
 
 	private ColourPicker colourPicker;
 	private Button importHeightMapButton;
-
-
-	private NumberBox heightMapIndexNumberBox;
-
 
 	private Button resetCameraButton;
 
@@ -2259,8 +2241,6 @@ public class GUI implements WindowEventListener, LobbyListener
             	
             	if (viewports.size() > 1)
             	{
-            			Viewport v = viewports.get(viewports.size() -1 );
-            			v = null;
                  		viewports.remove(viewports.size() - 1);
                  		reconstructViewportLayout();
             	}

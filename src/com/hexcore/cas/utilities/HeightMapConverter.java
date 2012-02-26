@@ -3,25 +3,13 @@ package com.hexcore.cas.utilities;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageProducer;
-import java.awt.image.PixelGrabber;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import jogamp.opengl.glu.mipmap.ScaleInternal;
-
-import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.HexagonGrid;
-import com.hexcore.cas.model.RectangleGrid;
-import com.hexcore.cas.model.TriangleGrid;
 
 /**
  * 
@@ -36,7 +24,6 @@ public class HeightMapConverter
 		int width = grid.getWidth();
 		int height = grid.getHeight();
 		
-		int[] pixels = new int[width*height];
 		BufferedImage heightMap = null;
 		int imgWidth = 0;
 		int imgHeight = 0;

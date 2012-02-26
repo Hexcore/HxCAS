@@ -1,16 +1,14 @@
 package com.hexcore.cas.math.test;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import com.hexcore.cas.math.Vector2f;
 
-public class TestVector2f
+public class TestVector2f extends TestCase
 {
 	static final float epsilon = 0.0001f;
 	
-	@Test
+	
 	public void testVector2f()
 	{
 		Vector2f point = new Vector2f();
@@ -18,7 +16,7 @@ public class TestVector2f
 		assertEquals(0.0f, point.y, epsilon);
 	}
 
-	@Test
+	
 	public void testVector2fIntInt()
 	{
 		Vector2f point = new Vector2f(7.7f, 9.9f);
@@ -26,7 +24,7 @@ public class TestVector2f
 		assertEquals(9.9f, point.y, epsilon);
 	}
 
-	@Test
+	
 	public void testVector2fVector2f()
 	{
 		Vector2f point = new Vector2f(3.3f, 4.4f);
@@ -35,7 +33,7 @@ public class TestVector2f
 		assertEquals(4.4f, copy.y, epsilon);
 	}
 	
-	@Test
+	
 	public void testGet()
 	{
 		Vector2f point = new Vector2f(7.7f, 9.9f);
@@ -43,7 +41,7 @@ public class TestVector2f
 		assertEquals(9.9f, point.get(1), epsilon);
 	}
 
-	@Test
+	
 	public void testEqualsVector2f()
 	{
 		Vector2f a, b;
@@ -65,7 +63,7 @@ public class TestVector2f
 		assertFalse(a.equals(b));
 	}
 	
-	@Test
+	
 	public void testSetIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 2.2f);
@@ -75,7 +73,7 @@ public class TestVector2f
 		assertEquals(4.4f, a.y, epsilon);	
 	}
 	
-	@Test
+	
 	public void testSetVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 2.2f);
@@ -92,7 +90,7 @@ public class TestVector2f
 		assertEquals(6.6f, a.y, epsilon);		
 	}	
 
-	@Test
+	
 	public void testAddVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -103,7 +101,7 @@ public class TestVector2f
 		assertEquals(9.9f, c.y, epsilon);
 	}
 
-	@Test
+	
 	public void testAddIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -113,7 +111,7 @@ public class TestVector2f
 		assertEquals(9.9f, c.y, epsilon);
 	}
 
-	@Test
+	
 	public void testSubtractVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -124,7 +122,7 @@ public class TestVector2f
 		assertEquals(1.1f, c.y, epsilon);
 	}
 
-	@Test
+	
 	public void testSubtractIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -134,7 +132,7 @@ public class TestVector2f
 		assertEquals(1.1f, c.y, epsilon);
 	}
 
-	@Test
+	
 	public void testToString()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -144,7 +142,7 @@ public class TestVector2f
 		assertEquals("Vector2f<-1.1, -5.5>", b.toString());
 	}
 		
-	@Test
+	
 	public void testIncVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -155,7 +153,7 @@ public class TestVector2f
 		assertEquals(9.9f, a.y, epsilon);
 	}
 
-	@Test
+	
 	public void testIncIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -165,7 +163,7 @@ public class TestVector2f
 		assertEquals(9.9f, a.y, epsilon);
 	}
 
-	@Test
+	
 	public void testDecVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -176,7 +174,7 @@ public class TestVector2f
 		assertEquals(1.1f, a.y, epsilon);
 	}
 
-	@Test
+	
 	public void testDecIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -186,7 +184,7 @@ public class TestVector2f
 		assertEquals(1.1f, a.y, epsilon);
 	}
 	
-	@Test
+	
 	public void testNormalize()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -196,7 +194,7 @@ public class TestVector2f
 		assertEquals(0.980580676f, a.y, epsilon);
 	}	
 	
-	@Test
+	
 	public void testGetNormalized()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -206,7 +204,7 @@ public class TestVector2f
 		assertEquals(0.980580676f, b.y, epsilon);
 	}
 	
-	@Test
+	
 	public void testGetPerpendicular()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);

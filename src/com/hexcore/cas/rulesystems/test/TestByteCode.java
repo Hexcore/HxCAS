@@ -2,15 +2,9 @@ package com.hexcore.cas.rulesystems.test;
 
 import java.io.File;
 
-import org.junit.Ignore;
-import org.junit.experimental.theories.suppliers.TestedOn;
-
 import junit.framework.TestCase;
 
-import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
-import com.hexcore.cas.model.Grid;
-import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
