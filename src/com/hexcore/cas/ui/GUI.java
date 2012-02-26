@@ -41,6 +41,7 @@ import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Fill;
 import com.hexcore.cas.ui.toolkit.Image;
+import com.hexcore.cas.ui.toolkit.LayoutParser;
 import com.hexcore.cas.ui.toolkit.Text;
 import com.hexcore.cas.ui.toolkit.Text.Size;
 import com.hexcore.cas.ui.toolkit.Theme;
@@ -364,6 +365,8 @@ public class GUI implements WindowEventListener, LobbyListener
     public Set<ClientEntry> usingClients;
 	
 	public static final String TAG = "GUI";
+
+	private LayoutParser layoutParser = new LayoutParser();
 	
     public Theme    theme;
     public Window	window;
@@ -668,56 +671,15 @@ public class GUI implements WindowEventListener, LobbyListener
         masterView.setFlag(Widget.FILL);
         window.add(masterView);
         
-        mainMenuLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        mainMenuLayout.setFlag(Widget.CENTER | Widget.WRAP);
-        mainMenuLayout.setMargin(new Vector2i(0, 0));
-        masterView.add(mainMenuLayout);
-        
-        mainLayout = new LinearLayout(new Vector2i(1000, 600), LinearLayout.Direction.HORIZONTAL);
-        mainLayout.setFlag(Widget.CENTER);
-        mainMenuLayout.add(mainLayout);
-                
-        ImageWidget mainLogo = new ImageWidget(theme.getImage("backgrounds", "main_bg.png"));
-        mainLogo.setFlag(Widget.CENTER_VERTICAL);
-        mainLayout.add(mainLogo);        
-        
-        buttonBarLayout = new LinearLayout(new Vector2i(340, 350), LinearLayout.Direction.VERTICAL);
-        buttonBarLayout.setFlag(Widget.CENTER_VERTICAL | Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
+        mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
 
-        mainLayout.add(buttonBarLayout);
-        
-        createWorldButton = new Button(new Vector2i(300, 50), "Create World");
-        createWorldButton.setTooltip("Creates a new world");
-        createWorldButton.setIcon(theme.getImage("icons", "create_icon.png"), theme.getImage("icons", "create_icon-white.png"));
-        createWorldButton.setFlag(Widget.CENTER_HORIZONTAL);
-        buttonBarLayout.add(createWorldButton);
-        
-        loadWorldButton = new Button(new Vector2i(300, 50), "Load World");
-        
-        loadWorldButton.setIcon(theme.getImage("icons", "load_icon.png"), theme.getImage("icons", "load_icon-white.png"));
-        loadWorldButton.setFlag(Widget.CENTER_HORIZONTAL);
-        buttonBarLayout.add(loadWorldButton);
-        
-        optionsButton = new Button(new Vector2i(300, 50), "Options");
-        
-        optionsButton.setIcon(theme.getImage("icons", "options_icon.png"), theme.getImage("icons", "options_icon-white.png"));
-        optionsButton.setFlag(Widget.CENTER_HORIZONTAL);
-        buttonBarLayout.add(optionsButton);
-        
-        helpButton = new Button(new Vector2i(300, 50), "Help");
-        
-        helpButton.setIcon(theme.getImage("icons", "help_icon.png"), theme.getImage("icons", "help_icon-white.png"));
-        helpButton.setFlag(Widget.CENTER_HORIZONTAL);
-        buttonBarLayout.add(helpButton);
-        
-        quitButton = new Button(new Vector2i(300, 50), "Quit");
-        
-        quitButton.setIcon(theme.getImage("icons", "on-off_icon.png"), theme.getImage("icons", "on-off_icon-white.png"));
-        quitButton.setFlag(Widget.CENTER_HORIZONTAL);
-        buttonBarLayout.add(quitButton);
+        createWorldButton = (Button)mainMenuLayout.findByName("createWorld");
+        loadWorldButton = (Button)mainMenuLayout.findByName("loadWorld");
+        optionsButton = (Button)mainMenuLayout.findByName("options");
+        helpButton = (Button)mainMenuLayout.findByName("help");
+        quitButton = (Button)mainMenuLayout.findByName("quit");
         
         /// Main WORLD BUILDER
-        
         
         worldLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         worldLayout.setFlag(Widget.FILL);
@@ -1333,70 +1295,22 @@ public class GUI implements WindowEventListener, LobbyListener
         distributionContainer.setFlag(Widget.FILL);
         tabbedWorldView.add(distributionContainer, "Distribution Settings");
         
-        LinearLayout masterDistributionLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-        masterDistributionLayout.setMargin(new Vector2i(0, 0));
-        masterDistributionLayout.setFlag(Widget.FILL);
-        distributionContainer.setContents(masterDistributionLayout);
+        LinearLayout masterDistributionLayout = (LinearLayout)layoutParser.parse("distributionTab", distributionContainer);
+
+    	// Left List
+        clientsAvailableList = (ListWidget)masterDistributionLayout.findByName("clientsAvailableList");
         
-        // List Layout
-        LinearLayout listLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        listLayout.setFlag(Widget.FILL);
-        masterDistributionLayout.add(listLayout);
+        // Center buttons
+        addClientButton = (Button)masterDistributionLayout.findByName("addButton");
+        addAllClientsButton = (Button)masterDistributionLayout.findByName("addAllButton");
+        removeClientButton = (Button)masterDistributionLayout.findByName("removeButton");
+        removeAllClientsButton = (Button)masterDistributionLayout.findByName("removeAllButton");
         
-        	// Left List Layout
-	        LinearLayout leftListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	        leftListLayout.setMargin(new Vector2i(0, 0));
-	        leftListLayout.setFlag(Widget.FILL);
-	        listLayout.add(leftListLayout);
-	        
-	        ImageWidget availableClientsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "available_clients_header.png"));
-	        availableClientsHeader.setFlag(Widget.CENTER_HORIZONTAL);
-	        leftListLayout.add(availableClientsHeader);
-	        
-	        clientsAvailableList = new ListWidget(new Vector2i(10, 10));
-	        clientsAvailableList.setFlag(Widget.FILL);
-	        leftListLayout.add(clientsAvailableList);
-	        
-	        // Center buttons
-	        LinearLayout centerButtonLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	        centerButtonLayout.setMargin(new Vector2i(0, 0));
-	        centerButtonLayout.setFlag(Widget.WRAP | Widget.CENTER_VERTICAL);
-	        listLayout.add(centerButtonLayout);
-	        
-	        addClientButton = new Button(new Vector2i(150, 40), "Add >");
-	        centerButtonLayout.add(addClientButton);
-	        
-	        addAllClientsButton = new Button(new Vector2i(150, 40), "Add All >>");
-	        centerButtonLayout.add(addAllClientsButton);
-	        
-	        removeClientButton = new Button(new Vector2i(150, 40), "< Remove");
-	        centerButtonLayout.add(removeClientButton);
-	        
-	        removeAllClientsButton = new Button(new Vector2i(150, 40), "<< Remove All");
-	        centerButtonLayout.add(removeAllClientsButton);
-	        
-	        // Right List Layout
-	        LinearLayout rightListLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	        rightListLayout.setMargin(new Vector2i(0, 0));
-	        rightListLayout.setFlag(Widget.FILL);
-	        listLayout.add(rightListLayout);
-	        
-	        
-	        ImageWidget usingClientsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "using_clients_header.png"));
-	        usingClientsHeader.setFlag(Widget.CENTER_HORIZONTAL);
-	        rightListLayout.add(usingClientsHeader);
-	        
-	        clientsUsingList = new ListWidget(new Vector2i(10, 10));
-	        clientsUsingList.setFlag(Widget.FILL);   
-	        rightListLayout.add(clientsUsingList);
+        // Right List
+        clientsUsingList = (ListWidget)masterDistributionLayout.findByName("clientsUsingList");
         
-        // Control Layout
-        LinearLayout controlLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-        controlLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
-        masterDistributionLayout.add(controlLayout);      
-        
-        refreshServerButton = new Button(new Vector2i(100, 50), "Refresh");
-        controlLayout.add(refreshServerButton);
+        // Controls
+        refreshServerButton = (Button)masterDistributionLayout.findByName("refreshButton");
     }
     
     

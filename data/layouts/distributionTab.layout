@@ -1,0 +1,102 @@
+widget LinearLayout : vertical
+{
+	alignment: fill;
+	
+	widget LinearLayout : horizontal
+	{
+		name: "listLayout";
+		alignment: fill;
+		
+		widget LinearLayout : vertical
+		{
+			name: "leftListLayout";
+			margin: 0;
+			alignment: fill;
+			
+		    widget Image
+		    {
+		        alignment: top center;
+		        image: image("headers", "available_clients_header.png");
+		    }
+		    
+		    widget List
+		    {
+		    	name: "clientsAvailableList";
+		    	alignment: fill;
+		    }
+		}
+		
+		widget LinearLayout : vertical
+		{
+			name: "centerButtonLayout";
+			margin: 0;
+			alignment: center left;
+			shrink-wrap: both;
+			
+			widget Button
+			{
+				name: "addButton";
+				caption: "Add >";
+				width: 150;
+				height: 40;
+			}
+			
+			widget Button
+			{
+				name: "addAllButton";
+				caption: "Add All >>";
+				width: 150;
+				height: 40;
+			}
+			
+			widget Button
+			{
+				name: "removeButton";
+				caption: "< Remove";
+				width: 150;
+				height: 40;
+			}
+			
+			widget Button
+			{
+				name: "removeAllButton";
+				caption: "<< Remove Al";
+				width: 150;
+				height: 40;
+			}
+		}
+				
+		widget LinearLayout : vertical
+		{
+			name: "rightListLayout";
+			margin: 0;
+			alignment: fill;
+			
+		    widget Image
+		    {
+		        alignment: top center;
+		        image: image("headers", "using_clients_header.png");
+		    }
+		    
+		    widget List
+		    {
+		    	name: "clientsUsingList";
+		    	alignment: fill;
+		    }
+		}		
+	}
+	
+	widget LinearLayout : horizontal
+	{
+		alignment: top fill;
+		shrink-wrap: vertical;
+		
+		widget Button
+		{
+			name: "refreshButton";
+			caption: "Refresh";
+			width: 100;
+			height: 50;
+		}
+	}
+}

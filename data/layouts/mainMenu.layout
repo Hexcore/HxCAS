@@ -1,0 +1,76 @@
+widget LinearLayout : vertical
+{
+	alignment: center;
+	shrink-wrap: both;
+
+	widget LinearLayout : horizontal
+	{
+		alignment: center;
+		width: 1000;
+		height: 600;
+		
+	    widget Image
+	    {
+	        alignment: center left;
+	        image: image("backgrounds", "main_bg.png");
+	    }
+	
+		widget LinearLayout : vertical
+		{
+			alignment: center fill;
+			shrink-wrap: vertical;
+			width: 340;
+			height: 350;
+			
+		    widget Button
+		    {
+		        name: "createWorld";
+		        caption: "Create World";
+		        width: 300;
+		        height: 50;
+		        alignment: top center;
+		        icon: image("icons", "create_icon.png");
+		    }
+		    
+		    widget Button
+		    {
+		        name: "loadWorld";
+		        caption: "Load World";
+		        width: 300;
+		        height: 50;
+		        alignment: top center;
+		        icon: image("icons", "load_icon.png");
+		    }
+		    
+		    widget Button
+		    {
+		        name: "options";
+		        caption: "Options";
+		        width: 300;
+		        height: 50;
+		        alignment: top center;
+		        icon: image("icons", "options_icon.png");
+		    }    
+		    
+		    widget Button
+		    {
+		        name: "help";
+		        caption: "Help";
+		        width: 300;
+		        height: 50;
+		        alignment: top center;
+		        icon: image("icons", "help_icon.png");
+		    }
+		    
+		    widget Button
+		    {
+		        name: "quit";
+		        caption: "Quit";
+		        width: 300;
+		        height: 50;
+		        alignment: top center;
+		        icon: image("icons", "on-off_icon.png");
+		    } 
+		}
+	}
+}
