@@ -21,21 +21,25 @@ Compilation Prerequisites
 -------------------------
 The project includes Eclipse project settings. The project has been
 successfully compiled with the following versions of Eclipse:
+
  * Helios
  * Indigo
  
 HxCAS has been successfully compiled with the following versions of Java:
+
  * 1.6
  * 1.7
  
 HxCAS has been successfully compiled and includes native libraries for the
 following platforms:
+
  * Windows 64bit
  * Linux 64bit
 
 Compilation Types
 -----------------
 HxCAS can be compiled in two ways from Eclipse:
+
  1. Standard source compile
  2. Full ANT compile
  
@@ -47,6 +51,7 @@ by clicking on the "run" button in Eclipse.
 A full ANT compile can be performed by running the build.xml file with ANT.
 This is only necessary when the file: CoCo/CAL.atg has been changed or any of
 CoCo's generated files need to be restored. These files are:
+
  * src/com/hexcore/cas/rulesystems/CAL.java
  * src/com/hexcore/cas/rulesystems/Parser.java
  * src/com/hexcore/cas/rulesystems/Scanner.java
