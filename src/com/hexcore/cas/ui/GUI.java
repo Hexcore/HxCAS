@@ -105,7 +105,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		}
 	}
 	
-
 	public static class RangeContainer
 	{
 		int id;
@@ -140,8 +139,6 @@ public class GUI implements WindowEventListener, LobbyListener
 			secondRange = new NumberBox(40);
 			secondRange.setFlag(Widget.CENTER_VERTICAL);
 		
-				
-				
 	       	t2 = new TextWidget("Range: ");
 	       	t2.setFlag(Widget.CENTER_VERTICAL);
 	       	t3 = new TextWidget(" - ");
@@ -151,8 +148,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	    	t5 = new TextWidget(" - ");
 	    	t5.setFlag(Widget.CENTER_VERTICAL);
 	       	
-	    	
-	    	
 	       	rangeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 	       	//rangeLayout.setFlag(Widget.WRAP);
 	       	rangeLayout.setHeight(50);
@@ -167,29 +162,19 @@ public class GUI implements WindowEventListener, LobbyListener
 
 			colourBoxFrom = new ColourBox(new Vector2i(32,32));
 			colourBoxFrom.setColour(fromColour);
+			
 			rangeLayout.add(colourBoxFrom);
-		  	
-						
 			rangeLayout.add(t5);
 			
-					
 			colourBoxTo = new ColourBox(new Vector2i(32,32));
 			colourBoxTo.setColour(toColour);
 			rangeLayout.add(colourBoxTo);
-			
-		
 		}
 		
 		public LinearLayout getLayout()
 		{
 			return rangeLayout;
 		}
-		
-		
-		
-		
-		
-		
 	}
 	
 	public static class ColourContainer
@@ -220,21 +205,18 @@ public class GUI implements WindowEventListener, LobbyListener
 			rangeButtonsLayout.setWindow(window);
 			rangeButtonsLayout.setFlag(Widget.WRAP);
 			
-			
-			
 			layout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 			layout.setWindow(window);
 			layout.setFlag(Widget.WRAP);
 			layout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 			layout.setHeight(50);
 			t1 = new TextWidget("Property: " + name, Text.Size.MEDIUM);
-		
 			layout.add(t1);
+			
 			rangeButtonsLayout.add(addRangeButton);
 			rangeButtonsLayout.add(removeRangeButton);
+			
 			layout.add(rangeButtonsLayout);
-			
-			
 			
 			rangeContainerList = new ArrayList<GUI.RangeContainer>();
 			
@@ -251,10 +233,6 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 				}
 			}
-			
-			
-			
-			
 		}
 		
 		public void addRangeGradient(int id, Range r )
@@ -273,7 +251,6 @@ public class GUI implements WindowEventListener, LobbyListener
 			rc.toColour = r.getColour(1);
 			
 			this.layout.add(rc.getLayout());
-		
 		}
 		
 		public void addRangeSolid(int id, Range r )
@@ -309,16 +286,12 @@ public class GUI implements WindowEventListener, LobbyListener
 			rc.fromColour = new Colour(0.0f,0.0f,0.0f);
 			rc.toColour = new Colour(0.0f,0.0f,0.0f);
 			this.layout.add(rc.getLayout());
-		
 		}
 		
-			
 		public void removeRange()
 		{
 			numRanges--;
 			rangeContainerList.remove(numRanges);
-			
-			
 		}
 		
 		public LinearLayout getLayout()
@@ -330,7 +303,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		{
 			return addRangeButton;
 		}
-		
 	}
 	
 	enum EditorToolType {LOOK, BRUSH, FILL};
@@ -354,7 +326,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	//OUR WORLD///
     public World world;
 	//////////////
-    
     
     //OUR VIEWPORTS//
     public ArrayList<Viewport> viewports;
@@ -394,11 +365,11 @@ public class GUI implements WindowEventListener, LobbyListener
     public TextWidget	worldSizeXLabel;
     public TextWidget	cellShapeLabel;
 
-    
     public NumberBox    worldSizeXNumberBox;
     public NumberBox    worldSizeYNumberBox;
 
     public CheckBox		wrapCheckBox;
+    public CheckBox		keepHistoryCheckBox;
     public DropDownBox	cellShapeDropDownBox;
     
     public Grid3DWidget	grid3DViewer = null;
@@ -445,7 +416,6 @@ public class GUI implements WindowEventListener, LobbyListener
         
     public Panel	mainPanel;
     
-   
     public ColourRuleSet        colourRules;
     
     public String    currentThemeName = "lightV2";
@@ -480,64 +450,25 @@ public class GUI implements WindowEventListener, LobbyListener
     
     private Server 	server;
 	private Button zoomInButton;
-
-
 	private Button zoomOutButton;
-
-
 	private Button moveUpButton;
-
-
 	private Button moveDownButton;
-
-
 	private Button moveLeftButton;
-
-
 	private Button moveRightButton;
-
-
 	private Button yawLeftButton;
-
-
 	private Button yawRightButton;
-
-
 	private Button pitchUpButton;
-
-
 	private Button pitchDownButton;
-
-
 	private Button saveAsCALFileButton;
-
-
 	private Button refreshServerButton;
-
-
 	private Container coloursContainer;
-
-
 	private LinearLayout masterColoursLayout;
-
-
 	private Button toggleHideButton;
-
-
 	private Button toggle3dButton;
-
-
 	private Button toggleWireframeButton;
-
-
 	private Button removeViewportButton;
-
-
 	private ImageWidget viewSettingsHeader;
-
-
 	private Button toggleShowButton;
-	
 	
 	// Distribution tab
 	public ListWidget 	clientsAvailableList;
@@ -581,45 +512,23 @@ public class GUI implements WindowEventListener, LobbyListener
 	private LinearLayout colourPropertiesLayout;
 	private ScrollableContainer colourPropertiesContainer;
 
-
 	private Button saveWorldButton;
-
-
 	private LinearLayout colourButtonsLayout;
-
-
 	private Button resetColourRangesButton;
-
-
 	private LinearLayout rightColourLayout;
-
-
 	private LinearLayout leftColourLayout;
-
-
 	private NumberBox cpRNumberBox;
-
-
 	private NumberBox cpGNumberBox;
-
-
 	private NumberBox cpBNumberBox;
-
-
 	private LinearLayout cpRGBLayout;
-
-
 	private ColourPicker colourPicker;
 	private Button importHeightMapButton;
-
 	private Button resetCameraButton;
-
 
 	private SliderWidget playbackSpeedSlider;
 	private LinearLayout simulationControlsLayout;
 	private LinearLayout topLayout;
 	private LinearLayout worldHeaderLayout;
-
 
 	private DropDownBox heightMapPropertySelector;
     
@@ -686,17 +595,12 @@ public class GUI implements WindowEventListener, LobbyListener
         
         masterView.add(worldLayout);
         
-        
         tabbedWorldView = new TabbedView(new Vector2i(30,30));
         tabbedWorldView.setFlag(Widget.FILL);
-        
-        
         
         worldHeaderLayout = new LinearLayout(new Vector2i(230, 40), LinearLayout.Direction.HORIZONTAL);
         worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
         worldLayout.add(worldHeaderLayout);
-
-        
 		worldLayout.add(tabbedWorldView);
 		
 		propertiesContainer = new Container(new Vector2i(100, 100));    
@@ -752,6 +656,11 @@ public class GUI implements WindowEventListener, LobbyListener
         wrapCheckBox.setFlag(Widget.CENTER_VERTICAL);
         wrapCheckBox.setMargin(new Vector2i(50,0));
         worldSizeLayout.add(wrapCheckBox);
+
+        keepHistoryCheckBox = new CheckBox(new Vector2i(100,50), "Keep History");
+        keepHistoryCheckBox.setFlag(Widget.CENTER_VERTICAL);
+        keepHistoryCheckBox.setMargin(new Vector2i(50,0));
+        worldSizeLayout.add(keepHistoryCheckBox);
         
         cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
@@ -771,8 +680,6 @@ public class GUI implements WindowEventListener, LobbyListener
         cellShapeDropDownBox.setSelected(0);
         
         cellShapeLayout.add(cellShapeDropDownBox);
-                
-        
         
         LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
@@ -796,20 +703,20 @@ public class GUI implements WindowEventListener, LobbyListener
         buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP);
         worldLayout.add(buttonHeaderLayout);
             
-            backButton = new Button(new Vector2i(100, 50), "Main Menu");
-            backButton.setWidth(165);
-            backButton.setHeight(35);
-            buttonHeaderLayout.add(backButton);
-            
-            saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
-            saveWorldButton.setWidth(165);
-            saveWorldButton.setHeight(35);
-            buttonHeaderLayout.add(saveWorldButton);
-            
-            simulateButton = new Button(new Vector2i(100, 50), "Simulate");
-            simulateButton.setWidth(165);
-            simulateButton.setHeight(35);
-            buttonHeaderLayout.add(simulateButton);
+        backButton = new Button(new Vector2i(100, 50), "Main Menu");
+        backButton.setWidth(165);
+        backButton.setHeight(35);
+        buttonHeaderLayout.add(backButton);
+        
+        saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
+        saveWorldButton.setWidth(165);
+        saveWorldButton.setHeight(35);
+        buttonHeaderLayout.add(saveWorldButton);
+        
+        simulateButton = new Button(new Vector2i(100, 50), "Simulate");
+        simulateButton.setWidth(165);
+        simulateButton.setHeight(35);
+        buttonHeaderLayout.add(simulateButton);
 
         rulesContainer = new Container(new Vector2i(100, 100));
         tabbedWorldView.add(rulesContainer, "CAL Rules");
@@ -819,14 +726,9 @@ public class GUI implements WindowEventListener, LobbyListener
         masterRulesLayout.setFlag(Widget.FILL);
         rulesContainer.setContents(masterRulesLayout);
         
-  
-        
         LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         CALLayout.setFlag(Widget.FILL);
         masterRulesLayout.add(CALLayout);
-        
-        
-        
         
         ImageWidget calEditorHeader = new ImageWidget(window.getTheme().getImage("headers","cal_editor_header.png"));
         calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
@@ -837,7 +739,6 @@ public class GUI implements WindowEventListener, LobbyListener
         CALTextArea.setFlag(Widget.FILL);
         CALTextArea.setLineNumbers(true);
     
-        
         ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
         textAreaContainer.setFlag(Widget.FILL);
     
@@ -846,12 +747,9 @@ public class GUI implements WindowEventListener, LobbyListener
         
         textAreaContainer.setContents(CALTextArea);
         
-        
         ImageWidget compilerOutputHeader = new ImageWidget(window.getTheme().getImage("headers","compiler_output_header.png"));
         compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
         CALLayout.add(compilerOutputHeader);    
-        
-        
         
         outputContainer = new ScrollableContainer(new Vector2i(250, 100));
         outputContainer.setFlag(Widget.FILL_HORIZONTAL);
@@ -865,40 +763,38 @@ public class GUI implements WindowEventListener, LobbyListener
         
         outputContainer.setContents(outputLayout);
         
-
         LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(875, 50), LinearLayout.Direction.HORIZONTAL);
         buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
         buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
         masterRulesLayout.add(buttonRulesLayout);
             
-            clearRulesButton = new Button(new Vector2i(100, 50), "Clear Rules");
-            clearRulesButton.setWidth(165);
-            clearRulesButton.setHeight(35);
-            buttonRulesLayout.add(clearRulesButton);
-            
-            submitRulesButton = new Button(new Vector2i(100, 50), "Submit Rules");
-            submitRulesButton.setWidth(165);
-            submitRulesButton.setHeight(35);
-            buttonRulesLayout.add(submitRulesButton);
-            
-            openCALFileButton = new Button(new Vector2i(100, 50), "Open File");
-            openCALFileButton.setWidth(165);
-            openCALFileButton.setHeight(35);
-            buttonRulesLayout.add(openCALFileButton);
-            
-            saveCALFileButton = new Button(new Vector2i(100, 50), "Save File");
-            saveCALFileButton.setWidth(165);
-            saveCALFileButton.setHeight(35);
-            buttonRulesLayout.add(saveCALFileButton);
-            
-           saveAsCALFileButton = new Button(new Vector2i(100, 50), "Save File As");
-            saveAsCALFileButton.setWidth(165);
-            saveAsCALFileButton.setHeight(35);
-            buttonRulesLayout.add(saveAsCALFileButton);
-            
-            createDistributionTab();
-
+        clearRulesButton = new Button(new Vector2i(100, 50), "Clear Rules");
+        clearRulesButton.setWidth(165);
+        clearRulesButton.setHeight(35);
+        buttonRulesLayout.add(clearRulesButton);
         
+        submitRulesButton = new Button(new Vector2i(100, 50), "Submit Rules");
+        submitRulesButton.setWidth(165);
+        submitRulesButton.setHeight(35);
+        buttonRulesLayout.add(submitRulesButton);
+        
+        openCALFileButton = new Button(new Vector2i(100, 50), "Open File");
+        openCALFileButton.setWidth(165);
+        openCALFileButton.setHeight(35);
+        buttonRulesLayout.add(openCALFileButton);
+        
+        saveCALFileButton = new Button(new Vector2i(100, 50), "Save File");
+        saveCALFileButton.setWidth(165);
+        saveCALFileButton.setHeight(35);
+        buttonRulesLayout.add(saveCALFileButton);
+            
+        saveAsCALFileButton = new Button(new Vector2i(100, 50), "Save File As");
+        saveAsCALFileButton.setWidth(165);
+        saveAsCALFileButton.setHeight(35);
+        buttonRulesLayout.add(saveAsCALFileButton);
+        
+	    createDistributionTab();
+
         coloursContainer = new Container(new Vector2i(100, 100));
         coloursContainer.setFlag(Widget.FILL);
         tabbedWorldView.add(coloursContainer, "Colour Ranges");
@@ -906,7 +802,6 @@ public class GUI implements WindowEventListener, LobbyListener
         masterColoursLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         masterColoursLayout.setFlag(Widget.FILL);
         coloursContainer.setContents(masterColoursLayout);
-        
         
         leftColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         leftColourLayout.setFlag(Widget.FILL);
@@ -916,8 +811,7 @@ public class GUI implements WindowEventListener, LobbyListener
         rightColourLayout.setFlag(Widget.FILL);
    //     rightColourLayout.setWidth(350);
         masterColoursLayout.add(rightColourLayout);
-        
-        
+
         LinearLayout propertyColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         propertyColourLayout.setFlag(Widget.FILL);
         leftColourLayout.add(propertyColourLayout);
@@ -937,49 +831,48 @@ public class GUI implements WindowEventListener, LobbyListener
 		colourPropertiesLayout.setWidth(700);
 		colourPropertiesLayout.setFlag(Widget.WRAP);
 		colourPropertiesContainer.setContents(colourPropertiesLayout);	
-		
 
 		TextWidget noColourSetText = new TextWidget("NO COLOUR RANGE PROPERTIES AVAILABLE. APPLY WORLD CHANGES FIRST.");
 		noColourSetText.setPosition(new Vector2i(colourPropertiesLayout.getWidth()/2, colourPropertiesLayout.getHeight()/2));
 		colourPropertiesLayout.add(noColourSetText);
 		
 		 LinearLayout innerRightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		    innerRightColourLayout.setFlag(Widget.WRAP);
-		    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-		    	
-		   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		   	colourButtonsLayout.setFlag(Widget.WRAP);
-		   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-		    rightColourLayout.add(colourButtonsLayout);
-		    
-		
-		    	
-		   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
-		   	colourButtonsLayout.add(setColourRangesButton);
-		    	
-		  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
-		  	colourButtonsLayout.add(resetColourRangesButton);
-		    
-		    colourPicker = new ColourPicker(window);
-		    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
-		    rightColourLayout.add(colourPicker);
-		    
-		    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
-		    cpRGBLayout.setFlag(Widget.WRAP);
-		    rightColourLayout.add(cpRGBLayout);
-		    
-		    cpRNumberBox = new NumberBox(40);
-		    cpRNumberBox.setValue(0);
-		    cpRGBLayout.add(cpRNumberBox);
-		   
-		    cpGNumberBox = new NumberBox(40);
-		    cpGNumberBox.setValue(0);
-		    cpRGBLayout.add(cpGNumberBox);
-		    
-		    cpBNumberBox = new NumberBox(40);
-		    cpBNumberBox.setValue(0);
-		    cpRGBLayout.add(cpBNumberBox);
+	    innerRightColourLayout.setFlag(Widget.WRAP);
+	    innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+	    	
+	   	colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	   	colourButtonsLayout.setFlag(Widget.WRAP);
+	   	colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourButtonsLayout);
+	    
+	
+	    	
+	   	setColourRangesButton = new Button(new Vector2i(120,40), "Set Colours");
+	   	colourButtonsLayout.add(setColourRangesButton);
+	    	
+	  	resetColourRangesButton = new Button(new Vector2i(140,40), "Reset Colours");
+	  	colourButtonsLayout.add(resetColourRangesButton);
+	    
+	    colourPicker = new ColourPicker(window);
+	    colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
+	    rightColourLayout.add(colourPicker);
+	    
+	    cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
+	    cpRGBLayout.setFlag(Widget.WRAP);
+	    rightColourLayout.add(cpRGBLayout);
+	    
+	    cpRNumberBox = new NumberBox(40);
+	    cpRNumberBox.setValue(0);
+	    cpRGBLayout.add(cpRNumberBox);
+	   
+	    cpGNumberBox = new NumberBox(40);
+	    cpGNumberBox.setValue(0);
+	    cpRGBLayout.add(cpGNumberBox);
+	    
+	    cpBNumberBox = new NumberBox(40);
+	    cpBNumberBox.setValue(0);
+	    cpRGBLayout.add(cpBNumberBox);
         
         createWorldEditorTab();        
 
@@ -1026,9 +919,7 @@ public class GUI implements WindowEventListener, LobbyListener
         dialogCALOKButton = new Button(new Vector2i(120, 30), "OK");
         dialogCALOKButton.setFlag(Widget.CENTER_HORIZONTAL);
         dialogCALLayout.add(dialogCALOKButton);
-        
-        
-        
+
         ////Simulation
         
         masterSimulationLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -1042,15 +933,15 @@ public class GUI implements WindowEventListener, LobbyListener
         topLayout.setFlag(Widget.FILL);
         masterSimulationLayout.add(topLayout);
 	   
-	        controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
-	        topLayout.add(controlLayout);
-        
-	        addSliceButton = new Button(new Vector2i(100, 50), "Add slice");
-	        	
-	        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-	        viewportsLayout.setFlag(Widget.FILL);
-	        topLayout.add(viewportsLayout);
+        controlLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        controlLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
+        topLayout.add(controlLayout);
+    
+        addSliceButton = new Button(new Vector2i(100, 50), "Add slice");
+        	
+        viewportsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+        viewportsLayout.setFlag(Widget.FILL);
+        topLayout.add(viewportsLayout);
         
         Container simulationWindowContainer = new Container(new Vector2i(500,300));
         simulationWindowContainer.setFlag(Widget.FILL);
@@ -1061,7 +952,6 @@ public class GUI implements WindowEventListener, LobbyListener
       
         viewports = new ArrayList<Viewport>();
         viewports.add(v);
-       
 
         //SLIDER
         
@@ -1096,9 +986,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         iterationsText = new TextWidget("Generations: 0");
         innerDetailsLayout2.add(iterationsText);
-        
-           
-        
+
         ImageWidget detailsImage = new ImageWidget(this.window.getTheme().getImage("headers", "details_header.png"));
         detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerDetailsLayout.add(detailsImage);
@@ -1155,9 +1043,7 @@ public class GUI implements WindowEventListener, LobbyListener
         ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
         playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerPlaybackLayout.add(playbackImage);
-        
-        
-        
+
         LinearLayout cameraLayout = new LinearLayout(new Vector2i(470, 90), LinearLayout.Direction.VERTICAL);
         cameraLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(cameraLayout);
@@ -1168,9 +1054,7 @@ public class GUI implements WindowEventListener, LobbyListener
         LinearLayout innerCameraLayout2 = new LinearLayout(new Vector2i(445, 40), LinearLayout.Direction.HORIZONTAL);
         innerCameraLayout2.setFlag(Widget.CENTER_HORIZONTAL);
         cameraLayout.add(innerCameraLayout2);
-        
-      
-        
+
         zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
         zoomInButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(zoomInButton);
@@ -1194,8 +1078,7 @@ public class GUI implements WindowEventListener, LobbyListener
         moveRightButton = new Button(window.getTheme().getImage("icons", "right_icon.png"));
         moveRightButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(moveRightButton);
-        
-        
+
         yawLeftButton = new Button(window.getTheme().getImage("icons", "yaw_left_icon.png"));
         yawLeftButton.setMargin(new Vector2i(5, 0));
         innerCameraLayout2.add(yawLeftButton);
@@ -1220,12 +1103,7 @@ public class GUI implements WindowEventListener, LobbyListener
         ImageWidget cameraImage = new ImageWidget(window.getTheme().getImage("headers", "camera_header.png"));
         cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
         innerCameraLayout.add(cameraImage);
-        
-        
-        
-        
-        
-        
+
         LinearLayout viewSettingsLayout = new LinearLayout(new Vector2i(250, 90), LinearLayout.Direction.VERTICAL);
         viewSettingsLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
         simulationControlsLayout.add(viewSettingsLayout);
@@ -1325,13 +1203,13 @@ public class GUI implements WindowEventListener, LobbyListener
         worldEditorLeftLayout.setFlag(Widget.FILL);
         masterWorldPreviewLayout.add(worldEditorLeftLayout);
         
-        	// Preview window
-	        previewWindowContainer = new Container(new Vector2i(100,100));
-	        previewWindowContainer.setFlag(Widget.FILL);
-	        previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f))); 
-	        
-	        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
-	        worldEditorLeftLayout.add(previewViewport.container);
+    	// Preview window
+        previewWindowContainer = new Container(new Vector2i(100,100));
+        previewWindowContainer.setFlag(Widget.FILL);
+        previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f))); 
+        
+        previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);    
+        worldEditorLeftLayout.add(previewViewport.container);
         
         worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
         worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
@@ -1349,28 +1227,28 @@ public class GUI implements WindowEventListener, LobbyListener
         toolLayout.setFlag(Widget.WRAP | Widget.CENTER_HORIZONTAL);
         worldEditorRightLayout.add(toolLayout);
         
-        	editorLookButton = new Button(window.getTheme().getImage("icons", "zoom_icon.png"));
-        	editorLookButton.setToggles(true);
-        	editorLookButton.setToggleState(true);
-        	toolLayout.add(editorLookButton);
-        	
-        	editorBrushButton = new Button(window.getTheme().getImage("icons", "brush_icon.png"));
-        	editorLookButton.setToggles(false);
-        	toolLayout.add(editorBrushButton);
-        	
-        	editorFillButton = new Button(window.getTheme().getImage("icons", "fill_icon.png"));
-        	editorLookButton.setToggles(false);
-        	toolLayout.add(editorFillButton);
+    	editorLookButton = new Button(window.getTheme().getImage("icons", "zoom_icon.png"));
+    	editorLookButton.setToggles(true);
+    	editorLookButton.setToggleState(true);
+    	toolLayout.add(editorLookButton);
+    	
+    	editorBrushButton = new Button(window.getTheme().getImage("icons", "brush_icon.png"));
+    	editorLookButton.setToggles(false);
+    	toolLayout.add(editorBrushButton);
+    	
+    	editorFillButton = new Button(window.getTheme().getImage("icons", "fill_icon.png"));
+    	editorLookButton.setToggles(false);
+    	toolLayout.add(editorFillButton);
         
     	// Property values
         propertyValuesContainer = new ScrollableContainer(new Vector2i(20, 20));
         propertyValuesContainer.setFlag(Widget.FILL);
         worldEditorRightLayout.add(propertyValuesContainer);
 	        
-	        propertyValues = new LinearLayout(LinearLayout.Direction.VERTICAL);
-	        propertyValues.setMargin(new Vector2i(0, 0));
-	        propertyValues.setFlag(Widget.WRAP);
-	        propertyValuesContainer.setContents(propertyValues);
+        propertyValues = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        propertyValues.setMargin(new Vector2i(0, 0));
+        propertyValues.setFlag(Widget.WRAP);
+        propertyValuesContainer.setContents(propertyValues);
         
         editorApplyButton = new Button(new Vector2i(180, 40), "Apply");
     	editorApplyButton.setFlag(Widget.CENTER_HORIZONTAL);
@@ -1383,19 +1261,19 @@ public class GUI implements WindowEventListener, LobbyListener
         heightMapLayout.setFlag(Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
         worldEditorRightLayout.add(heightMapLayout);
         
-        	ImageWidget heightMapWidgetHeader = new ImageWidget(theme.getImage("headers", "heightmap_widget_header.png"));
-        	heightMapLayout.add(heightMapWidgetHeader);
-        	
-	        TextWidget label1 = new TextWidget("Property:");
-	        heightMapLayout.add(label1);
-	        
-	        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
-	        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
-	        heightMapLayout.add(heightMapPropertySelector);
-	        
-	        importHeightMapButton = new Button(new Vector2i(150,40), "Import Heightmap");
-	        importHeightMapButton.setFlag(Widget.FILL_HORIZONTAL);
-	        heightMapLayout.add(importHeightMapButton); 
+    	ImageWidget heightMapWidgetHeader = new ImageWidget(theme.getImage("headers", "heightmap_widget_header.png"));
+    	heightMapLayout.add(heightMapWidgetHeader);
+    	
+        TextWidget label1 = new TextWidget("Property:");
+        heightMapLayout.add(label1);
+        
+        heightMapPropertySelector = new DropDownBox(new Vector2i(100, 20));
+        heightMapPropertySelector.setFlag(Widget.FILL_HORIZONTAL);
+        heightMapLayout.add(heightMapPropertySelector);
+        
+        importHeightMapButton = new Button(new Vector2i(150,40), "Import Heightmap");
+        importHeightMapButton.setFlag(Widget.FILL_HORIZONTAL);
+        heightMapLayout.add(importHeightMapButton); 
 
     }
     
@@ -1406,9 +1284,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	for(Viewport v : viewports)
     	{
     		viewportsLayout.add(v.container);
-        	
     	}
-    	
     }
     
     
@@ -1453,6 +1329,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     	
     	wrapCheckBox.setChecked(grid.isWrappable());
+    	keepHistoryCheckBox.setChecked(world.isHistoryKept());
     	
     	String ruleCode = world.getRuleCode();
     	if (ruleCode == null) ruleCode = "";
@@ -1500,6 +1377,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         grid.setWrappable(wrapCheckBox.isChecked());
         
+        world.setKeepHistory(keepHistoryCheckBox.isChecked());
         world.resetTo(grid);
     }
     
@@ -1735,7 +1613,6 @@ public class GUI implements WindowEventListener, LobbyListener
     @Override
     public void render()
     {
-    	
     }
     
     @Override
@@ -1789,16 +1666,14 @@ public class GUI implements WindowEventListener, LobbyListener
     			
     			if (result.isValid())
     			{
-    			HeightMapConverter hmc = new HeightMapConverter();
-    			hmc.loadHeightMap(result.getFullPath(), world.getLastGeneration(), heightMapPropertySelector.getSelected());
+	    			HeightMapConverter hmc = new HeightMapConverter();
+	    			hmc.loadHeightMap(result.getFullPath(), world.getLastGeneration(), heightMapPropertySelector.getSelected());
     			}
     			else
     			{
-    			System.out.println("PUT ERROR DIALOG HERE");	
+    				System.out.println("PUT ERROR DIALOG HERE");	
     			}
     		}
-    		
-    		
     		
     		if (colourContainerList != null)
         	{
@@ -1807,37 +1682,31 @@ public class GUI implements WindowEventListener, LobbyListener
 	        		for (RangeContainer r: c.rangeContainerList)
 	        		{
 	        			if (event.target == r.colourBoxFrom)
-	        				{
-	        				r.fromColour = colourPicker.getColour();
-	        				r.colourBoxFrom.setColour(colourPicker.getColour());
-	        				}
+        				{
+        				r.fromColour = colourPicker.getColour();
+        				r.colourBoxFrom.setColour(colourPicker.getColour());
+        				}
 	        			
 	        			if (event.target == r.colourBoxTo)
-	        				{
-	        				r.toColour = colourPicker.getColour();
-	        				r.colourBoxTo.setColour(colourPicker.getColour());
-	        				}
-	        			
+        				{
+        				r.toColour = colourPicker.getColour();
+        				r.colourBoxTo.setColour(colourPicker.getColour());
+        				}
 	        		}
 	        			
 	        	}
         	}
     		
-        	
         	if (colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
 	        	{System.out.println("CHECK BUTTON FOR ID:" + c.id);
 	        		if (event.target == c.addRangeButton)
 	        		{
-	        		
-	        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
-	        		
-	        		c.addRange(c.id);
-	        		window.relayout();
-	        		
-	        		
-	        		
+		        		System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
+		        		
+		        		c.addRange(c.id);
+		        		window.relayout();
 	        		}	
 	        		
 	        		if (event.target == c.removeRangeButton)
@@ -1848,15 +1717,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	        				createColoursTab();
 	        			}
 	        		}
-	        		
-	        			
-	        			
-	        			
-	        			
 	        	}
         	}
-        	
-        	
         	
         	if (event.target == setColourRangesButton)
         	{
@@ -1865,23 +1727,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	        	{
         			ColourRule cr = new ColourRule();
         			
-        			
         			for (RangeContainer r : c.rangeContainerList)
         			{
         				Range range = new Range(r.firstRange.getValue(0), r.secondRange.getValue(0), r.fromColour, r.toColour);
         				
         			   	cr.addRange(range);        				
         				
-        				
         				System.out.println("ADDING RANGE FOR ID: " + CodeGen.getPropertyList().get(r.id) + r.fromColour);
         			}
         			colourRules.setColourRule(c.id, cr);
 	        	} 
-        		
         		saveColourCodeToWorld();
-        		
-        		
-        		
         	}
         	
             if (event.target == createWorldButton)
@@ -1914,7 +1770,6 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 if (result.isValid())
                 {
-                	
                 	world.setFileName(result.getFullPath());
                     
                 	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SAVE_WORLD);
@@ -1926,7 +1781,6 @@ public class GUI implements WindowEventListener, LobbyListener
             
             else if (event.target == helpButton)
             {
-            	
             }
             else if (event.target == quitButton)
             {
@@ -1966,11 +1820,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 if (compiler.getErrorCount() == 0)
                 {
-
-
-                	saveRuleCodeToWorld();                	
-
-
+                	saveRuleCodeToWorld();
                 }
                 else
                 {
@@ -1979,7 +1829,6 @@ public class GUI implements WindowEventListener, LobbyListener
                 }
                 
                 createColoursTab();
-                
             }
             
             else if (event.target == saveCALFileButton)
@@ -1997,9 +1846,6 @@ public class GUI implements WindowEventListener, LobbyListener
     					out.write(CALTextArea.getText());
     					
     					out.close();
-    					
-    					
-    					
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
@@ -2014,9 +1860,6 @@ public class GUI implements WindowEventListener, LobbyListener
   					out.write(CALTextArea.getText());
   					
   					out.close();
-  					
-  					
-  					
   				} catch (IOException e) {
   					// TODO Auto-generated catch block
   					e.printStackTrace();
@@ -2026,8 +1869,6 @@ public class GUI implements WindowEventListener, LobbyListener
             
             else if (event.target == saveAsCALFileButton)
             {
-            	
-            	  
             	  FileSelectResult calFile = window.askUserForFileToSave("Select a location to save", "cal");
             	  
             	  File f = new File(calFile.getFullPath() + ".cal");
@@ -2037,14 +1878,10 @@ public class GUI implements WindowEventListener, LobbyListener
 					PrintWriter out = new PrintWriter(f);
 			        out.write(CALTextArea.getText());
 					out.close();
-					
-					
-					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-            	  
             }
             
             else if (event.target == openCALFileButton)
@@ -2149,8 +1986,6 @@ public class GUI implements WindowEventListener, LobbyListener
             
             else if (event.target == removeViewportButton)
             {
-            	
-            	
             	System.out.println("VIEWPORT:::::::::::::::::::;;" + viewports.size());
             	
             	if (viewports.size() > 1)
@@ -2353,8 +2188,6 @@ public class GUI implements WindowEventListener, LobbyListener
             }
 
             //VIEWPORT SETTINGS BUTTONS
-            
-
 			else if (event.target == toggle3dButton)
 			{
 				if (selectedViewport != null)
@@ -2449,27 +2282,18 @@ public class GUI implements WindowEventListener, LobbyListener
 					 
 					 System.out.println("VALUE:" + newValue);
 					 
-					c.setValue(i, newValue);
-					 
-					 
-					 
+					 c.setValue(i, newValue);
 				 }
 			 }
-            
-            
         }
         else if (event.type == Event.Type.CHANGE)
         {
         	if (event.target == colourPicker)
 			{
-        	cpRNumberBox.setValue((int) (colourPicker.getColour().r * 255));
-			cpGNumberBox.setValue((int) (colourPicker.getColour().g * 255));
-			cpBNumberBox.setValue((int) (colourPicker.getColour().b * 255));
+	        	cpRNumberBox.setValue((int) (colourPicker.getColour().r * 255));
+				cpGNumberBox.setValue((int) (colourPicker.getColour().g * 255));
+				cpBNumberBox.setValue((int) (colourPicker.getColour().b * 255));
 			}
-        	
-        	
-        	
-        	
         	
         	if (selectedViewport != null)
         	{
@@ -2489,6 +2313,7 @@ public class GUI implements WindowEventListener, LobbyListener
         	else if (event.target == worldSizeXNumberBox 
         			|| event.target == worldSizeYNumberBox
         			|| event.target == wrapCheckBox
+        			|| event.target == keepHistoryCheckBox
         			|| event.target == cellShapeDropDownBox)
         	{
                 if (worldSizeXNumberBox.getValue(5) < 5) worldSizeXNumberBox.setValue(5);	
