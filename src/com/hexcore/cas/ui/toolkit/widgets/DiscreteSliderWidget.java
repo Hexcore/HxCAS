@@ -9,6 +9,7 @@ import com.hexcore.cas.ui.toolkit.Theme.ButtonState;
 
 public class DiscreteSliderWidget extends ClickableWidget
 {
+	protected boolean allowActivation = true;
 	protected boolean showValue = false;
 
 	protected int minimum;
@@ -64,27 +65,46 @@ public class DiscreteSliderWidget extends ClickableWidget
 	@Override
 	public void render(GL gl, Vector2i position)
 	{
-		Vector2i pos = this.position.add(position);
-		
-		float percent = 1.0f;
-		if (maximum > minimum) percent = (float)(value - minimum) / (maximum - minimum);
-		
-		ButtonState state = ButtonState.NORMAL;
-		if (mouseover) state = ButtonState.HOVER;
-		if (active) state = ButtonState.ACTIVE;
-				
-		window.getTheme().renderSlider(gl, pos, size, state);
-		window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
-		
-		if (showValue && active) 
-			window.getTheme().renderSliderValue(gl, pos, size, value, 0, percent);
+		if(allowActivation)
+		{
+			Vector2i pos = this.position.add(position);
+			
+			float percent = 1.0f;
+			if (maximum > minimum) percent = (float)(value - minimum) / (maximum - minimum);
+			
+			ButtonState state = ButtonState.NORMAL;
+			if (mouseover) state = ButtonState.HOVER;
+			if (active) state = ButtonState.ACTIVE;
+					
+			window.getTheme().renderSlider(gl, pos, size, state);
+			window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
+			
+			if (showValue && active) 
+				window.getTheme().renderSliderValue(gl, pos, size, value, 0, percent);
+		}
+		else
+		{
+			Vector2i pos = this.position.add(position);
+			
+			float percent = 1.0f;
+			
+			ButtonState state = ButtonState.NORMAL;
+					
+			window.getTheme().renderSlider(gl, pos, size, state);
+			window.getTheme().renderSliderHandle(gl, pos, size, percent, state);
+		}
 	}
 	
 	@Override
 	public boolean handleEvent(Event event, Vector2i position)
 	{
-		receiveEventExtras(event, position);
-		return super.handleEvent(event, position);
+		if(allowActivation)
+		{
+			receiveEventExtras(event, position);
+			return super.handleEvent(event, position);
+		}
+		else
+			return false;
 	}
 	
 	@Override
@@ -102,5 +122,10 @@ public class DiscreteSliderWidget extends ClickableWidget
 		}
 		
 		return super.receiveEventExtras(event, position);
+	}
+	
+	public void toggleActivation()
+	{
+		allowActivation = !allowActivation;
 	}
 }

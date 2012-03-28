@@ -2313,7 +2313,6 @@ public class GUI implements WindowEventListener, LobbyListener
         	else if (event.target == worldSizeXNumberBox 
         			|| event.target == worldSizeYNumberBox
         			|| event.target == wrapCheckBox
-        			|| event.target == keepHistoryCheckBox
         			|| event.target == cellShapeDropDownBox)
         	{
                 if (worldSizeXNumberBox.getValue(5) < 5) worldSizeXNumberBox.setValue(5);	
@@ -2324,6 +2323,12 @@ public class GUI implements WindowEventListener, LobbyListener
                 updateWorldEditorTab();
                 createColoursTab();
         		updatePreview();
+        	}
+        	//Disable generation slider for no history keep
+        	else if(event.target == keepHistoryCheckBox)
+        	{
+        		generationSlider.toggleActivation();
+                savePropertiesToWorld();
         	}
         	else if (event.target == worldEditorPropertySelector)
         	{
