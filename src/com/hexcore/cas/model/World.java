@@ -18,7 +18,7 @@ import com.hexcore.cas.utilities.Log;
  */
 public class World
 {
-	private boolean keepHistory = true;
+	private int historyType = 1;
 	private List<Grid> worldGenerations = null;
 	private String worldFileName = null;
 	private String ruleCode = null;
@@ -33,7 +33,7 @@ public class World
 	{
 		worldGenerations.add(gen);
 		
-		if(!keepHistory)
+		if(historyType == 0)
 		{
 			for(int i = 0; i < worldGenerations.size() - 1; i++)
 				worldGenerations.set(i, null);
@@ -67,6 +67,11 @@ public class World
 	public Grid getGeneration(int index)
 	{
 		return worldGenerations.get(index);
+	}
+	
+	public int getHistoryType()
+	{
+		return historyType;
 	}
 	
 	public Grid getLastGeneration()
@@ -105,7 +110,9 @@ public class World
 	
 	public boolean isHistoryKept()
 	{
-		return keepHistory;
+		if(historyType == 0)
+			return false;
+		return true;
 	}
 	
 	public void reset()
@@ -138,9 +145,9 @@ public class World
 		worldFileName = name;
 	}
 
-	public void setKeepHistory(boolean kH)
+	public void setKeepHistory(int hT)
 	{
-		keepHistory = kH;
+		historyType = hT;
 	}
 	
 	public void setWorldGenerations(Grid[] w)

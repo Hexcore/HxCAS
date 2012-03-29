@@ -124,8 +124,8 @@ public class DiscreteSliderWidget extends ClickableWidget
 		return super.receiveEventExtras(event, position);
 	}
 	
-	public void toggleActivation()
+	public void toggleActivation(boolean val)
 	{
-		allowActivation = !allowActivation;
+		allowActivation = val;
 	}
 }
