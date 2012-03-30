@@ -36,6 +36,7 @@ public class WorldStreamer
 			file = new File(w.getFilename());
 		else
 			file = new File(w.getFilename() + ".caw");
+
 		try
 		{
 			world = new ZipFile(file);

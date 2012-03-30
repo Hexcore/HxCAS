@@ -42,7 +42,7 @@ public class TestWorld extends TestCase
 		
 		//Generation 1
 		grid = grids.get(0);
-		assertEquals('T', grid.getTypeSymbol());
+		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
 		assertEquals(0.0, grid.getCell(0, 0).getValue(0));
@@ -60,7 +60,7 @@ public class TestWorld extends TestCase
 		
 		//Generation 2
 		grid = grids.get(1);
-		assertEquals('T', grid.getTypeSymbol());
+		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
 		assertEquals(1.0, grid.getCell(0, 0).getValue(0));
@@ -78,7 +78,7 @@ public class TestWorld extends TestCase
 		
 		//Generation 3
 		grid = grids.get(2);
-		assertEquals('T', grid.getTypeSymbol());
+		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
 		assertEquals(2.0, grid.getCell(0, 0).getValue(0));
