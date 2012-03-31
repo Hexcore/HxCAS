@@ -49,6 +49,17 @@ public class World
 		}
 	}
 	
+	public boolean clearHistory()
+	{
+		if(historyType != 2)
+			return false;
+		
+		int size = worldGenerations.size();
+		for(int i = 0; i < size; i++)
+			worldGenerations.remove(0);
+		return true;
+	}
+	
 	public boolean clearHistory(int genNumber)
 	{
 		if(worldGenerations.size() <= genNumber)
