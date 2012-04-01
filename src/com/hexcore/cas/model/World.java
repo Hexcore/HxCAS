@@ -23,7 +23,6 @@ public class World
 	private String worldFileName = null;
 	private String ruleCode = null;
 	private String colourCode = null;
-	private WorldStreamer streamer = null;
 	
 	public World()
 	{
@@ -37,22 +36,16 @@ public class World
 		this.ruleCode= w.ruleCode;
 		this.colourCode= w.colourCode;
 		this.worldGenerations.addAll(w.worldGenerations);
-		streamer.reset(this);
 	}
 	
 	public void addGeneration(Grid gen)
 	{
 		worldGenerations.add(gen);
 		
-		if(historyType == 0 || historyType == 2)
+		if(historyType == 0)
 		{
 			for(int i = 0; i < worldGenerations.size() - 1; i++)
 				worldGenerations.set(i, null);
-		}
-		
-		if(historyType == 2)
-		{
-			streamer.streamGeneration(gen, streamer.getNumGenerations());
 		}
 	}
 	
@@ -61,7 +54,9 @@ public class World
 		if(historyType != 2)
 			return false;
 		
-		worldGenerations.clear();
+		int size = worldGenerations.size();
+		for(int i = 0; i < size; i++)
+			worldGenerations.remove(0);
 		return true;
 	}
 	
@@ -81,26 +76,17 @@ public class World
 	
 	public int getNumGenerations()
 	{
-		if(historyType != 2)
-			return worldGenerations.size();
-		
-		return streamer.getNumGenerations();
+		return worldGenerations.size();
 	}
 	
 	public List<Grid> getGenerations()
 	{
-		if(historyType != 2)
-			return worldGenerations;
-		
-		return streamer.getGenerations();
+		return worldGenerations;
 	}
 	
 	public Grid getGeneration(int index)
 	{
-		if(historyType != 2)
-			return worldGenerations.get(index);
-		
-		return streamer.streamGeneration(index);
+		return worldGenerations.get(index);
 	}
 	
 	public int getHistoryType()
@@ -110,13 +96,8 @@ public class World
 	
 	public Grid getLastGeneration()
 	{
-		if(historyType != 2)
-		{
-			if (worldGenerations.isEmpty()) return null;
-			return worldGenerations.get(worldGenerations.size() - 1);
-		}
-		
-		return streamer.getLastGeneration();
+		if (worldGenerations.isEmpty()) return null;
+		return worldGenerations.get(worldGenerations.size() - 1);
 	}
 	
 	public String getRuleCode()
@@ -131,10 +112,7 @@ public class World
 	
 	public Grid getInitialGeneration()
 	{
-		if(historyType != 2)
-			return worldGenerations.get(0);
-		
-		return streamer.streamGeneration(0);
+		return worldGenerations.get(0);
 	}
 	
 	public String getFilename()
@@ -154,7 +132,6 @@ public class World
 	{
 		if(historyType == 0)
 			return false;
-		
 		return true;
 	}
 	
@@ -163,8 +140,6 @@ public class World
 		Grid g = worldGenerations.get(0).clone();
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
-		
-		streamer.reset(this);
 	}
 	
 	public void resetTo(Grid g)
@@ -173,8 +148,6 @@ public class World
 		
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
-		
-		streamer.reset(this);
 	}
 	
 	public void setRuleCode(String ruleCode)
@@ -197,20 +170,10 @@ public class World
 		historyType = hT;
 	}
 	
-	public void setupStreaming()
-	{
-		streamer = new WorldStreamer();
-		streamer.start(this);
-	}
-	
 	public void setWorldGenerations(Grid[] w)
 	{
 		worldGenerations.clear();
-		if(historyType != 2)
-			for (Grid grid : w) worldGenerations.add(grid);
-		else
-			for(int i = 0; i < w.length; i++)
-				streamer.streamGeneration(w[i], i);
+		for (Grid grid : w) worldGenerations.add(grid);
 	}
 	
 	public boolean load()
