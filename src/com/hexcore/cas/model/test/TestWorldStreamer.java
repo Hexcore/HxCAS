@@ -1,5 +1,6 @@
 package com.hexcore.cas.model.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.zip.ZipException;
@@ -33,6 +34,8 @@ public class TestWorldStreamer extends TestCase
 		String colourCode = world.getColourCode();
 		assertNotNull(colourCode);
 		assertTrue(colourCode.startsWith("colours"));
+		
+		streamer.stop();
 		
 		List<Grid> grids = world.getGenerations();
 		Grid grid;
@@ -90,8 +93,6 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testReset()
@@ -149,6 +150,8 @@ public class TestWorldStreamer extends TestCase
 		List<Grid> grids = secondWorld.getGenerations();
 		Grid grid;
 		
+		streamer.stop();
+		
 		//Generation 1
 		grid = grids.get(0);
 		assertEquals('T', grid.getTypeSymbol());
@@ -202,8 +205,6 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testStreamingFromDisk()
@@ -215,6 +216,8 @@ public class TestWorldStreamer extends TestCase
 		streamer.start(world);
 		
 		Grid grid = streamer.streamGeneration(2);
+		
+		streamer.stop();
 
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
@@ -231,8 +234,6 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testStreamingToDisk()
@@ -325,5 +326,159 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(13.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(14.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(15.0, grid.getCell(1, 2).getValue(1));
+	}
+	
+	public void testGetGenerationNum()
+	{
+		world.setFileName("Test Data/world/world.caw");
+		world.load();
+		
+		WorldStreamer streamer = new WorldStreamer();
+		streamer.start(world);
+		
+		int genAmount = streamer.getNumGenerations();
+		
+		streamer.stop();
+
+		assertEquals(3, genAmount);
+	}
+	
+	public void testGetGenerations()
+	{
+		world.setFileName("Test Data/world/world.caw");
+		world.load();
+		
+		WorldStreamer streamer = new WorldStreamer();
+		streamer.start(world);
+		
+		List<Grid> grids = streamer.getGenerations();
+		
+		streamer.stop();
+
+		Grid grid;
+		
+		//Generation 1
+		grid = grids.get(0);
+		assertEquals('H', grid.getTypeSymbol());
+		assertEquals(2, grid.getWidth());
+		assertEquals(3, grid.getHeight());
+		assertEquals(0.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(1.0, grid.getCell(0, 0).getValue(1));
+		assertEquals(2.0, grid.getCell(1, 0).getValue(0));
+		assertEquals(3.0, grid.getCell(1, 0).getValue(1));
+		assertEquals(4.0, grid.getCell(0, 1).getValue(0));
+		assertEquals(5.0, grid.getCell(0, 1).getValue(1));
+		assertEquals(6.0, grid.getCell(1, 1).getValue(0));
+		assertEquals(7.0, grid.getCell(1, 1).getValue(1));
+		assertEquals(8.0, grid.getCell(0, 2).getValue(0));
+		assertEquals(9.0, grid.getCell(0, 2).getValue(1));
+		assertEquals(10.0, grid.getCell(1, 2).getValue(0));
+		assertEquals(11.0, grid.getCell(1, 2).getValue(1));
+		
+		//Generation 2
+		grid = grids.get(1);
+		assertEquals('H', grid.getTypeSymbol());
+		assertEquals(2, grid.getWidth());
+		assertEquals(3, grid.getHeight());
+		assertEquals(1.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(2.0, grid.getCell(0, 0).getValue(1));
+		assertEquals(3.0, grid.getCell(1, 0).getValue(0));
+		assertEquals(4.0, grid.getCell(1, 0).getValue(1));
+		assertEquals(5.0, grid.getCell(0, 1).getValue(0));
+		assertEquals(6.0, grid.getCell(0, 1).getValue(1));
+		assertEquals(7.0, grid.getCell(1, 1).getValue(0));
+		assertEquals(8.0, grid.getCell(1, 1).getValue(1));
+		assertEquals(9.0, grid.getCell(0, 2).getValue(0));
+		assertEquals(10.0, grid.getCell(0, 2).getValue(1));
+		assertEquals(11.0, grid.getCell(1, 2).getValue(0));
+		assertEquals(12.0, grid.getCell(1, 2).getValue(1));
+		
+		//Generation 3
+		grid = grids.get(2);
+		assertEquals('H', grid.getTypeSymbol());
+		assertEquals(2, grid.getWidth());
+		assertEquals(3, grid.getHeight());
+		assertEquals(2.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(3.0, grid.getCell(0, 0).getValue(1));
+		assertEquals(4.0, grid.getCell(1, 0).getValue(0));
+		assertEquals(5.0, grid.getCell(1, 0).getValue(1));
+		assertEquals(6.0, grid.getCell(0, 1).getValue(0));
+		assertEquals(7.0, grid.getCell(0, 1).getValue(1));
+		assertEquals(8.0, grid.getCell(1, 1).getValue(0));
+		assertEquals(9.0, grid.getCell(1, 1).getValue(1));
+		assertEquals(10.0, grid.getCell(0, 2).getValue(0));
+		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
+		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
+		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
+	}
+	
+	public void testGetLastGeneration()
+	{
+		world.setFileName("Test Data/world/world.caw");
+		world.load();
+		
+		WorldStreamer streamer = new WorldStreamer();
+		streamer.start(world);
+		
+		Grid grid = streamer.getLastGeneration();
+		
+		streamer.stop();
+		
+		//Generation 3
+		assertEquals('H', grid.getTypeSymbol());
+		assertEquals(2, grid.getWidth());
+		assertEquals(3, grid.getHeight());
+		assertEquals(2.0, grid.getCell(0, 0).getValue(0));
+		assertEquals(3.0, grid.getCell(0, 0).getValue(1));
+		assertEquals(4.0, grid.getCell(1, 0).getValue(0));
+		assertEquals(5.0, grid.getCell(1, 0).getValue(1));
+		assertEquals(6.0, grid.getCell(0, 1).getValue(0));
+		assertEquals(7.0, grid.getCell(0, 1).getValue(1));
+		assertEquals(8.0, grid.getCell(1, 1).getValue(0));
+		assertEquals(9.0, grid.getCell(1, 1).getValue(1));
+		assertEquals(10.0, grid.getCell(0, 2).getValue(0));
+		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
+		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
+		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
+	}
+	
+	//Not actually a test. Used to remove all the extra files created by the tests.
+	public void testRemoveAllExtraFile()
+	{
+		boolean deletionSuccess = true;
+		File fileToDelete = null;
+		
+		String secondWorld = "Test Data/world/secondWorld";
+		
+		int worldNum = 1;
+		while(true)
+		{
+			fileToDelete = new File(secondWorld + "_" + worldNum + ".caw");
+			if(fileToDelete.exists())
+			{
+				System.out.println("Deleting file " + secondWorld + "_" + worldNum + ".caw" + "...");
+				deletionSuccess = fileToDelete.delete();
+				assertTrue(deletionSuccess);
+				worldNum++;
+			}
+			else
+				break;
+		}
+		
+		String worldBegin = "Test Data/world/world";
+		worldNum = 1;
+		while(true)
+		{
+			fileToDelete = new File(worldBegin + "_" + worldNum + ".caw");
+			if(fileToDelete.exists())
+			{
+				System.out.println("Deleting file " + worldBegin + "_" + worldNum + ".caw" + "...");
+				deletionSuccess = fileToDelete.delete();
+				assertTrue(deletionSuccess);
+				worldNum++;
+			}
+			else
+				break;
+		}
 	}
 }
