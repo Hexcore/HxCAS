@@ -16,17 +16,11 @@ public class TestWorldStreamer extends TestCase
 		throws ZipException, IOException
 	{
 		world.setFileName("Test Data/world/world.caw");
-		world.load();
 		
 		WorldStreamer streamer = new WorldStreamer();
 		streamer.start(world);
 		assertTrue(streamer.isZipWorldOpen());
 		streamer.stop();
 		assertFalse(streamer.isZipWorldOpen());
-	}
-	
-	public void testReset()
-	{
-		
 	}
 }

@@ -29,15 +29,6 @@ public class World
 		worldGenerations = Collections.synchronizedList(new ArrayList<Grid>());
 	}
 	
-	public World(World w)
-	{
-		this.historyType = w.historyType;
-		this.worldFileName= w.worldFileName;
-		this.ruleCode= w.ruleCode;
-		this.colourCode= w.colourCode;
-		this.worldGenerations.addAll(w.worldGenerations);
-	}
-	
 	public void addGeneration(Grid gen)
 	{
 		worldGenerations.add(gen);
