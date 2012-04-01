@@ -371,7 +371,6 @@ public class GUI implements WindowEventListener, LobbyListener
     public CheckBox		wrapCheckBox;
     public CheckBox		keepHistoryCheckBox;
     public DropDownBox	cellShapeDropDownBox;
-    public DropDownBox	historyDropDownBox;
     
     public Grid3DWidget	grid3DViewer = null;
     public Grid2DWidget	gridViewer = null;
@@ -657,14 +656,11 @@ public class GUI implements WindowEventListener, LobbyListener
         wrapCheckBox.setFlag(Widget.CENTER_VERTICAL);
         wrapCheckBox.setMargin(new Vector2i(50,0));
         worldSizeLayout.add(wrapCheckBox);
-        
-        historyDropDownBox = new DropDownBox(new Vector2i(135,20));
-        historyDropDownBox.setFlag(Widget.CENTER_VERTICAL);
-        historyDropDownBox.addItem("None");
-        historyDropDownBox.addItem("Memory history");
-        historyDropDownBox.addItem("Harddisk history");
-        historyDropDownBox.setSelected(1);
-        worldSizeLayout.add(historyDropDownBox);
+
+        keepHistoryCheckBox = new CheckBox(new Vector2i(100,50), "Keep History");
+        keepHistoryCheckBox.setFlag(Widget.CENTER_VERTICAL);
+        keepHistoryCheckBox.setMargin(new Vector2i(50,0));
+        worldSizeLayout.add(keepHistoryCheckBox);
         
         cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
         cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
@@ -1333,7 +1329,7 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     	
     	wrapCheckBox.setChecked(grid.isWrappable());
-    	historyDropDownBox.setSelected(world.getHistoryType());
+    	keepHistoryCheckBox.setChecked(world.isHistoryKept());
     	
     	String ruleCode = world.getRuleCode();
     	if (ruleCode == null) ruleCode = "";
@@ -1381,7 +1377,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         grid.setWrappable(wrapCheckBox.isChecked());
         
-        world.setKeepHistory(historyDropDownBox.getSelected());
+        world.setKeepHistory(keepHistoryCheckBox.isChecked());
         world.resetTo(grid);
     }
     
@@ -2329,13 +2325,10 @@ public class GUI implements WindowEventListener, LobbyListener
         		updatePreview();
         	}
         	//Disable generation slider for no history keep
-        	else if(event.target == historyDropDownBox)
+        	else if(event.target == keepHistoryCheckBox)
         	{
-        		if(historyDropDownBox.getSelected() == 0)
-        			generationSlider.toggleActivation(false);
-        		else
-        			generationSlider.toggleActivation(true);
-        		savePropertiesToWorld();
+        		generationSlider.toggleActivation();
+                savePropertiesToWorld();
         	}
         	else if (event.target == worldEditorPropertySelector)
         	{
