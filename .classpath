@@ -3,21 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="jar/gluegen-rt.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="HexcoreCAS/lib"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="jar/jogl.all.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="HexcoreCAS/lib"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="jar/nativewindow.all.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="HexcoreCAS/lib"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="jar/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="jar/jogl.all.jar"/>
 	<classpathentry kind="lib" path="jar/cocolibs.jar"/>
 	<classpathentry kind="lib" path="jar/asm-3.3.1.jar">
 		<attributes>
