@@ -301,7 +301,7 @@ public class Grid3DWidget extends GridWidget
 	protected int calculateBufferRequirement(int sides)
 	{
 		long	vertices = (long)((sides - 2) * 3 + sides * 6) * slices.size() * grid.getHeight() * grid.getWidth() * 3;
-		System.out.println("Allocating space for " + vertices + " vertices");
+		//System.out.println("Allocating space for " + vertices + " vertices");
 		if (vertices < Integer.MAX_VALUE) return (int)vertices;
 		return -1;
 	}

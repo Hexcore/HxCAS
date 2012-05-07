@@ -82,7 +82,9 @@ import com.hexcore.cas.utilities.HeightMapConverter;
 import com.hexcore.cas.utilities.Log;
 
 public class GUI implements WindowEventListener, LobbyListener
-{	
+{
+	enum EditorToolType {LOOK, BRUSH, FILL};
+	
 	public void createColoursTab()
 	{
 		int numProperties = world.getInitialGeneration().getNumProperties();
@@ -108,11 +110,18 @@ public class GUI implements WindowEventListener, LobbyListener
 	public static class RangeContainer
 	{
 		int id;
-		public NumberBox firstRange;
-		public NumberBox secondRange;
 		
 		public Colour fromColour;
 		public Colour toColour;
+		public ColourBox colourBoxFrom;
+		public ColourBox colourBoxTo;
+		
+		public LinearLayout rangeLayout;
+		
+		public NumberBox firstRange;
+		public NumberBox secondRange;
+
+		public String type = "gradient";
 		
 		public TextWidget t;
 		public TextWidget t1;
@@ -120,12 +129,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		public TextWidget t3;
 		public TextWidget t4;
 		public TextWidget t5;
-		
-		public LinearLayout rangeLayout;
-		public ColourBox colourBoxFrom;
-		public ColourBox colourBoxTo;
-		
-		public String type = "gradient";
 		
 		public RangeContainer(int id, Window window)
 		{
@@ -182,15 +185,16 @@ public class GUI implements WindowEventListener, LobbyListener
 		public ArrayList<ColourRule> colourRuleList;
 		public ArrayList<RangeContainer> rangeContainerList;
 		
-		public int numRanges = 0;
-		public int id = 0;
-		
 		public Button addRangeButton;
 		public Button removeRangeButton;
+
+		public int id = 0;
+		public int numRanges = 0;
 		
 		public LinearLayout layout;
-		public LinearLayout rangesLayout;
 		public LinearLayout rangeButtonsLayout;
+		public LinearLayout rangesLayout;
+		
 		public TextWidget t1; 
 		
 		public ColourContainer(int id, Window window, String name, ColourRule c)
@@ -305,8 +309,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		}
 	}
 	
-	enum EditorToolType {LOOK, BRUSH, FILL};
-	
 	static class ClientEntry implements Comparable<ClientEntry>
 	{
 		InetSocketAddress address;
@@ -322,6 +324,10 @@ public class GUI implements WindowEventListener, LobbyListener
 			return address.getHostName().compareTo(other.address.getHostName());
 		}
 	}
+	
+	//HISTORY HELPERS//
+	private boolean recreate = true;
+	///////////////////
 	
 	//OUR WORLD///
     public World world;
@@ -1291,14 +1297,13 @@ public class GUI implements WindowEventListener, LobbyListener
     	}
     }
     
-    
     public void startWorldEditor(World world)
     {
     	this.world = world;
     	loadPropertiesFromWorld();
     	updateWorldEditorTab();
     	
-    	masterView.setIndex(1); 	
+    	masterView.setIndex(1);
     	window.relayout();
     }
     
@@ -1548,23 +1553,36 @@ public class GUI implements WindowEventListener, LobbyListener
     		iterationsText.setCaption("Generations: " + generations);
 
     		// Update viewports
-    		int		generation = generationSlider.getValue();    		
+    		int		generation = generationSlider.getValue();
     		Grid 	grid = world.getGeneration(generation);
+    		
+    		if(historyDropDownBox.getSelected() == 0)
+    		{
+    			generation = 0;
+    			grid = world.getInitialGeneration();
+    			force = true;
+    			iterationsText.setCaption("Generations: " + (world.getNumGenerations() - 1));
+    		}
     		
     		if (grid != null && (currentGeneration != generation || force))
     		{
     			currentGeneration = generation;
     			currentGrid = grid;
-    			
-    			if (currentGrid.getType() == grid.getType() && !force)
+
+            	if(viewports.isEmpty())
+            		System.out.println("VIEWPORTS IS EMPTY");
+            	
+    			if ((currentGrid.getType() == grid.getType() && !force) || (!recreate))
     			{
 	    			for (Viewport viewport : viewports)
 	    				viewport.gridWidget.setGrid(currentGrid);
     			}
     			else
     			{
-	   				for (Viewport viewport : viewports) 
+	   				for (Viewport viewport : viewports)
 	   					viewport.recreate(grid, window, colourRules);
+	   				
+	   				recreate = false;
     			}
     		}
     	}
@@ -1631,24 +1649,24 @@ public class GUI implements WindowEventListener, LobbyListener
     @Override
     public void handleWindowEvent(Event event)
     {
-    	if (event.type == Event.Type.GAINED_FOCUS)
+    	if(event.type == Event.Type.GAINED_FOCUS)
     	{
-        	for (Viewport viewport : viewports)
-        		if ((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
+        	for(Viewport viewport : viewports)
+        		if((viewport.gridWidget != null) && viewport.gridWidget.hasFocus() && selectedViewport != viewport)
     			{
     				selectedViewport = viewport;
     				selectedViewport.updateControlPanel(controlLayout, addSliceButton);
     			}
 
-        	for (Viewport viewport : viewports)
-        		if (viewport == selectedViewport)
+        	for(Viewport viewport : viewports)
+        		if(viewport == selectedViewport)
         			viewport.container.setBackground(new Fill(new Colour(0.8f, 0.2f, 0.2f)));
         		else
         			viewport.container.setBackground(new Fill(Colour.BLACK));
     	}
-    	else if (event.type == Event.Type.ACTION)
+    	else if(event.type == Event.Type.ACTION)
         {
-    		if (event.target == resetCameraButton)
+    		if(event.target == resetCameraButton)
     		{
     			for (Viewport viewport : viewports)
 	        	{
@@ -1664,7 +1682,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			
     		}
     		
-    		if (event.target == importHeightMapButton)
+    		if(event.target == importHeightMapButton)
     		{
     			FileSelectResult result = window.askUserForFileToLoad("Load a world");
     			
@@ -1679,7 +1697,7 @@ public class GUI implements WindowEventListener, LobbyListener
     			}
     		}
     		
-    		if (colourContainerList != null)
+    		if(colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
 	        	{
@@ -1701,7 +1719,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        	}
         	}
     		
-        	if (colourContainerList != null)
+        	if(colourContainerList != null)
         	{
 	        	for (ColourContainer c : colourContainerList)
 	        	{System.out.println("CHECK BUTTON FOR ID:" + c.id);
@@ -1724,7 +1742,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	        	}
         	}
         	
-        	if (event.target == setColourRangesButton)
+        	if(event.target == setColourRangesButton)
         	{
         		
         		for (ColourContainer c : colourContainerList)
@@ -1744,8 +1762,10 @@ public class GUI implements WindowEventListener, LobbyListener
         		saveColourCodeToWorld();
         	}
         	
-            if (event.target == createWorldButton)
-            {            	
+            if(event.target == createWorldButton)
+            {
+                recreate = true; 
+                
                 ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
                 serverEvent.size = new Vector2i(32, 32);
                 serverEvent.gridType = GridType.RECTANGLE;
@@ -1754,8 +1774,10 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 refreshClients();
             }
-            else if (event.target == loadWorldButton)
+            else if(event.target == loadWorldButton)
             {
+            	recreate = true;
+            	
                 FileSelectResult result = window.askUserForFileToLoad("Load a world");
                 
                 if (result.isValid())
@@ -1767,8 +1789,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 refreshClients();
             }
-            
-            else if (event.target == saveWorldButton)
+            else if(event.target == saveWorldButton)
             {
                 FileSelectResult result = window.askUserForFileToSave("world");
                 
@@ -1782,27 +1803,27 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 refreshClients();
             }
-            
             else if (event.target == helpButton)
             {
             }
-            else if (event.target == quitButton)
+            else if(event.target == quitButton)
             {
+            	world.stop();
                 window.exit();
             }
-            else if ((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
+            else if((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
             {
                 window.closeModalDialog();
             }
-            else if (event.target == backButton)
+            else if(event.target == backButton)
             {
                 masterView.setIndex(0);
             }
-            else if (event.target == clearRulesButton)
+            else if(event.target == clearRulesButton)
             {
                 CALTextArea.clear();
             }
-            else if (event.target == submitRulesButton)
+            else if(event.target == submitRulesButton)
             {
             	String CALCode = CALTextArea.getText();
                 CALCompiler compiler = new CALCompiler();
@@ -1834,10 +1855,9 @@ public class GUI implements WindowEventListener, LobbyListener
                 
                 createColoursTab();
             }
-            
-            else if (event.target == saveCALFileButton)
+            else if(event.target == saveCALFileButton)
             {
-            	if (selectedFile == null)
+            	if(selectedFile == null)
             	{
             		  selectedFile = window.askUserForFileToSave("Select a location to save", "cal");
                 	  
@@ -1857,21 +1877,20 @@ public class GUI implements WindowEventListener, LobbyListener
             	}
             	else
             	{
-            	  File f = new File(selectedFile.getFullPath() + ".cal");
-              	  try {
-  					PrintWriter out = new PrintWriter(f);
-  			        
-  					out.write(CALTextArea.getText());
-  					
-  					out.close();
-  				} catch (IOException e) {
-  					// TODO Auto-generated catch block
-  					e.printStackTrace();
-  				}
+					File f = new File(selectedFile.getFullPath() + ".cal");
+					try
+					{
+						PrintWriter out = new PrintWriter(f);
+						out.write(CALTextArea.getText());
+						out.close();
+					}
+					catch(IOException e)
+					{
+						e.printStackTrace();
+					}
             	}
             }
-            
-            else if (event.target == saveAsCALFileButton)
+            else if(event.target == saveAsCALFileButton)
             {
             	  FileSelectResult calFile = window.askUserForFileToSave("Select a location to save", "cal");
             	  
@@ -1887,17 +1906,16 @@ public class GUI implements WindowEventListener, LobbyListener
 					e.printStackTrace();
 				}
             }
-            
-            else if (event.target == openCALFileButton)
+            else if(event.target == openCALFileButton)
             {
                 selectedFile = window.askUserForFileToLoad("Select CAL File", "cal");
                 
                 System.out.println(selectedFile.directory);
                 System.out.println(selectedFile.filename);
                 
-                if (selectedFile.isValid())
+                if(selectedFile.isValid())
                 {
-	                if (selectedFile.filename.contains(".cal"))
+	                if(selectedFile.filename.contains(".cal"))
 	                {
 	                    try
 	                    {
@@ -1921,8 +1939,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	                } 
                 }
             }
-            else if (event.target == simulateButton)
-            {
+            else if(event.target == simulateButton)
+            {  
             	String ruleCode = world.getRuleCode();
             	if (ruleCode == null || ruleCode.equals(""))
             	{
@@ -1998,7 +2016,6 @@ public class GUI implements WindowEventListener, LobbyListener
                  		reconstructViewportLayout();
             	}
             }
-            
             else if (event.target == addSliceButton)
             {
         		if (selectedViewport != null)
@@ -2048,7 +2065,6 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
             }
-            
             else if (event.target == zoomInButton)
             {
             	for (Viewport viewport : viewports)
@@ -2063,7 +2079,6 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
             }
-            
             else if (event.target == zoomOutButton)
             {
             	for (Viewport viewport : viewports)
@@ -2078,7 +2093,7 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
             }
-			else if (event.target ==moveUpButton)
+			else if (event.target == moveUpButton)
 	        {
 	        	for (Viewport viewport : viewports)
 	        	{
@@ -2092,7 +2107,7 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 	        	}
 	        }
-			else if (event.target ==moveDownButton)
+			else if (event.target == moveDownButton)
 			{
 	        	for (Viewport viewport : viewports)
 	        	{
@@ -2106,7 +2121,7 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
             }
-			else if (event.target ==moveLeftButton)
+			else if (event.target == moveLeftButton)
 	        {
             	for (Viewport viewport : viewports)
             	{
@@ -2120,7 +2135,7 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
 	        }
-			else if (event.target ==moveRightButton)
+			else if (event.target == moveRightButton)
 	        {
             	for (Viewport viewport : viewports)
             	{
@@ -2134,7 +2149,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	    				}
 	            	}
 			}
-			else if (event.target ==yawLeftButton)
+			else if (event.target == yawLeftButton)
 			{
             	for (Viewport viewport : viewports)
             	{
@@ -2148,7 +2163,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	            	}
             	}
             }
-            else if (event.target ==yawRightButton)
+            else if (event.target == yawRightButton)
             {
             	for (Viewport viewport : viewports)
             	{
@@ -2190,7 +2205,6 @@ public class GUI implements WindowEventListener, LobbyListener
     				}
             	}
             }
-
             //VIEWPORT SETTINGS BUTTONS
 			else if (event.target == toggle3dButton)
 			{
@@ -2220,7 +2234,6 @@ public class GUI implements WindowEventListener, LobbyListener
 				if (selectedViewport != null)
 					selectedViewport.gridWidget.toggleDrawWireframe();	 				 
 			}
-
             // DISTRIBUTION BUTTONS
 			else if (event.target == refreshServerButton)
 			{
@@ -2273,9 +2286,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				updateAvailableClientsList();
 			}
             //COLOUR RANGES
-            
 			///PREVIEW
-                      
 			 else if (event.target == editorApplyButton)
 			 {
 				 int numProperties = world.getInitialGeneration().getNumProperties();
@@ -2319,6 +2330,8 @@ public class GUI implements WindowEventListener, LobbyListener
         			|| event.target == wrapCheckBox
         			|| event.target == cellShapeDropDownBox)
         	{
+        		recreate = true;
+        		
                 if (worldSizeXNumberBox.getValue(5) < 5) worldSizeXNumberBox.setValue(5);	
                 if (worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
 
@@ -2335,7 +2348,9 @@ public class GUI implements WindowEventListener, LobbyListener
         			generationSlider.toggleActivation(false);
         		else
         			generationSlider.toggleActivation(true);
+        		
         		savePropertiesToWorld();
+        		updateSimulationScreen(true);
         	}
         	else if (event.target == worldEditorPropertySelector)
         	{
@@ -2394,6 +2409,9 @@ public class GUI implements WindowEventListener, LobbyListener
 		            	break;	
 					}
 				}
+				
+				previewViewport.gridWidget.setGrid(currentGrid);
+				updatePreview();
 			}
         }
     }

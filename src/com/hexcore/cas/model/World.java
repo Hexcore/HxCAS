@@ -19,6 +19,7 @@ import com.hexcore.cas.utilities.Log;
 public class World
 {
 	private int historyType = 1;
+	private int genAmount = 0;
 	private List<Grid> worldGenerations = null;
 	private String worldFileName = null;
 	private String ruleCode = null;
@@ -42,13 +43,19 @@ public class World
 		this.colourCode = w.colourCode;
 		this.worldGenerations.addAll(w.worldGenerations);
 		
-		streamer = new WorldStreamer();
-		streamer.start(this);
+		if(historyType == 2)
+		{
+			streamer = new WorldStreamer();
+			streamer.start(this);
+		}
 	}
 	
 	public void addGeneration(Grid gen)
 	{
 		worldGenerations.add(gen);
+		
+		if(historyType == 0)
+			genAmount++;
 		
 		if(historyType == 0 || historyType == 2)
 		{
@@ -90,28 +97,28 @@ public class World
 	public int getNumGenerations()
 	{
 		if(historyType == 0)
-			return 0;
-		
-		if(historyType == 1)
+			return genAmount;
+		else if(historyType == 1)
 			return worldGenerations.size();
-		
-		return streamer.getNumGenerations();
+		else if(historyType == 2)
+			return streamer.getNumGenerations();
+		else
+			return -1;
 	}
 	
 	public List<Grid> getGenerations()
 	{
-		if(historyType == 0)
-			return null;
-
 		if(historyType == 2 && streamer.hasStarted())
 			return streamer.getGenerations(this);
-
-		return worldGenerations;
+		else
+			return worldGenerations;
 	}
 	
 	public Grid getGeneration(int index)
 	{
-		if(historyType == 1)
+		if(historyType == 0 && index == 0)
+			return worldGenerations.get(0);
+		else if(historyType == 1)
 		{
 			if(index >= worldGenerations.size())
 			{
@@ -121,11 +128,10 @@ public class World
 			
 			return worldGenerations.get(index);
 		}
-		
-		if(historyType == 2)
+		else if(historyType == 2)
 			return streamer.getGeneration(index);
-		
-		return null;
+		else
+			return null;
 	}
 	
 	public int getHistoryType()
@@ -135,18 +141,16 @@ public class World
 	
 	public Grid getLastGeneration()
 	{
-		if(worldGenerations.isEmpty()) return null;
-		
-		if(historyType == 0)
+		if(worldGenerations.isEmpty())
+			return null;
+		else if(historyType == 0)
 			return worldGenerations.get(0);
-		
-		if(historyType == 1)
+		else if(historyType == 1)
 			return worldGenerations.get(worldGenerations.size() - 1);
-		
-		if(historyType == 2)
+		else if(historyType == 2)
 			return streamer.getLastGeneration();
-		
-		return null;
+		else
+			return null;
 	}
 	
 	public String getRuleCode()
@@ -161,12 +165,12 @@ public class World
 	
 	public Grid getInitialGeneration()
 	{
-		if(worldGenerations.isEmpty()) return null;
-		
-		if(historyType == 2 && streamer.hasStarted())
+		if(worldGenerations.isEmpty())
+			return null;
+		else if(historyType == 2 && streamer.hasStarted())
 			return streamer.getGeneration(0);
-
-		return worldGenerations.get(0);
+		else
+			return worldGenerations.get(0);
 	}
 	
 	public String getFilename()
@@ -186,8 +190,8 @@ public class World
 	{
 		if(historyType == 0)
 			return false;
-		
-		return true;
+		else
+			return true;
 	}
 	
 	public void reset()
@@ -196,17 +200,22 @@ public class World
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
 		
-		streamer.reset(this);
+		if(historyType == 2)
+			streamer.reset(this);
 	}
 	
 	public void resetTo(Grid g)
 	{
-		Log.debug(TAG, "Grid: " + g.getWidth() + "x" + g.getHeight());
+		Log.debug(TAG, "Resetting world to grid: " + g.getWidth() + "x" + g.getHeight());
 		
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
+
+		if(historyType == 0)
+			genAmount = worldGenerations.size();
 		
-		streamer.reset(this);
+		if(historyType == 2)
+			streamer.reset(this);
 	}
 	
 	public void resetTo(World w)
@@ -219,7 +228,8 @@ public class World
 		this.colourCode= w.colourCode;
 		this.worldGenerations.addAll(w.worldGenerations);
 		
-		streamer.reset(this);
+		if(historyType == 2)
+			streamer.reset(this);
 	}
 	
 	public void setRuleCode(String ruleCode)
