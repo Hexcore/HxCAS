@@ -1,17 +1,17 @@
 package com.hexcore.cas.model.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.zip.ZipException;
+
+import junit.framework.TestCase;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.model.World;
-import com.hexcore.cas.model.WorldStreamer;
-
-import junit.framework.TestCase;
 
 public class TestWorldStreamer extends TestCase
 {
@@ -20,12 +20,15 @@ public class TestWorldStreamer extends TestCase
 	public void testStartAndStop()
 		throws ZipException, IOException
 	{
+		System.out.println("\n== Test : testStartAndStop ==");
+
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
-		WorldStreamer streamer = new WorldStreamer();
-		streamer.start(world);
+		world.setKeepHistory(2);
 		
+		world.start();
+
 		String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
 		assertTrue(ruleCode.startsWith("rules"));
@@ -36,6 +39,8 @@ public class TestWorldStreamer extends TestCase
 		
 		List<Grid> grids = world.getGenerations();
 		Grid grid;
+		
+		world.stop();
 		
 		//Generation 1
 		grid = grids.get(0);
@@ -90,18 +95,24 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testReset()
 	{
+		System.out.println("\n== Test : testReset() ==");
+		
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
+		
+		world.setKeepHistory(2);
+		
+		world.start();
+		System.out.println("== File 1 : " + world.getFilename() + " ==");
 		
 		World secondWorld = new World();
 		
 		secondWorld.setFileName("Test Data/world/secondWorld.caw");
+		
 		TriangleGrid[] worlds = new TriangleGrid[3];
 		
 		worlds[0] = new TriangleGrid(new Vector2i(2, 3), 2);
@@ -142,12 +153,14 @@ public class TestWorldStreamer extends TestCase
 			e.printStackTrace();
 		}
 		
-		WorldStreamer streamer = new WorldStreamer();
-		streamer.start(world);
-		streamer.reset(secondWorld);
+		world.resetTo(secondWorld);
+		world.setKeepHistory(2);
+		System.out.println("== File 2 : " + world.getFilename() + " ==");
 		
 		List<Grid> grids = secondWorld.getGenerations();
 		Grid grid;
+		
+		world.stop();
 		
 		//Generation 1
 		grid = grids.get(0);
@@ -202,19 +215,22 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testStreamingFromDisk()
 	{
+		System.out.println("\n== Test : testStreamingFromDisk() ==");
+		
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
-		WorldStreamer streamer = new WorldStreamer();
-		streamer.start(world);
+		world.setKeepHistory(2);
 		
-		Grid grid = streamer.streamGeneration(2);
+		world.start();
+		
+		Grid grid = world.getGeneration(2);
+		
+		world.stop();
 
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
@@ -231,17 +247,18 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
-		
-		streamer.stop();
 	}
 	
 	public void testStreamingToDisk()
 	{
+		System.out.println("\n== Test : testStreamingToDisk() ==");
+		
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
-		WorldStreamer streamer = new WorldStreamer();
-		streamer.start(world);
+		world.setKeepHistory(2);
+		
+		world.start();
 		
 		int nextGen = world.getNumGenerations();
 		
@@ -253,10 +270,10 @@ public class TestWorldStreamer extends TestCase
 		gen.setCell(0, 2, new double[] {11.0, 12.0});
 		gen.setCell(1, 2, new double[] {13.0, 14.0});
 		
-		streamer.streamGeneration(gen, nextGen);
-		Grid grid = streamer.streamGeneration(nextGen);
+		world.addGeneration(gen);
+		Grid grid = world.getGeneration(nextGen);
 
-		streamer.stop();
+		world.stop();
 		
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
@@ -277,11 +294,14 @@ public class TestWorldStreamer extends TestCase
 	
 	public void testStreamToFromToDisk()
 	{
+		System.out.println("\n== Test : testStreamToFromToDisk ==");
+		
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
-		WorldStreamer streamer = new WorldStreamer();
-		streamer.start(world);
+		world.setKeepHistory(2);
+		
+		world.start();
 		
 		int nextGen = world.getNumGenerations();
 		
@@ -301,14 +321,15 @@ public class TestWorldStreamer extends TestCase
 		gen2.setCell(0, 2, new double[] {12.0, 13.0});
 		gen2.setCell(1, 2, new double[] {14.0, 15.0});
 		
-		streamer.streamGeneration(gen1, nextGen);
-		Grid grid = streamer.streamGeneration(nextGen);
+		world.addGeneration(gen1);
+		Grid grid = world.getGeneration(nextGen);
 		
 		nextGen++;
-		streamer.streamGeneration(gen2, nextGen);
-		grid = streamer.streamGeneration(nextGen);
-
-		streamer.stop();
+		
+		world.addGeneration(gen2);
+		grid = world.getGeneration(nextGen);
+		
+		world.stop();
 		
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
@@ -325,5 +346,54 @@ public class TestWorldStreamer extends TestCase
 		assertEquals(13.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(14.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(15.0, grid.getCell(1, 2).getValue(1));
+	}
+	
+	//Not actually a test. Used to delete all the test worlds.
+	public void testDelete()
+	{
+		String worldName = "Test Data/world/world";
+		String secondWorldName = "Test Data/world/secondWorld";
+		
+		int worldNum = 1;
+		
+		while(true)
+		{
+			File caw = new File(worldName + "_" + worldNum + ".caw");
+			boolean success = false;
+			
+			if(caw.exists())
+				success = caw.delete();
+			else
+				break;
+			
+			System.out.println("Deletion of file " + worldName + "_" + worldNum + ".caw : " + (success ? "SUCCESS" : "FAILED"));
+			worldNum++;
+		}
+		
+		{
+			File caw = new File(secondWorldName + ".caw");
+			boolean success = false;
+			
+			if(caw.exists())
+				success = caw.delete();
+			
+			System.out.println("Deletion of file " + secondWorldName + ".caw : " + (success ? "SUCCESS" : "FAILED"));
+		}
+		
+		worldNum = 1;
+		
+		while(true)
+		{
+			File caw = new File(secondWorldName + "_" + worldNum + ".caw");
+			boolean success = false;
+			
+			if(caw.exists())
+				success = caw.delete();
+			else
+				break;
+			
+			System.out.println("Deletion of file " + secondWorldName + "_" + worldNum + ".caw : " + (success ? "SUCCESS" : "FAILED"));
+			worldNum++;
+		}
 	}
 }
