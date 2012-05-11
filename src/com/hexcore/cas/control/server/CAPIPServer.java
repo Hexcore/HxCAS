@@ -390,7 +390,7 @@ public class CAPIPServer
 			client.disconnect();
 				
 		clients.clear();
-				
+		
 		for (InetSocketAddress address : addresses) 
 		{
 			Log.debug(TAG, "Connecting client");
@@ -450,7 +450,6 @@ public class CAPIPServer
 		}
 		catch(InterruptedException e)
 		{
-			
 		}
 	}
 	

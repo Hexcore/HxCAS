@@ -1,16 +1,16 @@
 package com.hexcore.cas.model;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import com.hexcore.cas.math.Vector2i;
@@ -18,8 +18,10 @@ import com.hexcore.cas.utilities.Log;
 
 public class WorldStreamer
 {
+	private boolean reset = false;
 	private boolean started = false;
 	private boolean outOpen = false;
+	private int numGenerations = 0;
 	private String cawFilename = null;
 	private ZipOutputStream out = null;
 
@@ -42,6 +44,7 @@ public class WorldStreamer
 			}
 			catch(IOException ex)
 			{
+				Log.error(TAG, "Error with clearing the history - " + ex.getMessage());
 				ex.printStackTrace();
 			}
 		}
@@ -56,6 +59,7 @@ public class WorldStreamer
 			}
 			catch(IOException ex)
 			{
+				Log.error(TAG, "Error with clearing the history - " + ex.getMessage());
 				ex.printStackTrace();
 			}
 		}
@@ -65,111 +69,114 @@ public class WorldStreamer
 	
 	public Grid getGeneration(int genNum)
 	{
-		if(outOpen)
-			stop();
-		
 		try
 		{
 			File cawFile = new File(cawFilename);
-			ZipFile zip = new ZipFile(cawFile);
-
-			int x = -1;
-			int y = -1;
-			char type = 'N';
-			int properties = 0;
-			String line;
-
-			ZipEntry config = zip.getEntry("config.cac");
-			if(config == null)
+			if(!cawFile.exists())
 			{
-				System.out.println("Configuration file not found.");
+				Log.error(TAG, "Error with the world : The file " + cawFilename + " could not be found.");
 				return null;
 			}
+			
+			boolean configFound = false;
+			boolean genFound = false;
+			char type = 'N';
+			Grid gen = null;
+			int properties = 0;
+			int x = -1;
+			int y = -1;
+			ZipEntry entry;
+			ZipInputStream zipIn = new ZipInputStream(new BufferedInputStream(new FileInputStream(cawFile)));
+			
+			while((entry = zipIn.getNextEntry()) != null)
+			{
+				String name = entry.getName();
+				String ext = name.substring(name.lastIndexOf(".") + 1);
+				
+				String entryData = "";
+				
+				byte[] data = new byte[1];
+				while((data[0] = (byte)zipIn.read()) != -1)
+				{
+					entryData += new String(data);
+				}
+				
+				StringTokenizer token = new StringTokenizer(entryData);
+				
+				if(ext.compareTo("cac") == 0)
+				{
+					configFound = true;
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
-			line = in.readLine();
-			if(line.indexOf(" ") != -1)
-			{
-				x = Integer.parseInt(line.substring(0, line.indexOf(" ")));
-				y = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
-			}
-			else
-			{
-				x = Integer.parseInt(line);
-				line = in.readLine();
-				y = Integer.parseInt(line);
+					x = Integer.parseInt(token.nextToken());
+					y = Integer.parseInt(token.nextToken());
+					type = token.nextToken().charAt(0);
+					properties = Integer.parseInt(token.nextToken());
+
+					Vector2i gridSize = new Vector2i(x, y);
+					Cell cell = new Cell(properties);
+					switch(type)
+					{
+						case 'r':
+						case 'R':
+							gen = new RectangleGrid(gridSize, cell);
+							break;
+						case 'h':
+						case 'H':
+							gen = new HexagonGrid(gridSize, cell);
+							break;
+						case 't':
+						case 'T':
+							gen = new TriangleGrid(gridSize, cell);
+							break;
+						default:
+							Log.error(TAG, "Unable to create a grid with no type.");
+							return null;
+					}
+				}
+				else if(ext.compareTo("cag") == 0)
+				{
+					if(!configFound)
+					{
+						Log.error(TAG, "Configuration file not found.");
+						return null;
+					}
+					
+					int index = name.lastIndexOf('/');
+					if(index == -1)
+						index = 0;
+					
+					if(name.substring(index).compareTo(genNum + ".cag") == 0)
+					{
+						genFound = true;
+
+						for(int rows = 0; rows < y; rows++)
+						{
+							for(int cols = 0; cols < x; cols++)
+							{
+								double[] vals = new double[properties];
+
+								for(int i = 0; i < properties; i++)
+									vals[i] = Double.parseDouble(token.nextToken());
+								
+								gen.setCell(cols, rows, vals);
+							}
+						}
+					}
+				}
 			}
 			
-			line = in.readLine();
-			type = line.charAt(0);
-			line = in.readLine();
-			properties = Integer.parseInt(line);
-
-			Grid gen = null;
-			Vector2i gridSize = new Vector2i(x, y);
-			Cell cell = new Cell(properties);
-			switch(type)
-			{
-				case 'r':
-				case 'R':
-					gen = new RectangleGrid(gridSize, cell);
-					break;
-				case 'h':
-				case 'H':
-					gen = new HexagonGrid(gridSize, cell);
-					break;
-				case 't':
-				case 'T':
-					gen = new TriangleGrid(gridSize, cell);
-					break;
-				default:
-					System.out.println("Unable to create a grid with no type.");
-					return null;
-			}
-
-			String genName = genNum + ".cag";
-			ZipEntry genEntry = zip.getEntry(genName);
-			if(genEntry == null)
+			if(!genFound)
 			{
 				Log.error(TAG, "Generation file " + genNum + " not found.");
 				return null;
 			}
-			
-			in = new BufferedReader(new InputStreamReader(zip.getInputStream(genEntry)));
-			line = null;
-			for(int rows = 0; rows < y; rows++)
-			{
-				for(int cols = 0; cols < x; cols++)
-				{
-					line = in.readLine();
-					if (line.isEmpty()) continue;
-					
-					double[] vals = new double[properties];
-					
-					int prevIndex = -1;
-					for(int i = 0; i < properties - 1; i++)
-					{
-						int currIndex = line.indexOf(" ", prevIndex + 1);
 
-						if (currIndex <= 0)
-							return null;
-						
-						vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
-						prevIndex = currIndex;
-					}
-					vals[properties - 1] = Double.parseDouble(line.substring(prevIndex + 1));
-					
-					gen.setCell(cols, rows, vals);
-				}
-				line = in.readLine();
-			}
-			
-			zip.close();
-			
+			zipIn.close();
 			return gen;
 		}
 		catch(IOException ex)
 		{
+			Log.error(TAG, "Error retrieving generation - " + ex.getMessage());
 			ex.printStackTrace();
 			return null;
 		}
@@ -177,118 +184,112 @@ public class WorldStreamer
 	
 	public List<Grid> getGenerations(World w)
 	{
-		if(outOpen)
-			stop();
-		
 		List<Grid> generations = Collections.synchronizedList(new ArrayList<Grid>());
 		
 		try
 		{
 			File cawFile = new File(cawFilename);
-			ZipFile zip = new ZipFile(cawFile);
-
-			int x = -1;
-			int y = -1;
-			char type = 'N';
-			int properties = 0;
-			String line;
-
-			ZipEntry config = zip.getEntry("config.cac");
-			if(config == null)
+			if(!cawFile.exists())
 			{
-				Log.error(TAG, "Configuration file not found.");
+				Log.error(TAG, "Error with the world : The file " + cawFilename + " could not be found.");
 				return null;
 			}
-
-			BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
-			line = in.readLine();
-			if(line.indexOf(" ") != -1)
-			{
-				x = Integer.parseInt(line.substring(0, line.indexOf(" ")));
-				y = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
-			}
-			else
-			{
-				x = Integer.parseInt(line);
-				line = in.readLine();
-				y = Integer.parseInt(line);
-			}
 			
-			line = in.readLine();
-			type = line.charAt(0);
-			line = in.readLine();
-			properties = Integer.parseInt(line);
-
+			boolean configFound = false;
+			char type = 'N';
 			Grid gen = null;
-			Vector2i gridSize = new Vector2i(x, y);
-			Cell cell = new Cell(properties);
-			switch(type)
+			int properties = 0;
+			int x = -1;
+			int y = -1;
+			ZipEntry entry;
+			ZipInputStream zipIn = new ZipInputStream(new BufferedInputStream(new FileInputStream(cawFile)));
+			
+			while((entry = zipIn.getNextEntry()) != null)
 			{
-				case 'r':
-				case 'R':
-					gen = new RectangleGrid(gridSize, cell);
-					break;
-				case 'h':
-				case 'H':
-					gen = new HexagonGrid(gridSize, cell);
-					break;
-				case 't':
-				case 'T':
-					gen = new TriangleGrid(gridSize, cell);
-					break;
-				default:
-					Log.error(TAG, "Unable to create a grid with no type.");
-					return null;
+				String name = entry.getName();
+				String ext = name.substring(name.lastIndexOf(".") + 1);
+				
+				String entryData = "";
+				
+				byte[] data = new byte[1];
+				while((data[0] = (byte)zipIn.read()) != -1)
+				{
+					entryData += new String(data);
+				}
+				
+				StringTokenizer token = new StringTokenizer(entryData);
+				
+				if(ext.compareTo("cac") == 0)
+				{
+					configFound = true;
+					
+					x = Integer.parseInt(token.nextToken());
+					y = Integer.parseInt(token.nextToken());
+					type = token.nextToken().charAt(0);
+					properties = Integer.parseInt(token.nextToken());
+
+					Vector2i gridSize = new Vector2i(x, y);
+					Cell cell = new Cell(properties);
+					switch(type)
+					{
+						case 'r':
+						case 'R':
+							gen = new RectangleGrid(gridSize, cell);
+							break;
+						case 'h':
+						case 'H':
+							gen = new HexagonGrid(gridSize, cell);
+							break;
+						case 't':
+						case 'T':
+							gen = new TriangleGrid(gridSize, cell);
+							break;
+						default:
+							Log.error(TAG, "Unable to create a grid with no type.");
+							return null;
+					}
+				}
+				else if(ext.compareTo("cag") == 0)
+				{
+					if(!configFound)
+					{
+						Log.error(TAG, "Configuration file not found.");
+						return null;
+					}
+					
+					for(int genNum = 0; genNum < numGenerations; genNum++)
+					{
+						int index = name.lastIndexOf('/');
+						if(index == -1)
+							index = 0;
+						
+						if(name.substring(index).compareTo(genNum + ".cag") != 0)
+							Log.error(TAG, "Generation " + genNum + " file not found.");
+						
+						for(int rows = 0; rows < y; rows++)
+						{
+							for(int cols = 0; cols < x; cols++)
+							{
+								double[] vals = new double[properties];
+
+								for(int i = 0; i < properties; i++)
+									vals[i] = Double.parseDouble(token.nextToken());
+								
+								gen.setCell(cols, rows, vals);
+							}
+						}
+						
+						generations.add(gen.clone());
+					}
+				}
 			}
 
-			for(int genNum = 0; genNum < zip.size() - 3; genNum++)
-			{
-				String genName = genNum + ".cag";
-				ZipEntry genEntry = zip.getEntry(genName);
-				if(genEntry == null)
-				{
-					Log.error(TAG, "Generation " + genNum + " file not found.");
-					//return null;
-				}
-				
-				in = new BufferedReader(new InputStreamReader(zip.getInputStream(genEntry)));
-				line = null;
-				for(int rows = 0; rows < y; rows++)
-				{
-					for(int cols = 0; cols < x; cols++)
-					{
-						line = in.readLine();
-						if (line.isEmpty()) continue;
-						
-						double[] vals = new double[properties];
-						
-						int prevIndex = -1;
-						for(int i = 0; i < properties - 1; i++)
-						{
-							int currIndex = line.indexOf(" ", prevIndex + 1);
-	
-							if (currIndex <= 0)
-								return null;
-							
-							vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
-							prevIndex = currIndex;
-						}
-						vals[properties - 1] = Double.parseDouble(line.substring(prevIndex + 1));
-						
-						gen.setCell(cols, rows, vals);
-					}
-					line = in.readLine();
-				}
-				
-				generations.add(gen.clone());
-			}
-			
-			zip.close();
-			
+			zipIn.close();
 			return generations;
 		}
 		catch(IOException ex)
 		{
+			Log.error(TAG, "Error retrieving all generations - " + ex.getMessage());
 			ex.printStackTrace();
 			return null;
 		}
@@ -296,58 +297,12 @@ public class WorldStreamer
 	
 	public Grid getLastGeneration()
 	{
-		int size = getNumGenerations();
-		
-		return getGeneration(size - 1);
+		return getGeneration(numGenerations - 1);
 	}
 	
 	public int getNumGenerations()
 	{
-		if(outOpen)
-		{
-			try
-			{
-				out.close();
-				outOpen = false;
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	
-		File f = new File(cawFilename);
-		if (!f.exists())
-		{
-			Log.error(TAG, "Error loading world - Could not find file: " + cawFilename);
-			return -1;
-		}
-	
-		int size = -1;
-	
-		ZipFile zip = null;
-		try
-		{
-			zip = new ZipFile(f);
-		
-			size = zip.size() - 3;
-		
-			zip.close();
-		}
-		catch (ZipException e)
-		{
-			Log.error(TAG, "Error opening world - " + e.getMessage());
-			e.printStackTrace();
-			return -1;
-		}
-		catch(IOException e)
-		{
-			Log.error(TAG, "Error opening world - " + e.getMessage());
-			e.printStackTrace();
-			return -1;
-		}
-	
-		return size;
+		return numGenerations;
 	}
 	
 	public boolean hasStarted()
@@ -357,266 +312,84 @@ public class WorldStreamer
 	
 	public void openOut()
 	{
-		Log.debug(TAG, "ZipOutputStream was closed. Reopening.");
+		Log.debug(TAG, "ZipOutputStream was closed. Reopening....");
 		
-		String ruleCode = "";
-		String colourCode = "";	
-		
-		if(cawFilename == null)
-			Log.debug(TAG, "cawFilename is null.");
-		
-		File f = new File(cawFilename);
-		if (!f.exists())
-		{
-			Log.error(TAG, "Error loading world - Could not find file: " + cawFilename);
-			return;
-		}
-		
-		ZipFile zip = null;
-		try
-		{
-			zip = new ZipFile(f);
-		}
-		catch (ZipException e)
-		{
-			Log.error(TAG, "Error opening world - " + e.getMessage());
-			e.printStackTrace();
-			return;
-		}
-		catch(IOException e)
-		{
-			Log.error(TAG, "Error opening world - " + e.getMessage());
-			e.printStackTrace();
-			return;
-		}
-		
-		int x = -1;
-		int y = -1;
-		char type = 'N';
-		int properties = 0;
-		Grid[] worldGenerations = null;
-		int worldGenSize = zip.size() - 3;
+		File theFile = new File(cawFilename);
 		
 		try
 		{
-			Log.debug(TAG, "Reading in...");
-			ZipEntry config = zip.getEntry("config.cac");
-			
-			BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
-			String line;
-			line = in.readLine();
-			if(line.indexOf(" ") != -1)
-			{
-				x = Integer.parseInt(line.substring(0, line.indexOf(" ")));
-				y = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
-			}
-			else
-			{
-				x = Integer.parseInt(line);
-				line = in.readLine();
-				y = Integer.parseInt(line);
-			}
-			
-			line = in.readLine();
-			type = line.charAt(0);
-			line = in.readLine();
-			properties = Integer.parseInt(line);
-			
-			Vector2i gridSize = new Vector2i(x, y);
-			Cell cell = new Cell(properties);
-			switch(type)
-			{
-				case 'r':
-				case 'R':
-					worldGenerations = new RectangleGrid[worldGenSize];
-					for(int i = 0; i < worldGenSize; i++)
-						worldGenerations[i] = new RectangleGrid(gridSize, cell);
-					break;
-				case 'h':
-				case 'H':
-					worldGenerations = new HexagonGrid[worldGenSize];
-					for(int i = 0; i < worldGenSize; i++)
-						worldGenerations[i] = new HexagonGrid(gridSize, cell);
-					break;
-				case 't':
-				case 'T':
-					worldGenerations = new TriangleGrid[worldGenSize];
-					for(int i = 0; i < worldGenSize; i++)
-						worldGenerations[i] = new TriangleGrid(gridSize, cell);
-					break;
-				default:
-					Log.error(TAG, "Unable to create a grid with no type.");
-					return;
-			}
-			
-			ZipEntry rules = zip.getEntry("rules.car");
-			in = new BufferedReader(new InputStreamReader(zip.getInputStream(rules)));
-
-			line = in.readLine();
-			while(line != null)
-			{
-				ruleCode += line;
-				line = in.readLine();
-			}
-
-			ZipEntry colours = zip.getEntry("colours.cacp");
-			in = new BufferedReader(new InputStreamReader(zip.getInputStream(colours)));
-			
-			line = in.readLine();
-			while(line != null)
-			{
-				colourCode += line;
-				line = in.readLine();
-			}
-			
-			if(ruleCode.compareTo("") == 0)
-			{
-				Log.error(TAG, "Rule file not found.");
-				return;
-			}
-			
-			if(colourCode.compareTo("") == 0)
-			{
-				Log.error(TAG, "Colour file not found.");
-				return;
-			}
-			
-			for(int g = 0; g < worldGenSize; g++)
-			{
-				String genFile = g + ".cag";
-				ZipEntry gen = zip.getEntry(genFile);
-
-				in = new BufferedReader(new InputStreamReader(zip.getInputStream(gen)));
-				line = null;
-				for(int rows = 0; rows < y; rows++)
-				{
-					for(int cols = 0; cols < x; cols++)
-					{
-						line = in.readLine();
-						if (line.isEmpty()) continue;
-						
-						double[] vals = new double[properties];
-						
-						int prevIndex = -1;
-						for(int i = 0; i < properties - 1; i++)
-						{
-							int currIndex = line.indexOf(" ", prevIndex + 1);
-
-							if (currIndex <= 0)
-							{
-								Log.error(TAG, "Invalid file format.");
-								return;
-							}
-							
-							vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
-							prevIndex = currIndex;
-						}
-						vals[properties - 1] = Double.parseDouble(line.substring(prevIndex + 1));
-						
-						worldGenerations[g].setCell(cols, rows, vals);
-					}
-					line = in.readLine();
-				}
-			}
-			
-			zip.close();
-			
-			try
-			{
-				out = new ZipOutputStream(new FileOutputStream(new File(cawFilename)));
-				outOpen = true;
-			}
-			catch(IOException e)
-			{
-				Log.error(TAG, "Error creating output stream - " + e.getMessage());
-				e.printStackTrace();
-			}
-
-			Log.debug(TAG, "Writing out...");
-			
-			config = new ZipEntry("config.cac");
-			out.putNextEntry(config);
-			String configStr = x + " " + y + "\n";
-			configStr += type + "\n";
-			configStr += properties + "\n";
-			out.write(configStr.getBytes());
-			out.closeEntry();
-			
-			ZipEntry ruleCodeEntry = new ZipEntry("rules.car");
-			out.putNextEntry(ruleCodeEntry);
-			out.write(ruleCode.getBytes());
-			out.closeEntry();
-			
-			ZipEntry colourCodeEntry = new ZipEntry("colours.cacp");
-			out.putNextEntry(colourCodeEntry);
-			out.write(colourCode.getBytes());
-			out.closeEntry();
-			
-			for (int i = 0; i < worldGenSize; i++)
-			{
-				Grid grid = worldGenerations[i];
-				ZipEntry caw = new ZipEntry(i + ".cag");
-				out.putNextEntry(caw);
-				String str = "";
-				for(int rows = 0; rows < y; rows++)
-				{
-					for(int cols = 0; cols < x; cols++)
-					{
-						for(int index = 0; index < properties - 1; index++)
-							str += grid.getCell(cols, rows).getValue(index) + " ";
-						str += grid.getCell(cols, rows).getValue(properties - 1) + "\n";
-					}
-					str += "\n";
-				}
-				out.write(str.getBytes());
-				out.closeEntry();
-			}
+			out = new ZipOutputStream(new FileOutputStream(theFile, true));
+			outOpen = true;
 		}
 		catch(IOException e)
 		{
-			Log.error(TAG, "Error - " + e.getMessage());
+			Log.error(TAG, "Error getting streams to the world - " + e.getMessage());
 			e.printStackTrace();
+			return;
 		}
 	}
 	
 	public void reset(World w)
 	{
-		Log.debug(TAG, "reset() called");
-		stop();
-		start(w);
+		if(started)
+		{
+			reset = true;
+			
+			stop();
+			start(w);
+		}
+		else
+		{
+			reset = false;
+			
+			start(w);
+		}
 	}
 	
 	public void start(World w)
 	{
-		Log.debug(TAG, "start() called");
+		File caw = null;
 		if(w.getFilename() == null)
 			w.setFileName("worlds/newWorld.caw");
 		
 		int cawIndex = w.getFilename().indexOf(".caw");
 		
 		String name = (cawIndex != -1 ? w.getFilename() : w.getFilename() + ".caw");
-		File caw = new File(name);
-		int worldNum = 1;
-		try
-		{
-			while(!caw.createNewFile())
-			{
-				int underIndex = name.indexOf("_");
-				if(underIndex != -1)
-					name = name.substring(0, name.indexOf("_")) + "_" + worldNum + ".caw";
-				else
-					name = name.substring(0, name.indexOf(".caw")) + "_" + worldNum + ".caw";
-				
-				caw = new File(name);
-				worldNum++;
-			}
-			
+		
+		if(cawFilename == null)
 			cawFilename = name;
-			Log.debug(TAG, "cawFilename : " + cawFilename);
-		}
-		catch (IOException e)
+		
+		if(!reset)
 		{
-			e.printStackTrace();
+			caw = new File(name);
+			int worldNum = 1;
+			try
+			{
+				while(!caw.createNewFile())
+				{
+					int underIndex = name.indexOf("_");
+					if(underIndex != -1)
+						name = name.substring(0, name.indexOf("_")) + "_" + worldNum + ".caw";
+					else
+						name = name.substring(0, name.indexOf(".caw")) + "_" + worldNum + ".caw";
+					
+					caw = new File(name);
+					worldNum++;
+				}
+				
+				cawFilename = name;
+				Log.debug(TAG, "cawFilename : " + cawFilename);
+			}
+			catch (IOException ex)
+			{
+				Log.error(TAG, "Error generating new world - " + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+		else
+		{
+			caw = new File(cawFilename);
+			reset = false;
 		}
 		
 		try
@@ -626,45 +399,46 @@ public class WorldStreamer
 		}
 		catch(IOException ex)
 		{
+			Log.error(TAG, "Error getting output stream to the world - " + ex.getMessage());
 			ex.printStackTrace();
 		}
 		
+		numGenerations = 0;
+		
 		writeInitialValues(w);
-
+		
 		started = true;
 	}
 	
 	public void stop()
 	{
-		Log.debug(TAG, "stop() called");
-		
 		if(outOpen)
 		{
 			try
 			{
 				out.close();
+				out = null;
 				outOpen = false;
 				
 				started = false;
 			}
 			catch(IOException ex)
 			{
+				Log.error(TAG, "Error stopping the output stream to the world - " + ex.getMessage());
 				ex.printStackTrace();
 			}
-			
-			System.gc();
 		}
 	}
 	
 	public void streamGeneration(Grid gen)
 	{
-		int genNum = getNumGenerations();
-		
 		if(!outOpen)
 			openOut();
-
+		
 		try
 		{
+			int genNum = numGenerations;
+			
 			ZipEntry cag = new ZipEntry(genNum + ".cag");
 			out.putNextEntry(cag);
 			String str = "";
@@ -680,22 +454,27 @@ public class WorldStreamer
 			}
 			out.write(str.getBytes());
 			out.closeEntry();
+			
+			numGenerations++;
 		}
 		catch(IOException ex)
 		{
+			Log.error(TAG, "Error streaming generation to the world - " + ex.getMessage());
 			ex.printStackTrace();
 		}
 	}
 	
 	public void writeInitialValues(World w)
 	{
+		w.setKeepHistory(1);
+		
 		try
 		{
-			Grid gen0 = w.getInitialGeneration();
-			char type = gen0.getTypeSymbol();
-			int height = gen0.getHeight();
-			int props = gen0.getNumProperties();
-			int width = gen0.getWidth();
+			Grid genZero = w.getInitialGeneration();
+			char type = genZero.getTypeSymbol();
+			int height = genZero.getHeight();
+			int props = genZero.getNumProperties();
+			int width = genZero.getWidth();
 			
 			ZipEntry config = new ZipEntry("config.cac");
 			out.putNextEntry(config);
@@ -736,12 +515,17 @@ public class WorldStreamer
 				out.closeEntry();
 			}
 			
+			numGenerations = gens.size();
+			
 			w.clearHistory();
 		}
 		catch(IOException ex)
 		{
+			Log.error(TAG, "Error writing all initial values to the world - " + ex.getMessage());
 			ex.printStackTrace();
 		}
+		
+		w.setKeepHistory(2);
 	}
 	
 	public String getCawFilename()

@@ -455,7 +455,7 @@ public class GUI implements WindowEventListener, LobbyListener
     private int		currentGeneration = 0;
     private Grid	currentGrid;
     
-    private Server 	server;
+    private Server server;
 	private Button zoomInButton;
 	private Button zoomOutButton;
 	private Button moveUpButton;
@@ -1366,6 +1366,8 @@ public class GUI implements WindowEventListener, LobbyListener
     
     public void savePropertiesToWorld()
     {
+    	world.start();
+    	
     	Grid grid = world.getInitialGeneration();
     	
         Vector2i size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
@@ -1962,6 +1964,7 @@ public class GUI implements WindowEventListener, LobbyListener
 
             	currentGeneration = 0;
             	updateSimulationScreen(true);
+            	//Log.error(TAG, "FINAL CHECKPOINT");
             }
             else if (event.target == backToMainMenuButton)
             {
@@ -2411,6 +2414,10 @@ public class GUI implements WindowEventListener, LobbyListener
 				}
 				
 				previewViewport.gridWidget.setGrid(currentGrid);
+				
+				if(historyDropDownBox.getSelected() == 2)
+					world.resetTo(currentGrid);
+				
 				updatePreview();
 			}
         }

@@ -9,12 +9,14 @@ import com.hexcore.cas.utilities.Log;
 /**
  * Class World
  * Contains all information about a world.
- * Generations - end and first, rules, colours,
- * load and saving of a world by calling a worldLoader
- * and WorldSaver function.
+ * Generations :
+ * 	No history - only current generation being displayed;
+ * 	Memory history - all generations that memory can hold; and
+ * 	Disk history - all generations from the very beginning. 
+ * Rule and colour sets.
+ * Load and saving of a world by calling a WorldLoader and WorldSaver.
  * 
  * @author Megan
- *
  */
 public class World
 {
@@ -129,7 +131,11 @@ public class World
 			return worldGenerations.get(index);
 		}
 		else if(historyType == 2)
-			return streamer.getGeneration(index);
+		{
+			worldGenerations.clear();
+			worldGenerations.add(streamer.getGeneration(index));
+			return worldGenerations.get(0);
+		}
 		else
 			return null;
 	}
@@ -141,14 +147,16 @@ public class World
 	
 	public Grid getLastGeneration()
 	{
-		if(worldGenerations.isEmpty())
-			return null;
-		else if(historyType == 0)
+		if(historyType == 0 && !worldGenerations.isEmpty())
 			return worldGenerations.get(0);
-		else if(historyType == 1)
+		else if(historyType == 1 && !worldGenerations.isEmpty())
 			return worldGenerations.get(worldGenerations.size() - 1);
 		else if(historyType == 2)
-			return streamer.getLastGeneration();
+		{
+			worldGenerations.clear();
+			worldGenerations.add(streamer.getLastGeneration());
+			return worldGenerations.get(0);
+		}
 		else
 			return null;
 	}
@@ -168,7 +176,11 @@ public class World
 		if(worldGenerations.isEmpty())
 			return null;
 		else if(historyType == 2 && streamer.hasStarted())
-			return streamer.getGeneration(0);
+		{
+			worldGenerations.clear();
+			worldGenerations.add(streamer.getGeneration(0));
+			return worldGenerations.get(0);
+		}
 		else
 			return worldGenerations.get(0);
 	}
@@ -199,6 +211,9 @@ public class World
 		Grid g = worldGenerations.get(0).clone();
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
+
+		if(historyType == 0)
+			genAmount = worldGenerations.size();
 		
 		if(historyType == 2)
 			streamer.reset(this);
@@ -223,10 +238,17 @@ public class World
 		Log.debug(TAG, "Resetting world.");
 
 		this.historyType = w.historyType;
-		this.worldFileName= w.worldFileName;
-		this.ruleCode= w.ruleCode;
-		this.colourCode= w.colourCode;
-		this.worldGenerations.addAll(w.worldGenerations);
+		this.worldFileName = w.worldFileName;
+		this.ruleCode = w.ruleCode;
+		this.colourCode = w.colourCode;
+		
+		if(historyType != 0)
+			this.worldGenerations.addAll(w.worldGenerations);
+		else
+			this.worldGenerations.add(w.worldGenerations.get(w.worldGenerations.size() - 1));
+
+		if(historyType == 0)
+			genAmount = worldGenerations.size();
 		
 		if(historyType == 2)
 			streamer.reset(this);
@@ -270,10 +292,11 @@ public class World
 	
 	public void start()
 	{
-		Log.debug(TAG, "Starting streamer");
-		
 		if(!streamer.hasStarted())
+		{
+			Log.debug(TAG, "Starting streamer");
 			streamer.start(this);
+		}
 	}
 	
 	public void stop()
