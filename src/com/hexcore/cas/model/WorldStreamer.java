@@ -204,6 +204,7 @@ public class WorldStreamer
 			ZipEntry entry;
 			ZipInputStream zipIn = new ZipInputStream(new BufferedInputStream(new FileInputStream(cawFile)));
 			
+			int genNum = 0;
 			while((entry = zipIn.getNextEntry()) != null)
 			{
 				String name = entry.getName();
@@ -257,30 +258,30 @@ public class WorldStreamer
 						return null;
 					}
 					
-					for(int genNum = 0; genNum < numGenerations; genNum++)
+					int index = name.lastIndexOf('/');
+					if(index == -1)
+						index = 0;
+					
+					System.out.println("File name : " + name);
+					
+					if(name.substring(index).compareTo(genNum + ".cag") != 0)
+						Log.error(TAG, "Generation " + genNum + " file not found.");
+					
+					for(int rows = 0; rows < y; rows++)
 					{
-						int index = name.lastIndexOf('/');
-						if(index == -1)
-							index = 0;
-						
-						if(name.substring(index).compareTo(genNum + ".cag") != 0)
-							Log.error(TAG, "Generation " + genNum + " file not found.");
-						
-						for(int rows = 0; rows < y; rows++)
+						for(int cols = 0; cols < x; cols++)
 						{
-							for(int cols = 0; cols < x; cols++)
-							{
-								double[] vals = new double[properties];
+							double[] vals = new double[properties];
 
-								for(int i = 0; i < properties; i++)
-									vals[i] = Double.parseDouble(token.nextToken());
-								
-								gen.setCell(cols, rows, vals);
-							}
+							for(int i = 0; i < properties; i++)
+								vals[i] = Double.parseDouble(token.nextToken());
+							
+							gen.setCell(cols, rows, vals);
 						}
-						
-						generations.add(gen.clone());
 					}
+					
+					generations.add(gen.clone());
+					genNum++;
 				}
 			}
 
