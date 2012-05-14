@@ -31,42 +31,6 @@ public class WorldStreamer
 	{
 	}
 	
-	public void clearHistory(World w)
-	{
-		File caw = new File(cawFilename);
-		
-		if(!outOpen)
-		{
-			try
-			{
-				out = new ZipOutputStream(new FileOutputStream(caw));
-				outOpen = true;
-			}
-			catch(IOException ex)
-			{
-				Log.error(TAG, "Error with clearing the history - " + ex.getMessage());
-				ex.printStackTrace();
-			}
-		}
-		else
-		{
-			stop();
-			
-			try
-			{
-				out = new ZipOutputStream(new FileOutputStream(caw));
-				outOpen = true;
-			}
-			catch(IOException ex)
-			{
-				Log.error(TAG, "Error with clearing the history - " + ex.getMessage());
-				ex.printStackTrace();
-			}
-		}
-		
-		writeInitialValues(w);
-	}
-	
 	public Grid getGeneration(int genNum)
 	{
 		try
@@ -314,7 +278,7 @@ public class WorldStreamer
 	public void openOut()
 	{
 		Log.debug(TAG, "ZipOutputStream was closed. Reopening....");
-		
+
 		File theFile = new File(cawFilename);
 		
 		try

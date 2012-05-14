@@ -43,6 +43,7 @@ public class World
 		this.worldFileName = w.worldFileName;
 		this.ruleCode = w.ruleCode;
 		this.colourCode = w.colourCode;
+		this.worldGenerations.clear();
 		this.worldGenerations.addAll(w.worldGenerations);
 		
 		if(historyType == 2)
@@ -81,7 +82,7 @@ public class World
 	
 	public boolean clearHistory(int genNumber)
 	{
-		if(historyType == 0)
+		if(historyType == 0 || historyType == 2)
 			return false;
 		
 		if(worldGenerations.size() <= genNumber)
@@ -241,6 +242,7 @@ public class World
 		this.worldFileName = w.worldFileName;
 		this.ruleCode = w.ruleCode;
 		this.colourCode = w.colourCode;
+		this.worldGenerations.clear();
 		
 		if(historyType != 0)
 			this.worldGenerations.addAll(w.worldGenerations);

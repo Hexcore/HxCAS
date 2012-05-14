@@ -1387,8 +1387,11 @@ public class GUI implements WindowEventListener, LobbyListener
         }
         
         grid.setWrappable(wrapCheckBox.isChecked());
-        
+
+        if(world.getHistoryType() == 2 && historyDropDownBox.getSelected() != 2)
+        	world.stop();
         world.setKeepHistory(historyDropDownBox.getSelected());
+        
         world.resetTo(grid);
     }
     
@@ -1562,6 +1565,7 @@ public class GUI implements WindowEventListener, LobbyListener
     		{
     			generation = 0;
     			grid = world.getInitialGeneration();
+    			
     			force = true;
     			iterationsText.setCaption("Generations: " + (world.getNumGenerations() - 1));
     		}
