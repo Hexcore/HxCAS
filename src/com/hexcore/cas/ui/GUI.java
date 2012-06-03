@@ -666,7 +666,7 @@ public class GUI implements WindowEventListener, LobbyListener
         
         historyDropDownBox = new DropDownBox(new Vector2i(135,20));
         historyDropDownBox.setFlag(Widget.CENTER_VERTICAL);
-        historyDropDownBox.addItem("None");
+        historyDropDownBox.addItem("No History");
         historyDropDownBox.addItem("Memory history");
         historyDropDownBox.addItem("Harddisk history");
         historyDropDownBox.setSelected(1);
