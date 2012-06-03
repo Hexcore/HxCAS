@@ -184,6 +184,8 @@ public class WorldStreamer
 		File folder = new File(tmpDir);
 		File currFile = null;
 		File[] listOfFiles = folder.listFiles();
+		int arrSize = listOfFiles.length - 3;
+		Grid[] gens = new Grid[arrSize];
 		InputStream in = null;
 		String currFilename = null;
 		
@@ -287,11 +289,14 @@ public class WorldStreamer
 						int index = currFilename.lastIndexOf('/');
 						if(index == -1)
 							index = 0;
+						int fileGenIndex = currFilename.indexOf(".cag");
+						int fileGenNum = 0;
+						if(index != 0)
+							fileGenNum = Integer.parseInt(currFilename.substring(index + 1, fileGenIndex));
+						else
+							fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 						
-						System.out.println("File name : " + currFilename);
-						
-						if(currFilename.substring(index).compareTo(genNum + ".cag") != 0)
-							Log.error(TAG, "Generation " + genNum + " file not found.");
+						Log.debug(TAG, "File name : " + currFilename + "; File generation number : " + fileGenNum);
 						
 						for(int rows = 0; rows < y; rows++)
 						{
@@ -306,7 +311,7 @@ public class WorldStreamer
 							}
 						}
 						
-						generations.add(gen.clone());
+						gens[fileGenNum] = gen.clone();
 						genNum++;
 					}
 					else
@@ -316,6 +321,9 @@ public class WorldStreamer
 
 			in.close();
 			in = null;
+			
+			for(int i = 0; i < arrSize; i++)
+				generations.add(gens[i]);
 			
 			return generations;
 		}
