@@ -57,11 +57,11 @@ public class World
 	{
 		worldGenerations.add(gen);
 		
-		if(historyType == 0)
-			genAmount++;
 		
 		if(historyType == 0 || historyType == 2)
 		{
+			genAmount++;
+			
 			if(worldGenerations.size() > 1)
 				for(int i = 0; i < worldGenerations.size() - 1; i++)
 					worldGenerations.remove(0);
@@ -76,6 +76,8 @@ public class World
 		int size = worldGenerations.size();
 		for(int i = 0; i < size - 1; i++)
 			worldGenerations.remove(0);
+		
+		genAmount = worldGenerations.size();
 		
 		return true;
 	}
@@ -99,12 +101,10 @@ public class World
 	
 	public int getNumGenerations()
 	{
-		if(historyType == 0)
+		if(historyType == 0 || historyType == 2)
 			return genAmount;
 		else if(historyType == 1)
 			return worldGenerations.size();
-		else if(historyType == 2)
-			return streamer.getNumGenerations();
 		else
 			return -1;
 	}
@@ -133,9 +133,17 @@ public class World
 		}
 		else if(historyType == 2)
 		{
-			worldGenerations.clear();
-			worldGenerations.add(streamer.getGeneration(index));
-			return worldGenerations.get(0);
+			if(index == (genAmount - 1))
+			{
+				return worldGenerations.get(0);
+			}
+			else
+			{
+				worldGenerations.clear();
+				worldGenerations.add(streamer.getGeneration(index));
+				genAmount = worldGenerations.size();
+				return worldGenerations.get(0);
+			}
 		}
 		else
 			return null;
@@ -156,6 +164,7 @@ public class World
 		{
 			worldGenerations.clear();
 			worldGenerations.add(streamer.getLastGeneration());
+			genAmount = worldGenerations.size();
 			return worldGenerations.get(0);
 		}
 		else
@@ -178,9 +187,16 @@ public class World
 			return null;
 		else if(historyType == 2 && streamer.hasStarted())
 		{
-			worldGenerations.clear();
-			worldGenerations.add(streamer.getGeneration(0));
-			return worldGenerations.get(0);
+			if(genAmount == 1)
+			{
+				return worldGenerations.get(0);
+			}
+			else
+			{
+				worldGenerations.clear();
+				worldGenerations.add(streamer.getGeneration(0));
+				return worldGenerations.get(0);
+			}
 		}
 		else
 			return worldGenerations.get(0);
@@ -199,6 +215,11 @@ public class World
 			return worldFileName;
 	}
 	
+	public boolean hasStarted()
+	{
+		return streamer.hasStarted();
+	}
+	
 	public boolean isHistoryKept()
 	{
 		if(historyType == 0)
@@ -213,7 +234,7 @@ public class World
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
 
-		if(historyType == 0)
+		if(historyType == 0 || historyType == 2)
 			genAmount = worldGenerations.size();
 		
 		if(historyType == 2)
@@ -227,7 +248,7 @@ public class World
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
 
-		if(historyType == 0)
+		if(historyType == 0 || historyType == 2)
 			genAmount = worldGenerations.size();
 		
 		if(historyType == 2)
@@ -238,7 +259,6 @@ public class World
 	{
 		Log.debug(TAG, "Resetting world.");
 
-		this.historyType = w.historyType;
 		this.worldFileName = w.worldFileName;
 		this.ruleCode = w.ruleCode;
 		this.colourCode = w.colourCode;
@@ -249,7 +269,7 @@ public class World
 		else
 			this.worldGenerations.add(w.worldGenerations.get(w.worldGenerations.size() - 1));
 
-		if(historyType == 0)
+		if(historyType == 0 || historyType == 2)
 			genAmount = worldGenerations.size();
 		
 		if(historyType == 2)
@@ -288,12 +308,18 @@ public class World
 		
 		for(Grid grid : w) worldGenerations.add(grid);
 		
+		if(historyType == 0 || historyType == 2)
+			genAmount = worldGenerations.size();
+		
 		if(historyType == 2 && streamer.hasStarted())
 			streamer.reset(this);
 	}
 	
 	public void start()
 	{
+		if(historyType != 2)
+			return;
+		
 		if(!streamer.hasStarted())
 		{
 			Log.debug(TAG, "Starting streamer");
@@ -303,10 +329,10 @@ public class World
 	
 	public void stop()
 	{
-		Log.debug(TAG, "stop() called");
-		
 		if(historyType != 2)
 			return;
+		
+		Log.debug(TAG, "stop() called");
 		
 		if(streamer.hasStarted())
 			streamer.stop();

@@ -152,9 +152,8 @@ public class TestWorldStreamer extends TestCase
 		{
 			e.printStackTrace();
 		}
-		
+
 		world.resetTo(secondWorld);
-		world.setKeepHistory(2);
 		System.out.println("== File 2 : " + world.getFilename() + " ==");
 		
 		List<Grid> grids = secondWorld.getGenerations();
@@ -351,6 +350,8 @@ public class TestWorldStreamer extends TestCase
 	//Not actually a test. Used to delete all the test worlds.
 	public void testDelete()
 	{
+		System.out.println("\n== Deleting tester files ==");
+		
 		String worldName = "Test Data/world/world";
 		String secondWorldName = "Test Data/world/secondWorld";
 		

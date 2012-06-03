@@ -1366,8 +1366,6 @@ public class GUI implements WindowEventListener, LobbyListener
     
     public void savePropertiesToWorld()
     {
-    	world.start();
-    	
     	Grid grid = world.getInitialGeneration();
     	
         Vector2i size = new Vector2i(worldSizeXNumberBox.getValue(5), worldSizeYNumberBox.getValue(5));
@@ -1391,7 +1389,7 @@ public class GUI implements WindowEventListener, LobbyListener
         if(world.getHistoryType() == 2 && historyDropDownBox.getSelected() != 2)
         	world.stop();
         world.setKeepHistory(historyDropDownBox.getSelected());
-        
+
         world.resetTo(grid);
     }
     
