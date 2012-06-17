@@ -1843,8 +1843,8 @@ public class GUI implements WindowEventListener, LobbyListener
  
                 for (String result : compiler.getResult())
                 {
-                      outputLayout.add(new TextWidget(result));
-                      window.relayout();
+                	outputLayout.add(new TextWidget(result));
+                	window.relayout();
                 }
                 
                 if (compiler.getErrorCount() == 0)
@@ -1856,7 +1856,7 @@ public class GUI implements WindowEventListener, LobbyListener
                 	Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
                 	world.setRuleCode("");
                 }
-                
+    			
                 createColoursTab();
             }
             else if(event.target == saveCALFileButton)

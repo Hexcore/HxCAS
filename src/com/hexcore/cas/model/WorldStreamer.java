@@ -410,6 +410,8 @@ public class WorldStreamer
 		File folder = new File(tmpDir);
 		File caw = new File(cawFilename);
 		File[] listOfFiles = folder.listFiles();
+
+		folder.deleteOnExit();
 		
 		try
 		{
@@ -439,8 +441,6 @@ public class WorldStreamer
 			}
 			
 			out.close();
-			
-			folder.deleteOnExit();
 		}
 		catch(IOException ex)
 		{
