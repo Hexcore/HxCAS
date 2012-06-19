@@ -32,6 +32,11 @@ public class WorldStreamer
 	{
 	}
 	
+	public String getCawFilename()
+	{
+		return cawFilename;
+	}
+	
 	public Grid getGeneration(int genNum)
 	{
 		File folder = new File(tmpDir);
@@ -359,6 +364,11 @@ public class WorldStreamer
 		}
 	}
 	
+	public void setWorldFilename(String name)
+	{
+		cawFilename = name;
+	}
+	
 	public void start(World w)
 	{
 		if(!reset)
@@ -391,7 +401,7 @@ public class WorldStreamer
 			
 			cawFilename = name;
 			
-			tmpDir = "worlds/[tmp]" + cawFilename.substring(cawFilename.lastIndexOf("/") + 1, cawFilename.lastIndexOf("."));
+			tmpDir = "worlds/[tmp]" + cawFilename.substring(cawFilename.lastIndexOf("\\") + 1, cawFilename.lastIndexOf("."));
 			boolean res = (new File(tmpDir).mkdirs()); 
 			
 			Log.debug(TAG, "cawFilename : " + cawFilename);
@@ -568,10 +578,5 @@ public class WorldStreamer
 		}
 		
 		w.setKeepHistory(2);
-	}
-	
-	public String getCawFilename()
-	{
-		return cawFilename;
 	}
 }

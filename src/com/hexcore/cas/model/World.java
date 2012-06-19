@@ -288,6 +288,9 @@ public class World
 	public void setFileName(String name)
 	{
 		worldFileName = name;
+		
+		if(historyType == 2 && streamer.hasStarted())
+			streamer.setWorldFilename(worldFileName);
 	}
 
 	public void setKeepHistory(int hT)

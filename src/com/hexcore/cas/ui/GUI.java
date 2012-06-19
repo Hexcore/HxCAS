@@ -1795,14 +1795,19 @@ public class GUI implements WindowEventListener, LobbyListener
             }
             else if(event.target == saveWorldButton)
             {
+            	int selectedMemory = historyDropDownBox.getSelected();
+            	
                 FileSelectResult result = window.askUserForFileToSave("world");
                 
                 if (result.isValid())
                 {
                 	world.setFileName(result.getFullPath());
                     
-                	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SAVE_WORLD);
-                    server.sendEvent(serverEvent);
+                	if(selectedMemory != 2)
+                	{
+	                	ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SAVE_WORLD);
+	                    server.sendEvent(serverEvent);
+                	}
                 }
                 
                 refreshClients();
@@ -2349,10 +2354,17 @@ public class GUI implements WindowEventListener, LobbyListener
         	//Disable generation slider for no history keep
         	else if(event.target == historyDropDownBox)
         	{
-        		if(historyDropDownBox.getSelected() == 0)
+        		int selected = historyDropDownBox.getSelected();
+        		
+        		if(selected == 0)
         			generationSlider.toggleActivation(false);
         		else
         			generationSlider.toggleActivation(true);
+        		
+        		if(selected != 2)
+        			saveWorldButton.setCaption("Save World");
+        		else
+        			saveWorldButton.setCaption("Change Path");
         		
         		savePropertiesToWorld();
         		updateSimulationScreen(true);
