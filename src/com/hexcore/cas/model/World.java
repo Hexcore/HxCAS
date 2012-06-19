@@ -141,7 +141,6 @@ public class World
 			{
 				worldGenerations.clear();
 				worldGenerations.add(streamer.getGeneration(index));
-				genAmount = worldGenerations.size();
 				return worldGenerations.get(0);
 			}
 		}
