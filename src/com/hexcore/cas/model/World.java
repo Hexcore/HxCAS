@@ -1,6 +1,9 @@
 package com.hexcore.cas.model;
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +25,13 @@ public class World
 {
 	private int historyType = 1;
 	private int genAmount = 0;
+	private int lastIn = -1;
 	private List<Grid> worldGenerations = null;
 	private String worldFileName = null;
 	private String ruleCode = null;
 	private String colourCode = null;
 	private WorldStreamer streamer = null;
+	//private static Instrumentation instrumentation;
 
 	private static final String TAG = "World";
 	
@@ -50,6 +55,7 @@ public class World
 		{
 			streamer = new WorldStreamer();
 			streamer.start(this);
+			lastIn = worldGenerations.size();
 		}
 	}
 	
@@ -57,10 +63,10 @@ public class World
 	{
 		worldGenerations.add(gen);
 		
-		
 		if(historyType == 0 || historyType == 2)
 		{
 			genAmount++;
+			lastIn = genAmount - 1;
 			
 			if(worldGenerations.size() > 1)
 				for(int i = 0; i < worldGenerations.size() - 1; i++)
@@ -78,6 +84,7 @@ public class World
 			worldGenerations.remove(0);
 		
 		genAmount = worldGenerations.size();
+		lastIn = genAmount - 1;
 		
 		return true;
 	}
@@ -133,12 +140,16 @@ public class World
 		}
 		else if(historyType == 2)
 		{
-			if(index == (genAmount - 1))
+			if(genAmount == 0)
+				return null;
+			
+			if(index == lastIn && worldGenerations.size() > 0)
 			{
-				return worldGenerations.get(0);
+				return worldGenerations.get(worldGenerations.size() - 1);
 			}
 			else
 			{
+				lastIn = index;
 				worldGenerations.clear();
 				worldGenerations.add(streamer.getGeneration(index));
 				return worldGenerations.get(0);
@@ -161,9 +172,9 @@ public class World
 			return worldGenerations.get(worldGenerations.size() - 1);
 		else if(historyType == 2)
 		{
+			lastIn = genAmount - 1;
 			worldGenerations.clear();
 			worldGenerations.add(streamer.getLastGeneration());
-			genAmount = worldGenerations.size();
 			return worldGenerations.get(0);
 		}
 		else
@@ -186,6 +197,7 @@ public class World
 			return null;
 		else if(historyType == 2 && streamer.hasStarted())
 		{
+			lastIn = 0;
 			if(genAmount == 1)
 			{
 				return worldGenerations.get(0);
@@ -234,7 +246,10 @@ public class World
 		worldGenerations.add(g.clone());
 
 		if(historyType == 0 || historyType == 2)
+		{
 			genAmount = worldGenerations.size();
+			lastIn = genAmount - 1;
+		}
 		
 		if(historyType == 2)
 			streamer.reset(this);
@@ -248,7 +263,10 @@ public class World
 		worldGenerations.add(g.clone());
 
 		if(historyType == 0 || historyType == 2)
+		{
 			genAmount = worldGenerations.size();
+			lastIn = genAmount - 1;
+		}
 		
 		if(historyType == 2)
 			streamer.reset(this);
@@ -269,7 +287,10 @@ public class World
 			this.worldGenerations.add(w.worldGenerations.get(w.worldGenerations.size() - 1));
 
 		if(historyType == 0 || historyType == 2)
+		{
 			genAmount = worldGenerations.size();
+			lastIn = genAmount - 1;
+		}
 		
 		if(historyType == 2)
 			streamer.reset(this);

@@ -16,8 +16,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.widgets.Dialog;
 import com.hexcore.cas.ui.toolkit.widgets.Layout;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
+import com.hexcore.cas.utilities.Log;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ClipboardOwner
@@ -103,12 +103,17 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		canvas.setFocusTraversalKeysEnabled(false);
 
 		frame = new Frame(title);
-			
+		
 		frame.setSize(width, height);
 		frame.setResizable(true);
-		frame.addWindowListener(new WindowListener());
+		//frame.addWindowListener(new WindowListener());
 		frame.add(canvas);
 		frame.pack();
+	}
+	
+	public void addWindowListener(WindowListener wL)
+	{
+		frame.addWindowListener(wL);
 	}
 	
 	public boolean isDebugLayout()
@@ -147,7 +152,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		for (Widget component : components) component.update(new Vector2i(), delta);
 	}
 	
-	public void exit() 
+	public void shutdown()
 	{
 		System.out.println(eventListeners.size());
 		
@@ -156,7 +161,11 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
       			return;
 		
 		frame.dispose();
-      			
+	}
+	
+	//Reason for call? System.exit(0) called here AND at the end of Server
+	public void exit() 
+	{
       	System.exit(0);
 	}
 	
@@ -508,11 +517,15 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	}
 		
 	////
-		
-	private class WindowListener extends WindowAdapter
+	
+	/*private class WindowListener extends WindowAdapter
 	{
-		public void windowClosing(WindowEvent we) { exit(); }
-	}
+		public void windowClosing(WindowEvent we)
+		{
+			
+			exit();
+		}
+	}*/
 	
 	////
 	

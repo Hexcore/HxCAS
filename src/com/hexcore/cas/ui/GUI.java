@@ -2,6 +2,9 @@
 
 package com.hexcore.cas.ui;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -15,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.swing.JOptionPane;
 
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
@@ -403,6 +408,11 @@ public class GUI implements WindowEventListener, LobbyListener
     public TextWidget	dialogCALTitle;
     public TextWidget	dialogCALMessage;
     public Button		dialogCALOKButton;
+    
+    public Dialog		dialogGens; 
+    public LinearLayout dialogGensLayout;
+    public TextWidget	dialogGensTitle;
+    public TextWidget	dialogGensMessage;
  
     // DISTRIBUTION TAB
     public Container 	distributionContainer;
@@ -572,6 +582,18 @@ public class GUI implements WindowEventListener, LobbyListener
         window = new Window("Cellular Automata Simulator - v1.0", 1366, 700, theme);
         
         window.addListener(this);
+
+        WindowListener exitListener = new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+            	shutdownProcess();
+            	//window.exit();
+            }
+        };
+        window.addWindowListener(exitListener);
+        
         window.show();
     }
     
@@ -929,6 +951,25 @@ public class GUI implements WindowEventListener, LobbyListener
         dialogCALOKButton = new Button(new Vector2i(120, 30), "OK");
         dialogCALOKButton.setFlag(Widget.CENTER_HORIZONTAL);
         dialogCALLayout.add(dialogCALOKButton);
+        
+        //Dialog saving generations
+
+        dialogGens = new Dialog(window, new Vector2i(400, 200));
+        
+        dialogGensLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        dialogGensLayout.setFlag(Widget.FILL);
+        dialogGens.setContents(dialogGensLayout);
+        
+        dialogGensTitle = new TextWidget("Streaming...", Text.Size.LARGE);
+        dialogGensTitle.setFlag(Widget.CENTER_HORIZONTAL);
+        dialogGensLayout.add(dialogGensTitle);
+        
+        dialogGensMessage = new TextWidget("Saving generations to disk. Please be patient...");
+        dialogGensMessage.setFlag(Widget.FILL_HORIZONTAL);
+        dialogGensMessage.setFlag(Widget.FILL_VERTICAL); // This pushes the OK button down because it fills the space in between
+        dialogGensMessage.setFlowed(true);
+        dialogGensMessage.setFlag(Widget.CENTER_HORIZONTAL);
+        dialogGensLayout.add(dialogGensMessage);
 
         ////Simulation
         
@@ -1556,19 +1597,13 @@ public class GUI implements WindowEventListener, LobbyListener
     		iterationsText.setCaption("Generations: " + generations);
 
     		// Update viewports
-    		int		generation = generationSlider.getValue();
-    		Grid 	grid = world.getGeneration(generation);
+    		int		generation = (historyDropDownBox.getSelected() != 0 ? generationSlider.getValue() : 0);
+    		Grid 	grid = (historyDropDownBox.getSelected() != 0 ? world.getGeneration(generation) : world.getInitialGeneration());
     		
     		if(historyDropDownBox.getSelected() == 0)
-    		{
-    			generation = 0;
-    			grid = world.getInitialGeneration();
-    			
     			force = true;
-    			iterationsText.setCaption("Generations: " + (world.getNumGenerations() - 1));
-    		}
     		
-    		if (grid != null && (currentGeneration != generation || force))
+    		if(grid != null && (currentGeneration != generation || force))
     		{
     			currentGeneration = generation;
     			currentGrid = grid;
@@ -1576,15 +1611,15 @@ public class GUI implements WindowEventListener, LobbyListener
             	if(viewports.isEmpty())
             		System.out.println("VIEWPORTS IS EMPTY");
             	
-    			if ((currentGrid.getType() == grid.getType() && !force) || (!recreate))
+    			if((currentGrid.getType() == grid.getType() && !force) || (!recreate))
     			{
-	    			for (Viewport viewport : viewports)
+	    			for(Viewport viewport : viewports)
 	    				viewport.gridWidget.setGrid(currentGrid);
     			}
     			else
     			{
-	   				for (Viewport viewport : viewports)
-	   					viewport.recreate(grid, window, colourRules);
+	   				for(Viewport viewport : viewports)
+	   					viewport.recreate(currentGrid, window, colourRules);
 	   				
 	   				recreate = false;
     			}
@@ -1817,8 +1852,8 @@ public class GUI implements WindowEventListener, LobbyListener
             }
             else if(event.target == quitButton)
             {
-            	world.stop();
-                window.exit();
+            	shutdownProcess();
+                //window.exit();
             }
             else if((event.target == dialogOKButton) || (event.target == dialogCALOKButton))
             {
@@ -2449,5 +2484,36 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			updateAvailableClientsList();
 		}
+	}
+	
+	public void displayShutdownMessage()
+	{
+		Log.information(TAG, "Shutdown process initiated.");
+		
+        Dialog dia = new Dialog(window, new Vector2i(400, 80));
+        
+        LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        diaLayout.setFlag(Widget.FILL);
+        dia.setContents(diaLayout);
+        
+        TextWidget diaTitle = new TextWidget("Program Shut Down", Text.Size.LARGE);
+        diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
+        diaLayout.add(diaTitle);
+        
+        TextWidget diaMessage = new TextWidget("The program is busy shutting down. Please be patient.");
+        diaMessage.setFlag(Widget.FILL);
+        diaLayout.add(diaMessage);
+    	
+        window.showModalDialog(dia);
+	}
+	
+	public void shutdownProcess()
+	{
+		displayShutdownMessage();
+		
+        if(world != null)
+        	world.stop();
+        
+        window.shutdown();
 	}
 }

@@ -246,8 +246,12 @@ public class Server
 			e.printStackTrace();
 		}
 		
-		if(world != null)
+		/* Already called in GUI.
+		 * if(world != null)
+		{
+			Log.warning(TAG, "Server's world.stop()");
 			world.stop();
+		}*/
 		
 		System.exit(0);
 	}

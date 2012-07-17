@@ -39,6 +39,7 @@ public class WorldStreamer
 	
 	public Grid getGeneration(int genNum)
 	{
+		System.out.println("Streamer getGeneration(" + genNum + ") called.");
 		File folder = new File(tmpDir);
 		File currFile = null;
 		File[] listOfFiles = folder.listFiles();
@@ -401,7 +402,13 @@ public class WorldStreamer
 			
 			cawFilename = name;
 			
-			tmpDir = "worlds/[tmp]" + cawFilename.substring(cawFilename.lastIndexOf("\\") + 1, cawFilename.lastIndexOf("."));
+			int backIndex = cawFilename.lastIndexOf("\\");
+			int forwardIndex = cawFilename.lastIndexOf("/");
+			
+			if(backIndex != -1)
+				tmpDir = "worlds/[tmp]" + cawFilename.substring(backIndex + 1, cawFilename.lastIndexOf("."));
+			else if(forwardIndex != -1)
+				tmpDir = "worlds/[tmp]" + cawFilename.substring(forwardIndex + 1, cawFilename.lastIndexOf("."));
 			boolean res = (new File(tmpDir).mkdirs()); 
 			
 			Log.debug(TAG, "cawFilename : " + cawFilename);
@@ -418,11 +425,11 @@ public class WorldStreamer
 	public void stop()
 	{
 		File folder = new File(tmpDir);
+		folder.deleteOnExit();
+		
 		File caw = new File(cawFilename);
 		File[] listOfFiles = folder.listFiles();
 
-		folder.deleteOnExit();
-		
 		try
 		{
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(caw)));
@@ -432,7 +439,10 @@ public class WorldStreamer
 				if(listOfFiles[i].isFile())
 				{
 					String currFilename = listOfFiles[i].getName();
+					
 					File currFile = new File(tmpDir + "/" + currFilename);
+					currFile.deleteOnExit();
+					
 					FileInputStream in = new FileInputStream(currFile);
 					ZipEntry entry = new ZipEntry(currFilename);
 					
@@ -446,7 +456,6 @@ public class WorldStreamer
 					out.closeEntry();
 					
 					in.close();
-					currFile.deleteOnExit();
 				}
 			}
 			
