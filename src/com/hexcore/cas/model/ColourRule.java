@@ -10,25 +10,77 @@ import com.hexcore.cas.ui.toolkit.Colour;
  * 	Use this class to assign a colour or colour range
  *  to a specific property.
  * 
- * @author Divan
- *
+ * @author Divan Burger
  */
 
 public class ColourRule
 {
+	public ArrayList<Range> ranges;
+	public boolean			useClosestRange;
+	
+	public ColourRule()
+	{
+		useClosestRange = false;
+		ranges = new ArrayList<Range>();
+	}
+	
+	public void addRange(Range range)
+	{
+		ranges.add(range);
+	}
+	
+	public Colour getColour(double value)
+	{
+		Range closestRange = null;
+		
+		for(Range range : ranges)
+		{
+			if((value >= range.from) && (value < range.to)) 
+				return range.getColourAt(value);
+			else if(closestRange == null)
+				closestRange = range;
+			else 
+			{
+				double dist = Math.min(Math.abs(closestRange.from - value), Math.abs(closestRange.to - value));
+				double curDist = Math.min(Math.abs(range.from - value), Math.abs(range.to - value));
+				
+				if(curDist <= dist)
+					closestRange = range;
+			}
+		}
+		
+		if (useClosestRange && (closestRange != null))
+			return closestRange.getColourAt(value);
+			
+		return Colour.BLACK;
+	}
+	
+	public boolean isUsingClosestRange()
+	{
+		return useClosestRange;
+	}
+	
+	public void useClosestRange(boolean state)
+	{
+		useClosestRange = state;
+	}
+	
+	/////////////////////////////////////////////
+	/// Inner classes
 	/**
 	 * 	Static Range class.
 	 *  A Range doesn't not include the end of the range (the value of 'to')
 	 */
 	public static class Range
 	{
-		public enum Type {SOLID, GRADIENT};
+		public enum			Type {SOLID, GRADIENT};
+
+		private Colour[] 	colours;
 		
-		public double from;
-		public double to;
+		public double		from;
+		public double		to;
 		
 		private Type		type;
-		private Colour[] 	colours;
 		
 		public Range(double from, double to, Colour colour)
 		{
@@ -49,66 +101,24 @@ public class ColourRule
 			colours[1] = new Colour(toColour);
 		}
 		
-		public Type		getType() {return type;}
-		public Colour	getColour(int index) {return colours[index];}
-		
-		public Colour	getColourAt(double value)
+		public Colour getColour(int index)
 		{
-			if (type == Type.SOLID) return colours[0];
-			if (type != Type.GRADIENT) return null;
+			return colours[index];
+		}
+		
+		public Colour getColourAt(double value)
+		{
+			if(type == Type.SOLID) return colours[0];
+			if(type != Type.GRADIENT) return null;
+			if(value <= from) return colours[0];
+			if(value >= to) return colours[1];
 			
-			if (value <= from) return colours[0];
-			if (value >= to) return colours[1];
 			return colours[0].mix(colours[1], (float)((value - from) / (to - from)));
 		}
-	}
-	
-	public boolean			useClosestRange;
-	public ArrayList<Range> ranges;
-	
-	public ColourRule()
-	{
-		useClosestRange = false;
-		ranges = new ArrayList<Range>();
-	}
-	
-	public boolean isUsingClosestRange()
-	{
-		return useClosestRange;
-	}
-	
-	public void useClosestRange(boolean state)
-	{
-		useClosestRange = state;
-	}
-	
-	public void addRange(Range range)
-	{
-		ranges.add(range);
-	}
-	
-	public Colour getColour(double value)
-	{
-		Range	closestRange = null;
 		
-		for (Range range : ranges)
+		public Type getType()
 		{
-			if ((value >= range.from) && (value < range.to)) 
-				return range.getColourAt(value);
-			else if (closestRange == null)
-				closestRange = range;
-			else 
-			{
-				double	dist = Math.min(Math.abs(closestRange.from - value), Math.abs(closestRange.to - value));
-				double	curDist = Math.min(Math.abs(range.from - value), Math.abs(range.to - value));
-				
-				if (curDist <= dist) closestRange = range;
-			}
+			return type;
 		}
-		
-		if (useClosestRange && (closestRange != null))
-			return closestRange.getColourAt(value);
-			
-		return Colour.BLACK;
 	}
 }

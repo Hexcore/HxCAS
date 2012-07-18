@@ -1,11 +1,17 @@
 package com.hexcore.cas.rulesystems;
 
+/**
+ * Class TableEntry
+
+ * @authors Karl Zoller
+ */
+
 public class TableEntry
 {
 	public static final int	Constant = 0,		//Kinds
 							Variable = 1,
 							sFunction = 2,
-							aFunction = 3,							
+							aFunction = 3,
 							Property = 4,		//For cell properties
 							Cell =     5,
 							
@@ -16,7 +22,7 @@ public class TableEntry
 							cellType = 8;
 	
 	public int 				type;
-	public int 				kind;				
+	public int 				kind;
 	public int 				value;				//Constant value
 	public int 				offset;
 	public int				argType;
@@ -24,8 +30,6 @@ public class TableEntry
 	public boolean			immutable = false;
 	
 	public TableEntry 		nextEntry;
-	
-	
 	
 	public TableEntry()
 	{

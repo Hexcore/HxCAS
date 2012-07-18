@@ -3,6 +3,12 @@ package com.hexcore.cas.control.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Class IntNode
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class IntNode extends Node
 {
 	private int value;

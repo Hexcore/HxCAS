@@ -9,12 +9,12 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Class WorldSaver
- * An instance of this object is used to write all details
- * of a world to where it is stored.
+ * 	An instance of this object is used to write all details
+ * 	of a world to where it is stored.
  * 
- * @author Megan
- *
+ * @author Megan Duncan
  */
+
 public class WorldSaver
 {
 	public WorldSaver()

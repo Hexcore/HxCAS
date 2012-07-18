@@ -4,14 +4,22 @@ import com.hexcore.cas.math.Recti;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
 
+/**
+ * Class ThreadWork
+ * 	The class that is used by the server and client to designate and
+ * 	complete partitions of work and computation.
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class ThreadWork
 {
 	private Grid		grid = null;
 	private int			generation = 0;
 	private int			id = -1;
-	private Vector2i	position;
-	private Recti		workable = null;
 	private long		startTime = -1;
+	private Recti		workable = null;
+	private Vector2i	position;
 	
 	public ThreadWork(int generation, int id, Grid grid, Vector2i position, Recti workable)
 	{
@@ -48,6 +56,11 @@ public class ThreadWork
 		return id;
 	}
 	
+	public Vector2i getPosition()
+	{
+		return position;
+	}
+	
 	public Recti getWorkableArea()
 	{
 		return workable;
@@ -56,18 +69,13 @@ public class ThreadWork
 	public long getStartTime()
 	{
 		return startTime;
-	}	
-	
-	public Vector2i getPosition()
-	{
-		return position;
 	}
 	
 	public void setStartTime(long time)
 	{
 		startTime = time;
 	}
-		
+	
 	public void setGrid(Grid g)
 	{
 		grid = g.clone();

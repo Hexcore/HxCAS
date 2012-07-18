@@ -12,20 +12,24 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class CAPMessageProtocol
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class CAPMessageProtocol extends Thread
 {
-	private static final String TAG = "CAPMessageProtocol";
+	private static final int				NO_BYTE = -2;
+	private static final String				TAG = "CAPMessageProtocol";
 	
-	private static final int NO_BYTE = -2;
-	
-	private volatile boolean running = false;
-	private LinkedBlockingQueue<Message> messageQueue = null;
-	private Socket socket = null;
-	private ReentrantLock lock = null;
-
-	private BufferedInputStream inputStream;
-	private BufferedOutputStream outputStream;	
-	private int currentByte = NO_BYTE;
+	private volatile boolean				running = false;
+	private BufferedInputStream				inputStream;
+	private BufferedOutputStream			outputStream;
+	private int								currentByte = NO_BYTE;
+	private LinkedBlockingQueue<Message>	messageQueue = null;
+	private ReentrantLock					lock = null;
+	private Socket							socket = null;
 	
 	public CAPMessageProtocol(Socket socket)
 	{
@@ -40,10 +44,20 @@ public class CAPMessageProtocol extends Thread
 			inputStream = new BufferedInputStream((socket.getInputStream()));
 			outputStream = new BufferedOutputStream((socket.getOutputStream()));
 		}
-		catch (IOException e)
+		catch(IOException e)
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public void disconnect()
+	{
+		running = false;
+	}
+	
+	public Socket getSocket()
+	{
+		return socket;
 	}
 	
 	public boolean isRunning()
@@ -51,47 +65,115 @@ public class CAPMessageProtocol extends Thread
 		return running;
 	}
 	
-	private Node readNode() throws ProtocolErrorException, ProtocolCloseException
-	{
-		Node node = null;
-		byte b = peakByte();
-		switch(b)
+	@Override
+	public void run()
+	{		
+		while(running) 
 		{
-			case 'l':
-				node = list();
-				break;
-			case 'i':
-				node = intValue();
-				break;
-			case 'd':
-				node = dictionary();
-				break;
-			case 'f':
-				node = doubleValue();
-				break;
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				node = byteString();
-				break;
-			default:
-				Log.error(TAG, "Expected start of a node, got '" + (char)b + "'");
+			try
+			{
+				receiveMessage();
+			}
+			catch(ProtocolErrorException e)
+			{
+				Log.error(TAG, e.getMessage());
+				
+				try
+				{
+					forwardUntil('#');
+				}
+				catch(ProtocolCloseException e1)
+				{
+					Log.error(TAG, e1.getMessage());
+					disconnect();
+				}			
+				catch(ProtocolErrorException e2)
+				{
+					Log.error(TAG, e.getMessage());
+					disconnect();
+				}
+			}
+			catch(ProtocolCloseException e)
+			{
+				Log.error(TAG, e.getMessage());
+				disconnect();
+			}
 		}
 		
-		return node;
+		try
+		{
+			socket.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
+	
+	public void sendMessage(Message message)
+	{
+		if (!running) 
+		{
+			Log.warning(TAG, "Message not sent, protocol is not running");
+			return;
+		}
 		
-	private ByteNode byteString() throws ProtocolErrorException, ProtocolCloseException
+		lock.lock();
+		try
+		{
+			message.write(outputStream);
+			outputStream.flush();
+		}
+		catch(IOException e)
+		{
+			Log.error(TAG, "Could not send message, OutputStream raised a IOException");
+		}
+		finally
+		{
+			lock.unlock();
+		}
+	}
+	
+	public void sendState(int is, String mess)
+	{
+		DictNode header = new DictNode();
+		header.addToDict("TYPE", new ByteNode("STATUS"));
+		header.addToDict("VERSION", new IntNode(1));
+		
+		DictNode body = new DictNode();
+		body.addToDict("STATE", new IntNode(is));
+		body.addToDict("MSG", new ByteNode(mess));
+		Message msg = new Message(header, body);
+		sendMessage(msg);
+	}
+	
+	@Override
+	public void start()
+	{
+		running = true;
+		super.start();
+	}
+	
+	public Message waitForMessage()
+	{
+		try
+		{
+			return messageQueue.poll(1000, TimeUnit.MILLISECONDS);
+		}
+		catch(InterruptedException e)
+		{
+			return null;
+		}
+	}
+
+	/////////////////////////////////////////////
+	/// Private functions
+	private ByteNode byteString()
+		throws ProtocolErrorException, ProtocolCloseException
 	{		
 		int num = 0;
-		while(peakByte() != ':') num = num * 10 + (nextByte() - '0');
+		while(peakByte() != ':')
+			num = num * 10 + (nextByte() - '0');
 		
 		expect(':');
 		
@@ -109,7 +191,8 @@ public class CAPMessageProtocol extends Thread
 		return new ByteNode(b);
 	}
 	
-	private DictNode dictionary() throws ProtocolErrorException, ProtocolCloseException
+	private DictNode dictionary()
+		throws ProtocolErrorException, ProtocolCloseException
 	{		
 		DictNode d = new DictNode();
 		
@@ -158,37 +241,90 @@ public class CAPMessageProtocol extends Thread
 		return d;
 	}
 	
-	public void disconnect()
-	{
-		running = false;
-	}
-	
-	private DoubleNode doubleValue() throws ProtocolErrorException, ProtocolCloseException
+	private DoubleNode doubleValue()
+		throws ProtocolErrorException, ProtocolCloseException
 	{
 		ByteBuffer buf = ByteBuffer.allocate(8);
 		
 		expect('f');
-		for (int i = 0; i < 8; i++) buf.put(nextByte());
+		for(int i = 0; i < 8; i++)
+			buf.put(nextByte());
 		
 		buf.rewind();
 		return new DoubleNode(buf.getDouble());
 	}
 	
-	public Socket getSocket()
+	private void expect(byte b)
+		throws ProtocolErrorException, ProtocolCloseException
 	{
-		return socket;
+		byte g = nextByte();
+		if(g != b)
+			Log.error(TAG, "Protocol Stream Error: Expected '" + (char)b + "', got '" + (char)g + "'");
 	}
 	
-	private IntNode intValue() throws ProtocolErrorException, ProtocolCloseException
+	private void expect(char c)
+		throws ProtocolErrorException, ProtocolCloseException
+	{
+		expect((byte)c);
+	}
+	
+	private void forwardUntil(char c)
+		throws ProtocolErrorException, ProtocolCloseException
+	{
+		byte b = (byte)c, g;
+		
+		do
+		{
+			g = nextByte();
+		}while (g != b);
+	}
+	
+	private IntNode intValue()
+		throws ProtocolErrorException, ProtocolCloseException
 	{
 		int value = 0;
 		expect('i');
-		while(peakByte() != 'e') value = value * 10 + (nextByte() - '0');
+		while(peakByte() != 'e')
+			value = value * 10 + (nextByte() - '0');
 		expect('e');
 		return new IntNode(value);
 	}
 	
-	private ListNode list() throws ProtocolErrorException, ProtocolCloseException
+	private byte nextByte()
+		throws ProtocolErrorException, ProtocolCloseException
+	{
+		byte b = 0;
+		
+		if(currentByte == NO_BYTE)
+		{
+			try
+			{
+				int i = inputStream.read();
+				
+				if(i == -1)
+				{
+					Log.information(TAG, "End of stream");
+					throw new ProtocolCloseException("End of stream");
+				}
+								
+				b = (byte)i;
+			}
+			catch(IOException e)
+			{
+				throw new ProtocolCloseException("End of stream - " + e.getMessage());
+			}
+		}
+		else
+		{
+			b = (byte)currentByte;
+			currentByte = NO_BYTE;
+		}
+		
+		return b;
+	}
+	
+	private ListNode list()
+		throws ProtocolErrorException, ProtocolCloseException
 	{
 		expect('l');
 		
@@ -206,7 +342,70 @@ public class CAPMessageProtocol extends Thread
 		return list;
 	}
 	
-	private void receiveMessage() throws ProtocolErrorException, ProtocolCloseException
+	private byte peakByte()
+		throws ProtocolErrorException, ProtocolCloseException
+	{
+		if(currentByte == NO_BYTE)
+		{
+			try
+			{
+				currentByte = inputStream.read();
+				
+				if(currentByte == -1)
+				{
+					Log.information(TAG, "End of stream");
+					throw new ProtocolCloseException("End of stream");
+				}
+			}
+			catch(IOException e)
+			{
+				throw new ProtocolCloseException("End of stream - " + e.getMessage());
+			}
+		}
+		
+		return (byte)currentByte;
+	}
+	
+	private Node readNode()
+		throws ProtocolErrorException, ProtocolCloseException
+	{
+		Node node = null;
+		byte b = peakByte();
+		switch(b)
+		{
+			case 'l':
+				node = list();
+				break;
+			case 'i':
+				node = intValue();
+				break;
+			case 'd':
+				node = dictionary();
+				break;
+			case 'f':
+				node = doubleValue();
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				node = byteString();
+				break;
+			default:
+				Log.error(TAG, "Expected start of a node, got '" + (char)b + "'");
+		}
+		
+		return node;
+	}
+	
+	private void receiveMessage()
+		throws ProtocolErrorException, ProtocolCloseException
 	{
 		Node body = null;
 			
@@ -214,7 +413,7 @@ public class CAPMessageProtocol extends Thread
 		{
 			expect('#');
 		}
-		catch (ProtocolCloseException e)
+		catch(ProtocolCloseException e)
 		{
 			disconnect();
 			return;
@@ -225,8 +424,9 @@ public class CAPMessageProtocol extends Thread
 		expect(';');
 		
 		// Read in body
-		if(peakByte() != '.') body = dictionary();
-				
+		if(peakByte() != '.')
+			body = dictionary();
+		
 		// Read in last separator
 		expect('.');
 		
@@ -238,180 +438,6 @@ public class CAPMessageProtocol extends Thread
 			messageQueue.put(msg);
 		}
 		catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public void sendMessage(Message message)
-	{
-		if (!running) 
-		{
-			Log.warning(TAG, "Message not sent, protocol is not running");
-			return;
-		}
-		
-		lock.lock();
-		try
-		{
-			message.write(outputStream);
-			outputStream.flush();
-		}
-		catch(IOException e)
-		{
-			Log.error(TAG, "Could not send message, OutputStream raised a IOException");
-		}
-		finally
-		{
-			lock.unlock();
-		}
-	}
-	
-	public void sendState(int is, String mess)
-	{
-		DictNode header = new DictNode();
-		header.addToDict("TYPE", new ByteNode("STATUS"));
-		header.addToDict("VERSION", new IntNode(1));
-		
-		DictNode body = new DictNode();
-		body.addToDict("STATE", new IntNode(is));
-		body.addToDict("MSG", new ByteNode(mess));
-		Message msg = new Message(header, body);
-		sendMessage(msg);
-	}
-	
-	public Message waitForMessage()
-	{
-		try
-		{
-			return messageQueue.poll(1000, TimeUnit.MILLISECONDS);
-		}
-		catch(InterruptedException e)
-		{
-			return null;
-		}
-	}
-	
-	private void expect(char c) throws ProtocolErrorException, ProtocolCloseException
-	{
-		expect((byte)c);
-	}
-	
-	private void expect(byte b) throws ProtocolErrorException, ProtocolCloseException
-	{
-		byte g = nextByte(); 
-		if (g != b) Log.error(TAG, "Protocol Stream Error: Expected '" + (char)b + "', got '" + (char)g + "'");
-	}
-	
-	private void forwardUntil(char c) throws ProtocolErrorException, ProtocolCloseException
-	{
-		byte b = (byte)c, g;
-		
-		do { g = nextByte(); } while (g != b);
-	}
-	
-	private byte nextByte() throws ProtocolErrorException, ProtocolCloseException
-	{
-		byte b = 0;
-		
-		if (currentByte == NO_BYTE)
-		{
-			try
-			{
-				int i = inputStream.read();
-				
-				if (i == -1)
-				{
-					Log.information(TAG, "End of stream");
-					throw new ProtocolCloseException("End of stream");
-				}
-								
-				b = (byte)i;
-			}
-			catch (IOException e)
-			{
-				throw new ProtocolCloseException("End of stream - " + e.getMessage());
-			}
-		}
-		else
-		{
-			b = (byte)currentByte;
-			currentByte = NO_BYTE;
-		}
-		
-		return b;
-	}	
-	
-	private byte peakByte() throws ProtocolErrorException, ProtocolCloseException
-	{
-		if (currentByte == NO_BYTE)
-		{
-			try
-			{
-				currentByte = inputStream.read();
-				
-				if (currentByte == -1)
-				{
-					Log.information(TAG, "End of stream");
-					throw new ProtocolCloseException("End of stream");
-				}
-			}
-			catch (IOException e)
-			{
-				throw new ProtocolCloseException("End of stream - " + e.getMessage());
-			}
-		}
-		
-		return (byte)currentByte;
-	}
-	
-	@Override
-	public void start()
-	{
-		running = true;
-		super.start();
-	}
-	
-	@Override
-	public void run()
-	{		
-		while (running) 
-		{
-			try
-			{
-				receiveMessage();
-			}
-			catch(ProtocolErrorException e)
-			{
-				Log.error(TAG, e.getMessage());
-				
-				try
-				{
-					forwardUntil('#');
-				}
-				catch(ProtocolCloseException e1)
-				{
-					Log.error(TAG, e1.getMessage());
-					disconnect();
-				}			
-				catch (ProtocolErrorException e2)
-				{
-					Log.error(TAG, e.getMessage());
-					disconnect();
-				}
-			}
-			catch(ProtocolCloseException e)
-			{
-				Log.error(TAG, e.getMessage());
-				disconnect();
-			}
-		}
-		
-		try
-		{
-			socket.close();
-		}
-		catch(IOException e)
 		{
 			e.printStackTrace();
 		}

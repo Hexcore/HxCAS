@@ -7,29 +7,23 @@ import com.hexcore.cas.math.Vector2i;
  * For example, the different number of neighbours that 
  * a triangle grid has.
  * 
- * @author Megan
- *
+ * @author Megan Duncan
  */
 public class TriangleGrid extends Grid
 {
-	public TriangleGrid(Vector2i size, int numProperties)
-	{
-		super(size, numProperties);
-	}
-	
 	public TriangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
 	}
 	
+	public TriangleGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
+	}
+	
 	public TriangleGrid(Grid g)
 	{
 		super(g);
-	}
-	
-	public GridType getType()
-	{
-		return GridType.TRIANGLE;
 	}
 	
 	public Grid clone()
@@ -64,7 +58,14 @@ public class TriangleGrid extends Grid
 				return getNeighbours(false, pos);
 		}
 	}
-
+	
+	public GridType getType()
+	{
+		return GridType.TRIANGLE;
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{
 		Cell[] n = new Cell[12];

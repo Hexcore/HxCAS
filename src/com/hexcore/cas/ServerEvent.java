@@ -6,6 +6,14 @@ import java.util.List;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.GridType;
 
+/**
+ * Class ServerEvent
+ * 	Used to send requests and actions of the program through
+ * 	to the server for responses.
+ * 
+ * @authors Divan Burger; Karl Zoller
+ */
+
 public class ServerEvent 
 {	
 	public enum Type
@@ -15,24 +23,24 @@ public class ServerEvent
 		PING_CLIENTS, CLEAR_HISTORY, SET_PLAYBACK_SPEED;
 	}
 	
-	public Type		type;
+	public Type						type;
 	
 	// READY_SIMULATION
 	public List<InetSocketAddress>	clients;
 		
 	// CREATE_WORLD
-	public Vector2i	size;
-	public GridType	gridType;
-	public boolean	wrappable;
+	public boolean					wrappable;
+	public GridType					gridType;
+	public Vector2i					size;
 	
 	// LOAD_WORLD
-	public String		filename;
+	public String					filename;
 	
 	// CLEAR_HISTORY
-	public int genNumber;
+	public int						genNumber;
 	
 	// SET_PLAYBACK_SPEED
-	public long milliseconds;
+	public long						milliseconds;
 	
 	public ServerEvent(Type type)
 	{

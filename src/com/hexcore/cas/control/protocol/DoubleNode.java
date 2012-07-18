@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * Class DoubleNode
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class DoubleNode extends Node
 {
 	private double value;

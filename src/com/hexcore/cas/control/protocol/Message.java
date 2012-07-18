@@ -3,10 +3,16 @@ package com.hexcore.cas.control.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Class Message
+ * 
+ * @authors Divan Burger
+ */
+
 public class Message
 {
-	private DictNode header;
-	private Node body;
+	private DictNode	header;
+	private Node		body;
 	
 	public Message(DictNode header)
 	{
@@ -34,16 +40,19 @@ public class Message
 	{
 		String str = "Message(";
 		str += header.toString();
-		if (body != null) str += ", " + body.toString(); 
+		if(body != null)
+			str += ", " + body.toString(); 
 		return str + ")";
 	}
 	
-	public void write(OutputStream out) throws IOException
+	public void write(OutputStream out)
+		throws IOException
 	{
 		out.write('#');
 		header.write(out);
 		out.write(';');
-		if (body != null) body.write(out);
+		if(body != null)
+			body.write(out);
 		out.write('.');
 	}
 }

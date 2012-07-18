@@ -4,34 +4,28 @@ import com.hexcore.cas.math.Vector2i;
 
 /**
  * Class RectangleGrid
- * Stores details specific to a grid made of rectangle cells.
- * For example, the different number of neighbours that 
- * a rectangle grid has.
+ * 	Stores details specific to a grid made of rectangle cells.
+ * 	For example, the different number of neighbours that 
+ * 	a rectangle grid has.
  * 
- * @author Apurva
- *
+ * @author Apurva Kumar
  */
 
 public class RectangleGrid extends Grid
-{	
-	public RectangleGrid(Vector2i size, int numProperties)
-	{
-		super(size, numProperties);
-	}
-	
+{
 	public RectangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
 	}
 	
+	public RectangleGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
+	}
+	
 	public RectangleGrid(Grid g)
 	{
 		super(g);
-	}
-	
-	public GridType getType()
-	{
-		return GridType.RECTANGLE;
 	}
 	
 	public Grid clone()
@@ -57,12 +51,12 @@ public class RectangleGrid extends Grid
 	{
 		//System.out.println("Before : " + getCell(pos).getValue(0));
 		//Initialisations
-		Cell [] neighbours = new Cell[8];
+		Cell[] neighbours = new Cell[8];
 		int i = 0;//counter, goes till 8.
-		int xdim = getWidth();//get dimensions stored
-		int ydim = getHeight();
 		int x = pos.x;//get target cell's location stored.
 		int y = pos.y;
+		int xdim = getWidth();//get dimensions stored
+		int ydim = getHeight();
 		
 		if(wrap)
 		{
@@ -86,25 +80,32 @@ public class RectangleGrid extends Grid
 		else
 		{
 			//TOP LEFT: y-1, x-1
-			neighbours = setNeighbours(neighbours, x-1, y-1, 	xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x-1, y-1, xdim, ydim, i++);
 			//TOP CENTRE: y-1, x
-			neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x, y-1, xdim, ydim, i++);
 			//TOP RIGHT: y-1, x+1
-			neighbours = setNeighbours(neighbours, x+1, y-1, 	xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x+1, y-1, xdim, ydim, i++);
 			//LEFT: y, x-1
-			neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x-1, y, xdim, ydim, i++);
 			//RIGHT: y, x+1
-			neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x+1, y, xdim, ydim, i++);
 			//BOTTOM LEFT: y+1, x-1
-			neighbours = setNeighbours(neighbours, x-1, y+1, 	xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x-1, y+1, xdim, ydim, i++);
 			//BOTTOM CENTRE: y+1, x
-			neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x, y+1, xdim, ydim, i++);
 			//BOTTOM RIGHT: y+1, x+1
-			neighbours = setNeighbours(neighbours, x+1, y+1, 	xdim, ydim, i++);
+			neighbours = setNeighbours(neighbours, x+1, y+1, xdim, ydim, i++);
 		}
 		return neighbours;
 	}//end method getNeighbours
 	
+	public GridType getType()
+	{
+		return GridType.RECTANGLE;
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
 	/**
 	 * Private internal function. Chooses whether the neighbour is valid or should be set to null.
 	 * @param x - x position of target cell.
@@ -119,17 +120,12 @@ public class RectangleGrid extends Grid
 	private Cell[] setNeighbours(Cell [] neighbours, int x, int y, int xdim, int ydim, int i)
 	{
 		if((x < 0) || (x >= xdim))
-		{
 			neighbours[i] = null;
-		}
 		else if((y < 0) || (y >= ydim))
-		{
 			neighbours[i] = null;
-		}
 		else
 			neighbours[i] = getCell( x, y);
 		
 		return neighbours;
 	}//end method setNeighbours
-
 }

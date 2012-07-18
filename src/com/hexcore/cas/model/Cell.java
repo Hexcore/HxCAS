@@ -6,19 +6,19 @@ package com.hexcore.cas.model;
  * 	Has an array of doubles called values
  * 	that contains its properties.
  * 
- * @author Apurva
- *
+ * @author Apurva Kumar
  */
 
 public class Cell
 {
-	private double[] 	values;
+	private double[] values;
 	
 	public Cell(int valueCount)
 	{
 		values = new double[valueCount];
 		
-		for (int i = 0; i < valueCount; i++) values[i] = 0.0;
+		for(int i = 0; i < valueCount; i++)
+			values[i] = 0.0;
 	}
 	
 	public Cell(double[] values)
@@ -33,7 +33,8 @@ public class Cell
 	
 	public double getValue(int index)
 	{
-		if ((index < 0) || (index >= values.length)) return 0.0;
+		if((index < 0) || (index >= values.length))
+			return 0.0;
 		return values[index];
 	}
 	
@@ -49,7 +50,8 @@ public class Cell
 	
 	public void setValue(int index, double value)
 	{
-		if ((index < 0) || (index >= values.length)) return;
+		if((index < 0) || (index >= values.length))
+			return;
 		values[index] = value;
 	}
 }

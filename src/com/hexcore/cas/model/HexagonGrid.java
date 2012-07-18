@@ -3,33 +3,27 @@ package com.hexcore.cas.model;
 import com.hexcore.cas.math.Vector2i;
 /**
  * Class HexagonGrid
- * Stores details specific to a grid made of hexagon cells.
- * For example, the different number of neighbours that 
- * a hexagon grid has.
+ * 	Stores details specific to a grid made of hexagon cells.
+ * 	For example, the different number of neighbours that 
+ * 	a hexagon grid has.
  * 
- * @author Apurva
- *
+ * @author Apurva Kumar
  */
 public class HexagonGrid extends Grid
-{	
-	public HexagonGrid(Vector2i size, int numProperties)
-	{
-		super(size, numProperties);
-	}
-	
+{
 	public HexagonGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
 	}
 	
+	public HexagonGrid(Vector2i size, int numProperties)
+	{
+		super(size, numProperties);
+	}
+	
 	public HexagonGrid(Grid g)
 	{
 		super(g);
-	}
-	
-	public GridType getType()
-	{
-		return GridType.HEXAGON;
 	}
 	
 	public Grid clone()
@@ -110,7 +104,14 @@ public class HexagonGrid extends Grid
 		
 		return neighbours;
 	}//end method getNeighbours
-
+	
+	public GridType getType()
+	{
+		return GridType.HEXAGON;
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
 	/**
 	 * Private internal function. Chooses whether the neighbour is valid or should be set to null.
 	 * @param x - x position of target cell.

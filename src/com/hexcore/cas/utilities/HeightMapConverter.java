@@ -12,13 +12,15 @@ import javax.imageio.ImageIO;
 import com.hexcore.cas.model.Grid;
 
 /**
+ * Class HeightMapConverter
  * 
  * @author Karl Zoller
- *
  */
+
 public class HeightMapConverter
 {
 	private static final String TAG = "HeightMapConverter";
+	
 	public boolean loadHeightMap(String fileName, Grid grid, int propertyIndex)
 	{
 		int width = grid.getWidth();

@@ -4,11 +4,10 @@ import com.hexcore.cas.math.Vector2i;
 
 /**
  * Class GridType
- * Manages 3 different possible grid shapes:
- * Rectangle, hexagon, triangle.
+ * 	Manages 3 different possible grid shapes:
+ * 	Rectangle, hexagon, triangle.
  * 
- * @author Megan
- *
+ * @author Divan Burger
  */
 
 public enum GridType
@@ -19,25 +18,6 @@ public enum GridType
 	
 	char symbol;
 	Class<? extends Grid> clazz;
-	
-	GridType(char symbol, Class<? extends Grid> clazz)
-	{
-		this.symbol = symbol;
-		this.clazz = clazz;
-	}
-
-	public Grid create(Vector2i size, int numProperties)
-	{
-		try
-		{
-			return (Grid)clazz.getDeclaredConstructor(Vector2i.class, int.class).newInstance(size, numProperties);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}	
 	
 	public Grid create(Vector2i size, Cell example)
 	{
@@ -50,5 +30,26 @@ public enum GridType
 			e.printStackTrace();
 		}
 		return null;	
+	}
+	
+	public Grid create(Vector2i size, int numProperties)
+	{
+		try
+		{
+			return (Grid)clazz.getDeclaredConstructor(Vector2i.class, int.class).newInstance(size, numProperties);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/////////////////////////////////////////////
+	/// Private functions
+	GridType(char symbol, Class<? extends Grid> clazz)
+	{
+		this.symbol = symbol;
+		this.clazz = clazz;
 	}
 }

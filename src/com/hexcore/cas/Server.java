@@ -19,35 +19,46 @@ import com.hexcore.cas.ui.GUI;
 import com.hexcore.cas.utilities.Configuration;
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class Server
+ * 	The class that acts as the server for the program.
+ * 	Allows for creation, editing and saving of worlds.
+ * 	Initiates simulations and collects clients for computations.
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class Server
 {
-	private final static String TAG = "Server";
-	public final static String VERSION = "v0.1";
-		
-	private AtomicBoolean 	running = new AtomicBoolean(false);
-	private AtomicBoolean	activeSimulation = new AtomicBoolean(false);
+	/////////////////////////////////////////////
+	/// Public Variables
+	public static final String					VERSION = "v0.1";
 	
-	private Configuration 	config = null;
-	private Lobby 			lobby = null;
-	private GUI 			ui = null;
-	
-	private ClientThread	client = null;
-	private Simulator 		simulate = null;
-	private World			world = null;
-	
-	private List<InetSocketAddress>	clients;	
-	
-	private ReentrantLock	serverLock = new ReentrantLock();
-	
-	private LinkedBlockingQueue<ServerEvent>	eventQueue;
-	
-	private static Server instance = null;
+	/////////////////////////////////////////////
+	/// Private Variables
+	private static Server						instance = null;
 
+	private static final String					logFile = "HxCAS.log";
+	private static final String					TAG = "Server";
+	
+	private AtomicBoolean						activeSimulation = new AtomicBoolean(false);
+	private AtomicBoolean 						running = new AtomicBoolean(false);
+	
+	private ClientThread						client = null;
+	private Configuration 						config = null;
+	private GUI 								ui = null;
+	private LinkedBlockingQueue<ServerEvent>	eventQueue;
+	private List<InetSocketAddress>				clients;
+	private Lobby 								lobby = null;
+	private ReentrantLock						serverLock = new ReentrantLock();
+	private Simulator 							simulate = null;
+	private World								world = null;
+	
 	public static void main(String[] args)
 	{
 		try
 		{
-			FileOutputStream erasor = new FileOutputStream("HxCAS.log");
+			FileOutputStream erasor = new FileOutputStream(logFile);
 			erasor.write((new String()).getBytes());
 			erasor.close();
 		}
@@ -60,9 +71,21 @@ public class Server
 		instance.start();
 	}
 	
+	public void sendEvent(ServerEvent event)
+	{
+		try 
+		{
+			eventQueue.put(event);
+		} 
+		catch(InterruptedException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public void start()
 	{
-		System.out.println("== Hexcore CAS Server - " + VERSION + " ==");
+		Log.information(TAG, "== Hexcore CAS Server - " + VERSION + " ==");
 		
 		Log.information(TAG, "Loading configuration...");
 		config = new Configuration("data/config.txt");
@@ -82,14 +105,15 @@ public class Server
 		clients = new ArrayList<InetSocketAddress>();
 				
 		running.set(true);
-		while (running.get())
+		while(running.get())
 		{
 			try
 			{
 				ServerEvent event = eventQueue.poll(3, TimeUnit.SECONDS);
-				if (event == null) continue;
+				if(event == null)
+					continue;
 				
-				switch (event.type) 
+				switch(event.type) 
 				{				
 					case CREATE_WORLD:
 					{				
@@ -118,8 +142,6 @@ public class Server
 						serverLock.lock();
 						
 						world = new World();
-						//WorldReader reader = new WorldReader(world);
-						//reader.readWorld(event.filename);
 						world.setFileName(event.filename);
 						world.load();
 						
@@ -132,15 +154,12 @@ public class Server
 					{
 						serverLock.lock();
 						
-						//WorldSaver saver = new WorldSaver();
-						
 						try
 						{
-							//saver.saveWorld(world);
 							world.save();
 							Log.information(TAG, "Saved world");
 						}
-						catch (IOException e)
+						catch(IOException e)
 						{
 							e.printStackTrace();
 						}
@@ -153,7 +172,8 @@ public class Server
 						serverLock.lock();
 						
 						clients = event.clients;
-						if (!activeSimulation.getAndSet(true)) initSimulation();
+						if(!activeSimulation.getAndSet(true))
+							initSimulation();
 						
 						serverLock.unlock();
 						break;
@@ -162,7 +182,8 @@ public class Server
 					{
 						serverLock.lock();
 						
-						if (!activeSimulation.getAndSet(true)) initSimulation();
+						if(!activeSimulation.getAndSet(true))
+							initSimulation();
 						
 						simulate.play();
 						
@@ -173,7 +194,8 @@ public class Server
 					{
 						serverLock.lock();
 						
-						if (!activeSimulation.getAndSet(true)) initSimulation();
+						if(!activeSimulation.getAndSet(true))
+							initSimulation();
 						
 						simulate.step();
 						
@@ -184,7 +206,8 @@ public class Server
 					{
 						serverLock.lock();
 						
-						if (activeSimulation.get()) simulate.pause();
+						if(activeSimulation.get())
+							simulate.pause();
 						
 						serverLock.unlock();
 						break;
@@ -193,7 +216,7 @@ public class Server
 					{
 						serverLock.lock();
 						
-						if (activeSimulation.getAndSet(false))
+						if(activeSimulation.getAndSet(false))
 						{
 							simulate.disconnect();
 							simulate = null;
@@ -206,7 +229,8 @@ public class Server
 					{
 						serverLock.lock();
 						
-						if (!activeSimulation.getAndSet(true)) initSimulation();
+						if(!activeSimulation.getAndSet(true))
+							initSimulation();
 						
 						simulate.setMinimumGenerationTime(event.milliseconds);
 						
@@ -241,9 +265,10 @@ public class Server
 		
 		Log.information(TAG, "Shutting down...");
 		lobby.disconnect();
-		if (simulate != null) simulate.disconnect();
+		if(simulate != null)
+			simulate.disconnect();
 		
-		if (client != null)
+		if(client != null)
 		{
 			client.client.stop();
 			client = null;
@@ -253,28 +278,23 @@ public class Server
 		{
 			Thread.sleep(300);
 		}
-		catch (InterruptedException e)
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
 		
-		/* Already called in GUI.shutdownProcess (called for both quitButton and window exit button)
-		 * if(world != null)
-		{
-			Log.warning(TAG, "Server's world.stop()");
-			world.stop();
-		}*/
-		
 		System.exit(0);
 	}
 	
+	/////////////////////////////////////////////
+	/// Private functions
 	private void initSimulation() throws InterruptedException
 	{
-		if (clients.isEmpty())
+		if(clients.isEmpty())
 		{
 			Log.information(TAG, "No network clients found, starting local client");
 			
-			if (client == null)
+			if(client == null)
 			{
 				client = new ClientThread();
 				client.start();
@@ -290,7 +310,7 @@ public class Server
 		CALCompiler compiler = new CALCompiler();
 		compiler.compile(world.getRuleCode());
 		
-		if (compiler.getErrorCount() > 0)
+		if(compiler.getErrorCount() > 0)
 			Log.error(TAG, "Invalid rule code");
 		
 		Log.information(TAG, "Starting server...");
@@ -305,18 +325,8 @@ public class Server
 		simulate.simulate(-1);
 	}
 	
-	public void sendEvent(ServerEvent event)
-	{
-		try 
-		{
-			eventQueue.put(event);
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
+	/////////////////////////////////////////////
+	/// Inner classes
 	class ClientThread extends Thread
 	{
 		public Client client;

@@ -18,7 +18,19 @@ public class Recti
 	
 	public Recti()
 	{
-	}	
+	}
+	
+	public Recti(int x, int y, int w, int h)
+	{
+		this.position.set(x, y);
+		this.size.set(w, h);
+	}
+	
+	public Recti(Recti rect)
+	{
+		this.position.set(rect.position);
+		this.size.set(rect.size);
+	}
 	
 	public Recti(Vector2i size)
 	{
@@ -30,43 +42,11 @@ public class Recti
 		this.position.set(position);
 		this.size.set(size);
 	}
-
-	public Recti(int x, int y, int w, int h)
-	{
-		this.position.set(x, y);
-		this.size.set(w, h);
-	}
-	
-	public Recti(Recti rect)
-	{
-		this.position.set(rect.position);
-		this.size.set(rect.size);		
-	}
-
-	public Vector2i	getPosition() {return position;}
-	public Vector2i	getSize() {return size;}
-	public int		getX() {return position.x;}
-	public int		getY() {return position.y;}
-	public int		getWidth() {return size.x;}
-	public int		getHeight() {return size.y;}
-	
-	public void		setPosition(Vector2i position) {this.position.set(position);}
-	public void		setSize(Vector2i size) {this.size.set(size);}
-	
-	public Recti	intersect(Recti other)
-	{
-		Vector2i s = new Vector2i(position);
-		Vector2i e = position.add(size);
-		if (s.x < other.position.x) s.x = other.position.x;
-		if (s.y < other.position.y) s.y = other.position.y;
-		if (e.x > other.position.x + other.size.x) e.x = other.position.x + other.size.x;
-		if (e.y > other.position.y + other.size.y) e.y = other.position.y + other.size.y;
-		return new Recti(s, e.subtract(s));
-	}
 	
 	public static Recti getBoundingBox(Vector2i[] points)
 	{
-		if (points.length <= 0) return null;
+		if(points.length <= 0)
+			return null;
 		
 		Vector2i lowest = new Vector2i(points[0]);
 		Vector2i highest = new Vector2i(points[0]);
@@ -82,6 +62,59 @@ public class Recti
 		}
 		
 		return new Recti(lowest, highest.subtract(lowest));
+	}
+	
+	public int getHeight()
+	{
+		return size.y;
+	}
+	
+	public Vector2i getPosition()
+	{
+		return position;
+	}
+	
+	public Vector2i getSize()
+	{
+		return size;
+	}
+	
+	public int getWidth()
+	{
+		return size.x;
+	}
+	
+	public int getX()
+	{
+		return position.x;
+	}
+	
+	public int getY()
+	{
+		return position.y;
+	}
+	
+	public Recti intersect(Recti other)
+	{
+		Vector2i s = new Vector2i(position);
+		Vector2i e = position.add(size);
+		
+		if (s.x < other.position.x) s.x = other.position.x;
+		if (s.y < other.position.y) s.y = other.position.y;
+		if (e.x > other.position.x + other.size.x) e.x = other.position.x + other.size.x;
+		if (e.y > other.position.y + other.size.y) e.y = other.position.y + other.size.y;
+		
+		return new Recti(s, e.subtract(s));
+	}
+	
+	public void setPosition(Vector2i position)
+	{
+		this.position.set(position);
+	}
+	
+	public void setSize(Vector2i size)
+	{
+		this.size.set(size);
 	}
 	
 	@Override

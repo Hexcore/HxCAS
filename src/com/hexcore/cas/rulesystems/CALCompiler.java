@@ -5,21 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Class CALCompiler
+
+ * @authors Karl Zoller
+ */
 
 public class CALCompiler
 {	
 	public CALCompiler()
 	{
 		Parser.reset();
-	}
-	
-	public void compileFile(String fileName)
-	{
-			Parser.reset();
-			Scanner.Init(fileName);
-			Errors.Init(fileName, "./", true);
-			Parser.Parse();
-			Errors.Summarize();
 	}
 	
 	public void compile(String rules)
@@ -36,6 +32,20 @@ public class CALCompiler
 		}
 	}
 	
+	public void compileFile(String fileName)
+	{
+		Parser.reset();
+		Scanner.Init(fileName);
+		Errors.Init(fileName, "./", true);
+		Parser.Parse();
+		Errors.Summarize();
+	}
+	
+	public byte[] getCode()
+	{
+		return Parser.getCode();
+	}
+	
 	public int getErrorCount()
 	{
 		return Parser.getErrorCount();
@@ -45,9 +55,4 @@ public class CALCompiler
 	{
 		return Parser.getResult();
 	}
-	
-	public byte[] getCode()
-	{
-		return Parser.getCode();
-	}	
 }

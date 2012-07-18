@@ -8,91 +8,42 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Class ConfigScanner
+ * 
+ * @author Divan Burger; Karl Zoller
+ */
+
 public class ConfigScanner
 {
-	public static class Symbol
-	{
-		public enum Type {UNKNOWN, STRING, INTEGER, DECIMAL};
-		
-		public Symbol(String text, int line)
-		{
-			type = Type.UNKNOWN;
-			this.text = text;
-			this.line = line;
-		}
-		
-		public Type		type;
-		public String	text;
-		public int		integer;
-		public float	decimal;
-		public int		line;
-	}
 	
 	private boolean			valid = false;
 	private BufferedReader	reader;
-	private int				nextChar;
-	private Set<Character>	symbols;
-	private int				line;
 	
+	private int				line;
+	private int				nextChar;
+	
+	private Set<Character>	symbols;
 	private Symbol			nextSymbol;
 	
 	public ConfigScanner()
-	{		
+	{
 		symbols = new HashSet<Character>();
-	}
-	
-	public void readString(String text)
-	{
-		reader = new BufferedReader(new StringReader(text));
-		line = 1;
-		valid = true;
-		
-		nextSymbol();
-	}
-	
-	public void readFile(String filename)
-	{
-		try
-		{
-			reader = new BufferedReader(new FileReader(filename));
-		}
-		catch (FileNotFoundException e)
-		{
-			System.out.println("Error: Could not open file : " + filename);
-			valid = false;
-			return;
-		}
-		
-		line = 1;
-		valid = true;
-		
-		nextSymbol();
 	}
 	
 	public void addSymbol(char symbol)
 	{
 		this.symbols.add(symbol);
-	}	
+	}
 	
 	public void addSymbols(char[] symbols)
 	{
 		for (char symbol : symbols) this.symbols.add(symbol);
 	}
-			 
+	
 	public int getLineNumber()
 	{
 		return line;
-	}
-	
-	public boolean isValid()
-	{
-		return valid;
-	}
-	
-	// Returns the next symbol without stepping to the next symbol
-	public Symbol peakSymbol()
-	{
-		return nextSymbol;
 	}
 	
 	// Returns a symbol and then steps to the next symbol
@@ -101,6 +52,11 @@ public class ConfigScanner
 		Symbol symbol = nextSymbol;
 		nextSymbol();
 		return symbol;
+	}
+	
+	public boolean isValid()
+	{
+		return valid;
 	}
 	
 	// Steps to the next symbol
@@ -112,11 +68,11 @@ public class ConfigScanner
 		if (nextSymbol == null) return;
 		
 		if (nextSymbol.type == Symbol.Type.STRING) return;
-
+		
 		nextSymbol.type = Symbol.Type.STRING;
-
+		
 		try
-		{			
+		{
 			nextSymbol.integer = Integer.decode(nextSymbol.text);
 			nextSymbol.type = Symbol.Type.INTEGER;
 		}
@@ -133,25 +89,42 @@ public class ConfigScanner
 		}
 	}
 	
-	///////////////////////
-	/// Private Methods ///
-	///////////////////////
-	
-	private void nextChar()
+	// Returns the next symbol without stepping to the next symbol
+	public Symbol peakSymbol()
 	{
-		if (nextChar == -1) valid = false;
-		if (nextChar == '\n') line++;
-		
-		try
-		{
-			nextChar = reader.read();
-		}
-		catch(IOException ioe)
-		{
-			nextChar = -1;
-		}
+		return nextSymbol;
 	}
 	
+	public void readFile(String filename)
+	{
+		try
+		{
+			reader = new BufferedReader(new FileReader(filename));
+		}
+		catch(FileNotFoundException e)
+		{
+			System.out.println("Error: Could not open file : " + filename);
+			valid = false;
+			return;
+		}
+		
+		line = 1;
+		valid = true;
+		
+		nextSymbol();
+	}
+	
+	public void readString(String text)
+	{
+		reader = new BufferedReader(new StringReader(text));
+		line = 1;
+		valid = true;
+		
+		nextSymbol();
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
 	private int getChar()
 	{
 		return nextChar;
@@ -164,32 +137,34 @@ public class ConfigScanner
 		int		curLine = line;
 		
 		int	c = -1;
-		while (true)
+		while(true)
 		{
 			c = getChar();
-			if (c < 0) break;
+			if(c < 0)
+				break;
 			
-			if (c == '"')
+			if(c == '"')
 			{	
 				nextChar();
-				if (!quoted && !buf.isEmpty()) break;
-				if (quoted) return new Symbol(buf, curLine);
+				if(!quoted && !buf.isEmpty()) break;
+				if(quoted) return new Symbol(buf, curLine);
 				
 				quoted = !quoted;
 			}
-			else if (quoted)
+			else if(quoted)
 			{
 				nextChar();
 				buf += (char)c;
 			}
-			else if (c <= 32)
+			else if(c <= 32)
 			{
 				nextChar();
-				if (!buf.isEmpty()) break;
+				if(!buf.isEmpty())
+					break;
 			}
-			else if (symbols.contains((char)c))
+			else if(symbols.contains((char)c))
 			{
-				if (buf.isEmpty()) 
+				if(buf.isEmpty()) 
 				{
 					nextChar();
 					buf += (char)c;
@@ -207,7 +182,43 @@ public class ConfigScanner
 			}
 		}
 		
-		if (buf.isEmpty()) return null;
+		if(buf.isEmpty())
+			return null;
 		return new Symbol(buf, curLine);
+	}
+	
+	private void nextChar()
+	{
+		if(nextChar == -1) valid = false;
+		if(nextChar == '\n') line++;
+		
+		try
+		{
+			nextChar = reader.read();
+		}
+		catch(IOException ioe)
+		{
+			nextChar = -1;
+		}
+	}
+	
+	/////////////////////////////////////////////
+	/// Inner classes
+	public static class Symbol
+	{
+		public enum Type {UNKNOWN, STRING, INTEGER, DECIMAL};
+		
+		public float	decimal;
+		public int		integer;
+		public int		line;
+		public Type		type;
+		public String	text;
+		
+		public Symbol(String text, int line)
+		{
+			type = Type.UNKNOWN;
+			this.text = text;
+			this.line = line;
+		}
 	}
 }

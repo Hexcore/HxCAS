@@ -20,7 +20,7 @@ public class Vector3f
 		this.x = 0;
 		this.y = 0;
 		this.z = 0;
-	}	
+	}
 	
 	public Vector3f(float x, float y, float z)
 	{
@@ -34,7 +34,7 @@ public class Vector3f
 		this.x = v.x;
 		this.y = v.y;
 		this.z = z;
-	}	
+	}
 	
 	public Vector3f(Vector3f v)
 	{
@@ -42,7 +42,55 @@ public class Vector3f
 		this.y = v.y;
 		this.z = v.z;
 	}
-
+	
+	public Vector3f add(float x, float y, float z)
+	{
+		return new Vector3f(this.x + x, this.y + y, this.z + z);
+	}
+	
+	public Vector3f add(Vector3f p)
+	{
+		return new Vector3f(x + p.x, y + p.y, z + p.z);
+	}
+	
+	public void dec(float x, float y, float z)
+	{
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+	}
+	
+	public void dec(Vector3f p)
+	{
+		x -= p.x;
+		y -= p.y;
+		z -= p.z;
+	}
+	
+	public boolean equals(Vector3f p)
+	{
+		return (x == p.x) && (y == p.y) && (z == p.z);
+	}
+	
+	public float get(int index)
+	{
+		return (index == 2) ? z : ((index == 0) ? x : y);
+	}
+	
+	public void inc(float x, float y, float z)
+	{
+		this.x += x;
+		this.y += y;
+		this.z += z;
+	}
+	
+	public void inc(Vector3f p)
+	{
+		x += p.x;
+		y += p.y;
+		z += p.z;
+	}
+	
 	public void set(float x, float y, float z) 
 	{
 		this.x = x;
@@ -64,17 +112,14 @@ public class Vector3f
 		this.z = v.z;
 	}
 	
-	public float	get(int index) {return (index == 2) ? z : ((index == 0) ? x : y);}
-	
-	public boolean equals(Vector3f p)
+	public Vector3f subtract(float x, float y, float z)
 	{
-		return (x == p.x) && (y == p.y) && (z == p.z);
+		return new Vector3f(this.x - x, this.y - y, this.z - z);
 	}
 	
-	@Override
-	public String toString()
+	public Vector3f subtract(Vector3f p)
 	{
-		return "Vector3f<" + x + ", " + y + ", " + z + ">";
+		return new Vector3f(x - p.x, y - p.y, z - p.z);
 	}
 	
 	public FloatBuffer toFloatBuffer()
@@ -84,7 +129,7 @@ public class Vector3f
 		fb.put(1, y);
 		fb.put(2, z);
 		return fb;
-	}	
+	}
 	
 	public FloatBuffer toFloatBuffer(float w)
 	{
@@ -96,51 +141,9 @@ public class Vector3f
 		return fb;
 	}
 	
-	public void inc(Vector3f p)
+	@Override
+	public String toString()
 	{
-		x += p.x;
-		y += p.y;
-		z += p.z;
-	}
-	
-	public void inc(float x, float y, float z)
-	{
-		this.x += x;
-		this.y += y;
-		this.z += z;
-	}
-	
-	public Vector3f add(Vector3f p)
-	{
-		return new Vector3f(x + p.x, y + p.y, z + p.z);
-	}
-	
-	public Vector3f add(float x, float y, float z)
-	{
-		return new Vector3f(this.x + x, this.y + y, this.z + z);
-	}
-	
-	public void dec(Vector3f p)
-	{
-		x -= p.x;
-		y -= p.y;
-		z -= p.z;
-	}
-	
-	public void dec(float x, float y, float z)
-	{
-		this.x -= x;
-		this.y -= y;
-		this.z -= z;
-	}
-	
-	public Vector3f subtract(Vector3f p)
-	{
-		return new Vector3f(x - p.x, y - p.y, z - p.z);
-	}
-	
-	public Vector3f subtract(float x, float y, float z)
-	{
-		return new Vector3f(this.x - x, this.y - y, this.z - z);
+		return "Vector3f<" + x + ", " + y + ", " + z + ">";
 	}
 }

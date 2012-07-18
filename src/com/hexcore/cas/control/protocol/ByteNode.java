@@ -3,10 +3,16 @@ package com.hexcore.cas.control.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Class ByteNode
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class ByteNode extends Node
 {
 	private byte[] values = null;
-
+	
 	public ByteNode(byte[] b)
 	{
 		values = b.clone();

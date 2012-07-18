@@ -23,18 +23,32 @@ import com.hexcore.cas.model.TriangleGrid;
 import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class CAPIPClient
+ * 	Protocol on the client side that sends and accepts messages to
+ * 	and from the server. 
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class CAPIPClient extends Thread
 {
-	private static final String TAG = "CAPIPClient";
-	public final static int PROTOCOL_VERSION = 1;
-
-	private volatile boolean running = false;
-	private boolean sentAccept = false;
-	private boolean valid = false;
-	private CAPMessageProtocol protocol = null;
-	private ClientOverseer parent = null;
-	private ServerSocket serverSocket = null;
-
+	/////////////////////////////////////////////
+	/// Public Variables
+	public final static int			PROTOCOL_VERSION = 1;
+	
+	/////////////////////////////////////////////
+	/// Private Variables
+	private static final String		TAG = "CAPIPClient";
+	
+	private volatile boolean		running = false;
+	private boolean					sentAccept = false;
+	private boolean					valid = false;
+	
+	private CAPMessageProtocol		protocol = null;
+	private ClientOverseer			parent = null;
+	private ServerSocket			serverSocket = null;
+	
 	public CAPIPClient(ClientOverseer clientOverseer, int port)
 		throws IOException
 	{
@@ -51,19 +65,6 @@ public class CAPIPClient extends Thread
 		{
 			Log.error(TAG, "Could not bind socket to port " + port + " - " + ex.getMessage());
 		}
-	}
-	
-	public boolean isValid()
-	{
-		return valid;
-	}
-	
-	protected DictNode makeHeader(String type)
-	{
-		DictNode header = new DictNode();
-		header.addToDict("TYPE", new ByteNode(type));
-		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
-		return header;
 	}
 	
 	public void disconnect()
@@ -85,6 +86,40 @@ public class CAPIPClient extends Thread
 						
 		sentAccept = false;
 		running = false;
+	}
+	
+	public boolean isValid()
+	{
+		return valid;
+	}
+		
+	@Override
+	public void run()
+	{
+		while(running)
+		{
+			Log.information(TAG, "Client running...");
+			
+			protocol.start();
+			
+			while (protocol.isRunning())
+			{
+				Message message = protocol.waitForMessage();
+				if (message == null) continue;
+				
+				interpretInput(message);
+			}
+			
+			Log.information(TAG, "Closing connection to server...");
+			try
+			{
+				protocol.join();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void sendResult(Grid g, Recti area, int more, int id, int gen)
@@ -113,13 +148,6 @@ public class CAPIPClient extends Thread
 		sendResult(d);
 	}
 	
-	private void sendResult(DictNode d)
-	{
-		Log.information(TAG, "Sending result");
-		Message msg = new Message(makeHeader("RESULT"), d);
-		protocol.sendMessage(msg);
-	}
-	
 	public void sendState(int is)
 	{
 		DictNode body = new DictNode();
@@ -138,7 +166,40 @@ public class CAPIPClient extends Thread
 		Message msg = new Message(makeHeader("STATUS"), body);
 		protocol.sendMessage(msg);
 	}
-
+	
+	public void setup()
+	{
+		Log.information(TAG, "Waiting for server...");
+		
+		try
+		{
+			Socket clientSocket = serverSocket.accept();
+			Log.information(TAG, "Server connected");
+			protocol = new CAPMessageProtocol(clientSocket);
+			
+			if(!running)
+				running = true;
+		}
+		catch(SocketException ex)
+		{
+		}
+		catch(IOException e)
+		{
+			Log.error(TAG, "Error starting protocol");
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void start()
+	{
+		setup();
+		super.start();
+	}
+	
+	/////////////////////////////////////////////
+	/// Protected functions
+	
 	protected void interpretInput(Message message)
 	{
 		DictNode header = message.getHeader();
@@ -159,13 +220,13 @@ public class CAPIPClient extends Thread
 				sendState(2, "CONNECT MESSAGE HAS NOT BEEN RECEIVED YET");
 				return;
 			}
-
+			
 			if(!body.has("DATA"))
 			{
 				sendState(2, "DATA MISSING FOR CODE MESSAGE TYPE");
 				return;
 			}
-
+			
 			byte[] ruleByteCode = ((ByteNode)body.get("DATA")).getByteValues();
 			
 			RuleLoader loader = new RuleLoader();
@@ -280,13 +341,13 @@ public class CAPIPClient extends Thread
 				sendState(2, "GRID GENERATION MISSING");
 				return;
 			}
-						
+			
 			ArrayList<Node> sizeList = ((ListNode)body.get("SIZE")).getListValues();
 			size = new Vector2i(((IntNode)sizeList.get(0)).getIntValue(), ((IntNode)sizeList.get(1)).getIntValue());
-
+			
 			ArrayList<Node> areaList = ((ListNode)body.get("AREA")).getListValues();
 			area = new Recti(new Vector2i(((IntNode)areaList.get(0)).getIntValue(), ((IntNode)areaList.get(1)).getIntValue()), new Vector2i(((IntNode)areaList.get(2)).getIntValue(), ((IntNode)areaList.get(3)).getIntValue()));
-
+			
 			id = ((IntNode)body.get("ID")).getIntValue();
 			
 			gen = ((IntNode)body.get("GENERATION")).getIntValue();
@@ -329,7 +390,7 @@ public class CAPIPClient extends Thread
 					}
 				}
 			}
-
+			
 			parent.addGrid(grid, area, id, gen);
 		}
 		else if(header.get("TYPE").toString().compareTo("QUERY") == 0)
@@ -345,62 +406,20 @@ public class CAPIPClient extends Thread
 			sendState(2, "MESSAGE TYPE NOT RECOGNISED");
 	}
 	
-	public void setup()
+	protected DictNode makeHeader(String type)
 	{
-		Log.information(TAG, "Waiting for server...");
-		
-		try
-		{
-			Socket clientSocket = serverSocket.accept();
-			Log.information(TAG, "Server connected");
-			protocol = new CAPMessageProtocol(clientSocket);
-			
-			if(!running)
-				running = true;
-		}
-		catch(SocketException ex)
-		{
-		}
-		catch(IOException e)
-		{
-			Log.error(TAG, "Error starting protocol");
-			e.printStackTrace();
-		}
+		DictNode header = new DictNode();
+		header.addToDict("TYPE", new ByteNode(type));
+		header.addToDict("VERSION", new IntNode(PROTOCOL_VERSION));
+		return header;
 	}
 	
-	@Override
-	public void start()
+	/////////////////////////////////////////////
+	/// Private functions
+	private void sendResult(DictNode d)
 	{
-		setup();
-		super.start();
-	}
-		
-	@Override
-	public void run()
-	{
-		while(running)
-		{
-			Log.information(TAG, "Client running...");
-			
-			protocol.start();
-			
-			while (protocol.isRunning())
-			{			
-				Message message = protocol.waitForMessage();
-				if (message == null) continue;
-	
-				interpretInput(message);
-			}
-			
-			Log.information(TAG, "Closing connection to server...");
-			try
-			{
-				protocol.join();
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
+		Log.information(TAG, "Sending result");
+		Message msg = new Message(makeHeader("RESULT"), d);
+		protocol.sendMessage(msg);
 	}
 }

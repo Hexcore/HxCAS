@@ -5,6 +5,12 @@ import java.util.List;
 
 import com.hexcore.cas.ui.toolkit.Colour;
 
+/**
+ * Class ColourRuleSetWriter
+ *
+ * @authors Divan Burger; Karl Zoller
+ */
+
 public class ColourRuleSetWriter
 {
 	public ColourRuleSetWriter()
@@ -15,27 +21,33 @@ public class ColourRuleSetWriter
 	{	
 		String str = "colourset " + name + "\n{\n";
 		
-		for (int i = 0; i < colourRuleSet.getNumProperties(); i++)
+		for(int i = 0; i < colourRuleSet.getNumProperties(); i++)
 			str += writeProperty(colourRuleSet.getColourRule(i), properties.get(i));
 		
 		return str + "}\n";
 	}
 	
-	private String writeProperty(ColourRule colourRule, String name)
+	/////////////////////////////////////////////
+	/// Private functions
+	private String writeColour(Colour colour)
 	{
-		String str = "\tproperty " + name + "\n\t{\n";
+		DecimalFormat formater = new DecimalFormat("0.0###");
 		
-		for (ColourRule.Range range : colourRule.ranges)
-			str += writeRange(range);
+		String str = (colour.a < 1.0) ? "rgba(" : "rgb(";
+		str += formater.format(colour.r);
+		str += ", " + formater.format(colour.g);
+		str += ", " + formater.format(colour.b);
+		if(colour.a < 1.0)
+			str += ", " + formater.format(colour.a);
 		
-		return str + "\t}\n";
+		return str + ")";
 	}
 	
 	private String writeRange(ColourRule.Range range)
 	{
 		String str = "\t\t" + range.from + " - " + range.to + " : ";
 		
-		switch (range.getType())
+		switch(range.getType())
 		{
 			case SOLID:
 				str += writeColour(range.getColour(0));
@@ -49,15 +61,13 @@ public class ColourRuleSetWriter
 		return str + ";\n";
 	}
 	
-	private String writeColour(Colour colour)
+	private String writeProperty(ColourRule colourRule, String name)
 	{
-		DecimalFormat formater = new DecimalFormat("0.0###");
+		String str = "\tproperty " + name + "\n\t{\n";
 		
-		String str = (colour.a < 1.0) ? "rgba(" : "rgb(";
-		str += formater.format(colour.r);
-		str += ", " + formater.format(colour.g);
-		str += ", " + formater.format(colour.b);
-		if (colour.a < 1.0) str += ", " + formater.format(colour.a);
-		return str + ")";
+		for(ColourRule.Range range : colourRule.ranges)
+			str += writeRange(range);
+		
+		return str + "\t}\n";
 	}
 }

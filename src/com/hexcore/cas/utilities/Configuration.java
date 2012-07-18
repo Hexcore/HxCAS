@@ -4,12 +4,18 @@ import java.util.HashMap;
 
 import com.hexcore.cas.utilities.ConfigScanner.Symbol;
 
+/**
+ * Class Configuration
+ * 
+ * @authors Divan Burger; Karl Zoller
+ */
+
 public class Configuration extends ConfigParser
 {	
 	public class ConfigCategory
 	{
-		String					name;
-		HashMap<String, String>	properties = new HashMap<String, String>();
+		String name;
+		HashMap<String, String> properties = new HashMap<String, String>();
 		
 		public ConfigCategory(String name) {this.name = name;}
 	}
@@ -40,7 +46,7 @@ public class Configuration extends ConfigParser
 				System.out.println("A category's name may not include a '.'");
 				break;
 			}
-						
+			
 			//System.out.println("Block: " + symbol.text);
 			ConfigCategory category = new ConfigCategory(symbol.text);
 			
@@ -48,6 +54,47 @@ public class Configuration extends ConfigParser
 			
 			addCategory(category);
 		}
+	}
+	
+	public int getInteger(String categoryName, String propertyName, int fallback)
+	{
+		ConfigCategory category = categories.get(categoryName);
+		
+		if (category != null)
+		{
+			String value = category.properties.get(propertyName);
+			if (value == null) return fallback;
+			
+			try
+			{
+				return Integer.parseInt(value);
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
+		
+		return fallback;
+	}
+	
+	public String getString(String categoryName, String propertyName, String fallback)
+	{
+		ConfigCategory category = categories.get(categoryName);
+		
+		if (category != null)
+		{
+			String value = category.properties.get(propertyName);
+			if (value != null) return value;
+		}
+		
+		return fallback;
+	}
+	
+	/////////////////////////////////////////////
+	/// Private Variables
+	private void addCategory(ConfigCategory category)
+	{
+		categories.put(category.name, category);
 	}
 	
 	private void readBlock(ConfigCategory category)
@@ -100,44 +147,5 @@ public class Configuration extends ConfigParser
 		}
 		
 		expect("}");
-	}
-	
-	private void addCategory(ConfigCategory category)
-	{
-		categories.put(category.name, category);
-	}
-		
-	public String getString(String categoryName, String propertyName, String fallback)
-	{
-		ConfigCategory category = categories.get(categoryName);
-		
-		if (category != null)
-		{
-			String value = category.properties.get(propertyName);
-			if (value != null) return value;
-		}
-		
-		return fallback;
-	}
-	
-	public int getInteger(String categoryName, String propertyName, int fallback)
-	{
-		ConfigCategory category = categories.get(categoryName);
-		
-		if (category != null)
-		{
-			String value = category.properties.get(propertyName);
-			if (value == null) return fallback;
-			
-			try
-			{
-				return Integer.parseInt(value);
-			}
-			catch (NumberFormatException e)
-			{
-			}
-		}
-		
-		return fallback;
 	}
 }

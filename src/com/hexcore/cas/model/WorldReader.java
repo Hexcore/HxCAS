@@ -20,18 +20,17 @@ import com.hexcore.cas.utilities.Log;
 
 /**
  * Class WorldReader
- * An instance of this object is used to read all details
- * of a world from where it is stored.
+ * 	An instance of this object is used to read all details
+ * 	of a world from where it is stored.
  * 
- * @author Megan
- *
+ * @author Megan Duncan
  */
 
 public class WorldReader
 {
-	private static final String TAG = "WorldReader";
+	private static final String		TAG = "WorldReader";
 	
-	private World world = null;
+	private World					world = null;
 	
 	public WorldReader(World w)
 	{
@@ -234,11 +233,13 @@ public class WorldReader
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
 		
-		System.out.println("Number of generations from World Loader : " + world.getNumGenerations());
+		Log.information(TAG, "Number of generations from WorldReader : " + world.getNumGenerations());
 		
 		return true;
 	}
 	
+	/////////////////////////////////////////////
+	/// Private functions
 	private String getStringFromStream(InputStream stream)
 	{
 		return new Scanner(stream).useDelimiter("\\A").next();

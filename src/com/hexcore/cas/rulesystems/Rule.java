@@ -4,6 +4,12 @@ import java.util.ArrayList;
 
 import com.hexcore.cas.model.Cell;
 
+/**
+ * Class Rule
+
+ * @authors Karl Zoller
+ */
+
 public interface Rule
 {
 	public void run(Cell cell, Cell[] neighbours);

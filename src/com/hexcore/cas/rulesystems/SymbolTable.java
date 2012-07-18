@@ -2,9 +2,15 @@ package com.hexcore.cas.rulesystems;
 
 import java.util.Stack;
 
+/**
+ * Class SymbolTable
+
+ * @authors Karl Zoller
+ */
+
 public class SymbolTable
 {
-	private Stack<Scope>	scopeStack;
+	private Stack<Scope> scopeStack;
 	
 	public SymbolTable()
 	{

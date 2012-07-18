@@ -1,88 +1,33 @@
 package com.hexcore.cas.utilities;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+/**
+ * Class Log
+ * 	Used to create a log of the running system.
+ * 	Can be used in debugging, to display general information,
+ * 	to indicate an error has occurred or for displaying warnings.
+ * 
+ * @author Divan Burger
+ */
 
 public class Log
 {
-	private static File logFile = new File("HxCAS.log");
-	
 	public static void debug(String tag, String msg)
 	{
-		try
-		{
-			OutputStream out = new FileOutputStream(logFile, true);
-			out.write(("[DDD] " + tag + ": " + msg + "\n").getBytes());
-			out.close();
-		}
-		catch(FileNotFoundException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		//System.out.println("[DDD] " + tag + ": " + msg);
-	}
-	
-	public static void information(String tag, String msg)
-	{
-		try
-		{
-			OutputStream out = new FileOutputStream(logFile, true);
-			out.write(("[DDD] " + tag + ": " + msg + "\n").getBytes());
-			out.close();
-		}
-		catch(FileNotFoundException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		//System.out.println("[III] " + tag + ": " + msg);
-	}
-	
-	public static void warning(String tag, String msg)
-	{
-		try
-		{
-			OutputStream out = new FileOutputStream(logFile, true);
-			out.write(("[DDD] " + tag + ": " + msg + "\n").getBytes());
-			out.close();
-		}
-		catch(FileNotFoundException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		//System.out.println("[WWW] " + tag + ": " + msg);
+		System.out.println("[DDD] " + tag + ": " + msg);
 	}
 	
 	public static void error(String tag, String msg)
 	{
-		try
-		{
-			OutputStream out = new FileOutputStream(logFile, true);
-			out.write(("[DDD] " + tag + ": " + msg + "\n").getBytes());
-			out.close();
-		}
-		catch(FileNotFoundException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		//System.err.println("[EEE] " + tag + ": " + msg);
+		System.err.println("[EEE] " + tag + ": " + msg);
+	}
+	
+	public static void information(String tag, String msg)
+	{
+		System.out.println("[III] " + tag + ": " + msg);
+	}
+	
+	public static void warning(String tag, String msg)
+	{
+		System.out.println("[WWW] " + tag + ": " + msg);
 	}
 }

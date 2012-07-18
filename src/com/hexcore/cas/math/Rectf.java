@@ -18,7 +18,7 @@ public class Rectf
 	
 	public Rectf()
 	{
-	}	
+	}
 	
 	public Rectf(Vector2f size)
 	{
@@ -30,16 +30,6 @@ public class Rectf
 		this.position.set(position);
 		this.size.set(size);
 	}
-	
-	public Vector2f	getPosition() {return position;}
-	public Vector2f	getSize() {return size;}
-	public float	getX() {return position.x;}
-	public float	getY() {return position.y;}
-	public float	getWidth() {return size.x;}
-	public float	getHeight() {return size.y;}
-	
-	public void		setPosition(Vector2f position) {this.position.set(position);}
-	public void		setSize(Vector2f size) {this.size.set(size);}
 	
 	public static Rectf getBoundingBox(Vector2f[] points)
 	{
@@ -59,5 +49,45 @@ public class Rectf
 		}
 		
 		return new Rectf(lowest, highest.subtract(lowest));
+	}
+	
+	public float getHeight()
+	{
+		return size.y;
+	}
+	
+	public Vector2f getPosition()
+	{
+		return position;
+	}
+	
+	public Vector2f getSize()
+	{
+		return size;
+	}
+	
+	public float getWidth()
+	{
+		return size.x;
+	}
+	
+	public float getX()
+	{
+		return position.x;
+	}
+	
+	public float getY()
+	{
+		return position.y;
+	}
+	
+	public void setPosition(Vector2f position)
+	{
+		this.position.set(position);
+	}
+	
+	public void setSize(Vector2f size)
+	{
+		this.size.set(size);
 	}
 }

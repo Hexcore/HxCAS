@@ -13,7 +13,6 @@ import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -23,15 +22,23 @@ import com.hexcore.cas.utilities.Log;
 import com.javamex.classmexer.MemoryUtil;
 import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
+/**
+ * Class WorldStreamer
+ * 	The class that streams all world generations to disk as simulation
+ * 	runs when hard disk memory is selected.
+ * 
+ * @authors Megan Duncan
+ */
+
 public class WorldStreamer
 {
-	private boolean reset = false;
-	private boolean started = false;
-	private int numGenerations = 0;
-	private String cawFilename = null;
-	private String tmpDir = null;
-
 	private static final String TAG = "WorldStreamer";
+	
+	private boolean		reset = false;
+	private boolean		started = false;
+	private int			numGenerations = 0;
+	private String		cawFilename = null;
+	private String		tmpDir = null;
 	
 	public WorldStreamer()
 	{
@@ -45,7 +52,7 @@ public class WorldStreamer
 	public Grid getGeneration(int genNum)
 	{
 		Log.debug(TAG, "Streamer getGeneration(" + genNum + ") called.");
-
+		
 		boolean configFound = false;
 		boolean genFound = false;
 		char type = 'N';
@@ -90,7 +97,7 @@ public class WorldStreamer
 						y = Integer.parseInt(token.nextToken());
 						type = token.nextToken().charAt(0);
 						properties = Integer.parseInt(token.nextToken());
-
+						
 						Vector2i gridSize = new Vector2i(x, y);
 						Cell cell = new Cell(properties);
 						switch(type)
@@ -124,7 +131,7 @@ public class WorldStreamer
 				Log.error(TAG, "Error retrieving generaion - configuration file not found");
 				return null;
 			}
-
+			
 			Log.debug(TAG, "Looking for generation file");
 			//Searching for the generation file
 			for(int i = 0; i < listOfFiles.length; i++)
@@ -140,11 +147,11 @@ public class WorldStreamer
 					int index = currFilename.lastIndexOf('/');
 					if(index == -1)
 						index = 0;
-
+					
 					if(currFilename.substring(index).compareTo(genNum + ".cag") == 0)
 					{
 						genFound = true;
-
+						
 						byte[] data = new byte[1024];
 						int len = 1024;
 						while((len = in.read(data)) > 0)
@@ -159,7 +166,7 @@ public class WorldStreamer
 							for(int cols = 0; cols < x; cols++)
 							{
 								double[] vals = new double[properties];
-
+								
 								for(int j = 0; j < properties; j++)
 									vals[j] = Double.parseDouble(token.nextToken());
 								
@@ -171,7 +178,7 @@ public class WorldStreamer
 					}
 				}
 			}
-
+			
 			if(!genFound)
 			{
 				Log.error(TAG, "Error retrieving generation - generation file " + genNum + " not found");
@@ -238,7 +245,7 @@ public class WorldStreamer
 						y = Integer.parseInt(token.nextToken());
 						type = token.nextToken().charAt(0);
 						properties = Integer.parseInt(token.nextToken());
-
+						
 						Vector2i gridSize = new Vector2i(x, y);
 						Cell cell = new Cell(properties);
 						switch(type)
@@ -272,7 +279,7 @@ public class WorldStreamer
 				Log.error(TAG, "Error retrieving all generations - configuration file not found");
 				return null;
 			}
-
+			
 			int gensToLoad = arrSize;
 			int scale = 500;
 			long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);;
@@ -290,7 +297,7 @@ public class WorldStreamer
 				}
 			}
 			Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
-
+			
 			Grid[] gens = new Grid[gensToLoad];
 			int finalGen = arrSize - 1;
 			
@@ -331,14 +338,14 @@ public class WorldStreamer
 							for(int cols = 0; cols < x; cols++)
 							{
 								double[] vals = new double[properties];
-
+								
 								for(int j = 0; j < properties; j++)
 									vals[j] = Double.parseDouble(token.nextToken());
 								
 								gen.setCell(cols, rows, vals);
 							}
 						}
-
+						
 						int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
 						
 						if(arrIndex < 0)
@@ -350,7 +357,7 @@ public class WorldStreamer
 						continue;
 				}
 			}
-
+			
 			in.close();
 			in = null;
 			
@@ -455,7 +462,7 @@ public class WorldStreamer
 		
 		File caw = new File(cawFilename);
 		File[] listOfFiles = folder.listFiles();
-
+		
 		try
 		{
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(caw)));
@@ -507,7 +514,7 @@ public class WorldStreamer
 			genFile = new File(tmpDir + "/" + genNum + ".cag");
 			if(!genFile.createNewFile())
 			{
-				System.out.println("Could not create tmp generation " + genNum + " file.");
+				Log.error(TAG, "Error streaming generation to world - could not create temporary generation " + genNum + " file.");
 				System.exit(1);
 			}
 			out = new BufferedOutputStream(new FileOutputStream(genFile));
@@ -583,7 +590,7 @@ public class WorldStreamer
 				Grid grid = gens.get(i);
 				currFile = new File(tmpDir + "/" + i + ".cag");
 				out = new BufferedOutputStream(new FileOutputStream(currFile));
-
+				
 				for(int rows = 0; rows < height; rows++)
 				{
 					for(int cols = 0; cols < width; cols++)

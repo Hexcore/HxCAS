@@ -13,153 +13,47 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class Simulator
+ * 	The class that actually does the simulations.
+ * 	Divides the work amongst the clients collected by the server.
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class Simulator extends Thread
 {
 	private static final String TAG = "Server";
 	
-	private List<InetSocketAddress> clientAddresses = null;
-	
-	private AtomicBoolean connected = new AtomicBoolean(false);
-	private AtomicBoolean isFinishedGenerations = new AtomicBoolean(false);
-	private AtomicBoolean paused = new AtomicBoolean(false);
-	private AtomicBoolean reset = new AtomicBoolean(false);
-	
-	private volatile int currentGeneration = 0;
-	private volatile int numOfGenerations = 0;
-	private int threadWorkID = 0;
-	
-	private Recti[] clientWorkables = null;
-	private ThreadWork[] clientWork = null;
-	private World world = null;
-	
 	private CAPIPServer informationProcessor = null;
-	private int clientPort;
 	
-	private Grid 	grid = null;
-	private byte[]	ruleByteCode = null;
+	private AtomicBoolean				connected = new AtomicBoolean(false);
+	private AtomicBoolean				isFinishedGenerations = new AtomicBoolean(false);
+	private AtomicBoolean				paused = new AtomicBoolean(false);
+	private AtomicBoolean				reset = new AtomicBoolean(false);
 	
-	private long	startGenerationTime = 0;
-	private AtomicLong	minimumGenerationTime = new AtomicLong(0);
-		
+	private AtomicLong					minimumGenerationTime = new AtomicLong(0);
+	private byte[]						ruleByteCode = null;
+	private List<InetSocketAddress>		clientAddresses = null;
+	private Grid						grid = null;
+	
+	private int							clientPort;
+	private volatile int				currentGeneration = 0;
+	private volatile int				numOfGenerations = 0;
+	private int							threadWorkID = 0;
+	
+	private long						startGenerationTime = 0;
+	private Recti[]						clientWorkables = null;
+	private ThreadWork[]				clientWork = null;
+	private World						world = null;
+	
 	public Simulator(World world, int clientPort)
 	{
 		this.clientPort = clientPort;
 		this.world = world;
 		this.ruleByteCode = null;
 	}
-		
-	public ThreadWork[] getClientWork()
-	{
-		return clientWork;
-	}
 	
-	public List<InetSocketAddress> getClientAddresses()
-	{
-		return clientAddresses;
-	}
-	
-	public Recti[] getClientWorkables()
-	{
-		return clientWorkables;
-	}
-	
-	public Grid getGrid()
-	{
-		return grid;
-	}
-	
-	public void setGrid(Grid g)
-	{
-		grid = g.clone();
-	}
-	
-	public void setMinimumGenerationTime(long time)
-	{
-		minimumGenerationTime.set(time);
-	}
-	
-	public boolean isFinished()
-	{
-		return isFinishedGenerations.get();
-	}
-		
-	public void pause()
-	{
-		paused.set(true);
-	}
-	
-	public void play()
-	{		
-		numOfGenerations = -1;
-		
-		if (paused.getAndSet(false)) 
-			startGeneration();
-	}
-	
-	public void step()
-	{		
-		numOfGenerations = 1;
-		
-		if (paused.getAndSet(false)) 
-			startGeneration();
-	}	
-		
-	public void requestStatuses()
-	{
-		Log.information(TAG, "Requesting client statuses");
-		informationProcessor.updateClientStatus();
-	}
-	
-	public void forceConnect(int index)
-	{
-		informationProcessor.forceConnect(index);
-	}
-	
-	public void reset()
-	{
-		reset.set(true);
-		numOfGenerations = 0;
-		world.reset();
-		informationProcessor.setGeneration(currentGeneration);
-	}
-	
-	public void setRuleBytecode(byte[] ruleByteCode)
-	{
-		this.ruleByteCode = ruleByteCode;
-	}
-	
-	public byte[] getRuleByteCode()
-	{
-		return ruleByteCode;
-	}
-
-	public void setClients(List<InetSocketAddress> names)
-	{
-		clientAddresses = names;
-	}
-		
-	public void simulate(int gN)
-	{
-		Log.information(TAG, "Waiting for clients to send connect...");
-		while (informationProcessor.getConnectedAmount() != clientAddresses.size()) {}
-
-		Log.information(TAG, "Starting simulation...");
-		setGrid(world.getLastGeneration());
-		Log.information(TAG, "Generations: " + world.getNumGenerations());
-		Log.information(TAG, "Grid: " + grid.getWidth() + "x" + grid.getHeight());
-		numOfGenerations = gN;
-		
-		informationProcessor.sendByteCode(ruleByteCode);
-		
-		calculateSplits();
-		splitGrids();
-
-		isFinishedGenerations.set(false);
-		currentGeneration = 0;
-		
-		if (!paused.get()) startGeneration();
-	}
-		
 	public void disconnect()
 	{
 		informationProcessor.disconnect();
@@ -180,7 +74,7 @@ public class Simulator extends Thread
 		}
 		else
 		{
-			System.out.println("Out of memory!  Pausing system...");
+			Log.warning(TAG, "Out of memory!  Pausing simulation...");
 			paused.set(true);
 		}
 		
@@ -196,24 +90,87 @@ public class Simulator extends Thread
 			splitGrids();
 		}
 		
-		if (minimumGenerationTime.get() > 0)
+		if(minimumGenerationTime.get() > 0)
 		{
 			long diff = minimumGenerationTime.get() * 1000000 - (System.nanoTime() - startGenerationTime);
 			
-			if (diff > 0)
+			if(diff > 0)
 			{
 				try
 				{
 					Thread.sleep(diff / 1000000);
 				}
-				catch (InterruptedException e)
+				catch(InterruptedException e)
 				{
 					e.printStackTrace();
 				}
 			}
 		}
-
-		if (!paused.get()) startGeneration();
+		
+		if(!paused.get())
+			startGeneration();
+	}
+	
+	public void forceConnect(int index)
+	{
+		informationProcessor.forceConnect(index);
+	}
+	
+	public List<InetSocketAddress> getClientAddresses()
+	{
+		return clientAddresses;
+	}
+		
+	public ThreadWork[] getClientWork()
+	{
+		return clientWork;
+	}
+	
+	public Recti[] getClientWorkables()
+	{
+		return clientWorkables;
+	}
+	
+	public Grid getGrid()
+	{
+		return grid;
+	}
+	
+	public byte[] getRuleByteCode()
+	{
+		return ruleByteCode;
+	}
+	
+	public boolean isFinished()
+	{
+		return isFinishedGenerations.get();
+	}
+		
+	public void pause()
+	{
+		paused.set(true);
+	}
+	
+	public void play()
+	{
+		numOfGenerations = -1;
+		
+		if(paused.getAndSet(false)) 
+			startGeneration();
+	}
+	
+	public void requestStatuses()
+	{
+		Log.information(TAG, "Requesting client statuses");
+		informationProcessor.updateClientStatus();
+	}
+	
+	public void reset()
+	{
+		reset.set(true);
+		numOfGenerations = 0;
+		world.reset();
+		informationProcessor.setGeneration(currentGeneration);
 	}
 	
 	@Override
@@ -225,48 +182,70 @@ public class Simulator extends Thread
 		connected.set(true);
 	}
 	
-	class GenerationThread extends Thread
+	public void setClients(List<InetSocketAddress> names)
 	{
-		@Override
-		public void run()
-		{			
-			if (numOfGenerations == 0)
-			{
-				System.out.println("Finished!");
-				isFinishedGenerations.set(true);
-				paused.set(true);
-				return;
-			}
-			
-			Log.information(TAG, "Clients: " + informationProcessor.getConnectedAmount());
-			if (informationProcessor.getConnectedAmount() == 0)
-			{
-				System.out.println("No clients connected, pausing...");
-				paused.set(true);
-				return;
-			}
-			
-			if (numOfGenerations > 0) numOfGenerations--;
-			
-			startGenerationTime = System.nanoTime();
-			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
-			informationProcessor.sendInitialGrids();
-		}
+		clientAddresses = names;
+	}
+	
+	public void setGrid(Grid g)
+	{
+		grid = g.clone();
+	}
+	
+	public void setMinimumGenerationTime(long time)
+	{
+		minimumGenerationTime.set(time);
+	}
+	
+	public void setRuleBytecode(byte[] ruleByteCode)
+	{
+		this.ruleByteCode = ruleByteCode;
+	}
+	
+	public void simulate(int gN)
+	{
+		Log.information(TAG, "Waiting for clients to send connect...");
+		while(informationProcessor.getConnectedAmount() != clientAddresses.size()) {}
+		
+		Log.information(TAG, "Starting simulation...");
+		setGrid(world.getLastGeneration());
+		Log.information(TAG, "Generations: " + world.getNumGenerations());
+		Log.information(TAG, "Grid: " + grid.getWidth() + "x" + grid.getHeight());
+		numOfGenerations = gN;
+		
+		informationProcessor.sendByteCode(ruleByteCode);
+		
+		calculateSplits();
+		splitGrids();
+
+		isFinishedGenerations.set(false);
+		currentGeneration = 0;
+		
+		if(!paused.get())
+			startGeneration();
+	}
+	
+	public void step()
+	{
+		numOfGenerations = 1;
+		
+		if (paused.getAndSet(false)) 
+			startGeneration();
 	}
 	
 	/////////////////////////////////////////////
 	/// Private functions
-	
-	private void startGeneration()
+	private void calculateSplits()
 	{
-		isFinishedGenerations.set(false);
+		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 4, 1);
+		clientWorkables = new Recti[splits.length];
+		Log.information(TAG, "Split size: " + splits.length);
 		
-		currentGeneration++;
-		GenerationThread generationThread = new GenerationThread();
-		generationThread.start();		
+		for(int i = 0; i < splits.length; i++)
+			clientWorkables[i] = new Recti(splits[i].getPosition(), splits[i].getSize());
 	}
 		
-	/*
+	/**
 	 * @author Abby Kumar
 	 */
 	private static Recti[] divideToClients(Vector2i sizeOfGrid, int splittingFactor, int minimumSize)
@@ -357,14 +336,13 @@ public class Simulator extends Thread
 		return split;
 	}
 	
-	private void calculateSplits()
+	private void startGeneration()
 	{
-		Recti[] splits = divideToClients(grid.getSize(), informationProcessor.getTotalCoreAmount() * 4, 1);
-		clientWorkables = new Recti[splits.length];
-		Log.information(TAG, "Split size: " + splits.length);
+		isFinishedGenerations.set(false);
 		
-		for(int i = 0; i < splits.length; i++)
-			clientWorkables[i] = new Recti(splits[i].getPosition(), splits[i].getSize());
+		currentGeneration++;
+		GenerationThread generationThread = new GenerationThread();
+		generationThread.start();		
 	}
 	
 	private void splitGrids()
@@ -388,7 +366,7 @@ public class Simulator extends Thread
 			int right = borderSize.x;
 			int top = borderSize.y;
 			int bottom = borderSize.y;
-
+			
 			Recti workArea = clientWorkables[i];
 			Vector2i workStart = workArea.getPosition();
 			Vector2i workEnd = workArea.getPosition().add(workArea.getSize());
@@ -446,6 +424,38 @@ public class Simulator extends Thread
 			
 			Recti aw = new Recti(borderSize, workArea.getSize());
 			clientWork[i] = new ThreadWork(currentGeneration, threadWorkID++, workingGrid, workArea.getPosition(), aw);
+		}
+	}
+	
+	/////////////////////////////////////////////
+	/// Inner classes
+	class GenerationThread extends Thread
+	{
+		@Override
+		public void run()
+		{			
+			if(numOfGenerations == 0)
+			{
+				System.out.println("Finished!");
+				isFinishedGenerations.set(true);
+				paused.set(true);
+				return;
+			}
+			
+			Log.information(TAG, "Clients: " + informationProcessor.getConnectedAmount());
+			if(informationProcessor.getConnectedAmount() == 0)
+			{
+				Log.warning(TAG, "No clients currently connected. Pausing simulation...");
+				paused.set(true);
+				return;
+			}
+			
+			if(numOfGenerations > 0)
+				numOfGenerations--;
+			
+			startGenerationTime = System.nanoTime();
+			informationProcessor.setClientWork(grid, clientWork, currentGeneration);
+			informationProcessor.sendInitialGrids();
 		}
 	}
 }

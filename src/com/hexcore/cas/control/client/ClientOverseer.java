@@ -12,24 +12,29 @@ import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.test.GameOfLifeRule;
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class ClientOverseer
+ * 
+ * @authors Divan Burger; Megan Duncan; Apurva Kumar
+ */
+
 public class ClientOverseer extends Thread
 {
-	private static final String TAG = "ClientOverseer";
-	
-	private LinkedBlockingQueue<Work> workQueue;
-	private LinkedBlockingQueue<Work> completedQueue;
-	
-	private Rule	rule;
-	
-	private CAPIPClient informationProcessor;
-	
-	private WorkerThread[] threads;
-	
-	private boolean running = false;
-	private boolean busy = false;
-	private boolean valid = false;
-	private int port = -1;
+	private static final String			TAG = "ClientOverseer";
 
+	private boolean						running = false;
+	private boolean						busy = false;
+	private boolean						valid = false;
+	
+	private CAPIPClient					informationProcessor;
+	private int							port = -1;
+	
+	private LinkedBlockingQueue<Work>	workQueue;
+	private LinkedBlockingQueue<Work>	completedQueue;
+	
+	private Rule						rule;
+	private WorkerThread[]				threads;
+	
 	public ClientOverseer(int port)
 	{
 		super();
@@ -41,14 +46,6 @@ public class ClientOverseer extends Thread
 		
 		this.port = port;
 		//setup();
-	}
-	
-	public int checkState()
-	{
-		if(workQueue.isEmpty())
-			return 0;
-		else
-			return 1;
 	}
 	
 	public void addGrid(Grid grid, Recti workArea, int id, int generation)
@@ -68,28 +65,96 @@ public class ClientOverseer extends Thread
 		}
 	}
 	
-	public boolean isValid()
+	public int checkState()
 	{
-		return valid;
+		if(workQueue.isEmpty())
+			return 0;
+		else
+			return 1;
 	}
 	
 	public void disconnect()
 	{
 		valid = false;
 		busy = false;
-		if (informationProcessor != null) informationProcessor.disconnect();
+		if(informationProcessor != null)
+			informationProcessor.disconnect();
+	}
+	
+	public boolean isValid()
+	{
+		return valid;
+	}
+	
+	public void reset()
+	{
+		workQueue.clear();
+		completedQueue.clear();
+	}
+	
+	@Override
+	public void run()
+	{
+		running = true;
+		while(running)
+		{
+			Log.information(TAG, "Starting...");
+			informationProcessor.start();	
+			
+			for(int i = 0; i < threads.length; i++)
+				threads[i].start();
+			
+			busy = true;
+			
+			while(busy)
+			{
+				Work work = null;
+				
+				try
+				{
+					work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
+				}
+				catch(InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				
+				if(work == null)
+					continue;
+				
+				Log.information(TAG, "Sending completed work");
+				int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
+				informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
+			}
+			
+			Log.information(TAG, "Stopping...");
+			
+			informationProcessor.disconnect();
+			informationProcessor = null;
+			
+			try
+			{
+				for(int i = 0; i < threads.length; i++)
+					threads[i].quit();
+				for(int i = 0; i < threads.length; i++)
+					threads[i].join();
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			
+			if(!running)
+				break;
+			
+			setup();
+		}
 	}
 	
 	public void setRule(Rule rule)
 	{
 		Log.information(TAG, "Loaded new rule code");
 		this.rule = rule;
-	}
-	
-	public void stopRunning()
-	{
-		disconnect();
-		running = false;
 	}
 	
 	public void setup()
@@ -108,10 +173,10 @@ public class ClientOverseer extends Thread
 		
 		threads = new WorkerThread[cores];
 		
-		for (int i = 0; i < cores; i++) threads[i] = new WorkerThread(i);
+		for(int i = 0; i < cores; i++)
+			threads[i] = new WorkerThread(i);
 				
 		Log.information(TAG, "Ready");
-		
 	}
 	
 	@Override
@@ -128,72 +193,19 @@ public class ClientOverseer extends Thread
 		super.start();
 	}
 	
-	@Override
-	public void run()
+	public void stopRunning()
 	{
-		running = true;
-		while(running)
-		{
-			Log.information(TAG, "Starting...");
-			informationProcessor.start();	
-			
-			for (int i = 0; i < threads.length; i++) threads[i].start();
-			
-			busy = true;
-			
-			while (busy)
-			{
-				Work work = null;
-				
-				try
-				{
-					work = completedQueue.poll(500, TimeUnit.MILLISECONDS);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-				
-				if (work == null) continue;
-				
-				Log.information(TAG, "Sending completed work");
-				int more = Math.max(Runtime.getRuntime().availableProcessors() + 1 - workQueue.size(), 0);			
-				informationProcessor.sendResult(work.grid, work.workArea, more, work.id, work.generation);
-			}
-			
-			Log.information(TAG, "Stopping...");
-			
-			informationProcessor.disconnect();
-			informationProcessor = null;
-			
-			try
-			{
-				for (int i = 0; i < threads.length; i++) threads[i].quit();
-				for (int i = 0; i < threads.length; i++) threads[i].join();
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-			
-			if(!running)
-				break;
-			
-			setup();
-		}
+		disconnect();
+		running = false;
 	}
 	
-	public void reset()
-	{
-		workQueue.clear();
-		completedQueue.clear();
-	}
-	
+	/////////////////////////////////////////////
+	/// Inner classes
 	class Work
 	{
+		Grid	grid;
 		int		generation;
 		int		id;
-		Grid	grid;
 		Recti	workArea;
 	}
 	
@@ -215,23 +227,24 @@ public class ClientOverseer extends Thread
 		public void run()
 		{			
 			running = true;
-			while (running)
+			while(running)
 			{
 				try
 				{
 					Work work = workQueue.poll(1, TimeUnit.SECONDS);
-					if (work == null) continue;
+					if(work == null)
+						continue;
 										
-					Grid		newGrid = work.grid.getType().create(work.workArea.size, work.grid.getNumProperties());
-					Vector2i	offset = work.workArea.position;
-					Vector2i 	size = work.workArea.size;
+					Grid newGrid = work.grid.getType().create(work.workArea.size, work.grid.getNumProperties());
+					Vector2i offset = work.workArea.position;
+					Vector2i size = work.workArea.size;
 										
-					for (int y = 0; y < size.y; y++)
-						for (int x = 0; x < size.x; x++)
+					for(int y = 0; y < size.y; y++)
+						for(int x = 0; x < size.x; x++)
 						{
-							Vector2i 	location = offset.add(x, y);
-							Cell 		cell = new Cell(work.grid.getCell(location));
-							Cell[] 		neighbours = work.grid.getNeighbours(location);
+							Vector2i location = offset.add(x, y);
+							Cell cell = new Cell(work.grid.getCell(location));
+							Cell[] neighbours = work.grid.getNeighbours(location);
 							
 							rule.run(cell, neighbours);
 							newGrid.setCell(x, y, cell);
@@ -240,7 +253,7 @@ public class ClientOverseer extends Thread
 					work.grid = newGrid;
 					completedQueue.put(work);				
 				}
-				catch (InterruptedException e)
+				catch(InterruptedException e)
 				{
 					e.printStackTrace();
 				}

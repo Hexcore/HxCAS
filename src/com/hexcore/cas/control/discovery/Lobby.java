@@ -14,18 +14,28 @@ import java.util.Enumeration;
 
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class Lobby
+ * 
+ * @authors Divan Burger
+ */
+
 public class Lobby extends Thread
 {
-	private static final String TAG = "Lobby";
+	/////////////////////////////////////////////
+	/// Public Variables
+	public int						listenPort;
+	public int						beaconPort;
 	
-	public int listenPort;
-	public int beaconPort;
-	
-	private boolean running = false;
-	private SocketAddress address = null;
-	private DatagramChannel	channel = null;
+	/////////////////////////////////////////////
+	/// Private Variables
+	private static final String		TAG = "Lobby";
 	
 	private ArrayList<LobbyListener> listeners = null;
+	private boolean					running = false;
+	private DatagramChannel			channel = null;
+	
+	private SocketAddress			address = null;
 	
 	public Lobby(int beaconPort, int listenPort)
 	{
@@ -78,10 +88,10 @@ public class Lobby extends Thread
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			
 			// Try to broadcast on each interface on it's network's broadcast address
-			while (interfaces.hasMoreElements())
+			while(interfaces.hasMoreElements())
 			{
 				NetworkInterface networkInterface = interfaces.nextElement();
-				for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
+				for(InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
 				{
 					if (interfaceAddress == null) continue;
 					InetAddress broadcast = interfaceAddress.getBroadcast();
@@ -119,23 +129,24 @@ public class Lobby extends Thread
 		
 		try
 		{
-			while (running)
+			while(running)
 			{
 				SocketAddress replyAddress = channel.receive(buffer);
 				
-				if (buffer.position() < 8) continue;
-				if (buffer.get(0) != (byte)0xBE) continue;
-				if (buffer.get(1) != (byte)0xEF) continue;
-				if (buffer.get(2) != (byte)0xCA) continue;
-				if (buffer.get(3) != (byte)0xFE) continue;
+				if(buffer.position() < 8) continue;
+				if(buffer.get(0) != (byte)0xBE) continue;
+				if(buffer.get(1) != (byte)0xEF) continue;
+				if(buffer.get(2) != (byte)0xCA) continue;
+				if(buffer.get(3) != (byte)0xFE) continue;
 				
-				if (!(replyAddress instanceof InetSocketAddress)) continue;
+				if(!(replyAddress instanceof InetSocketAddress))
+					continue;
 				
 				InetSocketAddress replyInetAddress = (InetSocketAddress)replyAddress;
 				
 				Log.information(TAG, "Got reply from " + replyInetAddress.getAddress());
 				
-				for (LobbyListener listener : listeners)
+				for(LobbyListener listener : listeners)
 					listener.foundClient(replyInetAddress);
 			}
 		}

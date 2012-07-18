@@ -14,29 +14,168 @@ import com.hexcore.cas.rulesystems.Parser.MulOpE;
 import com.hexcore.cas.rulesystems.Parser.RelOpE;
 import com.hexcore.cas.rulesystems.TableEntry;
 
+/**
+ * Class CodeGen
+
+ * @authors Karl Zoller
+ */
+
 public class CodeGen implements org.objectweb.asm.Opcodes
 {
-	public static ArrayList<byte[]> code = new ArrayList<byte[]>();
-	public static ClassWriter cw;
-	public static String  name;
+	/////////////////////////////////////////////
+	/// Public Variables
+	public static ArrayList<byte[]>		code = new ArrayList<byte[]>();
+	public static ClassWriter			cw;
+	public static String				name;
 	
-	private static Label executeBegin;
-	private static Label executeEnd;
-	private static MethodVisitor executeVisitor;
-	private static int varIndex = 5;
-	private static int propertyIndex = 1;
-	private static int numProperties = 1;
-	private static ArrayList<String> properties;
+	/////////////////////////////////////////////
+	/// Private Variables
+	private static ArrayList<String>	properties;
+	private static boolean				debugEnabled = true;
+	private static int					currentFrameworkIndex = 0;
+	private static int					numProperties = 1;
+	private static int					propertyIndex = 1;
+	private static int					varIndex = 5;
+	private static Label				defaultLabel;
+	private static Label				executeBegin;
+	private static Label				executeEnd;
+	private static Label[]				frameworkLabels;
+	private static MethodVisitor		executeVisitor;
 	
-	private static Label[] frameworkLabels;
-	private static Label defaultLabel;
-	private static int currentFrameworkIndex = 0;
-	private static boolean debugEnabled = true;
-	
-	private static void debug(String msg)
+	public static int declareLocalVariable(String name)
 	{
-		if(debugEnabled)
-			System.out.println(msg);
+		debug("Declare var index: " + varIndex);
+		//executeVisitor.visitLocalVariable(name, "D", null, executeBegin, executeEnd, varIndex);
+		int result = varIndex;
+		varIndex += 2;
+		return result;
+	}
+	
+	public static int declareLoopVariables()
+	{
+		debug("Declare loop var index: " + varIndex);
+		int result = varIndex;
+		varIndex += 6;
+		return result;
+	}
+	
+	public static int declareProperty(String name)
+	{
+		debug("Declare property index: " + propertyIndex);
+		properties.add(name);
+		numProperties++;
+		return propertyIndex++;
+	}
+	
+	public static void derefArrayRef()
+	{
+		debug("Dereferencing array");
+		executeVisitor.visitInsn(D2I);
+		executeVisitor.visitInsn(AALOAD);
+	}
+	
+	public static void derefProperty(int index)
+	{
+		debug("Deref property: " + index);
+		//executeVisitor.visitVarInsn(ALOAD, 1);
+		executeVisitor.visitLdcInsn(new Integer(index));
+		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "getValue", "(I)D");
+	}
+	
+	public static void derefRef(int index)
+	{
+		debug("Deref ref: " + index);
+		executeVisitor.visitVarInsn(ALOAD, index);
+	}
+	
+	public static void derefVariable(int index)
+	{
+		debug("Deref var: " + index);
+		executeVisitor.visitVarInsn(DLOAD, index);
+	}
+	
+	public static void endClass()
+	{
+		implementPropertyCountFunction();
+		implementPropertyListFunction();
+		debug("End class");
+		
+		
+		//End class
+		cw.visitEnd();
+	}
+	
+	public static void endExecute()
+	{
+		debug("End Execute");
+		executeVisitor.visitLabel(defaultLabel);
+		executeVisitor.visitInsn(RETURN);
+		executeEnd = new Label();
+		executeVisitor.visitLabel(executeEnd);
+		executeVisitor.visitLocalVariable("this", "Lcom/hexcore/cas/rulesystems/"+name+"Rule;", null, executeBegin, executeEnd, 0);
+		executeVisitor.visitLocalVariable("self", "Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 1);
+		executeVisitor.visitLocalVariable("neighbours", "[Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 2);
+		executeVisitor.visitLocalVariable("temp", "D", null, executeBegin, executeEnd, 3);
+		executeVisitor.visitMaxs(0, 0);
+		executeVisitor.visitEnd();
+	}
+	
+	public static void endLoop(Label[] labels, int index)
+	{
+		debug("Ending Loop index: " + index);
+		executeVisitor.visitVarInsn(DLOAD, index);
+		executeVisitor.visitLdcInsn(new Double(1.0));
+		executeVisitor.visitInsn(DADD);
+		executeVisitor.visitVarInsn(DSTORE, index);
+		executeVisitor.visitJumpInsn(GOTO, labels[0]);
+		executeVisitor.visitLabel(labels[1]);
+	}
+	
+	public static void endType()
+	{
+		debug("End Type");
+		executeVisitor.visitJumpInsn(GOTO, defaultLabel);
+	}
+	
+	public static void generatePropertyArray(int index)
+	{
+		debug("Generating property array.");
+		executeVisitor.visitLdcInsn(new Integer(index));
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", "generatePropertyArray", "([Lcom/hexcore/cas/model/Cell;I)[D");
+	}
+	
+	public static byte[] getCode()
+	{
+		return cw.toByteArray();
+	}
+	
+	public static ArrayList<String> getPropertyList()
+	{
+		return properties;
+	}
+	
+	public static void implementPropertyCountFunction()
+	{
+		debug("Implement property count");
+		
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getNumProperties", "()I", null, null);
+		mVisitor.visitCode();
+		mVisitor.visitLdcInsn(new Integer(numProperties));
+		mVisitor.visitInsn(IRETURN);
+		mVisitor.visitMaxs(0, 0);
+		mVisitor.visitEnd();
+	}
+	
+	public static void implementPropertyListFunction()
+	{
+		debug("Implement property list");
+		
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getPropertyList", "()Ljava/util/ArrayList;", null, null);
+		mVisitor.visitCode();
+		mVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/CodeGen", "getPropertyList", "()Ljava/util/ArrayList;");
+		mVisitor.visitInsn(ARETURN);
+		mVisitor.visitMaxs(0, 0);
+		mVisitor.visitEnd();
 	}
 	
 	static void initClass(String ruleset)
@@ -103,222 +242,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitTableSwitchInsn(0, numTypes-1, defaultLabel, frameworkLabels);
 	}
 	
-	public static void initType()
-	{
-		debug("initType");
-		IndexOutOfBoundsException ex = new IndexOutOfBoundsException();
-		
-		try
-		{
-			if(currentFrameworkIndex >= frameworkLabels.length)
-				throw ex;
-			
-			executeVisitor.visitLabel(frameworkLabels[currentFrameworkIndex]);
-			
-			currentFrameworkIndex++;
-		}
-		catch(IndexOutOfBoundsException e)
-		{
-			
-		}		
-	}
-	
-	public static int declareLocalVariable(String name)
-	{
-		debug("Declare var index: " + varIndex);
-		//executeVisitor.visitLocalVariable(name, "D", null, executeBegin, executeEnd, varIndex);
-		int result = varIndex;
-		varIndex += 2;
-		return result;
-	}
-	
-	public static int declareProperty(String name)
-	{
-		debug("Declare property index: " + propertyIndex);
-		properties.add(name);
-		numProperties++;
-		return propertyIndex++;
-	}
-	
-	public static void loadConstant(double value)
-	{
-		debug("Loading constant: " + value);
-		executeVisitor.visitLdcInsn(new Double(value));
-	}
-	
-	
-	public static void storeVariable(int index)
-	{
-		debug("Storing at: " + index);
-		executeVisitor.visitVarInsn(DSTORE, index);
-	}
-	
-	public static void storeProperty(int index)
-	{
-		debug("Storing at property: " + index);
-		//Store result in temp variable in preparation for function call.
-		executeVisitor.visitVarInsn(DSTORE, 3);
-		//executeVisitor.visitVarInsn(ALOAD, 1);
-		executeVisitor.visitLdcInsn(new Integer(index));
-		
-		//Restore value
-		executeVisitor.visitVarInsn(DLOAD, 3);
-		
-		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "setValue", "(ID)V");
-	}
-	
-	
-	public static void performPostOp(int index, int delta)
-	{
-		debug("Post op");
-		executeVisitor.visitVarInsn(DLOAD, index);
-		executeVisitor.visitLdcInsn(new Double(delta));
-		executeVisitor.visitInsn(DADD);
-		executeVisitor.visitVarInsn(DSTORE, index);
-	}
-	
-	
-	public static void derefVariable(int index)
-	{
-		debug("Deref var: " + index);
-		executeVisitor.visitVarInsn(DLOAD, index);
-	}
-	
-	public static void derefRef(int index)
-	{
-		debug("Deref ref: " + index);
-		executeVisitor.visitVarInsn(ALOAD, index);
-	}
-	
-	public static void derefArrayRef()
-	{
-		debug("Dereferencing array");
-		executeVisitor.visitInsn(D2I);
-		executeVisitor.visitInsn(AALOAD);
-	}
-	
-	
-	public static void derefProperty(int index)
-	{
-		debug("Deref property: " + index);
-		//executeVisitor.visitVarInsn(ALOAD, 1);
-		executeVisitor.visitLdcInsn(new Integer(index));
-		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "getValue", "(I)D");
-	}
-	
-	public static void generatePropertyArray(int index)
-	{
-		debug("Generating property array.");
-		executeVisitor.visitLdcInsn(new Integer(index));
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", "generatePropertyArray", "([Lcom/hexcore/cas/model/Cell;I)[D");
-	}
-	
-	public static void invokeStandardArrayMethod(String name, int argType, int returnType)
-	{
-		String aType = "";
-		String rType = "";
-		
-		switch(argType)
-		{
-			case TableEntry.intType: aType = "[I"; break;
-			case TableEntry.doubleType: aType = "[D"; break;
-			case TableEntry.cellType: aType = "[Lcom/hexcore/cas/model/Cell"; break;
-		}
-		
-		switch(returnType)
-		{
-			case TableEntry.intType: rType = "I"; break;
-			case TableEntry.doubleType: rType = "D"; break;
-		}
-		
-		
-		debug("Invoking StdLib array method: " + name + " with argtype " + aType + " and rType " + rType);		
-		
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.intType)
-			executeVisitor.visitInsn(I2D);
-
-	}
-	
-	public static void invokeStandardScalarMethod(String name, int argType, int returnType)
-	{
-		String aType = "";
-		String rType = "";
-		
-		switch(argType)
-		{
-			case TableEntry.intType: aType = "I"; break;
-			case TableEntry.doubleType: aType = "D"; break;
-			case TableEntry.cellType: aType = "Lcom/hexcore/cas/Cell"; break;
-		}
-		
-		switch(returnType)
-		{
-			case TableEntry.intType: rType = "I"; break;
-			case TableEntry.doubleType: rType = "D"; break;
-		}
-		
-		
-		debug("Invoking StdLib scalar method: " + name + " with argtype " + aType + " and rType " + rType);		
-		
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.intType)
-			executeVisitor.visitInsn(I2D);
-	}
-	
-	public static void performRelationalOp(RelOpE op)
-	{
-		debug("Relational op: " + op.toString());
-		Label negative = new Label();
-		Label end = new Label();
-		executeVisitor.visitInsn(DCMPG);
-		switch(op)
-		{
-			case LT:	executeVisitor.visitJumpInsn(IFGE, negative); break;
-			case GT:	executeVisitor.visitJumpInsn(IFLE, negative); break;
-			case LE:	executeVisitor.visitJumpInsn(IFGT, negative); break;
-			case GE:	executeVisitor.visitJumpInsn(IFLT, negative); break;
-			case EQ:	executeVisitor.visitJumpInsn(IFNE, negative); break;
-			case NE:	executeVisitor.visitJumpInsn(IFEQ, negative); break;
-		}
-		
-		executeVisitor.visitInsn(ICONST_1);
-		executeVisitor.visitJumpInsn(GOTO, end);
-		executeVisitor.visitLabel(negative);
-		executeVisitor.visitInsn(ICONST_0);
-		executeVisitor.visitLabel(end);
-	}
-	
-	public static void toDouble()
-	{
-		debug("Convert to double");
-		executeVisitor.visitInsn(I2D);
-	}
-	
-	public static void performAddOp(AddOpE op)
-	{
-		debug("Add op: " + op.toString());
-		switch(op)
-		{
-			case ADD: executeVisitor.visitInsn(DADD); break;
-			case SUB: executeVisitor.visitInsn(DSUB); break;
-			case OR: executeVisitor.visitInsn(IOR); break;
-		}
-	}
-	
-	public static void performMulOp(MulOpE op)
-	{
-		debug("Mul op: " + op.toString());
-		switch(op)
-		{
-			case MUL: executeVisitor.visitInsn(DMUL); break;
-			case DIV: executeVisitor.visitInsn(DDIV); break;
-			case MOD: executeVisitor.visitInsn(DREM); break;
-			case AND: executeVisitor.visitInsn(IAND); break;
-		}
-	}
-	
-	public static Label[]  initIf()
+	public static Label[] initIf()
 	{
 		debug("Start if");
 		Label negative = new Label();
@@ -357,29 +281,76 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		
 	}
 	
-	public static void endLoop(Label[] labels, int index)
+	public static void initType()
 	{
-		debug("Ending Loop index: " + index);
-		executeVisitor.visitVarInsn(DLOAD, index);
-		executeVisitor.visitLdcInsn(new Double(1.0));
-		executeVisitor.visitInsn(DADD);
-		executeVisitor.visitVarInsn(DSTORE, index);
-		executeVisitor.visitJumpInsn(GOTO, labels[0]);
-		executeVisitor.visitLabel(labels[1]);
+		debug("initType");
+		IndexOutOfBoundsException ex = new IndexOutOfBoundsException();
+		
+		try
+		{
+			if(currentFrameworkIndex >= frameworkLabels.length)
+				throw ex;
+			
+			executeVisitor.visitLabel(frameworkLabels[currentFrameworkIndex]);
+			
+			currentFrameworkIndex++;
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			
+		}
 	}
 	
-	public static int declareLoopVariables()
+	public static void invokeStandardArrayMethod(String name, int argType, int returnType)
 	{
-		debug("Declare loop var index: " + varIndex);
-		int result = varIndex;
-		varIndex += 6;
-		return result;
+		String aType = "";
+		String rType = "";
+		
+		switch(argType)
+		{
+			case TableEntry.intType: aType = "[I"; break;
+			case TableEntry.doubleType: aType = "[D"; break;
+			case TableEntry.cellType: aType = "[Lcom/hexcore/cas/model/Cell"; break;
+		}
+		
+		switch(returnType)
+		{
+			case TableEntry.intType: rType = "I"; break;
+			case TableEntry.doubleType: rType = "D"; break;
+		}
+		
+		
+		debug("Invoking StdLib array method: " + name + " with argtype " + aType + " and rType " + rType);		
+		
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
+		if(returnType == TableEntry.intType)
+			executeVisitor.visitInsn(I2D);
 	}
 	
-	public static void visitLabel(Label label)
+	public static void invokeStandardScalarMethod(String name, int argType, int returnType)
 	{
-		debug("Label visit: " + label);
-		executeVisitor.visitLabel(label);
+		String aType = "";
+		String rType = "";
+		
+		switch(argType)
+		{
+			case TableEntry.intType: aType = "I"; break;
+			case TableEntry.doubleType: aType = "D"; break;
+			case TableEntry.cellType: aType = "Lcom/hexcore/cas/Cell"; break;
+		}
+		
+		switch(returnType)
+		{
+			case TableEntry.intType: rType = "I"; break;
+			case TableEntry.doubleType: rType = "D"; break;
+		}
+		
+		
+		debug("Invoking StdLib scalar method: " + name + " with argtype " + aType + " and rType " + rType);		
+		
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
+		if(returnType == TableEntry.intType)
+			executeVisitor.visitInsn(I2D);
 	}
 	
 	public static void jump(Label label)
@@ -388,79 +359,97 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitJumpInsn(GOTO, label);
 	}
 	
+	public static void loadConstant(double value)
+	{
+		debug("Loading constant: " + value);
+		executeVisitor.visitLdcInsn(new Double(value));
+	}
+	
 	public static void negate()
 	{
 		debug("Negate");
 		executeVisitor.visitInsn(DNEG);
 	}
 	
-	public static void endType()
+	public static void performAddOp(AddOpE op)
 	{
-		debug("End Type");
-		executeVisitor.visitJumpInsn(GOTO, defaultLabel);
+		debug("Add op: " + op.toString());
+		switch(op)
+		{
+			case ADD: executeVisitor.visitInsn(DADD); break;
+			case SUB: executeVisitor.visitInsn(DSUB); break;
+			case OR: executeVisitor.visitInsn(IOR); break;
+		}
 	}
 	
-	public static void endExecute()
+	public static void performMulOp(MulOpE op)
 	{
-		debug("End Execute");
-		executeVisitor.visitLabel(defaultLabel);
-		executeVisitor.visitInsn(RETURN);
-		executeEnd = new Label();
-		executeVisitor.visitLabel(executeEnd);
-		executeVisitor.visitLocalVariable("this", "Lcom/hexcore/cas/rulesystems/"+name+"Rule;", null, executeBegin, executeEnd, 0);
-		executeVisitor.visitLocalVariable("self", "Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 1);
-		executeVisitor.visitLocalVariable("neighbours", "[Lcom/hexcore/cas/model/Cell;", null, executeBegin, executeEnd, 2);
-		executeVisitor.visitLocalVariable("temp", "D", null, executeBegin, executeEnd, 3);
-		executeVisitor.visitMaxs(0, 0);
-		executeVisitor.visitEnd();
+		debug("Mul op: " + op.toString());
+		switch(op)
+		{
+			case MUL: executeVisitor.visitInsn(DMUL); break;
+			case DIV: executeVisitor.visitInsn(DDIV); break;
+			case MOD: executeVisitor.visitInsn(DREM); break;
+			case AND: executeVisitor.visitInsn(IAND); break;
+		}
 	}
 	
-	public static void implementPropertyCountFunction()
+	public static void performPostOp(int index, int delta)
 	{
-		debug("Implement property count");
+		debug("Post op");
+		executeVisitor.visitVarInsn(DLOAD, index);
+		executeVisitor.visitLdcInsn(new Double(delta));
+		executeVisitor.visitInsn(DADD);
+		executeVisitor.visitVarInsn(DSTORE, index);
+	}
+	
+	public static void performRelationalOp(RelOpE op)
+	{
+		debug("Relational op: " + op.toString());
+		Label negative = new Label();
+		Label end = new Label();
+		executeVisitor.visitInsn(DCMPG);
+		switch(op)
+		{
+			case LT:	executeVisitor.visitJumpInsn(IFGE, negative); break;
+			case GT:	executeVisitor.visitJumpInsn(IFLE, negative); break;
+			case LE:	executeVisitor.visitJumpInsn(IFGT, negative); break;
+			case GE:	executeVisitor.visitJumpInsn(IFLT, negative); break;
+			case EQ:	executeVisitor.visitJumpInsn(IFNE, negative); break;
+			case NE:	executeVisitor.visitJumpInsn(IFEQ, negative); break;
+		}
 		
-		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getNumProperties", "()I", null, null);
-		mVisitor.visitCode();
-		mVisitor.visitLdcInsn(new Integer(numProperties));
-		mVisitor.visitInsn(IRETURN);
-		mVisitor.visitMaxs(0, 0);
-		mVisitor.visitEnd();
+		executeVisitor.visitInsn(ICONST_1);
+		executeVisitor.visitJumpInsn(GOTO, end);
+		executeVisitor.visitLabel(negative);
+		executeVisitor.visitInsn(ICONST_0);
+		executeVisitor.visitLabel(end);
 	}
 	
-	public static void implementPropertyListFunction()
+	public static void storeProperty(int index)
 	{
-		debug("Implement property list");
+		debug("Storing at property: " + index);
+		//Store result in temp variable in preparation for function call.
+		executeVisitor.visitVarInsn(DSTORE, 3);
+		//executeVisitor.visitVarInsn(ALOAD, 1);
+		executeVisitor.visitLdcInsn(new Integer(index));
 		
-		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "getPropertyList", "()Ljava/util/ArrayList;", null, null);
-		mVisitor.visitCode();
-		mVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/CodeGen", "getPropertyList", "()Ljava/util/ArrayList;");
-		mVisitor.visitInsn(ARETURN);
-		mVisitor.visitMaxs(0, 0);
-		mVisitor.visitEnd();
-	}
-	
-	public static ArrayList<String> getPropertyList()
-	{
-		return properties;
-	}
-	
-	
-	
-	
-	public static void endClass()
-	{
-		implementPropertyCountFunction();
-		implementPropertyListFunction();
-		debug("End class");
+		//Restore value
+		executeVisitor.visitVarInsn(DLOAD, 3);
 		
-		
-		//End class
-		cw.visitEnd();
+		executeVisitor.visitMethodInsn(INVOKEVIRTUAL, "com/hexcore/cas/model/Cell", "setValue", "(ID)V");
 	}
 	
-	public static byte[] getCode()
+	public static void storeVariable(int index)
 	{
-		return cw.toByteArray();
+		debug("Storing at: " + index);
+		executeVisitor.visitVarInsn(DSTORE, index);
+	}
+	
+	public static void toDouble()
+	{
+		debug("Convert to double");
+		executeVisitor.visitInsn(I2D);
 	}
 	
 	public static void toFile(String fileName)
@@ -474,5 +463,19 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		{
 			System.err.println("Could not write class file");
 		}
+	}
+	
+	public static void visitLabel(Label label)
+	{
+		debug("Label visit: " + label);
+		executeVisitor.visitLabel(label);
+	}
+	
+	/////////////////////////////////////////////
+	/// Private functions
+	private static void debug(String msg)
+	{
+		if(debugEnabled)
+			System.out.println(msg);
 	}
 }

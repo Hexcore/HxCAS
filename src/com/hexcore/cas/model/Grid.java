@@ -3,13 +3,11 @@ package com.hexcore.cas.model;
 import com.hexcore.cas.math.Vector2i;
 /**
  * Class Grid
- * This is the grid representing a world.
- * It stores details of the wrappability, 
- * number of properties and size.
+ * 	This is the grid representing a world.
+ * 	It stores details of the wrappability, 
+ * 	number of properties and size.
  * 
- * @author Megan 
- * @author Divan
- * @author Apurva
+ * @author Divan Burger; Megan Duncan; Apurva Kumar
  */
 public abstract class Grid
 {
@@ -28,16 +26,6 @@ public abstract class Grid
 			for(int x = 0; x < size.x; x++)
 				this.cells[y][x] = new Cell(grid.getCell(x, y));
 	}
-
-	public Grid(Vector2i size, int numProperties)
-	{
-		this.numProperties = numProperties;
-		this.size = new Vector2i(size);
-		this.cells = new Cell[size.y][size.x];
-		for(int y = 0; y < size.y; y++)
-			for(int x = 0; x < size.x; x++)
-				this.cells[y][x] = new Cell(numProperties);
-	}	
 	
 	public Grid(Vector2i size, Cell example)
 	{
@@ -53,10 +41,17 @@ public abstract class Grid
 			}
 	}
 	
-	public abstract GridType getType();
+	public Grid(Vector2i size, int numProperties)
+	{
+		this.numProperties = numProperties;
+		this.size = new Vector2i(size);
+		this.cells = new Cell[size.y][size.x];
+		for(int y = 0; y < size.y; y++)
+			for(int x = 0; x < size.x; x++)
+				this.cells[y][x] = new Cell(numProperties);
+	}
+
 	public abstract Grid clone();
-	public abstract Vector2i getNeighbourhoodRange();
-	public abstract Cell[] getNeighbours(Vector2i pos);
 	
 	public Cell getCell(int x, int y)
 	{
@@ -72,20 +67,26 @@ public abstract class Grid
 	{
 		return size.y;
 	}
-		
+	
+	public abstract Vector2i getNeighbourhoodRange();
+	
+	public abstract Cell[] getNeighbours(Vector2i pos);
+	
 	public int getNumProperties()
 	{
 		return numProperties;
 	}
 	
-	public Vector2i getSize()
-	{
-		return size;
-	}
+	public abstract GridType getType();
 	
 	public char getTypeSymbol()
 	{
 		return getType().symbol;
+	}
+	
+	public Vector2i getSize()
+	{
+		return size;
 	}
 	
 	public int getWidth()

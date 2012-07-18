@@ -10,13 +10,19 @@ import java.net.SocketTimeoutException;
 
 import com.hexcore.cas.utilities.Log;
 
+/**
+ * Class Beacon
+ * 
+ * @authors Divan Burger
+ */
+
 public class Beacon extends Thread
 {
-	private final static String TAG = "Beacon";
-	
-	private int beaconPort;
-	private boolean running = false;
-	private SocketAddress address = null;
+	private final static String		TAG = "Beacon";
+
+	private boolean					running = false;
+	private int						beaconPort;
+	private SocketAddress			address = null;
 	
 	public Beacon(int beaconPort)
 	{
@@ -46,14 +52,14 @@ public class Beacon extends Thread
 			
 			DatagramPacket request = new DatagramPacket(requestBuffer, 8);
 			
-			while (running)
+			while(running)
 			{
 				// Wait for request
 				try
 				{
 					socket.receive(request);
 				}
-				catch (SocketTimeoutException e)
+				catch(SocketTimeoutException e)
 				{
 					continue;
 				}

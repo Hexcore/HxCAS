@@ -2,6 +2,12 @@ package com.hexcore.cas.rulesystems;
 
 import com.hexcore.cas.model.Cell;
 
+/**
+ * Class StdLib
+
+ * @authors Karl Zoller
+ */
+
 public class StdLib
 {
 	public static double max(double[] values)
