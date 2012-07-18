@@ -1,15 +1,19 @@
 package com.hexcore.cas.model;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+
+import com.javamex.classmexer.MemoryUtil;
+import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.utilities.Log;
@@ -34,175 +38,201 @@ public class WorldReader
 		world = w;
 	}
 	
-	public boolean readWorld(String worldFileName)
+	public boolean readWorld(String worldFilename)
 		throws IOException
 	{
 		/*
 		 * Takes the name of the world zip file and reads in.
 		 * It will specifically look for the configuration file first,
-		 * then the rules set and then all the generation files.
+		 * then the rules set then the colours set and then all the generation files
+		 * or the amount of generation files that can be held in memory.
 		 */
+		boolean coloursFound = false;
+		boolean rulesFound = false;
+		char type = 'N';
+		Enumeration<? extends ZipEntry> allFiles = null;
+		File cawFile = new File(worldFilename);
+		Grid gen = null;
+		int x = -1;
+		int y = -1;
+		int properties = 0;
+		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
+		String colourCode = null;
+		String currFilename = null;
 		String ruleCode = null;
-		String colourCode = null;	
+		ZipFile zip = null;
 		
-		File f = new File(worldFileName);
-		if (!f.exists())
+		if(!cawFile.exists())
 		{
-			Log.error(TAG, "Error loading world - Could not find file: " + worldFileName);
+			Log.error(TAG, "Error loading world - could not find file " + worldFilename);
 			return false;
 		}
 		
-		ZipFile zip = null;
 		try
 		{
-			zip = new ZipFile(f);
+			zip = new ZipFile(cawFile);
 		}
-		catch (ZipException e)
+		catch(ZipException e)
 		{
 			Log.error(TAG, "Error loading world - " + e.getMessage());
 			return false;
 		}
 		
-		Enumeration<? extends ZipEntry> generationFiles = zip.entries();
+		allFiles = zip.entries();
 		
-		int x = -1;
-		int y = -1;
-		char type = 'N';
-		int properties = 0;
+		//Searching for the configuration file
 		while(true)
 		{
-			if(!generationFiles.hasMoreElements())
+			if(!allFiles.hasMoreElements())
 			{
-				System.out.println("Configuration file not found.");
+				Log.error(TAG, "Error loading world - configuration file not found");
 				return false;
 			}
-			ZipEntry config = (ZipEntry)generationFiles.nextElement();
-			if (config.getName().endsWith(".cac"))
+			
+			ZipEntry entry = (ZipEntry)allFiles.nextElement();
+			currFilename = entry.getName();
+
+			if(currFilename.endsWith(".cac"))
 			{
-				BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(config)));
-				String line;
-				line = in.readLine();
-				if(line.indexOf(" ") != -1)
+				String fileData = getStringFromStream(zip.getInputStream(entry));
+				StringTokenizer token = new StringTokenizer(fileData);
+				
+				x = Integer.parseInt(token.nextToken());
+				y = Integer.parseInt(token.nextToken());
+				type = token.nextToken().charAt(0);
+				properties = Integer.parseInt(token.nextToken());
+
+				Vector2i gridSize = new Vector2i(x, y);
+				Cell cell = new Cell(properties);
+				
+				switch(type)
 				{
-					x = Integer.parseInt(line.substring(0, line.indexOf(" ")));
-					y = Integer.parseInt(line.substring(line.indexOf(" ") + 1));
-				}
-				else
-				{
-					x = Integer.parseInt(line);
-					line = in.readLine();
-					y = Integer.parseInt(line);
+					case 'r':
+					case 'R':
+						gen = new RectangleGrid(gridSize, cell);
+						break;
+					case 'h':
+					case 'H':
+						gen = new HexagonGrid(gridSize, cell);
+						break;
+					case 't':
+					case 'T':
+						gen = new TriangleGrid(gridSize, cell);
+						break;
+					default:
+						Log.error(TAG, "Error loading world - unable to create a grid with no type");
+						return false;
 				}
 				
-				line = in.readLine();
-				type = line.charAt(0);
-				line = in.readLine();
-				properties = Integer.parseInt(line);
 				break;
 			}
 		}
-		
-		Grid[] worldGenerations = null;
-		Vector2i gridSize = new Vector2i(x, y);
-		Cell cell = new Cell(properties);
-		switch(type)
-		{
-			case 'r':
-			case 'R':
-				worldGenerations = new RectangleGrid[zip.size() - 3];
-				for(int i = 0; i < zip.size() - 3; i++)
-					worldGenerations[i] = new RectangleGrid(gridSize, cell);
-				break;
-			case 'h':
-			case 'H':
-				worldGenerations = new HexagonGrid[zip.size() - 3];
-				for(int i = 0; i < zip.size() - 3; i++)
-					worldGenerations[i] = new HexagonGrid(gridSize, cell);
-				break;
-			case 't':
-			case 'T':
-				worldGenerations = new TriangleGrid[zip.size() - 3];
-				for(int i = 0; i < zip.size() - 3; i++)
-					worldGenerations[i] = new TriangleGrid(gridSize, cell);
-				break;
-			default:
-				System.out.println("Unable to create a grid with no type.");
-				return false;
-		}
-		
-		generationFiles = zip.entries();
-		while (generationFiles.hasMoreElements())
-		{
-			ZipEntry config = (ZipEntry)generationFiles.nextElement();
-			
-			if (config.getName().endsWith(".car"))
-				ruleCode = getStringFromStream(zip.getInputStream(config));
-			else if (config.getName().endsWith(".cacp"))
-				colourCode = getStringFromStream(zip.getInputStream(config));
-		}
-		
-		if (ruleCode == null)
-		{
-			System.out.println("Rule file not found.");
-			return false;
-		}
-		
-		if (colourCode == null)
-		{
-			System.out.println("Colour file not found.");
-			return false;
-		}	
-		
-		int worldPos = -1;
-		generationFiles = zip.entries();
-		while(generationFiles.hasMoreElements())
-		{
-			ZipEntry file = (ZipEntry)generationFiles.nextElement();
-			String name = file.getName();
-			long size = file.getSize();
-			if (name.endsWith(".cag"))
-			{
-				if(size > 0)
-				{
-					worldPos = Integer.parseInt(name.substring(0, name.indexOf(".cag")));
-					BufferedReader in = new BufferedReader(new InputStreamReader(zip.getInputStream(file)));
-					String line;
-					for(int rows = 0; rows < y; rows++)
-					{
-						for(int cols = 0; cols < x; cols++)
-						{
-							line = in.readLine();
-							if (line.isEmpty()) continue;
-							
-							double[] vals = new double[properties];
-							
-							int prevIndex = -1;
-							for(int i = 0; i < properties - 1; i++)
-							{
-								int currIndex = line.indexOf(" ", prevIndex + 1);
 
-								if (currIndex <= 0)
-								{
-									Log.error(TAG, "Invalid file format");
-									return false;
-								}
-								
-								vals[i] = Double.parseDouble(line.substring(prevIndex + 1, currIndex));
-								prevIndex = currIndex;
-							}
-							vals[properties - 1] = Double.parseDouble(line.substring(prevIndex + 1));
-							
-							worldGenerations[worldPos].setCell(cols, rows, vals);
-						}
-						line = in.readLine();
+		//Searching for the colours and rules files
+		allFiles = zip.entries();
+		while(allFiles.hasMoreElements())
+		{
+			ZipEntry entry = (ZipEntry)allFiles.nextElement();
+			currFilename = entry.getName();
+			
+			if(currFilename.endsWith(".car"))
+			{
+				rulesFound = true;
+				ruleCode = getStringFromStream(zip.getInputStream(entry));
+			}
+			else if(currFilename.endsWith(".cacp"))
+			{
+				coloursFound = true;
+				colourCode = getStringFromStream(zip.getInputStream(entry));
+			}
+		}
+
+		//Set to a default empty colour set
+		if(!coloursFound)
+		{
+			Log.warning(TAG, "Colour set not found - setting colours to default empty set");
+			colourCode = "colourset colours\n{}";
+		}
+		
+		//Set to a default ruleset for Conway's Game of Life and change colour set to mirror this, despite if a colour set was found
+		if(!rulesFound)
+		{
+			Log.warning(TAG, "Rule set not found - setting colours and rules to default sets for Conway's Game of Life");
+			ruleCode = "ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
+			colourCode = "colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}";
+		}
+
+		//Searching for all generation files that are to be loaded
+		allFiles = zip.entries();
+		int arrSize = zip.size() - 3;
+		int gensToLoad = arrSize;
+		int scale = 500;
+		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);;
+		long maxHeap = bean.getHeapMemoryUsage().getMax();
+		long toBeUsedHeap = generationSize * gensToLoad;
+		
+		if(toBeUsedHeap >= maxHeap - (scale * 1024 * 1024))
+		{
+			while(true)
+			{
+				gensToLoad--;
+				toBeUsedHeap = generationSize * gensToLoad;
+				if(toBeUsedHeap < maxHeap - (scale * 1024 * 1024))
+					break;
+			}
+		}
+		Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
+
+		Grid[] gens = new Grid[gensToLoad];
+		int finalGen = arrSize - 1;
+		
+		while(allFiles.hasMoreElements())
+		{
+			ZipEntry entry = (ZipEntry)allFiles.nextElement();
+			currFilename = entry.getName();
+			
+			if(currFilename.endsWith(".cag"))
+			{
+				String fileData = getStringFromStream(zip.getInputStream(entry));
+				StringTokenizer token = new StringTokenizer(fileData);
+				
+				int index = currFilename.lastIndexOf('/');
+				if(index == -1)
+					index = 0;
+				int fileGenIndex = currFilename.indexOf(".cag");
+				int fileGenNum = 0;
+				if(index != 0)
+					fileGenNum = Integer.parseInt(currFilename.substring(index + 1, fileGenIndex));
+				else
+					fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
+				
+				for(int rows = 0; rows < y; rows++)
+				{
+					for(int cols = 0; cols < x; cols++)
+					{
+						double[] vals = new double[properties];
+
+						for(int j = 0; j < properties; j++)
+							vals[j] = Double.parseDouble(token.nextToken());
+						
+						gen.setCell(cols, rows, vals);
 					}
 				}
+
+				int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
+				
+				if(arrIndex < 0)
+					continue;
+				
+				gens[arrIndex] = gen.clone();
 			}
+			else
+				continue;
 		}
 		
 		world.setRuleCode(ruleCode);
 		world.setColourCode(colourCode);
-		world.setWorldGenerations(worldGenerations);
+		world.setWorldGenerations(gens);
 		
 		System.out.println("Number of generations from World Loader : " + world.getNumGenerations());
 		

@@ -2503,7 +2503,7 @@ public class GUI implements WindowEventListener, LobbyListener
         TextWidget diaMessage = new TextWidget("The program is busy shutting down. Please be patient.");
         diaMessage.setFlag(Widget.FILL);
         diaLayout.add(diaMessage);
-    	
+        
         window.showModalDialog(dia);
 	}
 	

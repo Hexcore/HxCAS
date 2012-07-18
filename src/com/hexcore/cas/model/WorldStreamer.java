@@ -8,15 +8,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.utilities.Log;
+import com.javamex.classmexer.MemoryUtil;
+import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
 public class WorldStreamer
 {
@@ -39,25 +44,25 @@ public class WorldStreamer
 	
 	public Grid getGeneration(int genNum)
 	{
-		System.out.println("Streamer getGeneration(" + genNum + ") called.");
-		File folder = new File(tmpDir);
+		Log.debug(TAG, "Streamer getGeneration(" + genNum + ") called.");
+
+		boolean configFound = false;
+		boolean genFound = false;
+		char type = 'N';
 		File currFile = null;
+		File folder = new File(tmpDir);
 		File[] listOfFiles = folder.listFiles();
-		
+		Grid gen = null;
 		InputStream in = null;
+		int properties = 0;
+		int x = -1;
+		int y = -1;
 		String currFilename = null;
 		
 		try
 		{
-			boolean configFound = false;
-			boolean genFound = false;
-			char type = 'N';
-			Grid gen = null;
-			int properties = 0;
-			int x = -1;
-			int y = -1;
-			
-			//Find the config file.
+			Log.debug(TAG, "Looking for configuration file");
+			//Searching for the configuration file
 			for(int i = 0; i < listOfFiles.length; i++)
 			{
 				if(listOfFiles[i].isFile())
@@ -66,21 +71,20 @@ public class WorldStreamer
 					currFile = new File(tmpDir + "/" + currFilename);
 					in = new BufferedInputStream(new FileInputStream(currFile));
 					
-					String ext = currFilename.substring(currFilename.lastIndexOf(".") + 1);
 					String fileData = "";
 					
-					byte[] data = new byte[1024];
-					int len = 1024;
-					while((len = in.read(data)) > 0)
-					{
-						fileData += new String(data);
-					}
-					
-					StringTokenizer token = new StringTokenizer(fileData);
-					
-					if(ext.compareTo("cac") == 0)
+					if(currFilename.endsWith(".cac"))
 					{
 						configFound = true;
+						
+						byte[] data = new byte[1024];
+						int len = 1024;
+						while((len = in.read(data)) > 0)
+						{
+							fileData += new String(data);
+						}
+						
+						StringTokenizer token = new StringTokenizer(fileData);
 						
 						x = Integer.parseInt(token.nextToken());
 						y = Integer.parseInt(token.nextToken());
@@ -104,7 +108,7 @@ public class WorldStreamer
 								gen = new TriangleGrid(gridSize, cell);
 								break;
 							default:
-								Log.error(TAG, "Unable to create a grid with no type.");
+								Log.error(TAG, "Error retrieving generaion - unable to create a grid with no type");
 								return null;
 						}
 						
@@ -115,7 +119,14 @@ public class WorldStreamer
 				}
 			}
 			
-			//Find the generation files.
+			if(!configFound)
+			{
+				Log.error(TAG, "Error retrieving generaion - configuration file not found");
+				return null;
+			}
+
+			Log.debug(TAG, "Looking for generation file");
+			//Searching for the generation file
 			for(int i = 0; i < listOfFiles.length; i++)
 			{
 				if(listOfFiles[i].isFile())
@@ -126,29 +137,23 @@ public class WorldStreamer
 					
 					String fileData = "";
 					
-					byte[] data = new byte[1024];
-					int len = 1024;
-					while((len = in.read(data)) > 0)
-					{
-						fileData += new String(data);
-					}
-					
-					StringTokenizer token = new StringTokenizer(fileData);
-					
-					if(!configFound)
-					{
-						Log.error(TAG, "Configuration file not found.");
-						return null;
-					}
-					
 					int index = currFilename.lastIndexOf('/');
 					if(index == -1)
 						index = 0;
-					
+
 					if(currFilename.substring(index).compareTo(genNum + ".cag") == 0)
 					{
 						genFound = true;
 
+						byte[] data = new byte[1024];
+						int len = 1024;
+						while((len = in.read(data)) > 0)
+						{
+							fileData += new String(data);
+						}
+						
+						StringTokenizer token = new StringTokenizer(fileData);
+						
 						for(int rows = 0; rows < y; rows++)
 						{
 							for(int cols = 0; cols < x; cols++)
@@ -161,13 +166,15 @@ public class WorldStreamer
 								gen.setCell(cols, rows, vals);
 							}
 						}
+						
+						break;
 					}
 				}
 			}
 
 			if(!genFound)
 			{
-				Log.error(TAG, "Generation file " + genNum + " not found.");
+				Log.error(TAG, "Error retrieving generation - generation file " + genNum + " not found");
 				return null;
 			}
 			
@@ -178,7 +185,7 @@ public class WorldStreamer
 		}
 		catch(IOException ex)
 		{
-			Log.error(TAG, "Error retrieving all generations - " + ex.getMessage());
+			Log.error(TAG, "Error retrieving generation - " + ex.getMessage());
 			ex.printStackTrace();
 			return null;
 		}
@@ -186,26 +193,24 @@ public class WorldStreamer
 	
 	public List<Grid> getGenerations(World w)
 	{
-		List<Grid> generations = Collections.synchronizedList(new ArrayList<Grid>());
-		File folder = new File(tmpDir);
+		boolean configFound = false;
+		char type = 'N';
 		File currFile = null;
+		File folder = new File(tmpDir);
 		File[] listOfFiles = folder.listFiles();
-		int arrSize = listOfFiles.length - 3;
-		Grid[] gens = new Grid[arrSize];
+		Grid gen = null;
 		InputStream in = null;
+		int arrSize = listOfFiles.length - 3;
+		int properties = 0;
+		int x = -1;
+		int y = -1;
+		List<Grid> generations = Collections.synchronizedList(new ArrayList<Grid>());
+		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		String currFilename = null;
 		
 		try
 		{
-			boolean configFound = false;
-			char type = 'N';
-			Grid gen = null;
-			int properties = 0;
-			int x = -1;
-			int y = -1;
-			int genNum = 0;
-			
-			//Find the config file.
+			//Searching for the configuration file 
 			for(int i = 0; i < listOfFiles.length; i++)
 			{
 				if(listOfFiles[i].isFile())
@@ -214,21 +219,20 @@ public class WorldStreamer
 					currFile = new File(tmpDir + "/" + currFilename);
 					in = new BufferedInputStream(new FileInputStream(currFile));
 					
-					String ext = currFilename.substring(currFilename.lastIndexOf(".") + 1);
 					String fileData = "";
 					
-					byte[] data = new byte[1024];
-					int len = 1024;
-					while((len = in.read(data)) > 0)
-					{
-						fileData += new String(data);
-					}
-					
-					StringTokenizer token = new StringTokenizer(fileData);
-					
-					if(ext.compareTo("cac") == 0)
+					if(currFilename.endsWith(".cac"))
 					{
 						configFound = true;
+						
+						byte[] data = new byte[1024];
+						int len = 1024;
+						while((len = in.read(data)) > 0)
+						{
+							fileData += new String(data);
+						}
+						
+						StringTokenizer token = new StringTokenizer(fileData);
 						
 						x = Integer.parseInt(token.nextToken());
 						y = Integer.parseInt(token.nextToken());
@@ -252,7 +256,7 @@ public class WorldStreamer
 								gen = new TriangleGrid(gridSize, cell);
 								break;
 							default:
-								Log.error(TAG, "Unable to create a grid with no type.");
+								Log.error(TAG, "Error retrieving all generations - unable to create a grid with no type");
 								return null;
 						}
 						
@@ -263,7 +267,34 @@ public class WorldStreamer
 				}
 			}
 			
-			//Find the generation files.
+			if(!configFound)
+			{
+				Log.error(TAG, "Error retrieving all generations - configuration file not found");
+				return null;
+			}
+
+			int gensToLoad = arrSize;
+			int scale = 500;
+			long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);;
+			long maxHeap = bean.getHeapMemoryUsage().getMax();
+			long toBeUsedHeap = generationSize * gensToLoad;
+			
+			if(toBeUsedHeap >= maxHeap - (scale * 1024 * 1024))
+			{
+				while(true)
+				{
+					gensToLoad--;
+					toBeUsedHeap = generationSize * gensToLoad;
+					if(toBeUsedHeap < maxHeap - (scale * 1024 * 1024))
+						break;
+				}
+			}
+			Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
+
+			Grid[] gens = new Grid[gensToLoad];
+			int finalGen = arrSize - 1;
+			
+			//Searching for all generation files that are to be loaded
 			for(int i = 0; i < listOfFiles.length; i++)
 			{
 				if(listOfFiles[i].isFile())
@@ -272,25 +303,18 @@ public class WorldStreamer
 					currFile = new File(tmpDir + "/" + currFilename);
 					in = new BufferedInputStream(new FileInputStream(currFile));
 					
-					String ext = currFilename.substring(currFilename.lastIndexOf(".") + 1);
 					String fileData = "";
 					
-					byte[] data = new byte[1024];
-					int len = 1024;
-					while((len = in.read(data)) > 0)
+					if(currFilename.endsWith(".cag"))
 					{
-						fileData += new String(data);
-					}
-					
-					StringTokenizer token = new StringTokenizer(fileData);
-					
-					if(ext.compareTo("cag") == 0)
-					{
-						if(!configFound)
+						byte[] data = new byte[1024];
+						int len = 1024;
+						while((len = in.read(data)) > 0)
 						{
-							Log.error(TAG, "Configuration file not found.");
-							return null;
+							fileData += new String(data);
 						}
+						
+						StringTokenizer token = new StringTokenizer(fileData);
 						
 						int index = currFilename.lastIndexOf('/');
 						if(index == -1)
@@ -302,8 +326,6 @@ public class WorldStreamer
 						else
 							fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 						
-						Log.debug(TAG, "File name : " + currFilename + "; File generation number : " + fileGenNum);
-						
 						for(int rows = 0; rows < y; rows++)
 						{
 							for(int cols = 0; cols < x; cols++)
@@ -316,9 +338,13 @@ public class WorldStreamer
 								gen.setCell(cols, rows, vals);
 							}
 						}
+
+						int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
 						
-						gens[fileGenNum] = gen.clone();
-						genNum++;
+						if(arrIndex < 0)
+							continue;
+						
+						gens[arrIndex] = gen.clone();
 					}
 					else
 						continue;
@@ -328,7 +354,7 @@ public class WorldStreamer
 			in.close();
 			in = null;
 			
-			for(int i = 0; i < arrSize; i++)
+			for(int i = 0; i < gensToLoad; i++)
 				generations.add(gens[i]);
 			
 			return generations;

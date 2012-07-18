@@ -1,9 +1,6 @@
 package com.hexcore.cas.model;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +28,6 @@ public class World
 	private String ruleCode = null;
 	private String colourCode = null;
 	private WorldStreamer streamer = null;
-	//private static Instrumentation instrumentation;
 
 	private static final String TAG = "World";
 	

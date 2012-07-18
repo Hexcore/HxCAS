@@ -24,5 +24,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/HexcoreCAS/docs/asm.zip!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="jar/classmexer.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -246,11 +246,22 @@ public class Server
 			e.printStackTrace();
 		}
 		
-		/* Already called in GUI.
+		/* Already called in GUI.shutdownProcess (called for both quitButton and window exit button)
 		 * if(world != null)
 		{
 			Log.warning(TAG, "Server's world.stop()");
 			world.stop();
+		}*/
+		
+		/*try
+		{
+			FileOutputStream erasor = new FileOutputStream("yourFileName.txt");
+			erasor.write((new String()).getBytes());
+			erasor.close();
+		}
+		catch(IOException ex)
+		{
+			Log.error(TAG, "Error clearing log file.");
 		}*/
 		
 		System.exit(0);
