@@ -548,6 +548,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	private LinearLayout worldHeaderLayout;
 
 	private DropDownBox heightMapPropertySelector;
+	
+	private boolean loadingMessageDestroyed = false;
     
     public GUI(Server server)
     {
@@ -1480,6 +1482,9 @@ public class GUI implements WindowEventListener, LobbyListener
     	
     public void updateWorldEditorTab()
     {
+    	if(!loadingMessageDestroyed)
+    		destroyLoadingMessage();
+    	
     	currentGrid = world.getLastGeneration();
     	previewViewport.recreate(currentGrid, window, colourRules);
     	
@@ -1816,15 +1821,18 @@ public class GUI implements WindowEventListener, LobbyListener
             else if(event.target == loadWorldButton)
             {
             	recreate = true;
+            	displayLoadingMessage();
             	
                 FileSelectResult result = window.askUserForFileToLoad("Load a world");
                 
-                if (result.isValid())
+                if(result.isValid())
                 {
                     ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.LOAD_WORLD);
                     serverEvent.filename = result.getFullPath();
                     server.sendEvent(serverEvent);
                 }
+                else
+                	destroyLoadingMessage();
                 
                 refreshClients();
             }
@@ -2483,6 +2491,38 @@ public class GUI implements WindowEventListener, LobbyListener
 			availableClients.add(clientEntry);
 			
 			updateAvailableClientsList();
+		}
+	}
+	
+	public void displayLoadingMessage()
+	{
+		loadingMessageDestroyed = false;
+		
+		Log.information(TAG, "Loading world process initiated.");
+		
+        Dialog dia = new Dialog(window, new Vector2i(400, 80));
+        
+        LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+        diaLayout.setFlag(Widget.FILL);
+        dia.setContents(diaLayout);
+        
+        TextWidget diaTitle = new TextWidget("World Load", Text.Size.LARGE);
+        diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
+        diaLayout.add(diaTitle);
+        
+        TextWidget diaMessage = new TextWidget("The program is busy loading a world. Please be patient.");
+        diaMessage.setFlag(Widget.FILL);
+        diaLayout.add(diaMessage);
+        
+        window.showModalDialog(dia);
+	}
+	
+	public void destroyLoadingMessage()
+	{
+		if(!loadingMessageDestroyed)
+		{
+			window.closeModalDialog();	
+			loadingMessageDestroyed = true;
 		}
 	}
 	

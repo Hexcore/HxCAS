@@ -8,7 +8,7 @@ import java.io.OutputStream;
 
 public class Log
 {
-	private static File logFile = new File("log.txt");
+	private static File logFile = new File("HxCAS.log");
 	
 	public static void debug(String tag, String msg)
 	{

@@ -1,5 +1,6 @@
 package com.hexcore.cas;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -44,8 +45,19 @@ public class Server
 
 	public static void main(String[] args)
 	{
-		 instance = new Server();
-		 instance.start();
+		try
+		{
+			FileOutputStream erasor = new FileOutputStream("HxCAS.log");
+			erasor.write((new String()).getBytes());
+			erasor.close();
+		}
+		catch(IOException ex)
+		{
+			Log.error(TAG, "Error clearing log file.");
+		}
+		
+		instance = new Server();
+		instance.start();
 	}
 	
 	public void start()
@@ -251,17 +263,6 @@ public class Server
 		{
 			Log.warning(TAG, "Server's world.stop()");
 			world.stop();
-		}*/
-		
-		/*try
-		{
-			FileOutputStream erasor = new FileOutputStream("yourFileName.txt");
-			erasor.write((new String()).getBytes());
-			erasor.close();
-		}
-		catch(IOException ex)
-		{
-			Log.error(TAG, "Error clearing log file.");
 		}*/
 		
 		System.exit(0);
