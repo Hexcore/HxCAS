@@ -129,12 +129,36 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	/////////////////////////////////////////////
 	/// Private Variables
+	private boolean					changePathMessageDestroyed = false;
 	private boolean					loadingMessageDestroyed = false;
 	private boolean					savingMessageDestroyed = false;
 	private boolean					streamingMessageDestroyed = false;
 	private boolean					shutDownMessageDestroyed = false;
+
+	private Dialog					changePathDialog;
+	private Dialog					loadingDialog;
+	private Dialog					savingDialog;
+	private Dialog					shutdownDialog;
+	private Dialog					streamingDialog;
+
+	private LinearLayout			changePathLayout;
+	private LinearLayout			loadingLayout;
+	private LinearLayout			savingLayout;
+	private LinearLayout			shutdownLayout;
+	private LinearLayout			streamingLayout;
 	
 	private LayoutParser			layoutParser = new LayoutParser();
+
+	private TextWidget				changePathMessage;
+	private TextWidget				changePathTitle;
+	private TextWidget				loadingMessage;
+	private TextWidget				loadingTitle;
+	private TextWidget				savingMessage;
+	private TextWidget				savingTitle;
+	private TextWidget				shutdownMessage;
+	private TextWidget				shutdownTitle;
+	private TextWidget				streamingMessage;
+	private TextWidget				streamingTitle;
 	//////////////
 	
 	//WORLD PROPERTIES TAB//
@@ -512,6 +536,15 @@ public class GUI implements WindowEventListener, LobbyListener
 		heightMapLayout.add(importHeightMapButton); 
 	}
 	
+	public void destroyChangePathMessage()
+	{
+		if(!changePathMessageDestroyed)
+		{
+			window.closeModalDialog();
+			changePathMessageDestroyed = true;
+		}
+	}
+	
 	public void destroyLoadingMessage()
 	{
 		if(!loadingMessageDestroyed)
@@ -548,27 +581,22 @@ public class GUI implements WindowEventListener, LobbyListener
 		}
 	}
 	
+	public void displayChangePathMessage()
+	{
+		changePathMessageDestroyed = false;
+		
+		Log.information(TAG, "Changing path process initiated.");
+		
+		window.showModalDialog(changePathDialog);
+	}
+	
 	public void displayLoadingMessage()
 	{
 		loadingMessageDestroyed = false;
 		
 		Log.information(TAG, "Loading world process initiated.");
 		
-		Dialog dia = new Dialog(window, new Vector2i(400, 80));
-		
-		LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		diaLayout.setFlag(Widget.FILL);
-		dia.setContents(diaLayout);
-		
-		TextWidget diaTitle = new TextWidget("World Load", Text.Size.LARGE);
-		diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaTitle);
-		
-		TextWidget diaMessage = new TextWidget("The program is busy loading a world. Please be patient.");
-		diaMessage.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaMessage);
-		
-		window.showModalDialog(dia);
+		window.showModalDialog(loadingDialog);
 	}
 	
 	public void displaySavingMessage()
@@ -577,21 +605,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		Log.information(TAG, "Saving world process initiated.");
 		
-		Dialog dia = new Dialog(window, new Vector2i(400, 80));
-		
-		LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		diaLayout.setFlag(Widget.FILL);
-		dia.setContents(diaLayout);
-		
-		TextWidget diaTitle = new TextWidget("Saving", Text.Size.LARGE);
-		diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaTitle);
-		
-		TextWidget diaMessage = new TextWidget("The program is busy saving the world. Please be patient.");
-		diaMessage.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaMessage);
-		
-		window.showModalDialog(dia);
+		window.showModalDialog(savingDialog);
 	}
 	
 	public void displayStreamingMessage()
@@ -600,21 +614,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		Log.information(TAG, "Streaming world process initiated.");
 		
-		Dialog dia = new Dialog(window, new Vector2i(400, 80));
-		
-		LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		diaLayout.setFlag(Widget.FILL);
-		dia.setContents(diaLayout);
-		
-		TextWidget diaTitle = new TextWidget("Streaming", Text.Size.LARGE);
-		diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaTitle);
-		
-		TextWidget diaMessage = new TextWidget("The program is busy streaming to disk. Please be patient.");
-		diaMessage.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaMessage);
-		
-		window.showModalDialog(dia);
+		window.showModalDialog(streamingDialog);
 	}
 	
 	public void displayShutdownMessage()
@@ -623,21 +623,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		Log.information(TAG, "Shutdown world process initiated.");
 		
-		Dialog dia = new Dialog(window, new Vector2i(400, 80));
-		
-		LinearLayout diaLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		diaLayout.setFlag(Widget.FILL);
-		dia.setContents(diaLayout);
-		
-		TextWidget diaTitle = new TextWidget("Program Shut Down", Text.Size.LARGE);
-		diaTitle.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaTitle);
-		
-		TextWidget diaMessage = new TextWidget("The program is busy shutting down. Please be patient.");
-		diaMessage.setFlag(Widget.CENTER_HORIZONTAL);
-		diaLayout.add(diaMessage);
-		
-		window.showModalDialog(dia);
+		window.showModalDialog(shutdownDialog);
 	}
 	
 	@Override
@@ -806,6 +792,10 @@ public class GUI implements WindowEventListener, LobbyListener
 				displaySavingMessage();
 				
 				int selectedMemory = historyDropDownBox.getSelected();
+				if(selectedMemory == 2)
+					displayChangePathMessage();
+				else
+					displaySavingMessage();
 				
 				FileSelectResult result = window.askUserForFileToSave("world");
 				
@@ -820,7 +810,10 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 				}
 				
-				destroySavingMessage();
+				if(selectedMemory == 2)
+					destroyChangePathMessage();
+				else
+					destroySavingMessage();
 				
 				refreshClients();
 			}
@@ -2042,6 +2035,77 @@ public class GUI implements WindowEventListener, LobbyListener
 		headerLogo.setFlag(Widget.CENTER);
 		headerLogoContainer.setContents(headerLogo);
 		
+		//Creating messages to display
+		changePathDialog = new Dialog(window, new Vector2i(460, 80));
+		
+		changePathLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		changePathLayout.setFlag(Widget.FILL);
+		changePathDialog.setContents(changePathLayout);
+		
+		changePathTitle = new TextWidget("Changing Save Path", Text.Size.LARGE);
+		changePathTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		changePathLayout.add(changePathTitle);
+		
+		changePathMessage = new TextWidget("The program is busy changing the world path. Please be patient.");
+		changePathMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		changePathLayout.add(changePathMessage);
+		//
+		loadingDialog = new Dialog(window, new Vector2i(400, 80));
+		
+		loadingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		loadingLayout.setFlag(Widget.FILL);
+		loadingDialog.setContents(loadingLayout);
+		
+		loadingTitle = new TextWidget("Loading", Text.Size.LARGE);
+		loadingTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		loadingLayout.add(loadingTitle);
+		
+		loadingMessage = new TextWidget("The program is busy loading a world. Please be patient.");
+		loadingMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		loadingLayout.add(loadingMessage);
+		//
+		savingDialog = new Dialog(window, new Vector2i(400, 80));
+		
+		savingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		savingLayout.setFlag(Widget.FILL);
+		savingDialog.setContents(savingLayout);
+		
+		savingTitle = new TextWidget("Saving", Text.Size.LARGE);
+		savingTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		savingLayout.add(savingTitle);
+		
+		savingMessage = new TextWidget("The program is busy saving the world. Please be patient.");
+		savingMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		savingLayout.add(savingMessage);
+		//
+		shutdownDialog = new Dialog(window, new Vector2i(400, 80));
+		
+		shutdownLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		shutdownLayout.setFlag(Widget.FILL);
+		shutdownDialog.setContents(shutdownLayout);
+		
+		shutdownTitle = new TextWidget("Program Shut Down", Text.Size.LARGE);
+		shutdownTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		shutdownLayout.add(shutdownTitle);
+		
+		shutdownMessage = new TextWidget("The program is busy shutting down. Please be patient.");
+		shutdownMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		shutdownLayout.add(shutdownMessage);
+		//
+		streamingDialog = new Dialog(window, new Vector2i(400, 80));
+		
+		streamingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		streamingLayout.setFlag(Widget.FILL);
+		streamingDialog.setContents(streamingLayout);
+		
+		streamingTitle = new TextWidget("Streaming", Text.Size.LARGE);
+		streamingTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		streamingLayout.add(streamingTitle);
+		
+		streamingMessage = new TextWidget("The program is busy streaming to disk. Please be patient.");
+		streamingMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		streamingLayout.add(streamingMessage);
+		
 		window.relayout();
 	}
 	
@@ -2203,24 +2267,25 @@ public class GUI implements WindowEventListener, LobbyListener
 		window.showModalDialog(dialog);
 	}
 	
+	public void stopWorld()
+	{
+		if(world != null)
+		{
+			if(world.getHistoryType() == 2)
+				displayStreamingMessage();
+		
+			world.stop();
+		}
+	}
+	
 	public void shutdownProcess()
 	{
 		Log.information(TAG,"SHUTDOWN PROCESS INITIATED.");
 		
-		if(world != null)
-		{
-			displayStreamingMessage();
-			
-			world.stop();
-			
-			destroyStreamingMessage();
-		}
+		stopWorld();
 		
 		displayShutdownMessage();
-		
 		window.shutdown();
-		
-		destroyShutDownMessage();
 	}
 	
 	public void startWorldEditor(World world)
