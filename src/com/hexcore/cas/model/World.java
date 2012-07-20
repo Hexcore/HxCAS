@@ -24,15 +24,15 @@ public class World
 {
 	private static final String		TAG = "World";
 	
-	private int 					historyType = 1;
-	private int 					genAmount = 0;
-	private int 					lastIn = -1;
+	private int						historyType = 1;
+	private int						genAmount = 0;
+	private int						lastIn = -1;
 	
 	private List<Grid> 				worldGenerations = null;
 	
-	private String 					colourCode = null;
-	private String 					ruleCode = null;
-	private String 					worldFileName = null;
+	private String					colourCode = null;
+	private String					ruleCode = null;
+	private String					worldFileName = null;
 	
 	private WorldStreamer 			streamer = null;
 	
@@ -162,7 +162,7 @@ public class World
 	public List<Grid> getGenerations()
 	{
 		if(historyType == 2 && streamer.hasStarted())
-			return streamer.getGenerations(this);
+			return streamer.getGenerations();
 		else
 			return worldGenerations;
 	}

@@ -166,7 +166,7 @@ public class WorldReader
 		int arrSize = zip.size() - 3;
 		int gensToLoad = arrSize;
 		int scale = 500;
-		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);;
+		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);
 		long maxHeap = bean.getHeapMemoryUsage().getMax();
 		long toBeUsedHeap = generationSize * gensToLoad;
 		

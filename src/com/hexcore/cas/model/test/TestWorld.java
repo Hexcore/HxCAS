@@ -28,7 +28,7 @@ public class TestWorld extends TestCase
 	{
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
-
+		
 		String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
 		assertTrue(ruleCode.startsWith("rules"));
@@ -116,7 +116,7 @@ public class TestWorld extends TestCase
 		worlds[1].setCell(1, 1, new double[] {7.0, 8.0});
 		worlds[1].setCell(0, 2, new double[] {9.0, 10.0});
 		worlds[1].setCell(1, 2, new double[] {11.0, 12.0});
-
+		
 		worlds[2] = new HexagonGrid(new Vector2i(2, 3), 2);
 		worlds[2].setCell(0, 0, new double[] {2.0, 3.0});
 		worlds[2].setCell(1, 0, new double[] {4.0, 5.0});
@@ -124,7 +124,7 @@ public class TestWorld extends TestCase
 		worlds[2].setCell(1, 1, new double[] {8.0, 9.0});
 		worlds[2].setCell(0, 2, new double[] {10.0, 11.0});
 		worlds[2].setCell(1, 2, new double[] {12.0, 13.0});
-
+		
 		for(int i = 0; i < 3; i++)
 			world.addGeneration(worlds[i]);
 		
@@ -132,10 +132,9 @@ public class TestWorld extends TestCase
 		world.setColourCode("colours");
 		
 		world.save();
-
 		
 		assertTrue(world.load());
-
+		
 		String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
 		assertTrue(ruleCode.startsWith("rules"));
@@ -146,7 +145,7 @@ public class TestWorld extends TestCase
 		
 		List<Grid> grids = world.getGenerations();
 		Grid grid;
-
+		
 		//Generation 1
 		grid = grids.get(0);
 		assertEquals('H', grid.getTypeSymbol());
@@ -164,7 +163,7 @@ public class TestWorld extends TestCase
 		assertEquals(9.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(10.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(11.0, grid.getCell(1, 2).getValue(1));
-
+		
 		//Generation 2
 		grid = grids.get(1);
 		assertEquals('H', grid.getTypeSymbol());
@@ -182,7 +181,7 @@ public class TestWorld extends TestCase
 		assertEquals(10.0, grid.getCell(0, 2).getValue(1));
 		assertEquals(11.0, grid.getCell(1, 2).getValue(0));
 		assertEquals(12.0, grid.getCell(1, 2).getValue(1));
-
+		
 		//Generation 3
 		grid = grids.get(2);
 		assertEquals('H', grid.getTypeSymbol());

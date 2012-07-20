@@ -36,7 +36,9 @@ public class WorldStreamer
 	
 	private boolean		reset = false;
 	private boolean		started = false;
+	
 	private int			numGenerations = 0;
+	
 	private String		cawFilename = null;
 	private String		tmpDir = null;
 	
@@ -198,7 +200,7 @@ public class WorldStreamer
 		}
 	}
 	
-	public List<Grid> getGenerations(World w)
+	public List<Grid> getGenerations()
 	{
 		boolean configFound = false;
 		char type = 'N';
@@ -499,6 +501,7 @@ public class WorldStreamer
 			Log.error(TAG, "Error in stopping - " + ex.getMessage());
 			ex.printStackTrace();
 		}
+		started = false;
 	}
 	
 	public void streamGeneration(Grid gen)

@@ -39,33 +39,32 @@ import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.widgets.Dialog;
 import com.hexcore.cas.ui.toolkit.widgets.Layout;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
-import com.hexcore.cas.utilities.Log;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class Window extends Layout implements GLEventListener, MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ClipboardOwner
 {	
-	private Frame 		frame;
-	private GLCanvas	canvas;
-	private FPSAnimator	animator;
-	private	Theme		theme;
-			
-	private Vector2i	defaultMargin;
-	private Widget		focusedWidget = null;
-	private Dialog		modalDialog = null;
+	private Frame 						frame;
+	private GLCanvas					canvas;
+	private FPSAnimator					animator;
+	private	Theme						theme;
+	
+	private Vector2i					defaultMargin;
+	private Widget						focusedWidget = null;
+	private Dialog						modalDialog = null;
 	
 	private List<WindowEventListener>	eventListeners;
 	
-	private boolean[]		keyState;
-	private Timer			keyRepeatTimer = new Timer("KeyRepeatFilter");
-	private KeyRepeatFilter	keyRepeatFilter = null;
+	private boolean[]					keyState;
+	private Timer						keyRepeatTimer = new Timer("KeyRepeatFilter");
+	private KeyRepeatFilter				keyRepeatFilter = null;
 
-	private	boolean	updateComponents = true;	
-	private boolean	initDone = false;
-	private boolean	debugLayout = false;
-	private boolean	fullscreen = false;
+	private	boolean						updateComponents = true;
+	private boolean						initDone = false;
+	private boolean						debugLayout = false;
+	private boolean						fullscreen = false;
 	
 	private List<Recti>	clipRectangles = new ArrayList<Recti>();
-
+	
 	// Tooltip
 	Widget		wantsTooltip;
 	long		lastMouseMove;
@@ -79,9 +78,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public Window(String title, int width, int height, Theme theme)
 	{
 		super(new Vector2i(width, height));
-				
+		
 		keyState = new boolean[1024];
-		for (int i = 0; i < 1024; i++) keyState[i] = false;
+		for(int i = 0; i < 1024; i++)
+			keyState[i] = false;
 		
 		defaultMargin = new Vector2i(8, 8);
 		components = new ArrayList<Widget>();
@@ -134,7 +134,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		frame.addMouseWheelListener(this);
 		frame.addKeyListener(this);
 		canvas.addKeyListener(this);
-				
+		
 		/////////////////////
 		
 		canvas.requestFocus();
@@ -149,16 +149,17 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void updateWidgets(float delta)
 	{
 		update(new Vector2i(), delta);
-		for (Widget component : components) component.update(new Vector2i(), delta);
+		for(Widget component : components)
+			component.update(new Vector2i(), delta);
 	}
 	
 	public void shutdown()
 	{
 		System.out.println(eventListeners.size());
 		
-      	for (WindowEventListener listener : eventListeners)
-      		if (!listener.close())
-      			return;
+		for(WindowEventListener listener : eventListeners)
+			if(!listener.close())
+				return;
 		
 		frame.dispose();
 	}
@@ -166,7 +167,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	//Reason for call? System.exit(0) called here AND at the end of Server
 	public void exit() 
 	{
-      	System.exit(0);
+		System.exit(0);
 	}
 	
 	public Vector2i getDefaultMargin()
@@ -183,7 +184,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		return animator.getCurrentTime();
 	}
-
+	
 	public FileSelectResult askUserForFileToSave(String title)
 	{
 		FileDialog dialog = new FileDialog(frame, title);
@@ -216,7 +217,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		dialog.setFilenameFilter(new ExtensionFilter(extension));
 		dialog.setVisible(true);
 		return new FileSelectResult(dialog.getFile(), dialog.getDirectory());
-	}	
+	}
 	
 	public float getAspectRatio()
 	{
@@ -236,23 +237,22 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		GL2 gl2 = gl.getGL2();
 		gl2.glViewport(rect.position.x, this.size.y - (rect.size.y + rect.position.y), rect.size.x, rect.size.y);
-        gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-        gl2.glLoadIdentity();
-        gl2.glOrtho(rect.position.x, rect.position.x + rect.size.x, 
-        		rect.position.y + rect.size.y, rect.position.y, -1000.0, 1000.0);
-        gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-        gl2.glLoadIdentity();
+		gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		gl2.glOrtho(rect.position.x, rect.position.x + rect.size.x, rect.position.y + rect.size.y, rect.position.y, -1000.0, 1000.0);
+		gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+		gl2.glLoadIdentity();
 	}
 	
 	private void resetClip(GL gl)
 	{
 		GL2 gl2 = gl.getGL2();
 		gl2.glViewport(0, 0, size.x, size.y);
-        gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-        gl2.glLoadIdentity();
-        gl2.glOrtho(0.0, size.x, size.y, 0.0, -1000.0, 1000.0);
-        gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-        gl2.glLoadIdentity();
+		gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		gl2.glOrtho(0.0, size.x, size.y, 0.0, -1000.0, 1000.0);
+		gl2.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+		gl2.glLoadIdentity();
 	}
 	
 	public void addClipRectangle(GL gl, Vector2i position, Vector2i size)
@@ -261,7 +261,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		clipRectangles.add(rect);
 		
 		Recti current = clipRectangles.get(0);
-		for (int i = 1; i < clipRectangles.size(); i++)
+		for(int i = 1; i < clipRectangles.size(); i++)
 			current = current.intersect(clipRectangles.get(i));
 		
 		clip(gl, current);
@@ -269,16 +269,19 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void removeClipRectangle(GL gl)
 	{	
-		if (clipRectangles.isEmpty()) return;
+		if(clipRectangles.isEmpty())
+			return;
 		
 		clipRectangles.remove(clipRectangles.size() - 1);
 		
-		if (clipRectangles.isEmpty())
+		if(clipRectangles.isEmpty())
+		{
 			resetClip(gl);
+		}
 		else
 		{
 			Recti current = clipRectangles.get(0);
-			for (int i = 1; i < clipRectangles.size(); i++)
+			for(int i = 1; i < clipRectangles.size(); i++)
 				current = current.intersect(clipRectangles.get(i));
 			
 			clip(gl, current);
@@ -299,15 +302,17 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void requestTooltip(Widget widget)
 	{
-		if (widget == wantsTooltip) return;
+		if(widget == wantsTooltip)
+			return;
 		wantsTooltip = widget;
 	}
 	
 	public void giveUpFocus(Widget widget)
 	{
-		if (widget != focusedWidget) return;
+		if(widget != focusedWidget)
+			return;
 		
-		if (focusedWidget != null)
+		if(focusedWidget != null)
 		{
 			Event event = new Event(Event.Type.LOST_FOCUS);
 			focusedWidget.receiveEvent(event);
@@ -317,8 +322,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void requestFocus(Widget widget)
 	{
-		if ((widget == null) || !widget.canGetFocus()) return;
-		if (widget == focusedWidget) return;
+		if((widget == null) || !widget.canGetFocus()) return;
+		if(widget == focusedWidget) return;
 		
 		giveUpFocus(focusedWidget);
 		focusedWidget = widget;
@@ -329,7 +334,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void toggleFocus(Widget widget)
 	{
-		if (focusedWidget == widget)
+		if(focusedWidget == widget)
 			giveUpFocus(widget);
 		else
 			requestFocus(widget);
@@ -339,15 +344,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	{
 		fullscreen = state;
 		
-		if (fullscreen)
+		if(fullscreen)
 			frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 		else
 			frame.setExtendedState(Frame.NORMAL);
 	}
-				
+	
 	public boolean getKeyState(int keyCode)
 	{
-		if (keyCode > 1024) return false;
+		if(keyCode > 1024)
+			return false;
 		return keyState[keyCode];
 	}
 	
@@ -357,7 +363,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		String contents = "" ;
 		Transferable transferable = clipboard.getContents(null);
-		if ((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+		if((transferable != null) && transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
 		{
 			try
 			{
@@ -386,7 +392,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void sendWindowEvent(Event event)
 	{
-		for (WindowEventListener listener : eventListeners)
+		for(WindowEventListener listener : eventListeners)
 			listener.handleWindowEvent(event);
 		
 		canvas.display();
@@ -396,101 +402,101 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void relayout()
 	{
 		super.relayout();
-		if (modalDialog != null) modalDialog.relayout();
+		if(modalDialog != null)
+			modalDialog.relayout();
 	}
-		
+	
 	@Override
 	public void display(GLAutoDrawable drawable)
 	{
-		Colour	backgroundColour = theme.getColour("Window", "background", new Colour(0.93f, 0.93f, 0.93f));
+		Colour backgroundColour = theme.getColour("Window", "background", new Colour(0.93f, 0.93f, 0.93f));
 		
-        final GL2 gl = drawable.getGL().getGL2();
-        gl.glClearColor(backgroundColour.r, backgroundColour.g, backgroundColour.b, 1.0f);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-        
-        gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-        gl.glLoadIdentity();
-        gl.glOrtho(0.0, size.x, size.y, 0.0, -1000.0, 1000.0);
-        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-        gl.glLoadIdentity();
-                
-        for (WindowEventListener listener : eventListeners)
+		final GL2 gl = drawable.getGL().getGL2();
+		gl.glClearColor(backgroundColour.r, backgroundColour.g, backgroundColour.b, 1.0f);
+		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+		
+		gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+		gl.glLoadIdentity();
+		gl.glOrtho(0.0, size.x, size.y, 0.0, -1000.0, 1000.0);
+		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+		gl.glLoadIdentity();
+		
+		for(WindowEventListener listener : eventListeners)
 			listener.update(1.0f / 60.0f);
-        		
-        updateWidgets(1.0f / 60.0f);
-        
-        renderWidgets(drawable);
-        
-        for (WindowEventListener listener : eventListeners)
+		
+		updateWidgets(1.0f / 60.0f);
+		
+		renderWidgets(drawable);
+		
+		for(WindowEventListener listener : eventListeners)
 			listener.render();
-        		
-        drawable.swapBuffers();
+		
+		drawable.swapBuffers();
 	}
 	
 	@Override
 	public void dispose(GLAutoDrawable drawable)
 	{
-
 	}
 	
 	@Override
 	public void init(GLAutoDrawable drawable)
 	{
 		GL2 gl = drawable.getGL().getGL2();
-        gl.glClearDepth(1.0f);   
-        gl.glEnable(GL.GL_BLEND);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-       
-        if (!initDone)
-        {
-        	for (WindowEventListener listener : eventListeners)
-        		listener.initialise();
-        	
-        	initDone = true;
-        }
+		gl.glClearDepth(1.0f);   
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
+		if(!initDone)
+		{
+			for(WindowEventListener listener : eventListeners)
+				listener.initialise();
+			
+			initDone = true;
+		}
 	}
 	
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
 	{
-		if (width < 800) width = 800;
-		if (height < 600) height = 600;
+		if(width < 800) width = 800;
+		if(height < 600) height = 600;
 		
 		size = new Vector2i(width, height);
 		
 		relayout();
 	}
-		
+	
 	///////////
-			
+	
 	private void renderWidgets(GLAutoDrawable drawable)
 	{
-		if (updateComponents)
+		if(updateComponents)
 		{
-	        relayout();
-	        updateComponents = false;
+			relayout();
+			updateComponents = false;
 		}
 		
 		GL gl = drawable.getGL();
 		render(gl, new Vector2i(0, 0));
 		
-		if (modalDialog != null)
+		if(modalDialog != null)
 		{
 			theme.renderDialogFade(gl, size);
 			
 			modalDialog.render(gl, new Vector2i(0, 0));
 		}
-		else if (focusedWidget != null) 
+		else if(focusedWidget != null) 
 			focusedWidget.renderExtras(gl, focusedWidget.getRealPosition());
-		else if (wantsTooltip != null && wantsTooltip.isMouseOver() && !wantsTooltip.getTooltip().isEmpty())
+		else if(wantsTooltip != null && wantsTooltip.isMouseOver() && !wantsTooltip.getTooltip().isEmpty())
 		{
 			long diff = System.nanoTime() - lastMouseMove;
 			
 			if (diff > 1000000000)
 			{
-				Vector2i 	pos = mousePos.add(16, 16);
-				String		tooltip = wantsTooltip.getTooltip();
-				Vector2i 	textSize = theme.calculateTextSize(tooltip, Text.Size.SMALL);
+				Vector2i pos = mousePos.add(16, 16);
+				String tooltip = wantsTooltip.getTooltip();
+				Vector2i textSize = theme.calculateTextSize(tooltip, Text.Size.SMALL);
 				
 				Graphics.renderRectangle(gl, pos, textSize.add(8, 8), Colour.WHITE);
 				Graphics.renderBorder(gl, pos, textSize.add(8, 8), Colour.BLACK);
@@ -501,21 +507,21 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 			
 	private void sendEvent(Event event)
 	{
-		if (modalDialog != null)
+		if(modalDialog != null)
 		{
 			modalDialog.receiveEvent(event, new Vector2i(0, 0));
 			return;
 		}
 		
 		boolean handled = false;
-		if (focusedWidget != null)
+		if(focusedWidget != null)
 			handled = focusedWidget.receiveEventExtras(event, focusedWidget.getRealPosition());
 		
-		if (!handled)
-			for (Widget component : components)
+		if(!handled)
+			for(Widget component : components)
 				component.receiveEvent(event);
 	}
-		
+	
 	////
 	
 	/*private class WindowListener extends WindowAdapter
@@ -533,7 +539,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	public void lostOwnership(Clipboard arg0, Transferable arg1)
 	{
 	}
-
+	
 	@Override
 	public void mouseDragged(MouseEvent e)
 	{
@@ -545,7 +551,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void mouseMoved(MouseEvent e)
 	{
@@ -557,13 +563,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-
 	}
-
+	
 	@Override
 	public void mouseEntered(MouseEvent e)
 	{
@@ -575,13 +580,12 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void mouseExited(MouseEvent e)
 	{
-
 	}
-
+	
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
@@ -595,7 +599,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
@@ -609,7 +613,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.setModifiers(e);
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
@@ -618,23 +622,24 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		event.amount = e.getWheelRotation() * e.getScrollAmount() * 20;
 		sendEvent(event);	
 	}
-
+	
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
 		int	keyCode = e.getKeyCode();
-		if (keyCode < 1024) keyState[keyCode] = true;
+		if(keyCode < 1024)
+			keyState[keyCode] = true;
 		
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = true;
 		event.button = keyCode;
 		event.setModifiers(e);
 		
-		if (keyRepeatFilter != null && keyRepeatFilter.event != null)
+		if(keyRepeatFilter != null && keyRepeatFilter.event != null)
 		{
 			Event event2 = keyRepeatFilter.event;
 			
-			if (event2.button == keyCode) 
+			if(event2.button == keyCode) 
 			{
 				keyRepeatFilter.cancel();
 				keyRepeatFilter = null;
@@ -643,10 +648,10 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		sendEvent(event);
 	}
-
+	
 	@Override
 	public void keyReleased(KeyEvent e)
-	{		
+	{
 		int keyCode = e.getKeyCode();
 		Event event = new Event(Event.Type.KEY_PRESS);
 		event.pressed = false;
@@ -659,14 +664,16 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public void keyReleased(Event event)
 	{
-		if (event.button < 1024) keyState[event.button] = false;
+		if(event.button < 1024)
+			keyState[event.button] = false;
 		sendEvent(event);
 	}
 	
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
-		if (e.getKeyChar() == '`') debugLayout = !debugLayout;
+		if(e.getKeyChar() == '`')
+			debugLayout = !debugLayout;
 		
 		Event event = new Event(Event.Type.KEY_TYPED);
 		event.button = (int)e.getKeyChar();
@@ -703,7 +710,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		
 		public String getFullPath()
 		{
-			if (filename == null) return null;
+			if(filename == null)
+				return null;
 			return (directory != null ? directory : "") + filename;
 		}
 		
@@ -715,7 +723,8 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		@Override 
 		public String toString()
 		{
-			if (filename == null) return "<None>";
+			if(filename == null)
+				return "<None>";
 			return (directory != null ? directory : "") + filename;
 		}
 	}
@@ -739,7 +748,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		@Override
 		public void run()
 		{
-			if (event != null)
+			if(event != null)
 			{
 				final Event temp = event;
 				event = null;

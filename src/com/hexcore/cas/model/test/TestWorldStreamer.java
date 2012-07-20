@@ -21,14 +21,14 @@ public class TestWorldStreamer extends TestCase
 		throws ZipException, IOException
 	{
 		System.out.println("\n== Test : testStartAndStop ==");
-
+		
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
 		world.setKeepHistory(2);
 		
 		world.start();
-
+		
 		String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
 		assertTrue(ruleCode.startsWith("rules"));
@@ -130,7 +130,7 @@ public class TestWorldStreamer extends TestCase
 		worlds[1].setCell(1, 1, new double[] {7.0, 8.0});
 		worlds[1].setCell(0, 2, new double[] {9.0, 10.0});
 		worlds[1].setCell(1, 2, new double[] {11.0, 12.0});
-
+		
 		worlds[2] = new TriangleGrid(new Vector2i(2, 3), 2);
 		worlds[2].setCell(0, 0, new double[] {2.0, 3.0});
 		worlds[2].setCell(1, 0, new double[] {4.0, 5.0});
@@ -138,7 +138,7 @@ public class TestWorldStreamer extends TestCase
 		worlds[2].setCell(1, 1, new double[] {8.0, 9.0});
 		worlds[2].setCell(0, 2, new double[] {10.0, 11.0});
 		worlds[2].setCell(1, 2, new double[] {12.0, 13.0});
-
+		
 		for(int i = 0; i < 3; i++)
 			secondWorld.addGeneration(worlds[i]);
 		
@@ -152,7 +152,7 @@ public class TestWorldStreamer extends TestCase
 		{
 			e.printStackTrace();
 		}
-
+		
 		world.resetTo(secondWorld);
 		System.out.println("== File 2 : " + world.getFilename() + " ==");
 		
@@ -230,7 +230,7 @@ public class TestWorldStreamer extends TestCase
 		Grid grid = world.getGeneration(2);
 		
 		world.stop();
-
+		
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
@@ -271,7 +271,7 @@ public class TestWorldStreamer extends TestCase
 		
 		world.addGeneration(gen);
 		Grid grid = world.getGeneration(nextGen);
-
+		
 		world.stop();
 		
 		assertEquals('H', grid.getTypeSymbol());
