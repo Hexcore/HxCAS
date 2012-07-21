@@ -618,8 +618,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public void displayShutdownMessage()
 	{
-		while(!streamingMessageDestroyed) {}
-		
 		shutDownMessageDestroyed = false;
 		
 		Log.information(TAG, "Shutdown world process initiated.");
