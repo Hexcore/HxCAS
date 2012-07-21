@@ -344,7 +344,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	private ScrollableContainer		colourPropertiesContainer;
 	private ScrollableContainer		propertyValuesContainer;
-
+	
 	private SliderWidget			playbackSpeedSlider;
 	private Viewport				previewViewport;
 	//////////////
@@ -399,7 +399,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	@Override
 	public boolean close()
 	{
-		ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SHUTDOWN);  
+		ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.SHUTDOWN);
 		server.sendEvent(serverEvent);
 		
 		return false;
@@ -514,7 +514,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		editorApplyButton.setFlag(Widget.CENTER_HORIZONTAL);
 		worldEditorRightLayout.add(editorApplyButton);
 		
-		
 		LinearLayout heightMapLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		heightMapLayout.setBorder(new Fill(new Colour(0.7F, 0.7F, 0.7F)));
 		heightMapLayout.setMargin(new Vector2i(0, 0));
@@ -619,6 +618,8 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public void displayShutdownMessage()
 	{
+		while(!streamingMessageDestroyed) {}
+		
 		shutDownMessageDestroyed = false;
 		
 		Log.information(TAG, "Shutdown world process initiated.");
@@ -759,7 +760,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			
 			if(event.target == createWorldButton)
 			{
-				recreate = true; 
+				recreate = true;
 				
 				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.CREATE_WORLD);
 				serverEvent.size = new Vector2i(32, 32);
@@ -789,8 +790,6 @@ public class GUI implements WindowEventListener, LobbyListener
 			}
 			else if(event.target == saveWorldButton)
 			{
-				displaySavingMessage();
-				
 				int selectedMemory = historyDropDownBox.getSelected();
 				if(selectedMemory == 2)
 					displayChangePathMessage();
@@ -978,7 +977,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				
 				masterView.setIndex(2);
 				Log.information(TAG, "Switched to simulation screen");
-
+				
 				currentGeneration = 0;
 				updateSimulationScreen(true);
 			}
@@ -2218,7 +2217,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			destroyStreamingMessage();
 		}
 		world.setKeepHistory(historyDropDownBox.getSelected());
-		
+
 		world.resetTo(grid);
 	}
 	
@@ -2240,9 +2239,9 @@ public class GUI implements WindowEventListener, LobbyListener
 		{
 			Log.information(TAG, "Recreating grid, the current state will be lost");
 			grid = grid.getType().create(grid.getSize(), rule.getNumProperties());
+			world.setWorldGenerations(new Grid[] {grid});
 			
 			world.reset();
-			world.setWorldGenerations(new Grid[] {grid});
 		}
 		
 		worldEditorPropertySelector.clear();
@@ -2267,17 +2266,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		window.showModalDialog(dialog);
 	}
 	
-	public void stopWorld()
-	{
-		if(world != null)
-		{
-			if(world.getHistoryType() == 2)
-				displayStreamingMessage();
-		
-			world.stop();
-		}
-	}
-	
 	public void shutdownProcess()
 	{
 		Log.information(TAG,"SHUTDOWN PROCESS INITIATED.");
@@ -2296,6 +2284,19 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		masterView.setIndex(1);
 		window.relayout();
+	}
+	
+	public void stopWorld()
+	{
+		if(world != null && world.getHistoryType() == 2)
+		{
+			displayStreamingMessage();
+			
+			world.stop();
+			while(world.hasStarted()) {}
+			
+			destroyStreamingMessage();
+		}
 	}
 	
 	@Override
@@ -2407,7 +2408,9 @@ public class GUI implements WindowEventListener, LobbyListener
 				if((currentGrid.getType() == grid.getType() && !force) || (!recreate))
 				{
 					for(Viewport viewport : viewports)
+					{
 						viewport.gridWidget.setGrid(currentGrid);
+					}
 				}
 				else
 				{

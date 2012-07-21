@@ -85,18 +85,6 @@ public class World
 		}
 	}
 	
-	public boolean clearHistory()
-	{
-		int size = worldGenerations.size();
-		for(int i = 0; i < size - 1; i++)
-			worldGenerations.remove(0);
-		
-		genAmount = worldGenerations.size();
-		lastIn = genAmount - 1;
-		
-		return true;
-	}
-	
 	public boolean clearHistory(int genNumber)
 	{
 		if(historyType == 0 || historyType == 2)
@@ -262,18 +250,23 @@ public class World
 	
 	public void reset()
 	{
-		Grid g = worldGenerations.get(0).clone();
+		Log.debug(TAG, "Hard reset.");
+		
+		Grid g = null;
+		if(historyType == 0 || historyType == 1)
+			g = worldGenerations.get(0).clone();
+		else
+			g = streamer.getGeneration(0);
+		
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
-
-		if(historyType == 0 || historyType == 2)
-		{
-			genAmount = worldGenerations.size();
-			lastIn = genAmount - 1;
-		}
 		
 		if(historyType == 2)
+		{
+			genAmount = 1;
+			lastIn = 0;
 			streamer.reset(this);
+		}
 	}
 	
 	public void resetTo(Grid g)

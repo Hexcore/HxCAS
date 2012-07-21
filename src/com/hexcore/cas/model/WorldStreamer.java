@@ -32,15 +32,15 @@ import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
 public class WorldStreamer
 {
-	private static final String TAG = "WorldStreamer";
+	private static final String		TAG = "WorldStreamer";
 	
-	private boolean		reset = false;
-	private boolean		started = false;
+	private boolean					reset = false;
+	private volatile boolean		started = false;
 	
-	private int			numGenerations = 0;
+	private int						numGenerations = 0;
 	
-	private String		cawFilename = null;
-	private String		tmpDir = null;
+	private String					cawFilename = null;
+	private String					tmpDir = null;
 	
 	public WorldStreamer()
 	{
@@ -92,7 +92,7 @@ public class WorldStreamer
 						{
 							fileData += new String(data);
 						}
-						
+
 						StringTokenizer token = new StringTokenizer(fileData);
 						
 						x = Integer.parseInt(token.nextToken());
@@ -459,6 +459,8 @@ public class WorldStreamer
 	
 	public void stop()
 	{
+		Log.information(TAG, "The program is streaming the world to disk. Please be patient.");
+		
 		File folder = new File(tmpDir);
 		folder.deleteOnExit();
 		
@@ -501,6 +503,7 @@ public class WorldStreamer
 			Log.error(TAG, "Error in stopping - " + ex.getMessage());
 			ex.printStackTrace();
 		}
+		
 		started = false;
 	}
 	
@@ -516,10 +519,7 @@ public class WorldStreamer
 			
 			genFile = new File(tmpDir + "/" + genNum + ".cag");
 			if(!genFile.createNewFile())
-			{
-				Log.error(TAG, "Error streaming generation to world - could not create temporary generation " + genNum + " file.");
-				System.exit(1);
-			}
+				Log.warning(TAG, "Error streaming generation to world - could not create new temporary generation " + genNum + " file. Overwriting.");
 			out = new BufferedOutputStream(new FileOutputStream(genFile));
 			
 			for(int rows = 0; rows < gen.getHeight(); rows++)
@@ -613,8 +613,6 @@ public class WorldStreamer
 			}
 			
 			numGenerations = gens.size();
-			
-			w.clearHistory();
 		}
 		catch(IOException ex)
 		{
