@@ -444,7 +444,19 @@ public class WorldStreamer
 				tmpDir = "worlds/[tmp]" + cawFilename.substring(backIndex + 1, cawFilename.lastIndexOf("."));
 			else if(forwardIndex != -1)
 				tmpDir = "worlds/[tmp]" + cawFilename.substring(forwardIndex + 1, cawFilename.lastIndexOf("."));
-			boolean res = (new File(tmpDir).mkdirs()); 
+			boolean res = (new File(tmpDir).mkdirs());
+			
+			if(!res)
+			{
+				String[] files = (new File(tmpDir)).list();
+				for(int i = 0; i < files.length; i++)
+				{
+					String currName = tmpDir + "/" + files[i];
+					File currFile = new File(currName);
+					if(!currFile.delete())
+						Log.error(TAG, "Problem clearing out temporary file " + currName);
+				}
+			}
 			
 			Log.debug(TAG, "cawFilename : " + cawFilename);
 			Log.debug(TAG, "tmpDir : " + tmpDir);
