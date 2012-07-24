@@ -1,12 +1,13 @@
 package com.hexcore.cas.rulesystems;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-
+import com.hexcore.cas.rulesystems.TableEntry;
+import com.hexcore.cas.rulesystems.ConstantRecord;
+import com.hexcore.cas.rulesystems.SymbolTable;
+import com.hexcore.cas.rulesystems.PrimaryPair;
 import org.objectweb.asm.Label;
+
+import java.io.*;
 
 public class Parser {
 	static final int _EOF = 0;
