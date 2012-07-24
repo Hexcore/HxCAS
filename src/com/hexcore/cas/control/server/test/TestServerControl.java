@@ -1,5 +1,7 @@
 package com.hexcore.cas.control.server.test;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +12,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
@@ -33,7 +35,7 @@ import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
 
-public class TestServerControl extends TestCase
+public class TestServerControl
 {
 	private static final String TAG = "Test";
 	private static final int TEST_CLIENT_PORT = 3339;
@@ -49,22 +51,22 @@ public class TestServerControl extends TestCase
 		assertEquals(0, cW[0].getID());
 		assertEquals(4, cW[0].getGrid().getWidth());
 		assertEquals(4, cW[0].getGrid().getHeight());
-		assertEquals(1.0, cW[0].getGrid().getCell(0, 0).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(1, 0).getValue(0));
-		assertEquals(0.0, cW[0].getGrid().getCell(2, 0).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(3, 0).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(0, 1).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(1, 1).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(2, 1).getValue(0));
-		assertEquals(0.0, cW[0].getGrid().getCell(3, 1).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(0, 2).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(1, 2).getValue(0));
-		assertEquals(0.0, cW[0].getGrid().getCell(2, 2).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(3, 2).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(0, 3).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(1, 3).getValue(0));
-		assertEquals(1.0, cW[0].getGrid().getCell(2, 3).getValue(0));
-		assertEquals(0.0, cW[0].getGrid().getCell(3, 3).getValue(0));
+		assertEquals(1.0, cW[0].getGrid().getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(1, 0).getValue(0), 0.0);
+		assertEquals(0.0, cW[0].getGrid().getCell(2, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(3, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(0, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(1, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(2, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[0].getGrid().getCell(3, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(0, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(1, 2).getValue(0), 0.0);
+		assertEquals(0.0, cW[0].getGrid().getCell(2, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(3, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(0, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(1, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[0].getGrid().getCell(2, 3).getValue(0), 0.0);
+		assertEquals(0.0, cW[0].getGrid().getCell(3, 3).getValue(0), 0.0);
 		assertEquals(1, cW[0].getWorkableArea().getPosition().y);
 		assertEquals(1, cW[0].getWorkableArea().getPosition().x);
 		assertEquals(2, cW[0].getWorkableArea().getSize().y);
@@ -73,22 +75,22 @@ public class TestServerControl extends TestCase
 		assertEquals(2, cW[2].getID());
 		assertEquals(4, cW[2].getGrid().getWidth());
 		assertEquals(4, cW[2].getGrid().getHeight());
-		assertEquals(1.0, cW[2].getGrid().getCell(0, 0).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(1, 0).getValue(0));
-		assertEquals(0.0, cW[2].getGrid().getCell(2, 0).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(3, 0).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(0, 1).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(1, 1).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(2, 1).getValue(0));
-		assertEquals(0.0, cW[2].getGrid().getCell(3, 1).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(0, 2).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(1, 2).getValue(0));
-		assertEquals(0.0, cW[2].getGrid().getCell(2, 2).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(3, 2).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(0, 3).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(1, 3).getValue(0));
-		assertEquals(1.0, cW[2].getGrid().getCell(2, 3).getValue(0));
-		assertEquals(0.0, cW[2].getGrid().getCell(3, 3).getValue(0));
+		assertEquals(1.0, cW[2].getGrid().getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(1, 0).getValue(0), 0.0);
+		assertEquals(0.0, cW[2].getGrid().getCell(2, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(3, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(0, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(1, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(2, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[2].getGrid().getCell(3, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(0, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(1, 2).getValue(0), 0.0);
+		assertEquals(0.0, cW[2].getGrid().getCell(2, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(3, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(0, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(1, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[2].getGrid().getCell(2, 3).getValue(0), 0.0);
+		assertEquals(0.0, cW[2].getGrid().getCell(3, 3).getValue(0), 0.0);
 		assertEquals(1, cW[2].getWorkableArea().getPosition().y);
 		assertEquals(1, cW[2].getWorkableArea().getPosition().x);
 		assertEquals(2, cW[2].getWorkableArea().getSize().y);
@@ -97,22 +99,22 @@ public class TestServerControl extends TestCase
 		assertEquals(1, cW[1].getID());
 		assertEquals(4, cW[1].getGrid().getWidth());
 		assertEquals(4, cW[1].getGrid().getHeight());
-		assertEquals(0.0, cW[1].getGrid().getCell(0, 0).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(1, 0).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(2, 0).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(3, 0).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(0, 1).getValue(0));
-		assertEquals(0.0, cW[1].getGrid().getCell(1, 1).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(2, 1).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(3, 1).getValue(0));
-		assertEquals(0.0, cW[1].getGrid().getCell(0, 2).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(1, 2).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(2, 2).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(3, 2).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(0, 3).getValue(0));
-		assertEquals(0.0, cW[1].getGrid().getCell(1, 3).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(2, 3).getValue(0));
-		assertEquals(1.0, cW[1].getGrid().getCell(3, 3).getValue(0));
+		assertEquals(0.0, cW[1].getGrid().getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(1, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(2, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(3, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(0, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[1].getGrid().getCell(1, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(2, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(3, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[1].getGrid().getCell(0, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(1, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(2, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(3, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(0, 3).getValue(0), 0.0);
+		assertEquals(0.0, cW[1].getGrid().getCell(1, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(2, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[1].getGrid().getCell(3, 3).getValue(0), 0.0);
 		assertEquals(1, cW[1].getWorkableArea().getPosition().y);
 		assertEquals(1, cW[1].getWorkableArea().getPosition().x);
 		assertEquals(2, cW[1].getWorkableArea().getSize().y);
@@ -121,22 +123,22 @@ public class TestServerControl extends TestCase
 		assertEquals(3, cW[3].getID());
 		assertEquals(4, cW[3].getGrid().getWidth());
 		assertEquals(4, cW[3].getGrid().getHeight());
-		assertEquals(0.0, cW[3].getGrid().getCell(0, 0).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(1, 0).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(2, 0).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(3, 0).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(0, 1).getValue(0));
-		assertEquals(0.0, cW[3].getGrid().getCell(1, 1).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(2, 1).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(3, 1).getValue(0));
-		assertEquals(0.0, cW[3].getGrid().getCell(0, 2).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(1, 2).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(2, 2).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(3, 2).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(0, 3).getValue(0));
-		assertEquals(0.0, cW[3].getGrid().getCell(1, 3).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(2, 3).getValue(0));
-		assertEquals(1.0, cW[3].getGrid().getCell(3, 3).getValue(0));
+		assertEquals(0.0, cW[3].getGrid().getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(1, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(2, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(3, 0).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(0, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[3].getGrid().getCell(1, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(2, 1).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(3, 1).getValue(0), 0.0);
+		assertEquals(0.0, cW[3].getGrid().getCell(0, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(1, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(2, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(3, 2).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(0, 3).getValue(0), 0.0);
+		assertEquals(0.0, cW[3].getGrid().getCell(1, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(2, 3).getValue(0), 0.0);
+		assertEquals(1.0, cW[3].getGrid().getCell(3, 3).getValue(0), 0.0);
 		assertEquals(1, cW[3].getWorkableArea().getPosition().y);
 		assertEquals(1, cW[3].getWorkableArea().getPosition().x);
 		assertEquals(2, cW[3].getWorkableArea().getSize().y);
@@ -152,25 +154,25 @@ public class TestServerControl extends TestCase
 		assertEquals('R', grid.getTypeSymbol());
 		assertEquals(4, grid.getWidth());
 		assertEquals(4, grid.getHeight());
-		assertEquals(1.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(1.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(0.0, grid.getCell(2, 0).getValue(0));
-		assertEquals(1.0, grid.getCell(3, 0).getValue(0));
+		assertEquals(1.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(0.0, grid.getCell(2, 0).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(3, 0).getValue(0), 0.0);
 		
-		assertEquals(1.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(0.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(1.0, grid.getCell(2, 1).getValue(0));
-		assertEquals(1.0, grid.getCell(3, 1).getValue(0));
+		assertEquals(1.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(0.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(2, 1).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(3, 1).getValue(0), 0.0);
 		
-		assertEquals(1.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(1.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(0.0, grid.getCell(2, 2).getValue(0));
-		assertEquals(1.0, grid.getCell(3, 2).getValue(0));
+		assertEquals(1.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(0.0, grid.getCell(2, 2).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(3, 2).getValue(0), 0.0);
 		
-		assertEquals(1.0, grid.getCell(0, 3).getValue(0));
-		assertEquals(0.0, grid.getCell(1, 3).getValue(0));
-		assertEquals(1.0, grid.getCell(2, 3).getValue(0));
-		assertEquals(1.0, grid.getCell(3, 3).getValue(0));
+		assertEquals(1.0, grid.getCell(0, 3).getValue(0), 0.0);
+		assertEquals(0.0, grid.getCell(1, 3).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(2, 3).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(3, 3).getValue(0), 0.0);
 
 		Log.information(TAG, "SUCCESS - grid was calculated and set correctly");
 	}
@@ -216,6 +218,7 @@ public class TestServerControl extends TestCase
 		Log.information(TAG, "SUCCESS - workables was set correctly");
 	}
 	
+	@Test
 	public void testServer()
 		throws IOException
 	{
@@ -722,7 +725,7 @@ public class TestServerControl extends TestCase
 	    }
 	    
 	    if (index < length) throw new Exception("Not all bytes were read in");
-
+	    
 	    return bytes;
 	}
 }

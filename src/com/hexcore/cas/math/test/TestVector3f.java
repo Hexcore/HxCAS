@@ -1,17 +1,19 @@
 package com.hexcore.cas.math.test;
 
+import static org.junit.Assert.*;
+
 import java.nio.FloatBuffer;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2f;
 import com.hexcore.cas.math.Vector3f;
 
-public class TestVector3f extends TestCase
+public class TestVector3f
 {
 	static final float epsilon = 0.0001f;
 	
-	
+	@Test
 	public void testVector3f()
 	{
 		Vector3f point = new Vector3f();
@@ -20,6 +22,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testVector3fFloatFloatFloat()
 	{
 		Vector3f point = new Vector3f(7.7f, 9.9f, 13.13f);
@@ -29,6 +32,7 @@ public class TestVector3f extends TestCase
 	}
 	
 	
+	@Test
 	public void testVector3fVector2fFloat()
 	{
 		Vector2f point = new Vector2f(3.3f, 4.4f);
@@ -39,6 +43,7 @@ public class TestVector3f extends TestCase
 	}	
 
 	
+	@Test
 	public void testVector3fVector3f()
 	{
 		Vector3f point = new Vector3f(3.3f, 4.4f, 5.5f);
@@ -49,6 +54,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testGet()
 	{
 		Vector3f point = new Vector3f(7.7f, 9.9f, 13.13f);
@@ -58,6 +64,7 @@ public class TestVector3f extends TestCase
 	}
 	
 	
+	@Test
 	public void testEqualsVector3f()
 	{
 		Vector3f a, b;
@@ -84,6 +91,7 @@ public class TestVector3f extends TestCase
 	}
 	
 	
+	@Test
 	public void testSetFloatFloatFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 2.2f, 4.4f);
@@ -95,6 +103,7 @@ public class TestVector3f extends TestCase
 	}
 	
 	
+	@Test
 	public void testSetVector2fFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 2.2f, 4.4f);
@@ -106,6 +115,7 @@ public class TestVector3f extends TestCase
 	}	
 	
 	
+	@Test
 	public void testSetVector3f()
 	{
 		Vector3f a = new Vector3f(1.1f, 2.2f, 3.3f);
@@ -125,6 +135,7 @@ public class TestVector3f extends TestCase
 	}	
 
 	
+	@Test
 	public void testAddVector3f()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -137,6 +148,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testAddFloatFloatFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -148,6 +160,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testSubtractVector3f()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -160,6 +173,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testSubtractFloatFloatFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -171,6 +185,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testToString()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.9f);
@@ -181,6 +196,7 @@ public class TestVector3f extends TestCase
 	}
 	
 	
+	@Test
 	public void testToFloatBuffer()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.9f);
@@ -193,6 +209,7 @@ public class TestVector3f extends TestCase
 	}	
 	
 	
+	@Test
 	public void testToFloatBufferW()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.9f);
@@ -206,6 +223,7 @@ public class TestVector3f extends TestCase
 	}
 		
 	
+	@Test
 	public void testIncVector3f()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -218,6 +236,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testIncFloatFloatFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -229,6 +248,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testDecVector3f()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);
@@ -241,6 +261,7 @@ public class TestVector3f extends TestCase
 	}
 
 	
+	@Test
 	public void testDecFloatFloatFloat()
 	{
 		Vector3f a = new Vector3f(1.1f, 5.5f, 10.0f);

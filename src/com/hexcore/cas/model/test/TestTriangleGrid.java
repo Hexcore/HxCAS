@@ -1,26 +1,31 @@
 package com.hexcore.cas.model.test;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.TriangleGrid;
 
-import junit.framework.TestCase;
-
-public class TestTriangleGrid extends TestCase
+public class TestTriangleGrid
 {
 	private final TriangleGrid g = new TriangleGrid(new Vector2i(5, 10), 1);
 	
+	@Test
 	public void test1Width()
 	{
 		int expectedResults = 5;
 		assertEquals(expectedResults, g.getWidth());
 	}
 	
+	@Test
 	public void test2Height()
 	{
 		int expectedResults = 10;
 		assertEquals(expectedResults, g.getHeight());
 	}
 	
+	@Test
 	public void test3Size()
 	{
 		Vector2i expectedResults = new Vector2i(5, 10);
@@ -28,13 +33,15 @@ public class TestTriangleGrid extends TestCase
 		assertEquals(expectedResults.y, g.getSize().y);
 	}
 	
+	@Test
 	public void test4GetCell()
 	{
 		double[] vals = {0};
 		Cell c = new Cell(vals);
-		assertEquals(c.getValue(0), g.getCell(new Vector2i(0, 0)).getValue(0));
+		assertEquals(c.getValue(0), g.getCell(new Vector2i(0, 0)).getValue(0), 0.0);
 	}
 	
+	@Test
 	public void test5GetNeighbours00()
 	{
 		int gridSize = 5;
@@ -60,7 +67,7 @@ public class TestTriangleGrid extends TestCase
 		vals[10] = 5.0;
 		vals[11] = 6.0;
 		for(int i = 0; i < 12; i++)
-			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		
 		//Non-wrapping test
 		t.setWrappable(false);
@@ -81,10 +88,11 @@ public class TestTriangleGrid extends TestCase
 			if(vals[i] == Double.MIN_VALUE)
 				assertEquals(null, t.getNeighbours(pos)[i]);
 			else
-				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		}
 	}
 	
+	@Test
 	public void test6GetNeighbours01()
 	{
 		int gridSize = 5;
@@ -113,7 +121,7 @@ public class TestTriangleGrid extends TestCase
 		vals[10] = 7.0;
 		vals[11] = 8.0;
 		for(int i = 0; i < 12; i++)
-			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		
 		//Non-wrapping test
 		t.setWrappable(false);
@@ -134,10 +142,11 @@ public class TestTriangleGrid extends TestCase
 			if(vals[i] == Double.MIN_VALUE)
 				assertEquals(null, t.getNeighbours(pos)[i]);
 			else
-				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		}
 	}
 	
+	@Test
 	public void test7GetNeighbours22()
 	{
 		int gridSize = 5;
@@ -163,7 +172,7 @@ public class TestTriangleGrid extends TestCase
 		vals[10] = 17.0;
 		vals[11] = 18.0;
 		for(int i = 0; i < 12; i++)
-			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+			assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		
 		//Non-wrapping test
 		t.setWrappable(false);
@@ -184,7 +193,7 @@ public class TestTriangleGrid extends TestCase
 			if(vals[i] == Double.MIN_VALUE)
 				assertEquals(null, t.getNeighbours(pos)[i]);
 			else
-				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0));
+				assertEquals(vals[i], t.getNeighbours(pos)[i].getValue(0), 0.0);
 		}
 	}
 }
