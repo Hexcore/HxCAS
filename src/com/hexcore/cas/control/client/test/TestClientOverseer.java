@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import com.hexcore.cas.control.client.CAPIPClient;
 import com.hexcore.cas.control.client.ClientOverseer;
@@ -17,11 +18,11 @@ import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 import com.hexcore.cas.utilities.Log;
 
-public class TestClientOverseer extends TestCase
+public class TestClientOverseer
 {
 	private static final int TEST_CLIENT_PORT = 3229;
 	
-	
+	@Test
 	public void testClientOverseer()
 	{				
 		// Create client overseer

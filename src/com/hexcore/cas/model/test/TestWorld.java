@@ -1,10 +1,12 @@
 package com.hexcore.cas.model.test;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Grid;
@@ -12,10 +14,11 @@ import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.World;
 
 
-public class TestWorld extends TestCase
+public class TestWorld
 {
 	private World world = new World();
 	
+	@Test
 	public void testSetAndGetFileName()
 	{
 		world.setFileName("Test Data/world/world.caw");
@@ -23,6 +26,7 @@ public class TestWorld extends TestCase
 		assertTrue(world.getWorldName().equals("world.caw"));
 	}
 	
+	@Test
 	public void testReadWorld()
 		throws IOException
 	{
@@ -42,59 +46,60 @@ public class TestWorld extends TestCase
 		
 		//Generation 1
 		grid = grids.get(0);
-		assertEquals('H', grid.getTypeSymbol());
+		assertEquals('T', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(0.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(1.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(2.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(3.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(4.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(5.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(6.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(7.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(8.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(9.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(10.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(11.0, grid.getCell(1, 2).getValue(1));
+		assertEquals(0.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(2.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(3.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(4.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(5.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(6.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(7.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(8.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(9.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(10.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(11.0, grid.getCell(1, 2).getValue(1), 0.0);
 		
 		//Generation 2
 		grid = grids.get(1);
-		assertEquals('H', grid.getTypeSymbol());
+		assertEquals('T', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(1.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(2.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(3.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(4.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(5.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(6.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(7.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(8.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(9.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(10.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(11.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(12.0, grid.getCell(1, 2).getValue(1));
+		assertEquals(1.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(2.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(3.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(4.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(5.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(6.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(7.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(8.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(9.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(10.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(11.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(12.0, grid.getCell(1, 2).getValue(1), 0.0);
 		
 		//Generation 3
 		grid = grids.get(2);
-		assertEquals('H', grid.getTypeSymbol());
+		assertEquals('T', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(2.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(3.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(4.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(5.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(6.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(7.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(8.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(9.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(10.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
+		assertEquals(2.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(3.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(4.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(5.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(6.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(7.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(8.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(9.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(10.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(11.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(12.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(13.0, grid.getCell(1, 2).getValue(1), 0.0);
 	}
 	
+	@Test
 	public void testSaveWorld()
 		throws IOException
 	{
@@ -151,54 +156,56 @@ public class TestWorld extends TestCase
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(0.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(1.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(2.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(3.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(4.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(5.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(6.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(7.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(8.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(9.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(10.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(11.0, grid.getCell(1, 2).getValue(1));
+		
+		assertEquals(0.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(1.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(2.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(3.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(4.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(5.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(6.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(7.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(8.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(9.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(10.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(11.0, grid.getCell(1, 2).getValue(1), 0.0);
 		
 		//Generation 2
 		grid = grids.get(1);
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(1.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(2.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(3.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(4.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(5.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(6.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(7.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(8.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(9.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(10.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(11.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(12.0, grid.getCell(1, 2).getValue(1));
+
+		assertEquals(1.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(2.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(3.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(4.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(5.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(6.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(7.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(8.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(9.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(10.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(11.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(12.0, grid.getCell(1, 2).getValue(1), 0.0);
 		
 		//Generation 3
 		grid = grids.get(2);
 		assertEquals('H', grid.getTypeSymbol());
 		assertEquals(2, grid.getWidth());
 		assertEquals(3, grid.getHeight());
-		assertEquals(2.0, grid.getCell(0, 0).getValue(0));
-		assertEquals(3.0, grid.getCell(0, 0).getValue(1));
-		assertEquals(4.0, grid.getCell(1, 0).getValue(0));
-		assertEquals(5.0, grid.getCell(1, 0).getValue(1));
-		assertEquals(6.0, grid.getCell(0, 1).getValue(0));
-		assertEquals(7.0, grid.getCell(0, 1).getValue(1));
-		assertEquals(8.0, grid.getCell(1, 1).getValue(0));
-		assertEquals(9.0, grid.getCell(1, 1).getValue(1));
-		assertEquals(10.0, grid.getCell(0, 2).getValue(0));
-		assertEquals(11.0, grid.getCell(0, 2).getValue(1));
-		assertEquals(12.0, grid.getCell(1, 2).getValue(0));
-		assertEquals(13.0, grid.getCell(1, 2).getValue(1));
+		assertEquals(2.0, grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(3.0, grid.getCell(0, 0).getValue(1), 0.0);
+		assertEquals(4.0, grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(5.0, grid.getCell(1, 0).getValue(1), 0.0);
+		assertEquals(6.0, grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(7.0, grid.getCell(0, 1).getValue(1), 0.0);
+		assertEquals(8.0, grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(9.0, grid.getCell(1, 1).getValue(1), 0.0);
+		assertEquals(10.0, grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(11.0, grid.getCell(0, 2).getValue(1), 0.0);
+		assertEquals(12.0, grid.getCell(1, 2).getValue(0), 0.0);
+		assertEquals(13.0, grid.getCell(1, 2).getValue(1), 0.0);
 		
 		File file = new File("Test Data/world/savedWorld.caw");
 		file.delete();

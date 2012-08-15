@@ -1,14 +1,16 @@
 package com.hexcore.cas.math.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2f;
 
-public class TestVector2f extends TestCase
+public class TestVector2f
 {
 	static final float epsilon = 0.0001f;
 	
-	
+	@Test
 	public void testVector2f()
 	{
 		Vector2f point = new Vector2f();
@@ -17,6 +19,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testVector2fIntInt()
 	{
 		Vector2f point = new Vector2f(7.7f, 9.9f);
@@ -25,6 +28,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testVector2fVector2f()
 	{
 		Vector2f point = new Vector2f(3.3f, 4.4f);
@@ -34,6 +38,7 @@ public class TestVector2f extends TestCase
 	}
 	
 	
+	@Test
 	public void testGet()
 	{
 		Vector2f point = new Vector2f(7.7f, 9.9f);
@@ -42,6 +47,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testEqualsVector2f()
 	{
 		Vector2f a, b;
@@ -64,6 +70,7 @@ public class TestVector2f extends TestCase
 	}
 	
 	
+	@Test
 	public void testSetIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 2.2f);
@@ -74,6 +81,7 @@ public class TestVector2f extends TestCase
 	}
 	
 	
+	@Test
 	public void testSetVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 2.2f);
@@ -91,6 +99,7 @@ public class TestVector2f extends TestCase
 	}	
 
 	
+	@Test
 	public void testAddVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -102,6 +111,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testAddIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -112,6 +122,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testSubtractVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -123,6 +134,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testSubtractIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -133,6 +145,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testToString()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -143,6 +156,7 @@ public class TestVector2f extends TestCase
 	}
 		
 	
+	@Test
 	public void testIncVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -154,6 +168,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testIncIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -164,6 +179,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testDecVector2f()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -175,6 +191,7 @@ public class TestVector2f extends TestCase
 	}
 
 	
+	@Test
 	public void testDecIntInt()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -185,6 +202,7 @@ public class TestVector2f extends TestCase
 	}
 	
 	
+	@Test
 	public void testNormalize()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -195,6 +213,7 @@ public class TestVector2f extends TestCase
 	}	
 	
 	
+	@Test
 	public void testGetNormalized()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);
@@ -205,6 +224,7 @@ public class TestVector2f extends TestCase
 	}
 	
 	
+	@Test
 	public void testGetPerpendicular()
 	{
 		Vector2f a = new Vector2f(1.1f, 5.5f);

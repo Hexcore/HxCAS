@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
-
 import com.hexcore.cas.Server;
 import com.hexcore.cas.ServerEvent;
 import com.hexcore.cas.control.discovery.LobbyListener;
@@ -551,6 +549,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			window.closeModalDialog();
 			loadingMessageDestroyed = true;
 		}
+		
 	}
 	
 	public void destroySavingMessage()

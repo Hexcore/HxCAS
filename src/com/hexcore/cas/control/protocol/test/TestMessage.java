@@ -1,10 +1,12 @@
 package com.hexcore.cas.control.protocol.test;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.DictNode;
@@ -13,9 +15,10 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Message;
 
-public class TestMessage extends TestCase 
+public class TestMessage 
 {
 	
+	@Test
 	public void testEmptyMessage()
 	{
 		DictNode	header = new DictNode();
@@ -39,6 +42,7 @@ public class TestMessage extends TestCase
 	}
 	
 	
+	@Test
 	public void testIntMessage()
 	{
 		DictNode	header = new DictNode();
@@ -62,6 +66,7 @@ public class TestMessage extends TestCase
 	}
 	
 	
+	@Test
 	public void testDoubleMessage()
 	{
 		DictNode	header = new DictNode();
@@ -93,6 +98,7 @@ public class TestMessage extends TestCase
 	}
 	
 	
+	@Test
 	public void testListMessage()
 	{
 		ListNode	list1 = new ListNode();
@@ -126,6 +132,7 @@ public class TestMessage extends TestCase
 	}
 	
 	
+	@Test
 	public void testDictionaryIntMessage()
 	{
 		DictNode	header = new DictNode();

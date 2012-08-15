@@ -1,25 +1,31 @@
 package com.hexcore.cas.math.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2i;
 
-public class TestVector2i extends TestCase
+public class TestVector2i
 {
+	
+	@Test
 	public void testVector2i()
 	{
 		Vector2i point = new Vector2i();
 		assertEquals(0, point.x);
 		assertEquals(0, point.y);
 	}
-
+	
+	@Test
 	public void testVector2iIntInt()
 	{
 		Vector2i point = new Vector2i(7, 9);
 		assertEquals(7, point.x);
 		assertEquals(9, point.y);
 	}
-
+	
+	@Test
 	public void testVector2iVector2i()
 	{
 		Vector2i point = new Vector2i(3, 4);
@@ -27,14 +33,16 @@ public class TestVector2i extends TestCase
 		assertEquals(3, copy.x);
 		assertEquals(4, copy.y);
 	}
-
+	
+	@Test
 	public void testGet()
 	{
 		Vector2i point = new Vector2i(7, 9);
 		assertEquals(7, point.get(0));
 		assertEquals(9, point.get(1));
 	}
-
+	
+	@Test
 	public void testEqualsVector2i()
 	{
 		Vector2i a, b;
@@ -56,6 +64,7 @@ public class TestVector2i extends TestCase
 		assertFalse(a.equals(b));
 	}
 	
+	@Test
 	public void testSetIntInt()
 	{
 		Vector2i a = new Vector2i(1, 2);
@@ -65,6 +74,7 @@ public class TestVector2i extends TestCase
 		assertEquals(4, a.y);	
 	}
 	
+	@Test
 	public void testSetVector2i()
 	{
 		Vector2i a = new Vector2i(1, 2);
@@ -80,7 +90,8 @@ public class TestVector2i extends TestCase
 		assertEquals(5, a.x);
 		assertEquals(6, a.y);		
 	}	
-
+	
+	@Test
 	public void testAddVector2i()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -90,7 +101,8 @@ public class TestVector2i extends TestCase
 		assertEquals(3, c.x);
 		assertEquals(9, c.y);
 	}
-
+	
+	@Test
 	public void testAddIntInt()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -99,7 +111,8 @@ public class TestVector2i extends TestCase
 		assertEquals(3, c.x);
 		assertEquals(9, c.y);
 	}
-
+	
+	@Test
 	public void testSubtractVector2i()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -109,7 +122,8 @@ public class TestVector2i extends TestCase
 		assertEquals(-1, c.x);
 		assertEquals(1, c.y);
 	}
-
+	
+	@Test
 	public void testSubtractIntInt()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -118,7 +132,8 @@ public class TestVector2i extends TestCase
 		assertEquals(-1, c.x);
 		assertEquals(1, c.y);
 	}
-
+	
+	@Test
 	public void testToString()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -128,6 +143,7 @@ public class TestVector2i extends TestCase
 		assertEquals("Vector2i<-1, -5>", b.toString());
 	}
 	
+	@Test
 	public void testIncVector2i()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -137,7 +153,8 @@ public class TestVector2i extends TestCase
 		assertEquals(3, a.x);
 		assertEquals(9, a.y);
 	}
-
+	
+	@Test
 	public void testIncIntInt()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -146,7 +163,8 @@ public class TestVector2i extends TestCase
 		assertEquals(3, a.x);
 		assertEquals(9, a.y);
 	}
-
+	
+	@Test
 	public void testDecVector2i()
 	{
 		Vector2i a = new Vector2i(1, 5);
@@ -156,7 +174,8 @@ public class TestVector2i extends TestCase
 		assertEquals(-1, a.x);
 		assertEquals(1, a.y);
 	}
-
+	
+	@Test
 	public void testDecIntInt()
 	{
 		Vector2i a = new Vector2i(1, 5);

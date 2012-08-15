@@ -1,9 +1,12 @@
 package com.hexcore.cas.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 
-public class TestPrivateAccessor extends TestCase
+
+public class TestPrivateAccessor
 {
 	@SuppressWarnings("unused")
 	private class PrivateTestClass
@@ -23,7 +26,7 @@ public class TestPrivateAccessor extends TestCase
 		}
 	}
 	
-	
+	@Test
 	public void testGet()
 	{
 		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());
@@ -33,12 +36,14 @@ public class TestPrivateAccessor extends TestCase
 		
 	}
 	
+	@Test
 	public void testInvoke()
 	{
 		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());
 		assertTrue(pa.invokeMethod("getPrivateNumber", 10).equals(10));
 	}
 	
+	@Test
 	public void testSet()
 	{
 		PrivateAccessor pa = new PrivateAccessor(new PrivateTestClass());

@@ -275,7 +275,7 @@ public class World
 		
 		worldGenerations.clear();
 		worldGenerations.add(g.clone());
-
+		
 		if(historyType == 0 || historyType == 2)
 		{
 			genAmount = worldGenerations.size();
@@ -299,7 +299,7 @@ public class World
 			this.worldGenerations.addAll(w.worldGenerations);
 		else
 			this.worldGenerations.add(w.worldGenerations.get(w.worldGenerations.size() - 1));
-
+		
 		if(historyType == 0 || historyType == 2)
 		{
 			genAmount = worldGenerations.size();

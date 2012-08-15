@@ -1,34 +1,40 @@
 package com.hexcore.cas.ui.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 import com.hexcore.cas.ui.toolkit.Colour;
 
-public class TestColour extends TestCase
+public class TestColour
 {
 	
+	@Test
 	public void testColourFloatFloatFloat()
 	{
 		Colour colour = new Colour(0.1f, 0.2f, 0.3f);
 		
-		assertEquals(colour.r, 0.1f);
-		assertEquals(colour.g, 0.2f);
-		assertEquals(colour.b, 0.3f);
-		assertEquals(colour.a, 1.0f);
+		assertEquals(colour.r, 0.1f, 0.0);
+		assertEquals(colour.g, 0.2f, 0.0);
+		assertEquals(colour.b, 0.3f, 0.0);
+		assertEquals(colour.a, 1.0f, 0.0);
 	}
 
 	
+	@Test
 	public void testColourFloatFloatFloatFloat()
 	{
 		Colour colour = new Colour(0.1f, 0.2f, 0.3f, 0.4f);
 		
-		assertEquals(colour.r, 0.1f);
-		assertEquals(colour.g, 0.2f);
-		assertEquals(colour.b, 0.3f);
-		assertEquals(colour.a, 0.4f);
+		assertEquals(colour.r, 0.1f, 0.0);
+		assertEquals(colour.g, 0.2f, 0.0);
+		assertEquals(colour.b, 0.3f, 0.0);
+		assertEquals(colour.a, 0.4f, 0.0);
 	}
 
 	
+	@Test
 	public void testColourColour()
 	{
 		Colour a = new Colour(0.1f, 0.2f, 0.3f, 0.4f);
@@ -47,6 +53,7 @@ public class TestColour extends TestCase
 	}
 	
 	
+	@Test
 	public void testMixColour()
 	{
 		Colour a = new Colour(0.1f, 0.2f, 0.3f, 0.4f);
@@ -60,6 +67,7 @@ public class TestColour extends TestCase
 	}
 
 	
+	@Test
 	public void testMixColourFloat()
 	{
 		Colour a = new Colour(0.1f, 0.2f, 0.3f, 0.4f);
@@ -79,6 +87,7 @@ public class TestColour extends TestCase
 	}
 
 	
+	@Test
 	public void testToString()
 	{
 		Colour a = new Colour(0.1f, 0.2f, 0.3f, 0.4f);

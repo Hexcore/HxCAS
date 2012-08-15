@@ -1,16 +1,19 @@
 package com.hexcore.cas.rulesystems.test;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
 
-public class TestByteCode extends TestCase
+public class TestByteCode
 {
+	@Test
 	public void testPreconditions()
 	{
 		File in = new File("Test Data/rules/testSet1.cal");
@@ -53,7 +56,7 @@ public class TestByteCode extends TestCase
 		assertTrue(in.exists());
 	}
 
-	
+	@Test
 	public void testPropertyAssignment()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -68,23 +71,24 @@ public class TestByteCode extends TestCase
 		Cell c = new Cell(new double[]{0,0,0});
 		
 		//New Cell Test
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(0.0, c.getValue(1));
-		assertEquals(0.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(0.0, c.getValue(1), 0.0);
+		assertEquals(0.0, c.getValue(2), 0.0);
 		
 		//Run once Test
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(1.0, c.getValue(1));
-		assertEquals(2.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(1.0, c.getValue(1), 0.0);
+		assertEquals(2.0, c.getValue(2), 0.0);
 		
 		//Run again Test
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(2.0, c.getValue(1));
-		assertEquals(3.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(2.0, c.getValue(1), 0.0);
+		assertEquals(3.0, c.getValue(2), 0.0);
 	}
 	
+	@Test
 	public void testVariablesPostOps()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -98,23 +102,24 @@ public class TestByteCode extends TestCase
 		Cell c = new Cell(new double[]{0,0,0});
 		
 		//New Cell Test
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(0.0, c.getValue(1));
-		assertEquals(0.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(0.0, c.getValue(1), 0.0);
+		assertEquals(0.0, c.getValue(2), 0.0);
 		
 		//Run once Test
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(1.0, c.getValue(1));
-		assertEquals(11.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(1.0, c.getValue(1), 0.0);
+		assertEquals(11.0, c.getValue(2), 0.0);
 		
 		//Run again Test
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(2.0, c.getValue(1));
-		assertEquals(12.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(2.0, c.getValue(1), 0.0);
+		assertEquals(12.0, c.getValue(2), 0.0);
 	}
 	
+	@Test
 	public void testIfStatementsBasic()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -129,17 +134,18 @@ public class TestByteCode extends TestCase
 		
 		
 		//New Cell Test
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(0.0, c.getValue(1));
-		assertEquals(0.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(0.0, c.getValue(1), 0.0);
+		assertEquals(0.0, c.getValue(2), 0.0);
 		
 		//Run once
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(1.0, c.getValue(1));
-		assertEquals(2.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(1.0, c.getValue(1), 0.0);
+		assertEquals(2.0, c.getValue(2), 0.0);
 	}
 	
+	@Test
 	public void testIfStatementsComplex()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -154,21 +160,22 @@ public class TestByteCode extends TestCase
 		
 		
 		//New Cell Test
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(0.0, c.getValue(1));
-		assertEquals(0.0, c.getValue(2));
-		assertEquals(0.0, c.getValue(3));
-		assertEquals(0.0, c.getValue(4));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(0.0, c.getValue(1), 0.0);
+		assertEquals(0.0, c.getValue(2), 0.0);
+		assertEquals(0.0, c.getValue(3), 0.0);
+		assertEquals(0.0, c.getValue(4), 0.0);
 		
 		//Run once
 		rule.run(c, null);		
-		assertEquals(0.0, c.getValue(0));
-		assertEquals(1.0, c.getValue(1));
-		assertEquals(2.0, c.getValue(2));
-		assertEquals(3.0, c.getValue(3));
-		assertEquals(4.0, c.getValue(4));
+		assertEquals(0.0, c.getValue(0), 0.0);
+		assertEquals(1.0, c.getValue(1), 0.0);
+		assertEquals(2.0, c.getValue(2), 0.0);
+		assertEquals(3.0, c.getValue(3), 0.0);
+		assertEquals(4.0, c.getValue(4), 0.0);
 	}
 	
+	@Test
 	public void testPropertyCount()
 	{
 		CALCompiler compiler0 = new CALCompiler();
@@ -205,6 +212,7 @@ public class TestByteCode extends TestCase
 		
 	}
 	
+	@Test
 	public void testNeighboursAccess()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -223,9 +231,10 @@ public class TestByteCode extends TestCase
 		
 		rule.run(c, n);
 		
-		assertEquals(6.0, c.getValue(1));
+		assertEquals(6.0, c.getValue(1), 0.0);
 	}
 	
+	@Test
 	public void testStdLibFunctionCalls()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -246,11 +255,12 @@ public class TestByteCode extends TestCase
 		
 		rule.run(c, n);
 		
-		assertEquals(55.0, c.getValue(1));
+		assertEquals(55.0, c.getValue(1), 0.0);
 	}
 	
 	
 	
+	@Test
 	public void testSet11Test()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -274,15 +284,16 @@ public class TestByteCode extends TestCase
 		for(int i = 0; i < 20 ; i++)
 			rule.run(c, n);
 		
-		assertEquals(1.0, c.getValue(1));
-		assertEquals(20.0, c.getValue(2));
+		assertEquals(1.0, c.getValue(1), 0.0);
+		assertEquals(20.0, c.getValue(2), 0.0);
 		
 		rule.run(c, n);
-		assertEquals(0.0, c.getValue(1));
-		assertEquals(0.0, c.getValue(2));
+		assertEquals(0.0, c.getValue(1), 0.0);
+		assertEquals(0.0, c.getValue(2), 0.0);
 
 	}
 	
+	@Test
 	public void testMultipleTypeDeclarations()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -297,12 +308,12 @@ public class TestByteCode extends TestCase
 		Cell c2 = new Cell(new double[]{2,0});
 		
 		//New Cell Test
-		assertEquals(0.0, c0.getValue(0));
-		assertEquals(0.0, c0.getValue(1));
-		assertEquals(1.0, c1.getValue(0));
-		assertEquals(0.0, c1.getValue(1));
-		assertEquals(2.0, c2.getValue(0));
-		assertEquals(0.0, c2.getValue(1));
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c1.getValue(0), 0.0);
+		assertEquals(0.0, c1.getValue(1), 0.0);
+		assertEquals(2.0, c2.getValue(0), 0.0);
+		assertEquals(0.0, c2.getValue(1), 0.0);
 		
 		//Run once
 		rule.run(c0, null);
@@ -310,27 +321,28 @@ public class TestByteCode extends TestCase
 		rule.run(c2, null);
 		
 		//Post run test
-		assertEquals(0.0, c0.getValue(0));
-		assertEquals(15.0, c0.getValue(1));
-		assertEquals(1.0, c1.getValue(0));
-		assertEquals(20.0, c1.getValue(1));
-		assertEquals(0.0, c2.getValue(0));
-		assertEquals(30.0, c2.getValue(1));
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(15.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c1.getValue(0), 0.0);
+		assertEquals(20.0, c1.getValue(1), 0.0);
+		assertEquals(0.0, c2.getValue(0), 0.0);
+		assertEquals(30.0, c2.getValue(1), 0.0);
 		
 		//Run again
 		rule.run(c0, null);
 		rule.run(c2, null);
 		rule.run(c1, null);
 		
-		assertEquals(0.0, c0.getValue(0));
-		assertEquals(15.0, c0.getValue(1));
-		assertEquals(1.0, c1.getValue(0));
-		assertEquals(20.0, c1.getValue(1));
-		assertEquals(0.0, c2.getValue(0));
-		assertEquals(15.0, c2.getValue(1));
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(15.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c1.getValue(0), 0.0);
+		assertEquals(20.0, c1.getValue(1), 0.0);
+		assertEquals(0.0, c2.getValue(0), 0.0);
+		assertEquals(15.0, c2.getValue(1), 0.0);
 		
 	}
 	
+	@Test
 	public void testLoops()
 	{
 		CALCompiler compiler = new CALCompiler();
@@ -344,8 +356,8 @@ public class TestByteCode extends TestCase
 		rule.run(c0, null);
 		
 		//Post run test
-		assertEquals(0.0, c0.getValue(0));
-		assertEquals(10.0, c0.getValue(1));
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(10.0, c0.getValue(1), 0.0);
 	}
 	
 }

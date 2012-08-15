@@ -1,20 +1,23 @@
 package com.hexcore.cas.model.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 import com.hexcore.cas.model.ColourRule;
 import com.hexcore.cas.ui.toolkit.Colour;
 
-public class TestColourRule extends TestCase
+public class TestColourRule
 {
 	
+	@Test
 	public void testRangeSolid()
 	{
 		Colour colour = new Colour(0.8f, 0.5f, 0.2f);
 		ColourRule.Range range = new ColourRule.Range(10.0, 48.0, colour);
 		
-		assertEquals(10.0, range.from);
-		assertEquals(48.0, range.to);
+		assertEquals(10.0, range.from, 0.0);
+		assertEquals(48.0, range.to, 0.0);
 		assertEquals(ColourRule.Range.Type.SOLID, range.getType());
 		assertTrue(range.getColour(0).equals(colour));
 		
@@ -24,6 +27,7 @@ public class TestColourRule extends TestCase
 	}	
 	
 	
+	@Test
 	public void testRangeGradient()
 	{
 		Colour firstColour = new Colour(0.8f, 0.5f, 0.2f);
@@ -31,8 +35,8 @@ public class TestColourRule extends TestCase
 		Colour secondColour = new Colour(0.6f, 0.3f, 0.0f);
 		ColourRule.Range range = new ColourRule.Range(10.0, 60.0, firstColour, secondColour);
 		
-		assertEquals(10.0, range.from);
-		assertEquals(60.0, range.to);
+		assertEquals(10.0, range.from, 0.0);
+		assertEquals(60.0, range.to, 0.0);
 		assertEquals(ColourRule.Range.Type.GRADIENT, range.getType());
 		assertTrue(range.getColour(0).equals(firstColour));
 		assertTrue(range.getColour(1).equals(secondColour));
@@ -50,6 +54,7 @@ public class TestColourRule extends TestCase
 	}		
 	
 	
+	@Test
 	public void testColourRule()
 	{
 		Colour a = new Colour(0.4f, 0.9f, 0.1f);
@@ -80,6 +85,7 @@ public class TestColourRule extends TestCase
 	}
 	
 	
+	@Test
 	public void testColourRuleClosestRange()
 	{
 		Colour a = new Colour(0.4f, 0.9f, 0.1f);

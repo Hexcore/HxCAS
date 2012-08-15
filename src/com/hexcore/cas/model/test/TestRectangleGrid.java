@@ -1,61 +1,64 @@
 package com.hexcore.cas.model.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.model.RectangleGrid;
 
 
-public class TestRectangleGrid extends TestCase
+public class TestRectangleGrid
 {
+	@Test
 	public void testGetNeighboursFunction()
 	{
 		RectangleGrid grid;
 		
 		grid = addNeighbours(2,2, true);
-		assertEquals(18.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(10.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(6.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(18.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(10.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(6.0, 	grid.getCell(1, 1).getValue(0), 0.0);
 		
 		grid = addNeighbours(2,2, false);
-		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(4.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(3.0, 	grid.getCell(1, 1).getValue(0));
+		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(4.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(3.0, 	grid.getCell(1, 1).getValue(0), 0.0);
 		
 		grid = addNeighbours(2,3, true);
-		assertEquals(27.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(26.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(25.0, 	grid.getCell(0, 2).getValue(0));
-		assertEquals(15.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(14.0, 	grid.getCell(1, 1).getValue(0));
-		assertEquals(13.0, 	grid.getCell(1, 2).getValue(0));
+		assertEquals(27.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(26.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(25.0, 	grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(15.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(14.0, 	grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(13.0, 	grid.getCell(1, 2).getValue(0), 0.0);
 		
 		grid = addNeighbours(2,3, false);
-		assertEquals(8.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(10.0, 	grid.getCell(0, 2).getValue(0));
-		assertEquals(5.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(11.0, 	grid.getCell(1, 1).getValue(0));
-		assertEquals(7.0, 	grid.getCell(1, 2).getValue(0));
+		assertEquals(8.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(14.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(10.0, 	grid.getCell(0, 2).getValue(0), 0.0);
+		assertEquals(5.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(11.0, 	grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(7.0, 	grid.getCell(1, 2).getValue(0), 0.0);
 		
 		grid = addNeighbours(3,2,true);
-		assertEquals(24.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(20.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(22.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(18.0, 	grid.getCell(1, 1).getValue(0));
-		assertEquals(20.0, 	grid.getCell(2, 0).getValue(0));
-		assertEquals(16.0, 	grid.getCell(2, 1).getValue(0));
+		assertEquals(24.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(20.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(22.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(18.0, 	grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(20.0, 	grid.getCell(2, 0).getValue(0), 0.0);
+		assertEquals(16.0, 	grid.getCell(2, 1).getValue(0), 0.0);
 		
 		grid = addNeighbours(3,2, false);
-		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0));
-		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0));
-		assertEquals(13.0, 	grid.getCell(1, 0).getValue(0));
-		assertEquals(12.0, 	grid.getCell(1, 1).getValue(0));
-		assertEquals(10.0, 	grid.getCell(2, 0).getValue(0));
-		assertEquals(9.0, 	grid.getCell(2, 1).getValue(0));
+		assertEquals(6.0, 	grid.getCell(0, 0).getValue(0), 0.0);
+		assertEquals(5.0, 	grid.getCell(0, 1).getValue(0), 0.0);
+		assertEquals(13.0, 	grid.getCell(1, 0).getValue(0), 0.0);
+		assertEquals(12.0, 	grid.getCell(1, 1).getValue(0), 0.0);
+		assertEquals(10.0, 	grid.getCell(2, 0).getValue(0), 0.0);
+		assertEquals(9.0, 	grid.getCell(2, 1).getValue(0), 0.0);
 	}
 	
 	private static RectangleGrid addNeighbours(int x, int y, boolean wrap)

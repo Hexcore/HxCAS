@@ -1,12 +1,14 @@
 package com.hexcore.cas.control.protocol.test;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.DictNode;
@@ -15,7 +17,7 @@ import com.hexcore.cas.control.protocol.IntNode;
 import com.hexcore.cas.control.protocol.ListNode;
 import com.hexcore.cas.control.protocol.Node;
 
-public class TestNodes extends TestCase
+public class TestNodes
 {
 	private IntNode iN = new IntNode(1);
 	private DoubleNode fN = new DoubleNode(1.00);
@@ -23,28 +25,33 @@ public class TestNodes extends TestCase
 	private ListNode lN = new ListNode();
 	private DictNode dN = new DictNode();
 	
+	@Test
 	public void testIntNode1Getter()
 	{
 		assertEquals(1, iN.getIntValue());
 	}
 	
+	@Test
 	public void testIntNode2Setter()
 	{
 		iN.setValue(5);
 		assertEquals(5, iN.getIntValue());
 	}
-
+	
+	@Test
 	public void testDoubleNode1Getter()
 	{
-		assertEquals(1.00, fN.getDoubleValue());
+		assertEquals(1.00, fN.getDoubleValue(), 0.0);
 	}
 	
+	@Test
 	public void testDoubleNode2Setter()
 	{
 		fN.setValue(5.00);
-		assertEquals(5.00, fN.getDoubleValue());
+		assertEquals(5.00, fN.getDoubleValue(), 0.0);
 	}
 	
+	@Test
 	public void testDoubleNode3()
 	{
 		OutputStream out = new ByteArrayOutputStream();
@@ -64,12 +71,14 @@ public class TestNodes extends TestCase
 		System.out.println();
 	}
 	
+	@Test
 	public void testByteNode1Getter()
 	{
 		byte[] b = bN.getByteValues();
 		assertEquals("TEST", new String(b));
 	}
 	
+	@Test
 	public void testByteNode2ByteConstructor()
 	{
 		byte[] b = new byte[4];
@@ -81,11 +90,13 @@ public class TestNodes extends TestCase
 			assertEquals(i, b[i]);
 	}
 	
+	@Test
 	public void testByteNode3ToString()
 	{
 		assertEquals("TEST", bN.toString());
 	}
 	
+	@Test
 	public void testDictNodeAddToDictANDGetter()
 	{
 		dN.addToDict("iN", iN);
@@ -94,6 +105,7 @@ public class TestNodes extends TestCase
 		assertEquals(iN, TM.get("iN"));
 	}
 	
+	@Test
 	public void testListNodeAddToListANDGetter()
 	{
 		lN.addToList(iN);
@@ -101,6 +113,7 @@ public class TestNodes extends TestCase
 		assertEquals(iN, l.get(0));
 	}
 	
+	@Test
 	public void testWrite()
 	{
 		lN.addToList(iN);
