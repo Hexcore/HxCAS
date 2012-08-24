@@ -625,6 +625,8 @@ public class WorldStreamer
 			}
 			
 			numGenerations = gens.size();
+			
+			w.setGenAmount(numGenerations);
 		}
 		catch(IOException ex)
 		{

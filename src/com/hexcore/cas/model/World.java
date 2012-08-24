@@ -329,6 +329,11 @@ public class World
 			streamer.setWorldFilename(worldFileName);
 	}
 	
+	public void setGenAmount(int gA)
+	{
+		genAmount = gA;
+	}
+	
 	public void setKeepHistory(int hT)
 	{
 		historyType = hT;
