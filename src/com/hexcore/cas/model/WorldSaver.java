@@ -51,7 +51,7 @@ public class WorldSaver
 		out.write(configStr.getBytes());
 		out.closeEntry();
 		
-		ZipEntry ruleCodeEntry = new ZipEntry("rules.car");
+		ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
 		out.putNextEntry(ruleCodeEntry);
 		out.write(world.getRuleCode().getBytes());
 		out.closeEntry();

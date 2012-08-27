@@ -870,7 +870,13 @@ public class GUI implements WindowEventListener, LobbyListener
 				{
 					selectedFile = window.askUserForFileToSave("Select a location to save", "cal");
 					
-					File f = new File(selectedFile.getFullPath() + ".cal");
+					String fullPath = selectedFile.getFullPath();
+					
+					File f = null;
+					if(fullPath.contains(".cal"))
+						f = new File(fullPath);
+					else
+						f = new File(fullPath + ".cal");
 					
 					try
 					{
@@ -883,13 +889,19 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					catch(IOException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 				else
 				{
-					File f = new File(selectedFile.getFullPath() + ".cal");
+					String fullPath = selectedFile.getFullPath();
+					
+					File f = null;
+					if(fullPath.contains(".cal"))
+						f = new File(fullPath);
+					else
+						f = new File(fullPath + ".cal");
+					
 					try
 					{
 						PrintWriter out = new PrintWriter(f);
@@ -906,7 +918,14 @@ public class GUI implements WindowEventListener, LobbyListener
 			{
 				FileSelectResult calFile = window.askUserForFileToSave("Select a location to save", "cal");
 				
-				File f = new File(calFile.getFullPath() + ".cal");
+				String fullPath = calFile.getFullPath();
+				
+				File f = null;
+				if(fullPath.contains(".cal"))
+					f = new File(fullPath);
+				else
+					f = new File(fullPath + ".cal");
+				
 				System.out.println(calFile.getFullPath() + "/" + calFile.filename);
 				try
 				{

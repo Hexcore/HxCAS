@@ -585,7 +585,7 @@ public class WorldStreamer
 			data = "";
 			out = null;
 			
-			currFile = new File(tmpDir + "/rules.car");
+			currFile = new File(tmpDir + "/rules.cal");
 			out = new BufferedOutputStream(new FileOutputStream(currFile));
 			out.write(w.getRuleCode().getBytes());
 			out.close();

@@ -134,7 +134,7 @@ public class WorldReader
 			ZipEntry entry = (ZipEntry)allFiles.nextElement();
 			currFilename = entry.getName();
 			
-			if(currFilename.endsWith(".car"))
+			if(currFilename.endsWith(".cal"))
 			{
 				rulesFound = true;
 				ruleCode = getStringFromStream(zip.getInputStream(entry));

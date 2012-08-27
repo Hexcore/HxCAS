@@ -9,6 +9,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.rulesystems.CodeGen;
 import com.hexcore.cas.ui.toolkit.widgets.Button;
 import com.hexcore.cas.ui.toolkit.widgets.Container;
 import com.hexcore.cas.ui.toolkit.widgets.DropDownBox;
@@ -153,7 +154,7 @@ public class Viewport
 				DropDownBox colourProperty = new DropDownBox(new Vector2i(100, 20));
 				
 				for (int i = 0; i < grid.getNumProperties(); i++)
-					colourProperty.addItem("Property " + i);
+					colourProperty.addItem(CodeGen.getPropertyList().get(i));
 				
 				colourProperty.setSelected(slice.colourProperty);
 				controlPanel.add(colourProperty);
