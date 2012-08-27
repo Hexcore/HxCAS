@@ -118,6 +118,10 @@ public class WorldReader
 					case 'T':
 						gen = new TriangleGrid(gridSize, cell);
 						break;
+					case 'v':
+					case 'V':
+						gen = new VonNeumannGrid(gridSize, cell);
+						break;
 					default:
 						Log.error(TAG, "Error loading world - unable to create a grid with no type");
 						return false;

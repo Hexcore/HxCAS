@@ -35,6 +35,7 @@ import com.hexcore.cas.model.GridType;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.VonNeumannGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.CodeGen;
@@ -80,6 +81,8 @@ import com.hexcore.cas.ui.toolkit.widgets.TextWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.View;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGrid3DWidget;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
 import com.hexcore.cas.utilities.HeightMapConverter;
 import com.hexcore.cas.utilities.Log;
@@ -936,7 +939,6 @@ public class GUI implements WindowEventListener, LobbyListener
 				}
 				catch(IOException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1565,11 +1567,12 @@ public class GUI implements WindowEventListener, LobbyListener
 		cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeLayout.add(cellShapeLabel);
 		
-		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
+		cellShapeDropDownBox = new DropDownBox(new Vector2i(160,20));
 		cellShapeDropDownBox.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
+		cellShapeDropDownBox.addItem("Von Neumann Square");
 		cellShapeDropDownBox.setSelected(0);
 		
 		cellShapeLayout.add(cellShapeDropDownBox);
@@ -2142,6 +2145,9 @@ public class GUI implements WindowEventListener, LobbyListener
 			case HEXAGON:
 				cellShapeDropDownBox.setSelected(2);
 				break;
+			case VONNEUMANN:
+				cellShapeDropDownBox.setSelected(3);
+				break;
 		}
 		
 		wrapCheckBox.setChecked(grid.isWrappable());
@@ -2213,8 +2219,10 @@ public class GUI implements WindowEventListener, LobbyListener
 			type = GridType.TRIANGLE;
 		else if(cellShapeDropDownBox.getSelectedText() == "Hexagon")
 			type = GridType.HEXAGON;
-		else
+		else if(cellShapeDropDownBox.getSelectedText() == "Rectangle")
 			type = GridType.RECTANGLE;
+		else
+			type = GridType.VONNEUMANN;
 		
 		if(!grid.getSize().equals(size) || grid.getType() != type)
 		{
@@ -2380,6 +2388,15 @@ public class GUI implements WindowEventListener, LobbyListener
 				widget3DPreviewContainer.setContents(grid3DViewer);
 				
 				gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
+				widgetPreviewContainer.setContents(gridViewer);
+				break;
+				
+			case VONNEUMANN:
+				grid3DViewer = new VonNeumannGrid3DWidget(new Vector2i(400, 300), (VonNeumannGrid)grid, 24);
+				grid3DViewer.setFlag(Widget.FILL);
+				widget3DPreviewContainer.setContents(grid3DViewer);
+				
+				gridViewer = new VonNeumannGridWidget((VonNeumannGrid)grid, 16);
 				widgetPreviewContainer.setContents(gridViewer);
 				break;
 		}

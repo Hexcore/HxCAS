@@ -7,26 +7,26 @@ import com.hexcore.cas.math.Vector2i;
  * 
  * @author Megan Duncan
  */
-public class VonNuemannGrid extends Grid
+public class VonNeumannGrid extends Grid
 {
-	public VonNuemannGrid(Vector2i size, Cell example)
+	public VonNeumannGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
 	}
 	
-	public VonNuemannGrid(Vector2i size, int numProperties)
+	public VonNeumannGrid(Vector2i size, int numProperties)
 	{
 		super(size, numProperties);
 	}
 	
-	public VonNuemannGrid(Grid g)
+	public VonNeumannGrid(Grid g)
 	{
 		super(g);
 	}
 	
 	public Grid clone()
 	{
-		return new VonNuemannGrid(this);
+		return new VonNeumannGrid(this);
 	}
 	
 	public Vector2i getNeighbourhoodRange()
@@ -64,7 +64,7 @@ public class VonNuemannGrid extends Grid
 	
 	public GridType getType()
 	{
-		return GridType.VONNUEMANN;
+		return GridType.VONNEUMANN;
 	}
 	
 	private Cell[] setNeighbours(Cell [] neighbours, int x, int y, int xdim, int ydim, int i)

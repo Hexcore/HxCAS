@@ -9,13 +9,16 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.VonNeumannGrid;
 import com.hexcore.cas.rulesystems.CodeGen;
+import com.hexcore.cas.ui.toolkit.Window;
 import com.hexcore.cas.ui.toolkit.widgets.Button;
 import com.hexcore.cas.ui.toolkit.widgets.Container;
 import com.hexcore.cas.ui.toolkit.widgets.DropDownBox;
 import com.hexcore.cas.ui.toolkit.widgets.Grid2DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.Grid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.GridWidget;
+import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
 import com.hexcore.cas.ui.toolkit.widgets.HexagonGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.HexagonGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.LinearLayout;
@@ -23,9 +26,9 @@ import com.hexcore.cas.ui.toolkit.widgets.RectangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.RectangleGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGridWidget;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGrid3DWidget;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
-import com.hexcore.cas.ui.toolkit.widgets.GridWidget.Slice;
-import com.hexcore.cas.ui.toolkit.Window;
 import com.hexcore.cas.utilities.Log;
 
 public class Viewport
@@ -124,6 +127,26 @@ public class Viewport
 				else
 				{
 					temp2DWidget = new TriangleGridWidget(new Vector2i(10, 10), (TriangleGrid)grid, 10);
+
+					if (gridWidget != null)
+						if (gridWidget.hasFocus()) 
+							window.requestFocus(temp2DWidget);
+					gridWidget = temp2DWidget;
+				}	
+				break;
+			case VONNEUMANN:
+				if (type == Viewport.Type.THREE_D)
+				{
+					temp3DWidget = new VonNeumannGrid3DWidget(new Vector2i(10, 10), (VonNeumannGrid)grid, 10);
+					
+					if (gridWidget != null)
+						if (gridWidget.hasFocus()) 
+							window.requestFocus(temp3DWidget);
+					gridWidget = temp3DWidget;
+				}
+				else
+				{
+					temp2DWidget = new VonNeumannGridWidget(new Vector2i(10, 10), (VonNeumannGrid)grid, 10);
 
 					if (gridWidget != null)
 						if (gridWidget.hasFocus()) 

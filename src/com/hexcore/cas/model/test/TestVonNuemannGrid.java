@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
-import com.hexcore.cas.model.VonNuemannGrid;
+import com.hexcore.cas.model.VonNeumannGrid;
 
 
 public class TestVonNuemannGrid
 {
-	private final VonNuemannGrid g = new VonNuemannGrid(new Vector2i(5, 10), 1);
+	private final VonNeumannGrid g = new VonNeumannGrid(new Vector2i(5, 10), 1);
 	private final int size = 4;
 	
 	@Test
@@ -48,7 +48,7 @@ public class TestVonNuemannGrid
 	public void testGetNeighbours00()
 	{
 		int gridSize = 5;
-		VonNuemannGrid t = new VonNuemannGrid(new Vector2i(gridSize, gridSize), 1);
+		VonNeumannGrid t = new VonNeumannGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int x = 0; x < gridSize; x++)
 			for(int y = 0; y < gridSize; y++)
@@ -83,7 +83,7 @@ public class TestVonNuemannGrid
 	public void testGetNeighbours01()
 	{
 		int gridSize = 5;
-		VonNuemannGrid t = new VonNuemannGrid(new Vector2i(gridSize, gridSize), 1);
+		VonNeumannGrid t = new VonNeumannGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int x = 0; x < gridSize; x++)
 			for(int y = 0; y < gridSize; y++)
@@ -118,7 +118,7 @@ public class TestVonNuemannGrid
 	public void testGetNeighbours22()
 	{
 		int gridSize = 5;
-		VonNuemannGrid t = new VonNuemannGrid(new Vector2i(gridSize, gridSize), 1);
+		VonNeumannGrid t = new VonNeumannGrid(new Vector2i(gridSize, gridSize), 1);
 		int cnt = 0;
 		for(int x = 0; x < gridSize; x++)
 			for(int y = 0; y < gridSize; y++)

@@ -15,7 +15,7 @@ public enum GridType
 	RECTANGLE('R', RectangleGrid.class),
 	HEXAGON('H', HexagonGrid.class),
 	TRIANGLE('T', TriangleGrid.class),
-	VONNUEMANN('V', VonNuemannGrid.class);
+	VONNEUMANN('V', VonNeumannGrid.class);
 	
 	char symbol;
 	Class<? extends Grid> clazz;

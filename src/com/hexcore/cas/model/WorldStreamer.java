@@ -116,6 +116,10 @@ public class WorldStreamer
 							case 'T':
 								gen = new TriangleGrid(gridSize, cell);
 								break;
+							case 'v':
+							case 'V':
+								gen = new VonNeumannGrid(gridSize, cell);
+								break;
 							default:
 								Log.error(TAG, "Error retrieving generaion - unable to create a grid with no type");
 								return null;
@@ -263,6 +267,10 @@ public class WorldStreamer
 							case 't':
 							case 'T':
 								gen = new TriangleGrid(gridSize, cell);
+								break;
+							case 'v':
+							case 'V':
+								gen = new VonNeumannGrid(gridSize, cell);
 								break;
 							default:
 								Log.error(TAG, "Error retrieving all generations - unable to create a grid with no type");
