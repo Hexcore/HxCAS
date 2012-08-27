@@ -4,8 +4,8 @@ import com.hexcore.cas.math.Vector2i;
 
 /**
  * Class GridType
- * 	Manages 3 different possible grid shapes:
- * 	Rectangle, hexagon, triangle.
+ * 	Manages 4 different possible grid shapes:
+ * 	Rectangle, hexagon, triangle and von Nuemann
  * 
  * @author Divan Burger
  */
@@ -14,7 +14,8 @@ public enum GridType
 {
 	RECTANGLE('R', RectangleGrid.class),
 	HEXAGON('H', HexagonGrid.class),
-	TRIANGLE('T', TriangleGrid.class);
+	TRIANGLE('T', TriangleGrid.class),
+	VONNUEMANN('V', VonNuemannGrid.class);
 	
 	char symbol;
 	Class<? extends Grid> clazz;
