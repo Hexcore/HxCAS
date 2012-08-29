@@ -338,7 +338,9 @@ public class Simulator extends Thread
 	
 	private void startGeneration()
 	{
-		informationProcessor.sendByteCode(world.getRuleByteCode());
+		byte[] bytes = world.getRuleByteCode();
+		if(bytes != null)
+			informationProcessor.sendByteCode(world.getRuleByteCode());
 		
 		isFinishedGenerations.set(false);
 		

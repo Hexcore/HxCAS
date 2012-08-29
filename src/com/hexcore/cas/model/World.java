@@ -37,7 +37,6 @@ public class World
 	private List<Grid> 				worldGenerations = null;
 	
 	private String					colourCode = null;
-	private String					ruleCode = null;
 	private String					worldFileName = null;
 	
 	private WorldStreamer 			streamer = null;
@@ -55,7 +54,6 @@ public class World
 	{
 		this.historyType = w.historyType;
 		this.worldFileName = w.worldFileName;
-		this.ruleCode = w.ruleCode;
 		this.colourCode = w.colourCode;
 		this.worldGenerations.clear();
 		this.worldGenerations.addAll(w.worldGenerations);
@@ -477,9 +475,12 @@ public class World
 		Log.debug(TAG, "Resetting world.");
 		
 		this.worldFileName = w.worldFileName;
-		this.ruleCode = w.ruleCode;
 		this.colourCode = w.colourCode;
 		this.worldGenerations.clear();
+		
+		this.ruleCodes.clear();
+		this.ruleCodes.addAll(w.ruleCodes);
+		this.currEngineStep = w.currEngineStep;
 		
 		if(historyType != 0)
 			this.worldGenerations.addAll(w.worldGenerations);
@@ -523,11 +524,6 @@ public class World
 	public void setKeepHistory(int hT)
 	{
 		historyType = hT;
-	}
-	
-	public void setRuleCode(String ruleCode)
-	{
-		this.ruleCode = ruleCode;
 	}
 	
 	public void setRuleCodes(int steps)

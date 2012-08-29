@@ -597,7 +597,8 @@ public class WorldStreamer
 			{
 				currFile = new File(tmpDir + "/rules.cal");
 				out = new BufferedOutputStream(new FileOutputStream(currFile));
-				out.write(w.getRuleCode().getBytes());
+				
+				out.write(w.getRuleCodes().get(0).getBytes());
 				out.close();
 
 				currFile = null;

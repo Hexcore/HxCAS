@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipException;
 
@@ -38,9 +39,10 @@ public class TestWorld
 		world.setFileName("Test Data/world/world.caw");
 		world.load();
 		
-		String ruleCode = world.getRuleCode();
+		ArrayList<String> ruleCode = world.getRuleCodes();
+		//String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
-		assertTrue(ruleCode.startsWith("rules"));
+		assertTrue(ruleCode.get(0).startsWith("rules"));
 		
 		String colourCode = world.getColourCode();
 		assertNotNull(colourCode);
@@ -109,6 +111,11 @@ public class TestWorld
 		throws IOException
 	{
 		world.setFileName("Test Data/world/savedWorld.caw");
+		
+		ArrayList<String> rules = new ArrayList<String>();
+		rules.add("rules");
+		world.setRuleCodes(rules);
+		
 		HexagonGrid[] worlds = new HexagonGrid[3];
 		
 		worlds[0] = new HexagonGrid(new Vector2i(2, 3), 2);
@@ -138,7 +145,7 @@ public class TestWorld
 		for(int i = 0; i < 3; i++)
 			world.addGeneration(worlds[i]);
 		
-		world.setRuleCode("rules");
+		//world.setRuleCode("rules");
 		world.setColourCode("colours");
 		
 		world.save();
@@ -227,10 +234,11 @@ public class TestWorld
 		world.setKeepHistory(2);
 		
 		world.start();
-		
-		String ruleCode = world.getRuleCode();
+
+		ArrayList<String> ruleCode = world.getRuleCodes();
+		//String ruleCode = world.getRuleCode();
 		assertNotNull(ruleCode);
-		assertTrue(ruleCode.startsWith("rules"));
+		assertTrue(ruleCode.get(0).startsWith("rules"));
 		
 		String colourCode = world.getColourCode();
 		assertNotNull(colourCode);
@@ -313,6 +321,10 @@ public class TestWorld
 		
 		secondWorld.setFileName("Test Data/world/secondWorld.caw");
 		
+		ArrayList<String> rules = new ArrayList<String>();
+		rules.add("rules");
+		secondWorld.setRuleCodes(rules);
+		
 		TriangleGrid[] worlds = new TriangleGrid[3];
 		
 		worlds[0] = new TriangleGrid(new Vector2i(2, 3), 2);
@@ -342,7 +354,7 @@ public class TestWorld
 		for(int i = 0; i < 3; i++)
 			secondWorld.addGeneration(worlds[i]);
 		
-		secondWorld.setRuleCode("rules");
+		//secondWorld.setRuleCode("rules");
 		secondWorld.setColourCode("colours");
 		try
 		{

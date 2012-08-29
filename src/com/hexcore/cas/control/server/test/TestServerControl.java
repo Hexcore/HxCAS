@@ -256,6 +256,7 @@ public class TestServerControl
 				
 		//================================== Creating ServerOverseer ==================================
 		World theWorld = new World(); 
+		theWorld.setRuleCodes(1);
 		
 		server = new Simulator(theWorld, TEST_CLIENT_PORT);
 		
