@@ -1,8 +1,10 @@
 package com.hexcore.cas.model;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -51,10 +53,29 @@ public class WorldSaver
 		out.write(configStr.getBytes());
 		out.closeEntry();
 		
-		ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
+		/*ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
 		out.putNextEntry(ruleCodeEntry);
 		out.write(world.getRuleCode().getBytes());
-		out.closeEntry();
+		out.closeEntry();*/
+		
+		if(world.getStepAmount() == 1)
+		{
+			ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
+			out.putNextEntry(ruleCodeEntry);
+			out.write(world.getRuleCode().getBytes());
+			out.closeEntry();
+		}
+		else
+		{
+			ArrayList<String> rulesets = world.getRuleCodes();
+			for(int i = 0; i < rulesets.size(); i++)
+			{
+				ZipEntry ruleCodeEntry = new ZipEntry("rules" + (i + 1) + ".cal");
+				out.putNextEntry(ruleCodeEntry);
+				out.write(rulesets.get(i).getBytes());
+				out.closeEntry();
+			}
+		}
 		
 		ZipEntry colourCodeEntry = new ZipEntry("colours.cacp");
 		out.putNextEntry(colourCodeEntry);

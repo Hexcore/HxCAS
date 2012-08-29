@@ -71,7 +71,7 @@ public class Viewport
 		
 		Grid3DWidget temp3DWidget = null;
 		Grid2DWidget temp2DWidget = null;
-		
+
     	switch (grid.getType())
 		{
 			case RECTANGLE:

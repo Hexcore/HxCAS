@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -12,11 +13,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import com.javamex.classmexer.MemoryUtil;
-import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
-
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.utilities.Log;
+import com.javamex.classmexer.MemoryUtil;
+import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
 /**
  * Class WorldReader
@@ -58,7 +58,8 @@ public class WorldReader
 		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		String colourCode = null;
 		String currFilename = null;
-		String ruleCode = null;
+		//String ruleCode = null;
+		ArrayList<String> ruleCodes = new ArrayList<String>();
 		ZipFile zip = null;
 		
 		if(!cawFile.exists())
@@ -131,22 +132,18 @@ public class WorldReader
 			}
 		}
 
-		//Searching for the colours and rules files
+		//Searching for the colours file
 		allFiles = zip.entries();
 		while(allFiles.hasMoreElements())
 		{
 			ZipEntry entry = (ZipEntry)allFiles.nextElement();
 			currFilename = entry.getName();
 			
-			if(currFilename.endsWith(".cal"))
-			{
-				rulesFound = true;
-				ruleCode = getStringFromStream(zip.getInputStream(entry));
-			}
-			else if(currFilename.endsWith(".cacp"))
+			if(currFilename.endsWith(".cacp"))
 			{
 				coloursFound = true;
 				colourCode = getStringFromStream(zip.getInputStream(entry));
+				break;
 			}
 		}
 
@@ -156,18 +153,42 @@ public class WorldReader
 			Log.warning(TAG, "Colour set not found - setting colours to default empty set");
 			colourCode = "colourset colours\n{}";
 		}
+
+		//Searching for the rules files
+		allFiles = zip.entries();
+		while(allFiles.hasMoreElements())
+		{
+			ZipEntry entry = (ZipEntry)allFiles.nextElement();
+			currFilename = entry.getName();
+			
+			if(currFilename.endsWith(".cal"))
+			{
+				rulesFound = true;
+				
+				String number = currFilename.substring(currFilename.indexOf("rules") + 5, currFilename.indexOf("."));
+
+				if(number.compareTo("") != 0)
+					ruleCodes.add(number + ":" + getStringFromStream(zip.getInputStream(entry)));
+				else
+				{
+					ruleCodes.add(getStringFromStream(zip.getInputStream(entry)));
+					break;
+				}
+			}
+		}
 		
 		//Set to a default ruleset for Conway's Game of Life and change colour set to mirror this, despite if a colour set was found
 		if(!rulesFound)
 		{
 			Log.warning(TAG, "Rule set not found - setting colours and rules to default sets for Conway's Game of Life");
-			ruleCode = "ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
+			//ruleCode = "ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
+			world.setRuleCodes(1);
 			colourCode = "colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}";
 		}
 
 		//Searching for all generation files that are to be loaded
 		allFiles = zip.entries();
-		int arrSize = zip.size() - 3;
+		int arrSize = zip.size() - 2 - ruleCodes.size();
 		int gensToLoad = arrSize;
 		int scale = 500;
 		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);
@@ -196,6 +217,8 @@ public class WorldReader
 			
 			if(currFilename.endsWith(".cag"))
 			{
+				System.out.println("Doing file |" + currFilename + "|");
+				
 				String fileData = getStringFromStream(zip.getInputStream(entry));
 				StringTokenizer token = new StringTokenizer(fileData);
 				
@@ -233,7 +256,8 @@ public class WorldReader
 				continue;
 		}
 		
-		world.setRuleCode(ruleCode);
+		//world.setRuleCode(ruleCode);
+		world.setRuleCodes(ruleCodes);
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
 		

@@ -213,7 +213,7 @@ public class Simulator extends Thread
 		Log.information(TAG, "Grid: " + grid.getWidth() + "x" + grid.getHeight());
 		numOfGenerations = gN;
 		
-		informationProcessor.sendByteCode(ruleByteCode);
+		//informationProcessor.sendByteCode(ruleByteCode);
 		
 		calculateSplits();
 		splitGrids();
@@ -338,6 +338,8 @@ public class Simulator extends Thread
 	
 	private void startGeneration()
 	{
+		informationProcessor.sendByteCode(world.getRuleByteCode());
+		
 		isFinishedGenerations.set(false);
 		
 		currentGeneration++;

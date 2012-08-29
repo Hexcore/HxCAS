@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.hexcore.cas.rulesystems.CALCompiler;
+import com.hexcore.cas.rulesystems.Rule;
+import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.utilities.Log;
 
 /**
@@ -24,6 +27,9 @@ public class World
 {
 	private static final String		TAG = "World";
 	
+	private ArrayList<String>		ruleCodes;
+	
+	private int						currEngineStep = -1;
 	private int						historyType = 1;
 	private int						genAmount = 0;
 	private int						lastIn = -1;
@@ -41,6 +47,8 @@ public class World
 		worldGenerations = Collections.synchronizedList(new ArrayList<Grid>());
 		
 		streamer = new WorldStreamer();
+		
+		ruleCodes = new ArrayList<String>();
 	}
 	
 	public World(World w)
@@ -51,6 +59,10 @@ public class World
 		this.colourCode = w.colourCode;
 		this.worldGenerations.clear();
 		this.worldGenerations.addAll(w.worldGenerations);
+		
+		this.ruleCodes.clear();
+		this.ruleCodes.addAll(w.ruleCodes);
+		this.currEngineStep = w.currEngineStep;
 		
 		if(historyType == 2)
 		{
@@ -63,6 +75,7 @@ public class World
 	public void addGeneration(Grid gen)
 	{
 		worldGenerations.add(gen);
+		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 		
 		if(historyType == 0)
 		{
@@ -100,6 +113,127 @@ public class World
 				worldGenerations.remove(0);
 			return true;
 		}
+	}
+	
+	public ArrayList<String> compareRulesets()
+	{
+		System.out.println("==== compareRulesets ====");
+		
+		ArrayList<String> results = new ArrayList<String>();
+		
+		String ruleset0 = ruleCodes.get(0);
+		int ruleset0Typecount = 0;
+		ArrayList<String> ruleset0Properties = new ArrayList<String>();
+		ArrayList<String> ruleset0Typenames = new ArrayList<String>();
+		
+		//Get information on ruleset 0
+		int begin = 0, end = 0;
+		
+		//System.out.println("SEARCHING FOR TYPECOUNT");
+		//Typecount amount
+		begin = ruleset0.indexOf("typecount ");
+		end = ruleset0.indexOf(";", begin);
+		ruleset0Typecount = Integer.parseInt(ruleset0.substring(begin + "typecount ".length(), end));
+
+		//System.out.println("SEARCHING FOR PROPERTY NAMES[" + begin + "]");
+		//Property names
+		begin = end;
+		while(true)
+		{
+			begin = ruleset0.indexOf("property ", begin);
+			if(begin == -1)
+				break;
+			end = ruleset0.indexOf(";", begin);
+			ruleset0Properties.add(ruleset0.substring(begin + "property ".length(), end));
+			begin = end;
+		}
+
+		//System.out.println("SEARCHING FOR TYPENAMES[" + begin + "]");
+		//Typenames
+		while(true)
+		{
+			begin = ruleset0.indexOf("type ", begin);
+			if(begin == -1)
+				break;
+			end = ruleset0.indexOf("\n", begin);
+			ruleset0Typenames.add(ruleset0.substring(begin + "type ".length(), end));
+			begin = end;
+		}
+		
+		/*System.out.println("typecount == " + ruleset0Typecount);
+		System.out.print("properties:");
+		for(int i = 0; i < ruleset0Properties.size(); i++)
+			System.out.print(" " + ruleset0Properties.get(i));
+		System.out.print("\ntypenames:");
+		for(int i = 0; i < ruleset0Typenames.size(); i++)
+			System.out.print(" " + ruleset0Typenames.get(i));
+		System.out.println();*/
+		
+		for(int i = 1; i < ruleCodes.size(); i++)
+		{
+			String ruleseti = ruleCodes.get(i);
+			int rulesetiTypecount = 0;
+			ArrayList<String> rulesetiProperties = new ArrayList<String>();
+			ArrayList<String> rulesetiTypenames = new ArrayList<String>();
+			
+			begin = 0;
+			end = 0;
+			
+			//Typecount amount
+			begin = ruleseti.indexOf("typecount ");
+			end = ruleseti.indexOf(";", begin);
+			rulesetiTypecount = Integer.parseInt(ruleseti.substring(begin + "typecount ".length(), end));
+
+			//System.out.println("SEARCHING FOR PROPERTY NAMES[" + begin + "]");
+			//Property names
+			begin = end;
+			while(true)
+			{
+				begin = ruleseti.indexOf("property ", begin);
+				if(begin == -1)
+					break;
+				end = ruleseti.indexOf(";", begin);
+				rulesetiProperties.add(ruleseti.substring(begin + "property ".length(), end));
+				begin = end;
+			}
+
+			//System.out.println("SEARCHING FOR TYPENAMES[" + begin + "]");
+			//Typenames
+			while(true)
+			{
+				begin = ruleseti.indexOf("type ", begin);
+				if(begin == -1)
+					break;
+				end = ruleseti.indexOf("\n", begin);
+				rulesetiTypenames.add(ruleseti.substring(begin + "type ".length(), end));
+				begin = end;
+			}
+			
+			if(rulesetiTypecount != ruleset0Typecount)
+				results.add("Ruleset " + (i + 1) + " has a different typecount to the first ruleset.[typecount of " + rulesetiTypecount + "]");
+			if(rulesetiProperties.size() != ruleset0Properties.size())
+				results.add("Ruleset " + (i + 1) + " has a different amount of properties to the first ruleset.[" + rulesetiProperties.size() + " properties]");
+			else
+			{
+				for(int j = 0; j < rulesetiProperties.size(); j++)
+				{
+					if(rulesetiProperties.get(j).compareTo(ruleset0Properties.get(j)) != 0)
+						results.add("Ruleset " + (i + 1) + " has a different property to the first ruleset.[property " + (j + 1) + ":" + rulesetiProperties.get(j) + "]");
+				}
+			}
+			if(rulesetiTypenames.size() != ruleset0Typenames.size())
+				results.add("Ruleset " + (i + 1) + " has a different amount of types specified to the first ruleset.[" + rulesetiProperties.size() + " properties]");
+			else
+			{
+				for(int j = 0; j < rulesetiTypenames.size(); j++)
+				{
+					if(rulesetiTypenames.get(j).compareTo(ruleset0Typenames.get(j)) != 0)
+						results.add("Ruleset " + (i + 1) + " has a different type to the first ruleset.[type " + (j + 1) + ":" + rulesetiTypenames.get(j) + "]");
+				}
+			}
+		}
+		
+		return results;
 	}
 	
 	public String getColourCode()
@@ -209,9 +343,44 @@ public class World
 			return -1;
 	}
 	
+	public byte[] getRuleByteCode()
+	{
+		String code = ruleCodes.get(currEngineStep);
+		
+		CALCompiler compiler = new CALCompiler();
+		compiler.compile(code);
+		
+		return compiler.getCode();
+	}
+	
 	public String getRuleCode()
 	{
-		return ruleCode;
+		//return ruleCode;
+		return ruleCodes.get(currEngineStep);
+	}
+	
+	public String getRuleCode(int index)
+	{
+		return ruleCodes.get(index);
+	}
+	
+	public String getRuleCode(String firstLine)
+	{
+		for(int i = 0; i < ruleCodes.size(); i++)
+			if(ruleCodes.get(i).indexOf(firstLine) != -1)
+				return ruleCodes.get(i);
+		
+		return null;
+	}
+	
+	public ArrayList<String> getRuleCodes()
+	{
+		return ruleCodes;
+	}
+	
+	public int getStepAmount()
+	{
+		return ruleCodes.size();
 	}
 	
 	public String getWorldName()
@@ -246,6 +415,23 @@ public class World
 		{
 			return false;
 		}
+	}
+	
+	public boolean removeRuleCode(String name)
+	{
+		boolean removed = false;
+		
+		for(int i = 0; i < ruleCodes.size(); i++)
+		{
+			if(ruleCodes.get(i).indexOf("ruleset " + name) != -1)
+			{
+				ruleCodes.remove(i);
+				removed = true;
+				break;
+			}
+		}
+		
+		return removed;
 	}
 	
 	public void reset()
@@ -344,6 +530,50 @@ public class World
 		this.ruleCode = ruleCode;
 	}
 	
+	public void setRuleCodes(int steps)
+	{
+		if(ruleCodes.size() == steps)
+			return;
+		
+		String gameOfLifeRulesBegin = "ruleset GameOfLife";
+		String gameOfLifeRulesEnd = "\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
+		
+		if(ruleCodes.size() < steps)
+			for(int i = ruleCodes.size(); i < steps; i++)
+			{
+				String code = gameOfLifeRulesBegin + i + gameOfLifeRulesEnd;
+				ruleCodes.add(code);
+			}
+		else
+			for(int i = ruleCodes.size() - 1; i >= steps; i--)
+				ruleCodes.remove(i);
+	}
+	
+	public void setRuleCodes(ArrayList<String> list)
+	{
+		if(list.size() == 0)
+			setRuleCodes(1);
+		
+		ruleCodes.clear();
+		if(list.size() == 1)
+		{
+			ruleCodes.addAll(list);
+			return;
+		}
+
+		for(int i = 0; i < list.size(); i++)
+		{
+			for(int j = 0; j < list.size(); j++)
+			{
+				String currCode = list.get(j);
+				String numberStr = currCode.substring(0, currCode.indexOf(":"));
+				int number = Integer.parseInt(numberStr);
+				if(number == i + 1)
+					ruleCodes.add(currCode.substring(currCode.indexOf(":") + 1));
+			}
+		}
+	}
+	
 	public void setWorldGenerations(Grid[] w)
 	{
 		worldGenerations.clear();
@@ -391,5 +621,11 @@ public class World
 		
 		if(streamer.hasStarted())
 			streamer.stop();
+	}
+	
+	public void updateRuleCode(String code, int index)
+	{
+		ruleCodes.remove(index);
+		ruleCodes.add(index, code);
 	}
 }
