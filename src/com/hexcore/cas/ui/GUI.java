@@ -865,6 +865,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(compiler.getErrorCount() == 0)
 				{
 					saveRuleCodeToWorld();
+					setRulesetsDropDownBox();
 					//Update ruleset
 				}
 				else
