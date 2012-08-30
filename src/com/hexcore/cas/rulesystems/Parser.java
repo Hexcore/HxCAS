@@ -1,21 +1,15 @@
 package com.hexcore.cas.rulesystems;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-
+import com.hexcore.cas.rulesystems.TableEntry;
+import com.hexcore.cas.rulesystems.ConstantRecord;
+import com.hexcore.cas.rulesystems.SymbolTable;
+import com.hexcore.cas.rulesystems.PrimaryPair;
 import org.objectweb.asm.Label;
 
-/**
- * Class Parser
+import java.io.*;
 
- * @authors Karl Zoller
- */
-
-public class Parser
-{
+public class Parser {
 	static final int _EOF = 0;
 	static final int _number = 1;
 	static final int _double = 2;
@@ -64,192 +58,161 @@ public class Parser
 	static final int andand_Sym = 38;
 	static final int NOT_SYM = 39;
 	// pragmas
+
 	static final int maxT = 39;
-	
+
 	static final boolean T = true;
 	static final boolean x = false;
 	static final int minErrDist = 2;
-	
+
 	public static Token token;    // last recognized token   /* pdt */
 	public static Token la;       // lookahead token
 	static int errDist = minErrDist;
 
-	static enum AddOpE{ADD, SUB, OR, UN};
-	static enum MulOpE{MUL, DIV, MOD, AND, UN};
-	static enum PostOpE{INC, DEC, UN};
 	static enum RelOpE{LT, GT, LE, GE, EQ, NE, UN};
+static enum AddOpE{ADD, SUB, OR, UN};
+static enum MulOpE{MUL, DIV, MOD, AND, UN};
+static enum PostOpE{INC, DEC, UN};
+
+static SymbolTable table;
+static int typeCountExpected = 0;
+static int typeCountActual = 0;
+static boolean postOpQueued = false;
+static PostOpE postOpType;
+static boolean valid = true;
+static int typeCount = 0;
+
+static public int getErrorCount()
+{
+	return Errors.count;
+}
+
+
+static public ArrayList<String> getResult()
+{
+	ArrayList<String> results = Parser.getErrorList();
+	if(Parser.getErrorCount() == 0)
+		results.add("Compiled Successfully");
 	
-	static SymbolTable table;
-	static int typeCountExpected = 0;
-	static int typeCountActual = 0;
-	static boolean postOpQueued = false;
-	static PostOpE postOpType;
-	static boolean valid = true;
-	static int typeCount = 0;
-	
-	static public int getErrorCount()
-	{
-		return Errors.count;
-	}
-	
-	static public ArrayList<String> getResult()
-	{
-		ArrayList<String> results = Parser.getErrorList();
-		if(Parser.getErrorCount() == 0)
-			results.add("Compiled Successfully");
+	return results;
+}
+
+
+static ArrayList<String> getErrorList()
+{
+	ArrayList<String> results = new ArrayList<String>();
 		
-		return results;
-	}
+	ErrorRec current = Errors.first;
 	
-	static ArrayList<String> getErrorList()
+	while(current != null)
 	{
-		ArrayList<String> results = new ArrayList<String>();
-			
-		ErrorRec current = Errors.first;
-		
-		while(current != null)
-		{
-			results.add("Error at line " + current.line + ": " + current.str);
-			current = current.next;
-		}
-		
-		return results;
+		results.add("Error at line " + current.line + ": " + current.str);
+		current = current.next;
 	}
 	
-	static void SemanticError(String msg)
-	{
-		valid = false;
-		SemError(msg);
-		System.err.println("SEM ERROR");
-	}
-	
-	static byte[] getCode()
-	{
-		return CodeGen.getCode();
-	}
-	
-	static public void reset()
-	{
-		errDist = minErrDist;
-		Errors.count = 0;
-		Errors.first = null;
-		Errors.last = null;
-		Errors.eof = false;
-		valid = true;
-	}
-	
+	return results;
+}
+
+static void SemanticError(String msg)
+{
+	valid = false;
+	SemError(msg);
+	System.err.println("SEM ERROR");
+}
+
+static byte[] getCode()
+{
+	return CodeGen.getCode();
+}
+
+static public void reset()
+{
+	errDist = minErrDist;
+	Errors.count = 0;
+	Errors.first = null;
+	Errors.last = null;
+	Errors.eof = false;
+	valid = true;
+}
+
+
+
 	//Changed by Karl Zoller
-	static void SynErr(int n)
-	{
+	static void SynErr (int n) {
 		System.err.println("SYN ERROR");
 		valid = false;
-		if(errDist >= minErrDist)
-			Errors.SynErr(la.line, la.col, n);
+		if (errDist >= minErrDist) Errors.SynErr(la.line, la.col, n);
 		errDist = 0;
 	}
-	
-	public static void SemErr(String msg)
-	{
-		if(errDist >= minErrDist)
-			Errors.Error(token.line, token.col, msg); /* pdt */
+
+	public static void SemErr (String msg) {
+		if (errDist >= minErrDist) Errors.Error(token.line, token.col, msg); /* pdt */
 		errDist = 0;
 	}
-	
-	public static void SemError(String msg)
-	{
-		if(errDist >= minErrDist)
-			Errors.Error(token.line, token.col, msg); /* pdt */
+
+	public static void SemError (String msg) {
+		if (errDist >= minErrDist) Errors.Error(token.line, token.col, msg); /* pdt */
 		errDist = 0;
 	}
-	
-	public static void Warning(String msg)
-	{ /* pdt */
-		if(errDist >= minErrDist)
-			Errors.Warn(token.line, token.col, msg);
+
+	public static void Warning (String msg) { /* pdt */
+		if (errDist >= minErrDist) Errors.Warn(token.line, token.col, msg);
 		errDist = 0;
 	}
-	
-	public static boolean Successful()
-	{ /* pdt */
+
+	public static boolean Successful() { /* pdt */
 		return Errors.count == 0;
 	}
-	
-	public static String LexString()
-	{ /* pdt */
+
+	public static String LexString() { /* pdt */
 		return token.val;
 	}
-	
-	public static String LookAheadString()
-	{ /* pdt */
+
+	public static String LookAheadString() { /* pdt */
 		return la.val;
 	}
-	
-	static void Get()
-	{
-		for (;;)
-		{
+
+	static void Get () {
+		for (;;) {
 			token = la; /* pdt */
 			la = Scanner.Scan();
-			if(la.kind <= maxT)
-			{ ++errDist; break; }
-			
+			if (la.kind <= maxT) { ++errDist; break; }
+
 			la = token; /* pdt */
 		}
 	}
-	
-	static void Expect(int n)
-	{
-		if(la.kind==n)
-			Get();
-		else
-		{
-			SynErr(n);
-		}
+
+	static void Expect (int n) {
+		if (la.kind==n) Get(); else { SynErr(n); }
 	}
-	
-	static boolean StartOf(int s)
-	{
+
+	static boolean StartOf (int s) {
 		return set[s][la.kind];
 	}
-	
-	static void ExpectWeak(int n, int follow)
-	{
-		if(la.kind == n)
-			Get();
-		else
-		{
+
+	static void ExpectWeak (int n, int follow) {
+		if (la.kind == n) Get();
+		else {
 			SynErr(n);
 			while (!StartOf(follow)) Get();
 		}
 	}
-	
-	static boolean WeakSeparator(int n, int syFol, int repFol)
-	{
+
+	static boolean WeakSeparator (int n, int syFol, int repFol) {
 		boolean[] s = new boolean[maxT+1];
-		if(la.kind == n)
-		{
-			Get();
-			return true;
-		}
-		else if(StartOf(repFol))
-		{
-			return false;
-		}
-		else
-		{
-			for(int i=0; i <= maxT; i++)
-			{
+		if (la.kind == n) { Get(); return true; }
+		else if (StartOf(repFol)) return false;
+		else {
+			for (int i=0; i <= maxT; i++) {
 				s[i] = set[syFol][i] || set[repFol][i] || set[0][i];
 			}
 			SynErr(n);
-			while(!s[la.kind])
-				Get();
+			while (!s[la.kind]) Get();
 			return StartOf(syFol);
 		}
 	}
-	
-	static void CAL()
-	{
+
+	static void CAL() {
 		table = new SymbolTable();
 		typeCount = 0;
 		
@@ -266,9 +229,8 @@ public class Parser
 		}
 		
 	}
-	
-	static void RuleSet()
-	{
+
+	static void RuleSet() {
 		String name = "";
 		table.pushScope();
 		table.prepare();
@@ -284,40 +246,32 @@ public class Parser
 		Expect(lbrace_Sym);
 		TypeCount();
 		Property();
-		while(la.kind == property_Sym)
-		{
+		while (la.kind == property_Sym) {
 			Property();
 		}
 		TypeSpec();
-		while(la.kind == type_Sym)
-		{
+		while (la.kind == type_Sym) {
 			TypeSpec();
 		}
 		Expect(rbrace_Sym);
 	}
-	
-	static String Ident()
-	{
+
+	static String Ident() {
 		String name;
 		name = "";
 		
-		if(la.kind == identifier_Sym)
-		{
+		if (la.kind == identifier_Sym) {
 			Get();
 			name = token.val;
-		}
-		else if(la.kind == type_Sym)
-		{
+			
+		} else if (la.kind == type_Sym) {
 			Get();
 			name = "type";
-		}
-		else
-			SynErr(40);
+		} else SynErr(40);
 		return name;
 	}
-	
-	static void TypeCount()
-	{
+
+	static void TypeCount() {
 		int value = 0;
 		Expect(typecount_Sym);
 		value  = IntConst();
@@ -332,9 +286,8 @@ public class Parser
 		
 		Expect(semicolon_Sym);
 	}
-	
-	static void Property()
-	{
+
+	static void Property() {
 		String name = "";
 		Expect(property_Sym);
 		name  = Ident();
@@ -349,9 +302,8 @@ public class Parser
 		
 		Expect(semicolon_Sym);
 	}
-	
-	static void TypeSpec()
-	{
+
+	static void TypeSpec() {
 		table.pushScope();  												
 		
 		Expect(type_Sym);
@@ -365,8 +317,7 @@ public class Parser
 			CodeGen.initType();
 		
 		Expect(lbrace_Sym);
-		while(StartOf(1))
-		{
+		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
@@ -374,10 +325,10 @@ public class Parser
 		
 		if(valid)
 			CodeGen.endType();
+		
 	}
-	
-	static int IntConst()
-	{
+
+	static int IntConst() {
 		int value;
 		Expect(number_Sym);
 		try
@@ -391,52 +342,36 @@ public class Parser
 		
 		return value;
 	}
-	
-	static void Statement()
-	{
-		if(la.kind == lbrace_Sym)
-		{
+
+	static void Statement() {
+		if (la.kind == lbrace_Sym) {
 			Block();
-		}
-		else if(la.kind == identifier_Sym || la.kind == type_Sym)
-		{
+		} else if (la.kind == identifier_Sym || la.kind == type_Sym) {
 			AssignCall();
-		}
-		else if(la.kind == if_Sym)
-		{
+		} else if (la.kind == if_Sym) {
 			IfStatement();
-		}
-		else if(la.kind == loop_Sym)
-		{
+		} else if (la.kind == loop_Sym) {
 			Loop();
-		}
-		else if(la.kind == var_Sym)
-		{
+		} else if (la.kind == var_Sym) {
 			VarDeclaration();
-		}
-		else
-			SynErr(41);
+		} else SynErr(41);
 	}
-	
-	static void Block()
-	{
+
+	static void Block() {
 		Expect(lbrace_Sym);
 		table.pushScope();
-		while(StartOf(1))
-		{
+		while (StartOf(1)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
 		table.popScope();
 	}
-	
-	static void AssignCall()
-	{
+
+	static void AssignCall() {
 		TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;
 		entry = Designator(false);
 		PostOpE T = PostOpE.UN;
-		if(la.kind == equal_Sym)
-		{
+		if (la.kind == equal_Sym) {
 			Get();
 			type  = Expression();
 			if(!(TableEntry.isArith(entry.type) && TableEntry.isArith(type)) && !(TableEntry.isBool(entry.type) && TableEntry.isBool(type)))
@@ -467,9 +402,7 @@ public class Parser
 				}
 			}
 			
-		}
-		else if (la.kind == postInc_Sym || la.kind == postDec_Sym)
-		{
+		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
 			if(!TableEntry.isArith(entry.type))
 				SemanticError("Cannot perform a post operation on a boolan type.");
@@ -494,46 +427,41 @@ public class Parser
 				}
 			}
 			
-		}
-		else if(la.kind == lparen_Sym)
-		{
+		} else if (la.kind == lparen_Sym) {
 			Get();
 			typeA  = Arguments();
 			if(!TableEntry.isFunction(entry.kind))
 			{
-				SemanticError("Arguments can only be given to a function.");
+			SemanticError("Arguments can only be given to a function.");
 			}
 			
 			if(entry.kind == TableEntry.aFunction)
 			{
-				if(!TableEntry.isArray(typeA))
-				{
-					SemanticError("Invalid argument. Argument must be an array");
-				}
+			if(!TableEntry.isArray(typeA))
+			{
+			SemanticError("Invalid argument. Argument must be an array");
+			}
 			}
 			else
 			{
-				if(TableEntry.isArray(typeA))
-				{
-					SemanticError("Invalid argument. Argument must be a scalar type");
-				}
+			if(TableEntry.isArray(typeA))
+			{
+			SemanticError("Invalid argument. Argument must be a scalar type");
+			}
 			}
 			
 			Expect(rparen_Sym);
-		}
-		else
-			SynErr(42);
+		} else SynErr(42);
 		Expect(semicolon_Sym);
 	}
-	
-	static void IfStatement()
-	{
+
+	static void IfStatement() {
 		int type = TableEntry.noType;
 		Expect(if_Sym);
 		Expect(lparen_Sym);
 		type  = Expression();
 		Expect(rparen_Sym);
-		if(!TableEntry.isBool(type))
+		if (!TableEntry.isBool(type))
 		{
 			SemanticError("Expected a boolean result for the if statement's expression");
 		}
@@ -551,17 +479,16 @@ public class Parser
 			CodeGen.visitLabel(pointers[0]);
 		}
 		
-		if (la.kind == else_Sym)
-		{
+		if (la.kind == else_Sym) {
 			Get();
 			Statement();
 		}
 		if(valid)
 			CodeGen.visitLabel(pointers[1]);
+		
 	}
-	
-	static void Loop()
-	{
+
+	static void Loop() {
 		int type1 = 0, type2 = 0;
 		String name = "";
 		Label[] loopLabels = null;
@@ -575,7 +502,7 @@ public class Parser
 		}
 		
 		if(valid)
-		{
+		{  														
 			entry.kind = TableEntry.Variable;
 			entry.name = name;
 			entry.type = TableEntry.intType;
@@ -603,27 +530,23 @@ public class Parser
 			loopLabels = CodeGen.initLoop(entry.offset);
 		}
 		
-		Expect(lbrace_Sym);
-		Statement();
-		Expect(rbrace_Sym);
+		Block();
 		if(valid)
 			CodeGen.endLoop(loopLabels, entry.offset);
+		
 	}
-	
-	static void VarDeclaration()
-	{
+
+	static void VarDeclaration() {
 		Expect(var_Sym);
 		OneVar();
-		while(la.kind == comma_Sym)
-		{
+		while (la.kind == comma_Sym) {
 			Get();
 			OneVar();
 		}
 		Expect(semicolon_Sym);
 	}
-	
-	static TableEntry Designator(boolean attr)
-	{
+
+	static TableEntry Designator(boolean attr) {
 		TableEntry entry;
 		int type = TableEntry.noType;
 		int typeE = TableEntry.noType;
@@ -636,27 +559,27 @@ public class Parser
 			SemanticError("Undeclared identifier \"" + name + "\"");
 		else
 			type = entry.type;
-		
+			
 		if(entry.kind == TableEntry.Property && attr == false)
 			SemanticError("Properties must be called with \"self\"");
-		
-		
+			
+			
 		if(entry.kind == TableEntry.Cell)
 			if(valid)
 				CodeGen.derefRef(entry.offset);
+			
 		
-		if (la.kind == lbrack_Sym)
-		{
+		if (la.kind == lbrack_Sym) {
 			Get();
 			typeE  = Expression();
 			if((type % 2) == 0) SemanticError("Cannot index scalar type \"" + name +  "\"");
 			if(!TableEntry.isArith(typeE))
 			{
-				SemanticError("Index must be arithmetic");
+			SemanticError("Index must be arithmetic");
 			}
 			
 			if(valid)
-				CodeGen.derefArrayRef();
+			CodeGen.derefArrayRef();
 			
 			Expect(rbrack_Sym);
 			if(!TableEntry.isArray(type))
@@ -668,12 +591,12 @@ public class Parser
 			entryS.kind = entry.kind;
 			entryS.type = entry.type - 1;
 			entry = entryS;
+			
 		}
-		if (la.kind == point_Sym)
-		{
+		if (la.kind == point_Sym) {
 			Get();
 			entryA  = Attribute();
-			if(entry.kind != TableEntry.Cell)SemanticError("Only cells have attributes.");
+			if(entry.kind != TableEntry.Cell) SemanticError("Only cells have attributes.");
 			if(entryA.kind != TableEntry.Property) SemanticError("Only declared properties can be used as cell attributes.");
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
@@ -689,12 +612,12 @@ public class Parser
 			}
 			
 			entry = entryAA;
+			
 		}
 		return entry;
 	}
-	
-	static int Expression()
-	{
+
+	static int Expression() {
 		int type;
 		int type1, type2;
 		type = TableEntry.noType;
@@ -703,8 +626,7 @@ public class Parser
 		RelOpE op = RelOpE.UN;
 		type = type1;
 		
-		if(StartOf(2))
-		{
+		if (StartOf(2)) {
 			op  = RelOp();
 			type2  = AddExp();
 			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
@@ -712,54 +634,45 @@ public class Parser
 				SemanticError("Type mismatch");
 				type = TableEntry.noType;
 			}
-			
+				
 			type = TableEntry.boolType;
 			
 			if(valid)
-				CodeGen.performRelationalOp(op);
+				CodeGen.performRelationalOp(op);										
+			
 		}
 		return type;
 	}
-	
-	static PostOpE PostOp()
-	{
+
+	static PostOpE PostOp() {
 		PostOpE op;
 		op = PostOpE.UN;	
-		if(la.kind == postInc_Sym)
-		{
+		if (la.kind == postInc_Sym) {
 			Get();
 			op = PostOpE.INC;	
-		}
-		else if(la.kind == postDec_Sym)
-		{
+		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		}
-		else
-			SynErr(43);
+		} else SynErr(43);
 		return op;
 	}
-	
-	static int Arguments()
-	{
+
+	static int Arguments() {
 		int type;
 		type = TableEntry.noType;
-		if(StartOf(3))
-		{
+		if (StartOf(3)) {
 			type  = Expression();
 		}
 		return type;
 	}
-	
-	static TableEntry Attribute()
-	{
+
+	static TableEntry Attribute() {
 		TableEntry entry;
 		entry = Designator(true);
 		return entry;
 	}
-	
-	static void OneVar()
-	{
+
+	static void OneVar() {
 		int type = TableEntry.noType; String name = "";
 		name  = Ident();
 		TableEntry entry = new TableEntry();
@@ -774,8 +687,7 @@ public class Parser
 			entry.offset = CodeGen.declareLocalVariable(name);
 		}
 		
-		if(la.kind == equal_Sym)
-		{
+		if (la.kind == equal_Sym) {
 			Get();
 			type  = Expression();
 			if(!entry.name.equals("__new__"))
@@ -786,27 +698,23 @@ public class Parser
 			
 			if(valid)
 				CodeGen.storeVariable(entry.offset);
+			
 		}
 		if(!entry.name.equals("__new__"))
 			table.insert(entry);
 		
 	}
-	
-	static int AddExp()
-	{
+
+	static int AddExp() {
 		int type;
 		int type1, type2;
 		type = TableEntry.noType;
 		boolean negative = false;
 		
-		if(la.kind == plus_Sym || la.kind == minus_Sym)
-		{
-			if(la.kind == plus_Sym)
-			{
+		if (la.kind == plus_Sym || la.kind == minus_Sym) {
+			if (la.kind == plus_Sym) {
 				Get();
-			}
-			else
-			{
+			} else {
 				Get();
 				negative = true;
 			}
@@ -824,8 +732,7 @@ public class Parser
 					CodeGen.negate();
 		}
 		
-		while(la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym)
-		{
+		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
 			op  = AddOp();
 			type2  = Term();
 			switch(op)
@@ -846,61 +753,51 @@ public class Parser
 			
 			if(valid)
 				CodeGen.performAddOp(op);
+			
 		}
 		return type;
 	}
-	
-	static RelOpE RelOp()
-	{
+
+	static RelOpE RelOp() {
 		RelOpE op;
 		op = RelOpE.UN;	
-		switch (la.kind)
-		{
-			case equalequal_Sym:
-			{
-				Get();
-				op = RelOpE.EQ;	
-				break;
-			}
-			case bangequal_Sym:
-			{
-				Get();
-				op = RelOpE.NE;	
-				break;
-			}
-			case greater_Sym:
-			{
-				Get();
-				op = RelOpE.GT;	
-				break;
-			}
-			case less_Sym:
-			{
-				Get();
-				op = RelOpE.LT;	
-				break;
-			}
-			case greaterequal_Sym:
-			{
-				Get();
-				op = RelOpE.GE;	
-				break;
-			}
-			case lessequal_Sym:
-			{
-				Get();
-				op = RelOpE.LE;	
-				break;
-			}
-			default:
-				SynErr(44);
-				break;
+		switch (la.kind) {
+		case equalequal_Sym: {
+			Get();
+			op = RelOpE.EQ;	
+			break;
+		}
+		case bangequal_Sym: {
+			Get();
+			op = RelOpE.NE;	
+			break;
+		}
+		case greater_Sym: {
+			Get();
+			op = RelOpE.GT;	
+			break;
+		}
+		case less_Sym: {
+			Get();
+			op = RelOpE.LT;	
+			break;
+		}
+		case greaterequal_Sym: {
+			Get();
+			op = RelOpE.GE;	
+			break;
+		}
+		case lessequal_Sym: {
+			Get();
+			op = RelOpE.LE;	
+			break;
+		}
+		default: SynErr(44); break;
 		}
 		return op;
 	}
-	
-	static int Term()
-	{
+
+	static int Term() {
 		int type;
 		int type1, type2;
 		type = TableEntry.noType;
@@ -909,8 +806,7 @@ public class Parser
 		MulOpE op = MulOpE.UN;
 		type = type1;
 		
-		while(StartOf(4))
-		{
+		while (StartOf(4)) {
 			op  = MulOp();
 			type2  = Factor();
 			switch(op)
@@ -926,52 +822,42 @@ public class Parser
 					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
 						type = TableEntry.intType;
 					else
-						type = TableEntry.doubleType;
+						type = TableEntry.doubleType;  														
 			}
 			
 			if(valid)
 				CodeGen.performMulOp(op);
+			
 		}
 		return type;
 	}
-	
-	static AddOpE AddOp()
-	{
+
+	static AddOpE AddOp() {
 		AddOpE op;
 		op = AddOpE.UN;	
-		if(la.kind == plus_Sym)
-		{
+		if (la.kind == plus_Sym) {
 			Get();
 			op = AddOpE.ADD;	
-		}
-		else if(la.kind == minus_Sym)
-		{
+		} else if (la.kind == minus_Sym) {
 			Get();
 			op = AddOpE.SUB;	
-		}
-		else if(la.kind == barbar_Sym)
-		{
+		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		}
-		else
-			SynErr(45);
+		} else SynErr(45);
 		return op;
 	}
-	
-	static int Factor()
-	{
+
+	static int Factor() {
 		int type;
 		PostOpE T = PostOpE.UN;
 		PrimaryPair p = new PrimaryPair();
 		
 		p  = Primary();
 		type = p.type;
-		if(la.kind == postInc_Sym || la.kind == postDec_Sym)
-		{
-			T = PostOp();
-			if(!TableEntry.isArith(type))
-				SemanticError("Cannot perform a post operation on a boolan type.");
+		if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
+			T  = PostOp();
+			if(!TableEntry.isArith(type)) SemanticError("Cannot perform a post operation on a boolan type.");
 			
 			if(p.kind != TableEntry.Variable)
 			{
@@ -979,53 +865,43 @@ public class Parser
 			}
 			else
 			{
-				if(valid)
-				{
-					if(T == PostOpE.INC)
-					{
-						CodeGen.performPostOp(p.offset, 1);
-					}
-					else
-					{
-						CodeGen.performPostOp(p.offset, -1);
-					}
-				}
+			if(valid)
+			{
+			if(T == PostOpE.INC)
+			{
+				CodeGen.performPostOp(p.offset, 1);
 			}
+			else
+			{
+				CodeGen.performPostOp(p.offset, -1);
+			}
+			}
+			}
+			
 		}
 		return type;
 	}
-	
-	static MulOpE MulOp()
-	{
+
+	static MulOpE MulOp() {
 		MulOpE op;
 		op = MulOpE.UN;	
-		if(la.kind == star_Sym)
-		{
+		if (la.kind == star_Sym) {
 			Get();
 			op = MulOpE.MUL;	
-		}
-		else if(la.kind == slash_Sym)
-		{
+		} else if (la.kind == slash_Sym) {
 			Get();
 			op = MulOpE.DIV;	
-		}
-		else if(la.kind == percent_Sym)
-		{
+		} else if (la.kind == percent_Sym) {
 			Get();
 			op = MulOpE.MOD;	
-		}
-		else if(la.kind == andand_Sym)
-		{
+		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		}
-		else
-			SynErr(46);
+		} else SynErr(46);
 		return op;
 	}
-	
-	static PrimaryPair Primary()
-	{
+
+	static PrimaryPair Primary() {
 		PrimaryPair p;
 		p = new PrimaryPair();
 		p.type = TableEntry.noType;
@@ -1036,17 +912,17 @@ public class Parser
 		ConstantRecord con;
 		TableEntry entry = null;
 		
-		if(la.kind == identifier_Sym || la.kind == type_Sym)
-		{
+		if (la.kind == identifier_Sym || la.kind == type_Sym) {
 			entry = Designator(false);
 			p.type = entry.type;
 			p.kind = TableEntry.Variable;
 			p.offset = entry.offset;
 			
+			
 			if(valid)
 			{
-				if(entry.kind == TableEntry.Variable)
-					CodeGen.derefVariable(entry.offset);
+			if(entry.kind == TableEntry.Variable)
+					CodeGen.derefVariable(entry.offset);		  											
 				else if(entry.kind == TableEntry.Property)
 				{
 					if(TableEntry.isArray(entry.type))
@@ -1056,46 +932,44 @@ public class Parser
 				}
 			}
 			
-			if (la.kind == lparen_Sym)
-			{
+			if (la.kind == lparen_Sym) {
 				Get();
 				typeA  = Arguments();
 				if(!TableEntry.isFunction(entry.kind))
 				{
-					SemanticError("Arguments can only be given to a function.");
+				SemanticError("Arguments can only be given to a function.");
 				}
 				
 				if(entry.kind == TableEntry.aFunction)
 				{
-					if(!TableEntry.isArray(typeA))
-					{
-						SemanticError("Invalid argument. Argument must be an array");
-					}
-					else
-					{
-						if(valid)
-							CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
-					}
+				if(!TableEntry.isArray(typeA))
+				{
+					SemanticError("Invalid argument. Argument must be an array");
 				}
 				else
 				{
-					if(TableEntry.isArray(typeA))
-					{
-						SemanticError("Invalid argument. Argument must be a scalar type");
-					}
-					else
-					{
-						if(valid)
-							CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
-					}
+					if(valid)
+						CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
+				}
+				}
+				else
+				{
+				if(TableEntry.isArray(typeA))
+				{
+					SemanticError("Invalid argument. Argument must be a scalar type");
+				}
+				else
+				{
+					if(valid)
+						CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
+				}
 				}
 				p.kind = TableEntry.Constant;
 				
+				
 				Expect(rparen_Sym);
 			}
-		}
-		else if(la.kind == number_Sym || la.kind == double_Sym)
-		{
+		} else if (la.kind == number_Sym || la.kind == double_Sym) {
 			con  = Constant();
 			p.type = con.type;
 			p.kind = TableEntry.Constant;
@@ -1103,64 +977,55 @@ public class Parser
 			if(valid)
 				CodeGen.loadConstant((double)con.value);
 			
-		}
-		else if(la.kind == lparen_Sym)
-		{
+		} else if (la.kind == lparen_Sym) {
 			Get();
 			typeE  = Expression();
 			p.type = typeE;
 			p.kind = TableEntry.Constant;
 			
 			Expect(rparen_Sym);
-		}
-		else
-			SynErr(47);
+		} else SynErr(47);
 		return p;
 	}
-	
-	static ConstantRecord Constant()
-	{
+
+	static ConstantRecord Constant() {
 		ConstantRecord con;
 		con = new ConstantRecord();
 		
-		if(la.kind == double_Sym)
-		{
+		if (la.kind == double_Sym) {
 			con.value  = DoubleConst();
 			con.type = TableEntry.doubleType;	
-		}
-		else if(la.kind == number_Sym)
-		{
+		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.intType;		
-		}
-		else
-			SynErr(48);
+		} else SynErr(48);
 		return con;
 	}
-	
-	static double DoubleConst()
-	{
+
+	static double DoubleConst() {
 		double value;
 		Expect(double_Sym);
 		try
 		{
 			value = Double.parseDouble(token.val);
-		}
-		catch(NumberFormatException e)
+		} catch(NumberFormatException e)
 		{
 			value = 0;
 		}
 		
+		
 		return value;
 	}
-	
-	public static void Parse()
-	{
+
+
+
+	public static void Parse() {
 		la = new Token();
 		la.val = "";
 		Get();
 		CAL();
 		Expect(EOF_SYM);
+
 	}
 
 	private static boolean[][] set = {
@@ -1168,118 +1033,98 @@ public class Parser
 		{x,x,x,x, x,T,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x},
 		{x,T,T,x, x,T,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}};
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}
+
+	};
 
 } // end Parser
 
 /* pdt - considerable extension from here on */
 
-class ErrorRec
-{
+class ErrorRec {
 	public int line, col, num;
 	public String str;
 	public ErrorRec next;
 
-	public ErrorRec(int l, int c, String s)
-	{
-		line = l;
-		col = c;
-		str = s;
-		next = null;
+	public ErrorRec(int l, int c, String s) {
+		line = l; col = c; str = s; next = null;
 	}
+
 } // end ErrorRec
 
-class Errors
-{
+class Errors {
+
 	public static int count = 0;                                     // number of errors detected
 	public static String errMsgFormat = "file {0} : ({1}, {2}) {3}"; // 0=file 1=line, 2=column, 3=text
 	static String fileName = "";
 	static String listName = "";
 	static boolean mergeErrors = false;
 	static PrintWriter mergedList;
-	
+
 	static ErrorRec first = null, last;
 	static boolean eof = false;
-	
-	static String getLine()
-	{
+
+	static String getLine() {
 		char ch, CR = '\r', LF = '\n';
 		int l = 0;
 		StringBuffer s = new StringBuffer();
 		ch = (char) Buffer.Read();
-		while(ch != Buffer.EOF && ch != CR && ch != LF)
-		{
-			s.append(ch);
-			l++;
-			ch = (char)Buffer.Read();
+		while (ch != Buffer.EOF && ch != CR && ch != LF) {
+			s.append(ch); l++; ch = (char) Buffer.Read();
 		}
 		eof = (l == 0 && ch == Buffer.EOF);
-		if (ch == CR)
-		{  // check for MS-DOS
+		if (ch == CR) {  // check for MS-DOS
 			ch = (char) Buffer.Read();
 			if (ch != LF && ch != Buffer.EOF) Buffer.pos--;
 		}
 		return s.toString();
 	}
-	
-	static private String Int(int n, int len)
-	{
+
+	static private String Int(int n, int len) {
 		String s = String.valueOf(n);
 		int i = s.length(); if (len < i) len = i;
 		int j = 0, d = len - s.length();
 		char[] a = new char[len];
-		for(i = 0; i < d; i++)a[i] = ' ';
-		for(j = 0; i < len; i++) {a[i] = s.charAt(j); j++;}
+		for (i = 0; i < d; i++) a[i] = ' ';
+		for (j = 0; i < len; i++) {a[i] = s.charAt(j); j++;}
 		return new String(a, 0, len);
 	}
-	
-	static void display(String s, ErrorRec e)
-	{
+
+	static void display(String s, ErrorRec e) {
 		mergedList.print("**** ");
-		for(int c = 1; c < e.col; c++)
-			if(s.charAt(c-1) == '\t')
-				mergedList.print("\t"); else mergedList.print(" ");
+		for (int c = 1; c < e.col; c++)
+			if (s.charAt(c-1) == '\t') mergedList.print("\t"); else mergedList.print(" ");
 		mergedList.println("^ " + e.str);
 	}
-	
-	public static void Init(String fn, String dir, boolean merge)
-	{
+
+	public static void Init (String fn, String dir, boolean merge) {
 		fileName = fn;
 		listName = dir + "listing.txt";
 		mergeErrors = merge;
-		if(mergeErrors)
-			try
-			{
+		if (mergeErrors)
+			try {
 				mergedList = new PrintWriter(new BufferedWriter(new FileWriter(listName, false)));
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				Errors.Exception("-- could not open " + listName);
 			}
 	}
-	
-	public static void Summarize()
-	{
-		if(mergeErrors)
-		{
+
+	public static void Summarize () {
+		if (mergeErrors) {
 			ErrorRec cur = first;
 			Buffer.setPos(0);
 			int lnr = 1;
 			String s = getLine();
-			while(!eof)
-			{
+			while (!eof) {
 				mergedList.println(Int(lnr, 4) + " " + s);
-				while(cur != null && cur.line == lnr)
-				{
+				while (cur != null && cur.line == lnr) {
 					display(s, cur); cur = cur.next;
 				}
 				lnr++; s = getLine();
 			}
-			if(cur != null)
-			{
+			if (cur != null) {
 				mergedList.println(Int(lnr, 4));
-				while(cur != null)
-				{
+				while (cur != null) {
 					display(s, cur); cur = cur.next;
 				}
 			}
@@ -1287,40 +1132,25 @@ class Errors
 			mergedList.println(count + " errors detected");
 			mergedList.close();
 		}
-		switch(count)
-		{
-			case 0 :
-				System.out.println("Parsed correctly");
-				break;
-			case 1 :
-				System.out.println("1 error detected");
-				break;
-			default:
-				System.out.println(count + " errors detected");
-				break;
+		switch (count) {
+			case 0 : System.out.println("Parsed correctly"); break;
+			case 1 : System.out.println("1 error detected"); break;
+			default: System.out.println(count + " errors detected"); break;
 		}
-		if(count > 0 && mergeErrors)
-			System.out.println("see " + listName);
+		if (count > 0 && mergeErrors) System.out.println("see " + listName);
 	}
-	
-	public static void storeError(int line, int col, String s)
-	{
-		if(mergeErrors)
-		{
+
+	public static void storeError (int line, int col, String s) {
+		if (mergeErrors) {
 			ErrorRec latest = new ErrorRec(line, col, s);
-			if(first == null)
-				first = latest;
-			else
-				last.next = latest;
+			if (first == null) first = latest; else last.next = latest;
 			last = latest;
 		} else printMsg(fileName, line, col, s);
 	}
-	
-	public static void SynErr(int line, int col, int n)
-	{
+
+	public static void SynErr (int line, int col, int n) {
 		String s;
-		switch (n)
-		{
+		switch (n) {
 			case 0: s = "EOF expected"; break;
 			case 1: s = "number expected"; break;
 			case 2: s = "double expected"; break;
@@ -1375,32 +1205,27 @@ class Errors
 		storeError(line, col, s);
 		count++;
 	}
-	
-	public static void SemErr(int line, int col, int n)
-	{
+
+	public static void SemErr (int line, int col, int n) {
 		storeError(line, col, ("error " + n));
 		count++;
 	}
-	
-	public static void Error(int line, int col, String s)
-	{
+
+	public static void Error (int line, int col, String s) {
 		storeError(line, col, s);
 		count++;
 	}
-	
-	public static void Warn(int line, int col, String s)
-	{
+
+	public static void Warn (int line, int col, String s) {
 		storeError(line, col, s);
 	}
-	
-	public static void Exception(String s)
-	{
+
+	public static void Exception (String s) {
 		System.out.println(s);
 		System.exit(1);
 	}
-	
-	private static void printMsg(String fileName, int line, int column, String msg)
-	{
+
+	private static void printMsg(String fileName, int line, int column, String msg) {
 		StringBuffer b = new StringBuffer(errMsgFormat);
 		int pos = b.indexOf("{0}");
 		if (pos >= 0) { b.replace(pos, pos+3, fileName); }
@@ -1412,4 +1237,5 @@ class Errors
 		if (pos >= 0) b.replace(pos, pos+3, msg);
 		System.out.println(b.toString());
 	}
+
 } // end Errors
