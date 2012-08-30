@@ -483,9 +483,7 @@ PRODUCTIONS
   														loopLabels = CodeGen.initLoop(entry.offset);
   													}
   												.)
-  	"{"
-  		Statement
-  	"}"											(.
+  	Statement									(.
   													if(valid)
   														CodeGen.endLoop(loopLabels, entry.offset);
   												.)

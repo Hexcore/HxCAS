@@ -4,14 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.BitSet;
 
-/**
- * Class Scanner
-
- * @authors Karl Zoller
- */
-
-class Token
-{
+class Token {
 	public int kind;    // token kind
 	public int pos;     // token position in the source text (starting at 0)
 	public int col;     // token column (starting at 0)
@@ -20,78 +13,57 @@ class Token
 	public Token next;  // AW 2003-03-07 Tokens are kept in linked list
 }
 
-class Buffer
-{
+class Buffer {
 	public static final char EOF = (char)256;
 	static byte[] buf;
 	static int bufLen;
 	static int pos;
-	
-	public static void Fill (FileInputStream s)
-	{
-		try
-		{
+
+	public static void Fill (FileInputStream s) {
+		try {
 			bufLen = s.available();
 			buf = new byte[bufLen];
 			s.read(buf, 0, bufLen);
 			pos = 0;
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e){
 			System.out.println("--- error on filling the buffer ");
 			System.exit(1);
 		}
 	}
-	
-	public static int Read()
-	{
-		if(pos < bufLen)
-			return buf[pos++] & 0xff;  // mask out sign bits
-		else
-			return EOF;                             /* pdt */
+
+	public static int Read () {
+		if (pos < bufLen) return buf[pos++] & 0xff;  // mask out sign bits
+		else return EOF;                             /* pdt */
 	}
-	
-	public static int Peek()
-	{
-		if(pos < bufLen)
-			return buf[pos] & 0xff;    // mask out sign bits
-		else
-			return EOF;                             /* pdt */
+
+	public static int Peek () {
+		if (pos < bufLen) return buf[pos] & 0xff;    // mask out sign bits
+		else return EOF;                             /* pdt */
 	}
-	
+
 	/* AW 2003-03-10 moved this from ParserGen.cs */
-	public static String GetString (int beg, int end)
-	{
+	public static String GetString (int beg, int end) {
 		StringBuffer s = new StringBuffer(64);
 		int oldPos = Buffer.getPos();
 		Buffer.setPos(beg);
-		while(beg < end)
-		{
-			s.append((char)Buffer.Read());
-			beg++;
-		}
+		while (beg < end) { s.append((char)Buffer.Read()); beg++; }
 		Buffer.setPos(oldPos);
 		return s.toString();
 	}
-	
-	public static int getPos()
-	{
+
+	public static int getPos() {
 		return pos;
 	}
-	
-	public static void setPos(int value)
-	{
-		if(value < 0)
-			pos = 0;
-		else if(value >= bufLen)
-			pos = bufLen;
-		else
-			pos = value;
+
+	public static void setPos (int value) {
+		if (value < 0) pos = 0;
+		else if (value >= bufLen) pos = bufLen;
+		else pos = value;
 	}
+
 } // end Buffer
 
-public class Scanner
-{
+public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
@@ -139,7 +111,7 @@ public class Scanner
 	static final int andand_Sym = 38;
 	static final int NOT_SYM = 39;
 	// pragmas
-	
+
 	static short[] start = {
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -158,8 +130,8 @@ public class Scanner
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  -1};
-	
-	
+
+
 	static Token t;          // current token
 	static char ch;          // current input character
 	static int pos;          // column number of current character
@@ -167,42 +139,31 @@ public class Scanner
 	static int lineStart;    // start position of current line
 	static int oldEols;      // EOLs that appeared in a comment;
 	static BitSet ignore;    // set of characters to be ignored by the scanner
-	
+
 	static Token tokens;     // the complete input token stream
 	static Token pt;         // current peek token
-	
-	public static void Init(String fileName)
-	{
+
+	public static void Init (String fileName) {
 		FileInputStream s = null;
-		try
-		{
+		try {
 			s = new FileInputStream(fileName);
 			Init(s);
-		}
-		catch(IOException e)
-		{
+		} catch (IOException e) {
 			System.out.println("--- Cannot open file " + fileName);
 			System.exit(1);
-		}
-		finally
-		{
-			if(s != null)
-			{
-				try
-				{
+		} finally {
+			if (s != null) {
+				try {
 					s.close();
-				}
-				catch(IOException e)
-				{
+				} catch (IOException e) {
 					System.out.println("--- Cannot close file " + fileName);
 					System.exit(1);
 				}
 			}
 		}
 	}
-	
-	public static void Init(FileInputStream s)
-	{
+
+	public static void Init (FileInputStream s) {
 		Buffer.Fill(s);
 		pos = -1; line = 1; lineStart = 0;
 		oldEols = 0;
@@ -222,143 +183,98 @@ public class Scanner
 		//--- AW: fill token list
 		tokens = new Token();  // first token is a dummy
 		Token node = tokens;
-		do
-		{
+		do {
 			node.next = NextToken();
 			node = node.next;
-		}while(node.kind != eofSym);
+		} while (node.kind != eofSym);
 		node.next = node;
 		node.val = "EOF";
 		t = pt = tokens;
 	}
-	
-	static void NextCh()
-	{
-		if(oldEols > 0)
-		{
-			ch = EOL;
-			oldEols--;
-		}
-		else
-		{
+
+	static void NextCh() {
+		if (oldEols > 0) { ch = EOL; oldEols--; }
+		else {
 			ch = (char)Buffer.Read(); pos++;
 			// replace isolated '\r' by '\n' in order to make
 			// eol handling uniform across Windows, Unix and Mac
-			if(ch == '\r' && Buffer.Peek() != '\n') ch = EOL;
-			if(ch == EOL) { line++; lineStart = pos + 1; }
+			if (ch == '\r' && Buffer.Peek() != '\n') ch = EOL;
+			if (ch == EOL) { line++; lineStart = pos + 1; }
 		}
+
 	}
-	
-	static boolean Comment0()
-	{
+
+
+	static boolean Comment0() {
 		int level = 1, line0 = line, lineStart0 = lineStart;
 		NextCh();
-		if(ch == '/')
-		{
+		if (ch == '/') {
 			NextCh();
-			for(;;)
-			{
-				if(ch == 10)
-				{
+			for(;;) {
+				if (ch == 10) {
 					level--;
 					if (level == 0) { oldEols = line - line0; NextCh(); return true; }
 					NextCh();
-				}
-				else if(ch == Buffer.EOF)
-					return false;
-				else
-					NextCh();
+				} else if (ch == Buffer.EOF) return false;
+				else NextCh();
 			}
-		}
-		else
-		{
-			if(ch == EOL)
-			{
-				line--;
-				lineStart = lineStart0;
-			}
-			pos = pos - 2;
-			Buffer.setPos(pos+1);
-			NextCh();
-		}
-		return false;
-	}
-	
-	static boolean Comment1()
-	{
-		int level = 1, line0 = line, lineStart0 = lineStart;
-		NextCh();
-		if(ch == '*')
-		{
-			NextCh();
-			for(;;)
-			{
-				if(ch == '*')
-				{
-					NextCh();
-					if(ch == '/')
-					{
-						level--;
-						if(level == 0)
-						{
-							oldEols = line - line0;
-							NextCh();
-							return true;
-						}
-						NextCh();
-					}
-				}
-				else if(ch == Buffer.EOF)
-					return false;
-				else
-					NextCh();
-			}
-		}
-		else
-		{
-			if(ch == EOL)
-			{
-				line--;
-				lineStart = lineStart0;
-			}
+		} else {
+			if (ch == EOL) { line--; lineStart = lineStart0; }
 			pos = pos - 2; Buffer.setPos(pos+1); NextCh();
 		}
 		return false;
 	}
-	
-	static void CheckLiteral()
-	{
-		String lit = t.val;
-		if(lit.compareTo("ruleset") == 0) t.kind = ruleset_Sym;
-		else if(lit.compareTo("typecount") == 0) t.kind = typecount_Sym;
-		else if(lit.compareTo("property") == 0) t.kind = property_Sym;
-		else if(lit.compareTo("type") == 0) t.kind = type_Sym;
-		else if(lit.compareTo("if") == 0) t.kind = if_Sym;
-		else if(lit.compareTo("else") == 0) t.kind = else_Sym;
-		else if(lit.compareTo("loop") == 0) t.kind = loop_Sym;
-		else if(lit.compareTo("from") == 0) t.kind = from_Sym;
-		else if(lit.compareTo("to") == 0) t.kind = to_Sym;
-		else if(lit.compareTo("var") == 0) t.kind = var_Sym;
+
+	static boolean Comment1() {
+		int level = 1, line0 = line, lineStart0 = lineStart;
+		NextCh();
+		if (ch == '*') {
+			NextCh();
+			for(;;) {
+				if (ch == '*') {
+					NextCh();
+					if (ch == '/') {
+						level--;
+						if (level == 0) { oldEols = line - line0; NextCh(); return true; }
+						NextCh();
+					}
+				} else if (ch == Buffer.EOF) return false;
+				else NextCh();
+			}
+		} else {
+			if (ch == EOL) { line--; lineStart = lineStart0; }
+			pos = pos - 2; Buffer.setPos(pos+1); NextCh();
+		}
+		return false;
 	}
-	
+
+
+	static void CheckLiteral() {
+		String lit = t.val;
+		if (lit.compareTo("ruleset") == 0) t.kind = ruleset_Sym;
+		else if (lit.compareTo("typecount") == 0) t.kind = typecount_Sym;
+		else if (lit.compareTo("property") == 0) t.kind = property_Sym;
+		else if (lit.compareTo("type") == 0) t.kind = type_Sym;
+		else if (lit.compareTo("if") == 0) t.kind = if_Sym;
+		else if (lit.compareTo("else") == 0) t.kind = else_Sym;
+		else if (lit.compareTo("loop") == 0) t.kind = loop_Sym;
+		else if (lit.compareTo("from") == 0) t.kind = from_Sym;
+		else if (lit.compareTo("to") == 0) t.kind = to_Sym;
+		else if (lit.compareTo("var") == 0) t.kind = var_Sym;
+	}
+
 	/* AW Scan() renamed to NextToken() */
-	static Token NextToken()
-	{
+	static Token NextToken() {
 		while (ignore.get(ch)) NextCh();
-		if(ch == '/' && Comment0() ||ch == '/' && Comment1())
-			return NextToken();
+		if (ch == '/' && Comment0() ||ch == '/' && Comment1()) return NextToken();
 		t = new Token();
-		t.pos = pos;
-		t.col = pos - lineStart + 1;
-		t.line = line;
+		t.pos = pos; t.col = pos - lineStart + 1; t.line = line;
 		int state = start[ch];
 		StringBuffer buf = new StringBuffer(16);
 		buf.append(ch); NextCh();
 		boolean done = false;
-		while(!done)
-		{
-			switch(state)
-			{
+		while (!done) {
+			switch (state) {
 				case -1: { t.kind = eofSym; done = true; break; }  // NextCh already done /* pdt */
 				case 0: { t.kind = noSym; done = true; break; }    // NextCh already done
 				case 1:
@@ -440,32 +356,28 @@ public class Scanner
 				case 32:
 					if (ch == '=') { buf.append(ch); NextCh(); state = 20; break;}
 					else { t.kind = less_Sym; done = true; break; }
+
 			}
 		}
 		t.val = buf.toString();
 		return t;
 	}
-	
+
 	/* AW 2003-03-07 get the next token, move on and synch peek token with current */
-	public static Token Scan()
-	{
+	public static Token Scan () {
 		t = pt = t.next;
 		return t;
 	}
-	
+
 	/* AW 2003-03-07 get the next token, ignore pragmas */
-	public static Token Peek()
-	{
-		do
-		{                      // skip pragmas while peeking
+	public static Token Peek () {
+		do {                      // skip pragmas while peeking
 			pt = pt.next;
-		}while(pt.kind > maxT);
+		} while (pt.kind > maxT);
 		return pt;
 	}
-	
+
 	/* AW 2003-03-11 to make sure peek start at current scan position */
-	public static void ResetPeek()
-	{
-		pt = t;
-	}
+	public static void ResetPeek () { pt = t; }
+
 } // end Scanner
