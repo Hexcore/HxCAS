@@ -1,0 +1,14 @@
+ruleset set13
+{
+	typecount 1;
+	property alive;
+
+	type Land
+	{
+		loop i from 0 to 5
+		{
+			var x = 1;
+			self.alive = self.alive + i;
+		}
+	}
+}
