@@ -90,6 +90,8 @@ import com.hexcore.cas.utilities.Log;
 /**
  * Class GUI
  * 
+ * Later additions made by Megan Duncan
+ * 
  * @authors Divan Burger; Leon Van Dyk
  */
 
@@ -1014,10 +1016,25 @@ public class GUI implements WindowEventListener, LobbyListener
 			//OTHER
 			else if(event.target == simulateButton)
 			{
-				String ruleCode = world.getRuleCode();
-				if(ruleCode == null || ruleCode.equals(""))
+				int errors = 0;
+				int nulls = 0;
+				
+				ArrayList<String> rulesets = world.getRuleCodes();
+				for(int i = 0; i < rulesets.size(); i++)
 				{
-					showDialog("Simulation", "Cell rules not set yet");
+					CALCompiler compiler = new CALCompiler();
+					if(rulesets.get(i) == null)
+						nulls += 1;
+					else
+					{
+						compiler.compile(rulesets.get(i));
+						errors += compiler.getErrorCount();
+					}
+				}
+				
+				if(errors > 0 || nulls > 0)
+				{
+					showDialog("Simulation", "Cell rules did not compile therefore simulation cannot run.");
 					return;
 				}
 				

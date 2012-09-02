@@ -154,7 +154,6 @@ public class Viewport
 					gridWidget = temp2DWidget;
 				}	
 				break;
-			
 		}
     	
 		for (int index = 1; index < 2; index++)

@@ -115,7 +115,7 @@ public class World
 	
 	public ArrayList<String> compareRulesets()
 	{
-		System.out.println("==== compareRulesets ====");
+		//System.out.println("==== compareRulesets ====");
 		
 		ArrayList<String> results = new ArrayList<String>();
 		
@@ -543,6 +543,8 @@ public class World
 		else
 			for(int i = ruleCodes.size() - 1; i >= steps; i--)
 				ruleCodes.remove(i);
+
+		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 	}
 	
 	public void setRuleCodes(ArrayList<String> list)
@@ -554,6 +556,7 @@ public class World
 		if(list.size() == 1)
 		{
 			ruleCodes.addAll(list);
+			currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 			return;
 		}
 
@@ -568,6 +571,7 @@ public class World
 					ruleCodes.add(currCode.substring(currCode.indexOf(":") + 1));
 			}
 		}
+		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 	}
 	
 	public void setWorldGenerations(Grid[] w)
