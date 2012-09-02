@@ -1407,9 +1407,15 @@ public class GUI implements WindowEventListener, LobbyListener
 					
 					if(selectedViewport.type == Viewport.Type.THREE_D)
 					{
-						System.out.println("Changed slice property");
+						System.out.println("Changed slice property in 3D mode");
 						Grid3DWidget grid3DWidget = (Grid3DWidget)selectedViewport.gridWidget;
 						grid3DWidget.setSlice(i, index, index);
+					}
+					else if(selectedViewport.type == Viewport.Type.TWO_D)
+					{
+						System.out.println("Changed slice property in 2D mode");
+						Grid2DWidget grid2DWidget = (Grid2DWidget)selectedViewport.gridWidget;
+						grid2DWidget.setSlice(i, index, index);
 					}
 				}
 			}
