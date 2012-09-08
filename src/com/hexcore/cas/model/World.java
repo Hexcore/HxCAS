@@ -560,17 +560,23 @@ public class World
 			return;
 		}
 
-		for(int i = 0; i < list.size(); i++)
+		int i = 1;
+		int j = 0;
+
+		while(j < list.size())
 		{
-			for(int j = 0; j < list.size(); j++)
+			String currCode = list.get(j);
+			String numberStr = currCode.substring(0, currCode.indexOf(":"));
+			int number = Integer.parseInt(numberStr);
+			if(number == i)
 			{
-				String currCode = list.get(j);
-				String numberStr = currCode.substring(0, currCode.indexOf(":"));
-				int number = Integer.parseInt(numberStr);
-				if(number == i + 1)
-					ruleCodes.add(currCode.substring(currCode.indexOf(":") + 1));
+				ruleCodes.add(currCode.substring(currCode.indexOf(":") + 1));
+				j++;
 			}
+			
+			i++;
 		}
+
 		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 	}
 	
