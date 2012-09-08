@@ -171,6 +171,7 @@ public class WorldReader
 					ruleCodes.add(number + ":" + getStringFromStream(zip.getInputStream(entry)));
 				else
 				{
+					ruleCodes.clear();
 					ruleCodes.add(getStringFromStream(zip.getInputStream(entry)));
 					break;
 				}
