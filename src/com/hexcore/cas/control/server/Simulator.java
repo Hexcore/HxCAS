@@ -213,8 +213,6 @@ public class Simulator extends Thread
 		Log.information(TAG, "Grid: " + grid.getWidth() + "x" + grid.getHeight());
 		numOfGenerations = gN;
 		
-		//informationProcessor.sendByteCode(ruleByteCode);
-		
 		calculateSplits();
 		splitGrids();
 

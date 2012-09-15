@@ -115,8 +115,6 @@ public class World
 	
 	public ArrayList<String> compareRulesets()
 	{
-		//System.out.println("==== compareRulesets ====");
-		
 		ArrayList<String> results = new ArrayList<String>();
 		
 		String ruleset0 = ruleCodes.get(0);
@@ -127,13 +125,11 @@ public class World
 		//Get information on ruleset 0
 		int begin = 0, end = 0;
 		
-		//System.out.println("SEARCHING FOR TYPECOUNT");
 		//Typecount amount
 		begin = ruleset0.indexOf("typecount ");
 		end = ruleset0.indexOf(";", begin);
 		ruleset0Typecount = Integer.parseInt(ruleset0.substring(begin + "typecount ".length(), end));
 
-		//System.out.println("SEARCHING FOR PROPERTY NAMES[" + begin + "]");
 		//Property names
 		begin = end;
 		while(true)
@@ -146,7 +142,6 @@ public class World
 			begin = end;
 		}
 
-		//System.out.println("SEARCHING FOR TYPENAMES[" + begin + "]");
 		//Typenames
 		while(true)
 		{
@@ -157,15 +152,6 @@ public class World
 			ruleset0Typenames.add(ruleset0.substring(begin + "type ".length(), end));
 			begin = end;
 		}
-		
-		/*System.out.println("typecount == " + ruleset0Typecount);
-		System.out.print("properties:");
-		for(int i = 0; i < ruleset0Properties.size(); i++)
-			System.out.print(" " + ruleset0Properties.get(i));
-		System.out.print("\ntypenames:");
-		for(int i = 0; i < ruleset0Typenames.size(); i++)
-			System.out.print(" " + ruleset0Typenames.get(i));
-		System.out.println();*/
 		
 		for(int i = 1; i < ruleCodes.size(); i++)
 		{
@@ -182,7 +168,6 @@ public class World
 			end = ruleseti.indexOf(";", begin);
 			rulesetiTypecount = Integer.parseInt(ruleseti.substring(begin + "typecount ".length(), end));
 
-			//System.out.println("SEARCHING FOR PROPERTY NAMES[" + begin + "]");
 			//Property names
 			begin = end;
 			while(true)
@@ -195,7 +180,6 @@ public class World
 				begin = end;
 			}
 
-			//System.out.println("SEARCHING FOR TYPENAMES[" + begin + "]");
 			//Typenames
 			while(true)
 			{
@@ -353,7 +337,6 @@ public class World
 	
 	public String getRuleCode()
 	{
-		//return ruleCode;
 		return ruleCodes.get(currEngineStep);
 	}
 	

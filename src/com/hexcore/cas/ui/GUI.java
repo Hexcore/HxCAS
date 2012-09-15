@@ -868,12 +868,10 @@ public class GUI implements WindowEventListener, LobbyListener
 				{
 					saveRuleCodeToWorld();
 					setRulesetsDropDownBox();
-					//Update ruleset
 				}
 				else
 				{
 					Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
-					//world.setRuleCode("");
 					//No change to current rulesets
 				}
 				
@@ -1430,9 +1428,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
 				
 				savePropertiesToWorld();
-				//saveRuleCodeToWorld(); //Point of this?
 				updateWorldEditorTab();
-				//createColoursTab(); //Point of this?
 				updatePreview();
 			}
 			else if(event.target == engineNumberBox)
@@ -2265,7 +2261,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		wrapCheckBox.setChecked(grid.isWrappable());
 		historyDropDownBox.setSelected(world.getHistoryType());
 		
-		//String ruleCode = world.getRuleCode();
 		String ruleCode = world.getRuleCode(rulesetsDropDownBox.getSelected());
 		if(ruleCode == null)
 			ruleCode = "";
@@ -2373,7 +2368,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		Rule rule = ruleLoader.loadRule(compiler.getCode());
 		
 		Log.information(TAG, "Loading rule code into World");
-		//world.setRuleCode(code);
 		world.updateRuleCode(code, rulesetsDropDownBox.getSelected());
 		
 		Grid grid = world.getInitialGeneration();
@@ -2553,7 +2547,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			if(generationSlider.getValue() >= origMaximum)
 				generationSlider.setValue(world.getNumGenerations() - 1);
 			
-			// Update tex
+			// Update text
 			iterationsText.setCaption("Generations: " + generations);
 			
 			// Update viewports

@@ -1,6 +1,5 @@
 package com.hexcore.cas.model;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,6 +20,45 @@ public class WorldSaver
 {
 	public WorldSaver()
 	{
+	}
+	
+	private List<CoordinatedCell> getDifferenceCells(int prev, int curr, List<Grid> generations)
+	{
+		if(curr == 0)
+			return new ArrayList<CoordinatedCell>();
+		else
+		{
+			List<CoordinatedCell> differentCells = new ArrayList<CoordinatedCell>();
+			
+			Grid generationZero = generations.get(0);
+			Grid prevGen = generations.get(prev);
+			Grid currGen = generations.get(curr);
+			
+			int gridHeight = generationZero.getHeight();
+			int gridWidth = generationZero.getWidth();
+			int properties = generationZero.getNumProperties();
+
+			int totalProperties = gridHeight * gridWidth * properties;
+			int diff = 0;
+			double threshold = (double)properties / (double)(properties + 2);
+			double percent = 1.0;
+			
+			for(int rows = 0; rows < gridHeight; rows++)
+				for(int cols = 0; cols < gridWidth; cols++)
+					for(int props = 0; props < properties; props++)
+						if(prevGen.getCell(cols, rows).getValue(props) != currGen.getCell(cols, rows).getValue(props))
+						{
+							diff++;
+							differentCells.add(new CoordinatedCell(currGen.getCell(cols, rows), cols, rows));
+						}
+			
+			percent = (double)diff / (double)totalProperties;
+			
+			if(percent < threshold)
+				return differentCells;
+			else
+				return new ArrayList<CoordinatedCell>();
+		}
 	}
 	
 	public void saveWorld(World world)
@@ -53,11 +91,6 @@ public class WorldSaver
 		out.write(configStr.getBytes());
 		out.closeEntry();
 		
-		/*ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
-		out.putNextEntry(ruleCodeEntry);
-		out.write(world.getRuleCode().getBytes());
-		out.closeEntry();*/
-		
 		if(world.getStepAmount() == 1)
 		{
 			ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
@@ -82,27 +115,75 @@ public class WorldSaver
 		out.write(world.getColourCode().getBytes());
 		out.closeEntry();
 		
+		int differenceGenerationCounter = 0;
+		
 		List<Grid> generations = world.getGenerations();
-		for (int i = 0; i < generations.size(); i++)
+		for(int i = 0; i < generations.size(); i++)
 		{
 			Grid grid = generations.get(i);
 			ZipEntry caw = new ZipEntry(i + ".cag");
 			out.putNextEntry(caw);
 			String str = "";
-			for(int rows = 0; rows < gridHeight; rows++)
+			
+			List<CoordinatedCell> differentCells = getDifferenceCells(i - 1, i, generations);
+			
+			if(differenceGenerationCounter >= 20)
 			{
-				for(int cols = 0; cols < gridWidth; cols++)
-				{
-					for(int index = 0; index < properties - 1; index++)
-						str += grid.getCell(cols, rows).getValue(index) + " ";
-					str += grid.getCell(cols, rows).getValue(properties - 1) + "\n";
-				}
-				str += "\n";
+				differentCells.clear();
+				differenceGenerationCounter = 0;
 			}
+			
+			if(differentCells.size() == 0)
+			{
+				str += "E\n";
+				
+				for(int rows = 0; rows < gridHeight; rows++)
+				{
+					for(int cols = 0; cols < gridWidth; cols++)
+					{
+						for(int index = 0; index < properties - 1; index++)
+							str += grid.getCell(cols, rows).getValue(index) + " ";
+						str += grid.getCell(cols, rows).getValue(properties - 1) + "\n";
+					}
+					str += "\n";
+				}
+				
+				differenceGenerationCounter = 0;
+			}
+			else
+			{
+				str += "D\n";
+				
+				for(int j = 0; j < differentCells.size(); j++)
+				{
+					CoordinatedCell cell = differentCells.get(j);
+					str += cell.x + " " + cell.y + " ";
+					
+					for(int index = 0; index < properties - 1; index++)
+						str += cell.getValue(index) + " ";
+					str += cell.getValue(properties - 1) + "\n";
+				}
+				
+				differenceGenerationCounter++;
+			}
+			
 			out.write(str.getBytes());
 			out.closeEntry();
 		}
 		
 		out.close();
+	}
+	
+	private class CoordinatedCell extends Cell
+	{
+		public int x;
+		public int y;
+		
+		public CoordinatedCell(Cell cell, int x, int y)
+		{
+			super(cell);
+			this.x = x;
+			this.y = y;
+		}
 	}
 }

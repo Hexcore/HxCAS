@@ -58,7 +58,6 @@ public class WorldReader
 		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		String colourCode = null;
 		String currFilename = null;
-		//String ruleCode = null;
 		ArrayList<String> ruleCodes = new ArrayList<String>();
 		ZipFile zip = null;
 		
@@ -182,8 +181,6 @@ public class WorldReader
 		if(!rulesFound)
 		{
 			Log.warning(TAG, "Rule set not found - setting colours and rules to default sets for Conway's Game of Life");
-			//ruleCode = "ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
-			//world.setRuleCodes(1);
 			colourCode = "colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}";
 		}
 
@@ -220,9 +217,6 @@ public class WorldReader
 			{
 				System.out.println("Doing file |" + currFilename + "|");
 				
-				String fileData = getStringFromStream(zip.getInputStream(entry));
-				StringTokenizer token = new StringTokenizer(fileData);
-				
 				int index = currFilename.lastIndexOf('/');
 				if(index == -1)
 					index = 0;
@@ -233,16 +227,47 @@ public class WorldReader
 				else
 					fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 				
-				for(int rows = 0; rows < y; rows++)
+				String fileData = getStringFromStream(zip.getInputStream(entry));
+				boolean newGenerationEntryType = true;
+				
+				if(fileData.charAt(0) == 'E' || fileData.charAt(0) == 'D')
+					newGenerationEntryType = true;
+				else
+					newGenerationEntryType = false;
+				
+				StringTokenizer token = new StringTokenizer(fileData);
+				
+				String tmp = "X";
+				if(newGenerationEntryType == true)
+					tmp = token.nextToken();
+				
+				if(newGenerationEntryType == false || tmp.compareTo("E") == 0)
 				{
-					for(int cols = 0; cols < x; cols++)
+					for(int rows = 0; rows < y; rows++)
 					{
+						for(int cols = 0; cols < x; cols++)
+						{
+							double[] vals = new double[properties];
+	
+							for(int j = 0; j < properties; j++)
+								vals[j] = Double.parseDouble(token.nextToken());
+							
+							gen.setCell(cols, rows, vals);
+						}
+					}
+				}
+				else
+				{
+					while(token.hasMoreTokens())
+					{
+						int col = Integer.parseInt(token.nextToken());
+						int row = Integer.parseInt(token.nextToken());
+						
 						double[] vals = new double[properties];
-
 						for(int j = 0; j < properties; j++)
 							vals[j] = Double.parseDouble(token.nextToken());
 						
-						gen.setCell(cols, rows, vals);
+						gen.setCell(col, row, vals);
 					}
 				}
 
@@ -257,7 +282,7 @@ public class WorldReader
 				continue;
 		}
 		
-		//world.setRuleCode(ruleCode);
+		//If ruleCodes is empty, a single default rule set will be set
 		world.setRuleCodes(ruleCodes);
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
