@@ -18,49 +18,19 @@ import java.util.zip.ZipOutputStream;
 
 public class WorldSaver
 {
+	/**
+	 * WorldSaver default constructor.
+	 */
 	public WorldSaver()
 	{
 	}
 	
-	private List<CoordinatedCell> getDifferenceCells(int prev, int curr, List<Grid> generations)
-	{
-		if(curr == 0)
-			return new ArrayList<CoordinatedCell>();
-		else
-		{
-			List<CoordinatedCell> differentCells = new ArrayList<CoordinatedCell>();
-			
-			Grid generationZero = generations.get(0);
-			Grid prevGen = generations.get(prev);
-			Grid currGen = generations.get(curr);
-			
-			int gridHeight = generationZero.getHeight();
-			int gridWidth = generationZero.getWidth();
-			int properties = generationZero.getNumProperties();
-
-			int totalProperties = gridHeight * gridWidth * properties;
-			int diff = 0;
-			double threshold = (double)properties / (double)(properties + 2);
-			double percent = 1.0;
-			
-			for(int rows = 0; rows < gridHeight; rows++)
-				for(int cols = 0; cols < gridWidth; cols++)
-					for(int props = 0; props < properties; props++)
-						if(prevGen.getCell(cols, rows).getValue(props) != currGen.getCell(cols, rows).getValue(props))
-						{
-							diff++;
-							differentCells.add(new CoordinatedCell(currGen.getCell(cols, rows), cols, rows));
-						}
-			
-			percent = (double)diff / (double)totalProperties;
-			
-			if(percent < threshold)
-				return differentCells;
-			else
-				return new ArrayList<CoordinatedCell>();
-		}
-	}
-	
+	/**
+	 * Saves the world to the file name that the world has.
+	 * 
+	 * @param world - the world that needs to be saved
+	 * @throws IOException
+	 */
 	public void saveWorld(World world)
 		throws IOException
 	{
@@ -174,6 +144,65 @@ public class WorldSaver
 		out.close();
 	}
 	
+	/////////////////////////////////////////////
+	/// Private functions
+	/**
+	 * Gets a list of the cells that are different between the current generation and the previous
+	 * generation.
+	 * 
+	 * If the current generation is Generation Zero, then an empty list is returned.
+	 * 
+	 * If the number of differences between the generations is larger than the threshold,
+	 * an empty list is returned.
+	 * 
+	 * Otherwise returns the list of difference cells.
+	 * 
+	 * @param prev - the index of the previous generation
+	 * @param curr - the index of the current generation
+	 * @param generations - the list of generations for the world
+	 * @return - the list of difference cells
+	 */
+	private List<CoordinatedCell> getDifferenceCells(int prev, int curr, List<Grid> generations)
+	{
+		if(curr == 0)
+			return new ArrayList<CoordinatedCell>();
+		else
+		{
+			List<CoordinatedCell> differentCells = new ArrayList<CoordinatedCell>();
+			
+			Grid generationZero = generations.get(0);
+			Grid prevGen = generations.get(prev);
+			Grid currGen = generations.get(curr);
+			
+			int gridHeight = generationZero.getHeight();
+			int gridWidth = generationZero.getWidth();
+			int properties = generationZero.getNumProperties();
+
+			int totalProperties = gridHeight * gridWidth * properties;
+			int diff = 0;
+			double threshold = (double)properties / (double)(properties + 2);
+			double percent = 1.0;
+			
+			for(int rows = 0; rows < gridHeight; rows++)
+				for(int cols = 0; cols < gridWidth; cols++)
+					for(int props = 0; props < properties; props++)
+						if(prevGen.getCell(cols, rows).getValue(props) != currGen.getCell(cols, rows).getValue(props))
+						{
+							diff++;
+							differentCells.add(new CoordinatedCell(currGen.getCell(cols, rows), cols, rows));
+						}
+			
+			percent = (double)diff / (double)totalProperties;
+			
+			if(percent < threshold)
+				return differentCells;
+			else
+				return new ArrayList<CoordinatedCell>();
+		}
+	}
+	
+	/////////////////////////////////////////////
+	/// Inner classes
 	private class CoordinatedCell extends Cell
 	{
 		public int x;

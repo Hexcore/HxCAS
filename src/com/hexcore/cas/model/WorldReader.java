@@ -32,11 +32,37 @@ public class WorldReader
 	
 	private World					world = null;
 	
+	/**
+	 * WorldReader custom constructor.
+	 * 
+	 * @param w - the world that all the details must go into
+	 */
 	public WorldReader(World w)
 	{
 		world = w;
 	}
 	
+	/**
+	 * Reads the file given by the file name and populates the world with the details.
+	 * 
+	 * False is returned if any of the following happen during the coarse of reading the file:
+	 * 	The file does not exist;
+	 * 	The file is not a zipped CAW file;
+	 * 	No configuration file was found; or
+	 * 	The configuration file does not have a grid type symbol.
+	 * 
+	 * Handled missing files:
+	 * 	No colour set file resolves to an empty colour set code.
+	 * 	No rule set file resolves to the rule set code for Conway's Game of Life and the colour set
+	 * 	code to match.
+	 * 	A missing generation will have a null grid.
+	 * 
+	 * Otherwise, true is returned.
+	 * 
+	 * @param worldFilename - the file name of the world that needs to be read in
+	 * @return - the boolean value on the status of successful reading
+	 * @throws IOException
+	 */
 	public boolean readWorld(String worldFilename)
 		throws IOException
 	{

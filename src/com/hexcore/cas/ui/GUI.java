@@ -895,7 +895,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				{
 					ArrayList<String> results = world.compareRulesets();
 					if(results.size() == 0)
-						outputLayout.add(new TextWidget("There is no descrepencies between the rulesets."));
+						outputLayout.add(new TextWidget("There is no discrepencies between the rulesets."));
 					else
 						for(int i = 0; i < results.size(); i++)
 							outputLayout.add(new TextWidget(results.get(i)));
@@ -2331,7 +2331,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			type = GridType.TRIANGLE;
 		else if(cellShapeDropDownBox.getSelectedText() == "Hexagon")
 			type = GridType.HEXAGON;
-		else if(cellShapeDropDownBox.getSelectedText() == "Rectangle")
+		else if(cellShapeDropDownBox.getSelectedText() == "Square")
 			type = GridType.RECTANGLE;
 		else
 			type = GridType.VONNEUMANN;

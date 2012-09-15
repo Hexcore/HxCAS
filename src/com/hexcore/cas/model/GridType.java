@@ -5,7 +5,7 @@ import com.hexcore.cas.math.Vector2i;
 /**
  * Class GridType
  * 	Manages 4 different possible grid shapes:
- * 	Rectangle, hexagon, triangle and von Nuemann
+ * 	Rectangle, hexagon, triangle and Von Neumann
  * 
  * @author Divan Burger
  */
