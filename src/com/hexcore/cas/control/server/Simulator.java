@@ -169,6 +169,7 @@ public class Simulator extends Thread
 	{
 		reset.set(true);
 		numOfGenerations = 0;
+		currentGeneration = 0;
 		world.reset();
 		informationProcessor.setGeneration(currentGeneration);
 	}

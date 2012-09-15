@@ -1,7 +1,7 @@
 package com.hexcore.cas.ui.toolkit.widgets;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.media.opengl.GL;
 
@@ -36,7 +36,7 @@ public class Layout extends Widget implements StyledWidget
 	public Layout(Vector2i size)
 	{
 		super(size);
-		components = new ArrayList<Widget>();
+		components = new CopyOnWriteArrayList<Widget>();//ConcurrentModificationException
 		lastMouse = new Vector2i();
 	}
 				

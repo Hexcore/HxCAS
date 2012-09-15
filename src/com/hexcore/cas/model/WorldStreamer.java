@@ -42,15 +42,36 @@ public class WorldStreamer
 	private String					cawFilename = null;
 	private String					tmpDir = null;
 	
+	/**
+	 * WorldStreamer default constructor.
+	 */
 	public WorldStreamer()
 	{
 	}
 	
+	/**
+	 * Returns the CAW file name as given by the file name of the world.
+	 * 
+	 * @return - the CAW file name of the world
+	 */
 	public String getCawFilename()
 	{
 		return cawFilename;
 	}
 	
+	/**
+	 * Looks for the generation with the corresponding given generation number on disk and reads in.
+	 * 
+	 * Returns null during the following conditions:
+	 * 	No configuration file is found;
+	 * 	Configuration file is found but has not grid type symbol; or
+	 * 	No generation with the given number.
+	 * 
+	 * Otherwise returns the generation with all its information read in.
+	 * 
+	 * @param genNum - the generation number that has been requested
+	 * @return - the complete generation
+	 */
 	public Grid getGeneration(int genNum)
 	{
 		Log.debug(TAG, "Streamer getGeneration(" + genNum + ") called.");
@@ -204,6 +225,20 @@ public class WorldStreamer
 		}
 	}
 	
+	/**
+	 * Looks for all generations on disk and reads them in one by one. Only reads in the total number
+	 * of generations that the system can handle with an extra gap of 500 generations.
+	 * 
+	 * Returns null during the following conditions:
+	 * 	No configuration file is found; or
+	 * 	Configuration file is found but has not grid type symbol.
+	 * 
+	 * Otherwise returns the list of generations.
+	 * 
+	 * Any missing generation file will result in a Grid that is null in that spot in the returned list.
+	 * 
+	 * @return - the list of complete generations with 500 gap
+	 */
 	public List<Grid> getGenerations()
 	{
 		boolean configFound = false;
@@ -384,16 +419,34 @@ public class WorldStreamer
 		}
 	}
 	
+	/**
+	 * Returns the last generation that was written to disk by using the getGeneration function.
+	 * 
+	 * @return - the last generation written
+	 */
 	public Grid getLastGeneration()
 	{
 		return getGeneration(numGenerations - 1);
 	}
 	
+	/**
+	 * Returns true if the streamer has been started and false if the streamer has not been started.
+	 * 
+	 * @return - the boolean on the started status
+	 */
 	public boolean hasStarted()
 	{
 		return started;
 	}
 	
+	/**
+	 * Resets to the given world.
+	 * 
+	 * If the streamer has already started, then the reset is a soft reset to Generation Zero.
+	 * Otherwise, it is a hard reset to a completely new world.
+	 * 
+	 * @param w - the world that is to be reset to
+	 */
 	public void reset(World w)
 	{
 		if(started)
@@ -408,11 +461,26 @@ public class WorldStreamer
 		}
 	}
 	
+	/**
+	 * Sets the CAW file name of the streamer to the given file name.
+	 * 
+	 * @param name - the file name that must be set to
+	 */
 	public void setWorldFilename(String name)
 	{
 		cawFilename = name;
 	}
 	
+	/**
+	 * Starts the streamer up with the given world.
+	 * 
+	 * If it is not a soft reset, a new temporary folder is created and set as the current CAW file name.
+	 * 
+	 * Regardless, the streamer sets the generation counter to 0, re-writes the details from the
+	 * world and starts.
+	 * 
+	 * @param w - the world that the streamer is set to
+	 */
 	public void start(World w)
 	{
 		if(!reset)
@@ -477,6 +545,10 @@ public class WorldStreamer
 		started = true;
 	}
 	
+	/**
+	 * Stops the streamer and streams all information from the temporary folders into a permanent
+	 * zipped CAW file.
+	 */
 	public void stop()
 	{
 		Log.information(TAG, "The program is streaming the world to disk. Please be patient.");
@@ -527,6 +599,11 @@ public class WorldStreamer
 		started = false;
 	}
 	
+	/**
+	 * Streams the given generation to disk in the temporary folder.
+	 * 
+	 * @param gen - the generation that must be streamed to disk
+	 */
 	public void streamGeneration(Grid gen)
 	{
 		OutputStream out = null;
@@ -565,7 +642,13 @@ public class WorldStreamer
 		}
 	}
 	
-	public void writeInitialValues(World w)
+	/**
+	 * Requests all the information from the given world and streams everything into the
+	 * temporary folder.
+	 * 
+	 * @param w - the world that the streamer is set to
+	 */
+	private void writeInitialValues(World w)
 	{
 		OutputStream out = null;
 		File currFile = null;

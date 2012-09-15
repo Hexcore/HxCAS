@@ -7,6 +7,8 @@ import com.hexcore.cas.math.Vector2i;
  * 	Manages 4 different possible grid shapes:
  * 	Rectangle, hexagon, triangle and Von Neumann
  * 
+ * Later additions made by Megan Duncan
+ * 
  * @author Divan Burger
  */
 

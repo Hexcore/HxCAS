@@ -297,6 +297,9 @@ public class World
 	 */
 	public Grid getGeneration(int index)
 	{
+		if(index < 0)
+			return null;
+		
 		if(historyType == 0 && index == 0)
 			return worldGenerations.get(0);
 		else if(historyType == 1)

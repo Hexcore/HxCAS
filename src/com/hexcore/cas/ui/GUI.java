@@ -726,7 +726,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			if(colourContainerList != null)
 			{
 				for(ColourContainer c : colourContainerList)
-				{System.out.println("CHECK BUTTON FOR ID:" + c.id);
+				{
+					System.out.println("CHECK BUTTON FOR ID:" + c.id);
 					if(event.target == c.addRangeButton)
 					{
 						System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
@@ -737,6 +738,8 @@ public class GUI implements WindowEventListener, LobbyListener
 					
 					if(event.target == c.removeRangeButton)
 					{
+						System.out.println("REMOVE RANGE BUTTON PRESSED FOR: " + c.id);
+						
 						if(!c.rangeContainerList.isEmpty())
 						{
 							c.removeRange();
@@ -1552,7 +1555,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		window.add(masterView);
 		
 		mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
-		
 		createWorldButton = (Button)mainMenuLayout.findByName("createWorld");
 		loadWorldButton = (Button)mainMenuLayout.findByName("loadWorld");
 		optionsButton = (Button)mainMenuLayout.findByName("options");
@@ -2779,7 +2781,6 @@ public class GUI implements WindowEventListener, LobbyListener
 			rc.fromColour = r.getColour(0);
 			rc.toColour = r.getColour(0);
 			this.layout.add(rc.getLayout());
-		
 		}
 		
 		public Button getAddRangeButton()
