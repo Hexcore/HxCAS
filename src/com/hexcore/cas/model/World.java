@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.hexcore.cas.rulesystems.CALCompiler;
-import com.hexcore.cas.rulesystems.Rule;
-import com.hexcore.cas.rulesystems.RuleLoader;
 import com.hexcore.cas.utilities.Log;
 
 /**

@@ -109,6 +109,7 @@ public class WorldStreamer
 						configFound = true;
 						
 						byte[] data = new byte[1024];
+						@SuppressWarnings("unused")
 						int len = 1024;
 						while((len = in.read(data)) > 0)
 						{
@@ -170,6 +171,7 @@ public class WorldStreamer
 				genFound = true;
 				
 				byte[] data = new byte[1024];
+				@SuppressWarnings("unused")
 				int len = 1024;
 				while((len = in.read(data)) > 0)
 				{
@@ -226,6 +228,7 @@ public class WorldStreamer
 						if(currFile.exists())
 						{
 							byte[] data = new byte[1024];
+							@SuppressWarnings("unused")
 							int len = 1024;
 							while((len = in.read(data)) > 0)
 							{
@@ -358,6 +361,7 @@ public class WorldStreamer
 						configFound = true;
 						
 						byte[] data = new byte[1024];
+						@SuppressWarnings("unused")
 						int len = 1024;
 						while((len = in.read(data)) > 0)
 						{
@@ -452,6 +456,7 @@ public class WorldStreamer
 					if(currFilename.endsWith(".cag"))
 					{
 						byte[] data = new byte[1024];
+						@SuppressWarnings("unused")
 						int len = 1024;
 						while((len = in.read(data)) > 0)
 						{

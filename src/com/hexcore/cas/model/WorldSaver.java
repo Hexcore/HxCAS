@@ -18,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 
 public class WorldSaver
 {
+	@SuppressWarnings("unused")
 	private static final String		TAG = "WorldSaver";
 	
 	/**
