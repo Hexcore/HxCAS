@@ -5,8 +5,7 @@ import com.hexcore.cas.math.Vector2i;
 /**
  * Class Grid
  * 	This is the grid representing a world.
- * 	It stores details of the wrappability, 
- * 	number of properties and size.
+ * 	It stores details of the wrappability, number of properties and size.
  * 
  * @author Divan Burger; Megan Duncan; Apurva Kumar
  */
@@ -21,7 +20,7 @@ public abstract class Grid
 	/**
 	 * Grid copy constructor.
 	 * 
-	 * @param g - the grid to be cloned
+	 * @param grid - the grid to be cloned
 	 */
 	public Grid(Grid grid)
 	{
@@ -81,6 +80,7 @@ public abstract class Grid
 	 * 
 	 * @param x - column in which the cell can be found in the grid
 	 * @param y - row in which the cell can be found in the grid
+	 * 
 	 * @return - the cell at column x and row y
 	 */
 	public Cell getCell(int x, int y)
@@ -92,6 +92,7 @@ public abstract class Grid
 	 * Returns the cell at the given coordinates.
 	 * 
 	 * @param pos - the Vector2i of the column and row in which the cell can be found in the grid
+	 * 
 	 * @return - the cell at column pos.x and row pos.y
 	 */
 	public Cell getCell(Vector2i pos)

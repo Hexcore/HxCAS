@@ -20,8 +20,8 @@ import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
 /**
  * Class WorldReader
- * 	An instance of this object is used to read all details
- * 	of a world from where it is stored.
+ * 	An instance of this object is used to read all details of a world from where it is stored
+ * 	according to the file name given by the world.
  * 
  * @author Megan Duncan
  */
@@ -35,11 +35,11 @@ public class WorldReader
 	/**
 	 * WorldReader custom constructor.
 	 * 
-	 * @param w - the world that all the details must go into
+	 * @param world - the world that all the details must go into
 	 */
-	public WorldReader(World w)
+	public WorldReader(World world)
 	{
-		world = w;
+		this.world = world;
 	}
 	
 	/**
@@ -60,18 +60,15 @@ public class WorldReader
 	 * Otherwise, true is returned.
 	 * 
 	 * @param worldFilename - the file name of the world that needs to be read in
+	 * 
 	 * @return - the boolean value on the status of successful reading
+	 * 
 	 * @throws IOException
 	 */
 	public boolean readWorld(String worldFilename)
 		throws IOException
 	{
-		/*
-		 * Takes the name of the world zip file and reads in.
-		 * It will specifically look for the configuration file first,
-		 * then the rules set then the colours set and then all the generation files
-		 * or the amount of generation files that can be held in memory.
-		 */
+		ArrayList<String> ruleCodes = new ArrayList<String>();
 		boolean coloursFound = false;
 		boolean rulesFound = false;
 		char type = 'N';
@@ -84,7 +81,6 @@ public class WorldReader
 		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		String colourCode = null;
 		String currFilename = null;
-		ArrayList<String> ruleCodes = new ArrayList<String>();
 		ZipFile zip = null;
 		
 		if(!cawFile.exists())
@@ -212,9 +208,14 @@ public class WorldReader
 
 		//Searching for all generation files that are to be loaded
 		allFiles = zip.entries();
+		
 		int arrSize = zip.size() - 2 - ruleCodes.size();
+		int finalGen = arrSize - 1;
 		int gensToLoad = arrSize;
 		int scale = 500;
+		
+		Grid[] gens = new Grid[gensToLoad];
+		
 		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);
 		long maxHeap = bean.getHeapMemoryUsage().getMax();
 		long toBeUsedHeap = generationSize * gensToLoad;
@@ -231,9 +232,11 @@ public class WorldReader
 		}
 		Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
 
-		Grid[] gens = new Grid[gensToLoad];
-		int finalGen = arrSize - 1;
-		
+		ArrayList<String> incompleteGens = new ArrayList<String>();
+		for(int i = 0; i < gensToLoad; i++)
+			incompleteGens.add("");
+
+		//Searching for all generation files and adding them to incompleteGens
 		while(allFiles.hasMoreElements())
 		{
 			ZipEntry entry = (ZipEntry)allFiles.nextElement();
@@ -241,7 +244,7 @@ public class WorldReader
 			
 			if(currFilename.endsWith(".cag"))
 			{
-				System.out.println("Doing file |" + currFilename + "|");
+				Log.debug(TAG, "Reading generation file " + currFilename);
 				
 				int index = currFilename.lastIndexOf('/');
 				if(index == -1)
@@ -254,58 +257,67 @@ public class WorldReader
 					fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 				
 				String fileData = getStringFromStream(zip.getInputStream(entry));
-				boolean newGenerationEntryType = true;
 				
-				if(fileData.charAt(0) == 'E' || fileData.charAt(0) == 'D')
-					newGenerationEntryType = true;
-				else
-					newGenerationEntryType = false;
-				
-				StringTokenizer token = new StringTokenizer(fileData);
-				
-				String tmp = "X";
-				if(newGenerationEntryType == true)
-					tmp = token.nextToken();
-				
-				if(newGenerationEntryType == false || tmp.compareTo("E") == 0)
-				{
-					for(int rows = 0; rows < y; rows++)
-					{
-						for(int cols = 0; cols < x; cols++)
-						{
-							double[] vals = new double[properties];
-	
-							for(int j = 0; j < properties; j++)
-								vals[j] = Double.parseDouble(token.nextToken());
-							
-							gen.setCell(cols, rows, vals);
-						}
-					}
-				}
-				else
-				{
-					while(token.hasMoreTokens())
-					{
-						int col = Integer.parseInt(token.nextToken());
-						int row = Integer.parseInt(token.nextToken());
-						
-						double[] vals = new double[properties];
-						for(int j = 0; j < properties; j++)
-							vals[j] = Double.parseDouble(token.nextToken());
-						
-						gen.setCell(col, row, vals);
-					}
-				}
-
 				int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
-				
+					
 				if(arrIndex < 0)
 					continue;
 				
-				gens[arrIndex] = gen.clone();
+				incompleteGens.remove(arrIndex);
+				incompleteGens.add(arrIndex, fileData);
 			}
 			else
 				continue;
+		}
+		
+		//Build up all the generations from incompleteGens and add them to generations
+		Log.debug(TAG, "BUILDING GENERATIONS");
+		for(int i = 0; i < incompleteGens.size(); i++)
+		{
+			Log.debug(TAG, "Building generation " + i);
+			
+			boolean newGenerationType = true;
+			String generationData = incompleteGens.get(i);
+			if(generationData.charAt(0) != 'E' && generationData.charAt(0) != 'D')
+				newGenerationType = false;
+			
+			StringTokenizer token = new StringTokenizer(generationData);
+			
+			String generationType = "X";
+			if(newGenerationType)
+				generationType = token.nextToken();
+			
+			if(generationType.compareTo("E") == 0 || !newGenerationType)
+			{
+				for(int rows = 0; rows < y; rows++)
+				{
+					for(int cols = 0; cols < x; cols++)
+					{
+						double[] vals = new double[properties];
+						
+						for(int j = 0; j < properties; j++)
+							vals[j] = Double.parseDouble(token.nextToken());
+						
+						gen.setCell(cols, rows, vals);
+					}
+				}
+			}
+			else
+			{
+				while(token.hasMoreTokens())
+				{
+					int col = Integer.parseInt(token.nextToken());
+					int row = Integer.parseInt(token.nextToken());
+					
+					double[] vals = new double[properties];
+					for(int j = 0; j < properties; j++)
+						vals[j] = Double.parseDouble(token.nextToken());
+					
+					gen.setCell(col, row, vals);
+				}
+			}
+			
+			gens[i] = gen.clone();
 		}
 		
 		//If ruleCodes is empty, a single default rule set will be set
@@ -313,7 +325,7 @@ public class WorldReader
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
 		
-		Log.information(TAG, "Number of generations from WorldReader : " + world.getNumGenerations());
+		Log.information(TAG, "Number of generations read from WorldReader : " + world.getNumGenerations());
 		
 		return true;
 	}

@@ -14,11 +14,11 @@ public class VonNeumannGrid extends Grid
 	/**
 	 * VonNeumannGrid copy constructor.
 	 * 
-	 * @param g - the grid to be cloned
+	 * @param grid - the grid to be cloned
 	 */
-	public VonNeumannGrid(Grid g)
+	public VonNeumannGrid(Grid grid)
 	{
-		super(g);
+		super(grid);
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public class VonNeumannGrid extends Grid
 	 * Returns the range of the Von Neumann grid type, being the four touching cells directly
 	 * above, below, left and right.
 	 * 
-	 * @return - a Vector2i of the range of the Von Neumann grid type, begin 1 all round 
+	 * @return - a Vector2i of the range of the Von Neumann grid type, being 1 all round 
 	 */
 	public Vector2i getNeighbourhoodRange()
 	{
@@ -70,6 +70,7 @@ public class VonNeumannGrid extends Grid
 	 * Returns null if the neighbour is the target cell itself.
 	 * 
 	 * @param pos - location of cell whose neighbours are requested
+	 * 
 	 * @return - cell array of 4 neighbours
 	 */
 	public Cell[] getNeighbours(Vector2i pos)

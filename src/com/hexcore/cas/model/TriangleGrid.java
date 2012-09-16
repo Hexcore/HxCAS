@@ -15,11 +15,11 @@ public class TriangleGrid extends Grid
 	/**
 	 * TriangleGrid copy constructor.
 	 * 
-	 * @param g - the grid to be cloned
+	 * @param grid - the grid to be cloned
 	 */
-	public TriangleGrid(Grid g)
+	public TriangleGrid(Grid grid)
 	{
-		super(g);
+		super(grid);
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public class TriangleGrid extends Grid
 	/**
 	 * Returns the range of the triangle grid type, being all the touching cells around it.
 	 * 
-	 * @return - a Vector2i of the range of the triangle grid type, begin 1 all round 
+	 * @return - a Vector2i of the range of the triangle grid type, being 1 up and down and 2 left and right 
 	 */
 	public Vector2i getNeighbourhoodRange()
 	{
@@ -70,6 +70,7 @@ public class TriangleGrid extends Grid
 	 * Returns null if the neighbour is the target cell itself.
 	 * 
 	 * @param pos - location of cell whose neighbours are requested
+	 * 
 	 * @return - cell array of 12 neighbours
 	 */
 	public Cell[] getNeighbours(Vector2i pos)
@@ -111,6 +112,7 @@ public class TriangleGrid extends Grid
 	 * 
 	 * @param up - whether the current triangle is facing upwards or downwards
 	 * @param pos - location of cell whose neighbours are requested
+	 * 
 	 * @return - cell array of 12 neighbours
 	 */
 	private Cell[] getNeighbours(boolean up, Vector2i pos)

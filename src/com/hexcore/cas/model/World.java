@@ -57,19 +57,19 @@ public class World
 	/**
 	 * World copy constructor.
 	 * 
-	 * @param w - the world to be cloned
+	 * @param world - the world to be cloned
 	 */
-	public World(World w)
+	public World(World world)
 	{
-		this.historyType = w.historyType;
-		this.worldFileName = w.worldFileName;
-		this.colourCode = w.colourCode;
+		this.historyType = world.historyType;
+		this.worldFileName = world.worldFileName;
+		this.colourCode = world.colourCode;
 		this.worldGenerations.clear();
-		this.worldGenerations.addAll(w.worldGenerations);
+		this.worldGenerations.addAll(world.worldGenerations);
 		
 		this.ruleCodes.clear();
-		this.ruleCodes.addAll(w.ruleCodes);
-		this.currEngineStep = w.currEngineStep;
+		this.ruleCodes.addAll(world.ruleCodes);
+		this.currEngineStep = world.currEngineStep;
 		
 		if(historyType == 2)
 		{
@@ -105,11 +105,14 @@ public class World
 			genAmount++;
 			lastIn = genAmount - 1;
 			
+			if(worldGenerations.size() == 1)
+				streamer.streamGeneration(null, gen);
+			else
+				streamer.streamGeneration(worldGenerations.get(0), gen);
+			
 			if(worldGenerations.size() > 1)
 				for(int i = 0; i < worldGenerations.size() - 1; i++)
 					worldGenerations.remove(0);
-			
-			streamer.streamGeneration(gen);
 		}
 	}
 	
@@ -120,21 +123,21 @@ public class World
 	 * If the number of generations is less than the generation number, then the clear is unsuccessful.
 	 * Otherwise, the clear is recorded as successful.
 	 * 
-	 * @param genNumber - the generation number the must be clear up until
+	 * @param genNum - the generation number the must be clear up until
 	 * @return - boolean value of whether the world was able to clear the history or not
 	 */
-	public boolean clearHistory(int genNumber)
+	public boolean clearHistory(int genNum)
 	{
 		if(historyType == 0 || historyType == 2)
 			return false;
 		
-		if(worldGenerations.size() <= genNumber)
+		if(worldGenerations.size() <= genNum)
 		{
 			return false;
 		}
 		else
 		{
-			for(int i = 0; i < genNumber; i++)
+			for(int i = 0; i < genNum; i++)
 				worldGenerations.remove(0);
 			return true;
 		}
@@ -152,11 +155,10 @@ public class World
 	public ArrayList<String> compareRulesets()
 	{
 		ArrayList<String> results = new ArrayList<String>();
-		
-		String ruleset0 = ruleCodes.get(0);
-		int ruleset0Typecount = 0;
 		ArrayList<String> ruleset0Properties = new ArrayList<String>();
 		ArrayList<String> ruleset0Typenames = new ArrayList<String>();
+		int ruleset0Typecount = 0;
+		String ruleset0 = ruleCodes.get(0);
 		
 		//Get information on ruleset 0
 		int begin = 0, end = 0;
@@ -292,40 +294,40 @@ public class World
 	 * 
 	 * Otherwise, null is returned.
 	 * 
-	 * @param index - the generation number
+	 * @param genNum - the generation number
 	 * @return - the generation that has the number of index
 	 */
-	public Grid getGeneration(int index)
+	public Grid getGeneration(int genNum)
 	{
-		if(index < 0)
+		if(genNum < 0)
 			return null;
 		
-		if(historyType == 0 && index == 0)
+		if(historyType == 0 && genNum == 0)
 			return worldGenerations.get(0);
 		else if(historyType == 1)
 		{
-			if(index >= worldGenerations.size())
+			if(genNum >= worldGenerations.size())
 			{
-				Log.error(TAG, "Generation " + index + " not found!");
+				Log.error(TAG, "Error retrieving generation " + genNum + " - the generation was not found.");
 				return null;
 			}
 			
-			return worldGenerations.get(index);
+			return worldGenerations.get(genNum);
 		}
 		else if(historyType == 2)
 		{
 			if(genAmount == 0)
 				return null;
 			
-			if(index == lastIn && worldGenerations.size() > 0)
+			if(genNum == lastIn && worldGenerations.size() > 0)
 			{
 				return worldGenerations.get(worldGenerations.size() - 1);
 			}
 			else
 			{
-				lastIn = index;
+				lastIn = genNum;
 				worldGenerations.clear();
-				worldGenerations.add(streamer.getGeneration(index));
+				worldGenerations.add(streamer.getGeneration(genNum));
 				return worldGenerations.get(0);
 			}
 		}
@@ -495,13 +497,13 @@ public class World
 	 * 
 	 * If no rule set is found with the given declaration, null is returned.
 	 * 
-	 * @param firstLine - the line of the rule set that declares a rule set with its name
+	 * @param ruleDeclaration - the line of the rule set that declares a rule set with its name
 	 * @return - the rule set code
 	 */
-	public String getRuleCode(String firstLine)
+	public String getRuleCode(String ruleDeclaration)
 	{
 		for(int i = 0; i < ruleCodes.size(); i++)
-			if(ruleCodes.get(i).indexOf(firstLine) != -1)
+			if(ruleCodes.get(i).indexOf(ruleDeclaration) != -1)
 				return ruleCodes.get(i);
 		
 		return null;
@@ -591,14 +593,14 @@ public class World
 	{
 		Log.debug(TAG, "Hard reset.");
 		
-		Grid g = null;
+		Grid generationZero = null;
 		if(historyType == 0 || historyType == 1)
-			g = worldGenerations.get(0).clone();
+			generationZero = worldGenerations.get(0).clone();
 		else
-			g = streamer.getGeneration(0);
+			generationZero = streamer.getGeneration(0);
 		
 		worldGenerations.clear();
-		worldGenerations.add(g.clone());
+		worldGenerations.add(generationZero.clone());
 		
 		if(historyType == 2)
 		{
@@ -611,14 +613,14 @@ public class World
 	/**
 	 * Performs a reset on the world back to the generation given.
 	 *
-	 * @param g - generation to be reset to
+	 * @param gen - generation to be reset to
 	 */
-	public void resetTo(Grid g)
+	public void resetTo(Grid gen)
 	{
-		Log.debug(TAG, "Resetting world to grid: " + g.getWidth() + "x" + g.getHeight());
+		Log.debug(TAG, "Resetting world to grid: " + gen.getWidth() + "x" + gen.getHeight());
 		
 		worldGenerations.clear();
-		worldGenerations.add(g.clone());
+		worldGenerations.add(gen.clone());
 		
 		if(historyType == 0 || historyType == 2)
 		{
@@ -634,24 +636,24 @@ public class World
 	 * Performs a reset on the world to the given world.
 	 * Could be considered a "clone reset".
 	 * 
-	 * @param w - world to be reset to
+	 * @param world - world to be reset to
 	 */
-	public void resetTo(World w)
+	public void resetTo(World world)
 	{
 		Log.debug(TAG, "Resetting world.");
 		
-		this.worldFileName = w.worldFileName;
-		this.colourCode = w.colourCode;
+		this.worldFileName = world.worldFileName;
+		this.colourCode = world.colourCode;
 		this.worldGenerations.clear();
 		
 		this.ruleCodes.clear();
-		this.ruleCodes.addAll(w.ruleCodes);
-		this.currEngineStep = w.currEngineStep;
+		this.ruleCodes.addAll(world.ruleCodes);
+		this.currEngineStep = world.currEngineStep;
 		
 		if(historyType != 0)
-			this.worldGenerations.addAll(w.worldGenerations);
+			this.worldGenerations.addAll(world.worldGenerations);
 		else
-			this.worldGenerations.add(w.worldGenerations.get(w.worldGenerations.size() - 1));
+			this.worldGenerations.add(world.worldGenerations.get(world.worldGenerations.size() - 1));
 		
 		if(historyType == 0 || historyType == 2)
 		{
@@ -800,19 +802,20 @@ public class World
 	/**
 	 * Sets the world generations to the generations given.
 	 * 
-	 * @param w - the list of generations to be added
+	 * @param generations - the list of generations to be added
 	 */
-	public void setWorldGenerations(Grid[] w)
+	public void setWorldGenerations(Grid[] generations)
 	{
 		worldGenerations.clear();
 		
 		if(historyType == 0)
 		{
-			worldGenerations.add(w[w.length - 1]);
+			worldGenerations.add(generations[generations.length - 1]);
 			return;
 		}
 		
-		for(Grid grid : w) worldGenerations.add(grid);
+		for(Grid grid : generations)
+			worldGenerations.add(grid);
 		
 		if(historyType == 0 || historyType == 2)
 			genAmount = worldGenerations.size();

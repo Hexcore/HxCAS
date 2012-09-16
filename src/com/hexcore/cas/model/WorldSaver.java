@@ -10,14 +10,16 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Class WorldSaver
- * 	An instance of this object is used to write all details
- * 	of a world to where it is stored.
+ * 	An instance of this object is used to write all details of a world to where it is to be stored
+ * 	according to the file name given by the world.
  * 
  * @author Megan Duncan
  */
 
 public class WorldSaver
 {
+	private static final String		TAG = "WorldSaver";
+	
 	/**
 	 * WorldSaver default constructor.
 	 */
@@ -28,23 +30,24 @@ public class WorldSaver
 	/**
 	 * Saves the world to the file name that the world has.
 	 * 
+	 * This is done by creating a zipped CAW file to persist the world to that is named by the
+	 * file name given by the world. Into this zipped file goes a configuration file, at least
+	 * one rule set file, a colour set file and at least one generation file.
+	 * 
 	 * @param world - the world that needs to be saved
+	 * 
 	 * @throws IOException
 	 */
 	public void saveWorld(World world)
 		throws IOException
 	{
-		Grid firstGrid = world.getInitialGeneration();
+		Grid generationZero = world.getInitialGeneration();
 		
-		char type = firstGrid.getTypeSymbol();
-		int gridHeight = firstGrid.getHeight();
-		int gridWidth = firstGrid.getWidth();
-		int properties = firstGrid.getNumProperties();
+		char type = generationZero.getTypeSymbol();
+		int gridHeight = generationZero.getHeight();
+		int gridWidth = generationZero.getWidth();
+		int properties = generationZero.getNumProperties();
 		
-		/*
-		 * Creates a ZIP file to persist the world, it's configuration,
-		 * it's rule set and it's generations. 
-		 */
 		int exindex = world.getFilename().indexOf(".caw");
 		File file = null;
 		if(exindex != -1)
@@ -160,6 +163,7 @@ public class WorldSaver
 	 * @param prev - the index of the previous generation
 	 * @param curr - the index of the current generation
 	 * @param generations - the list of generations for the world
+	 * 
 	 * @return - the list of difference cells
 	 */
 	private List<CoordinatedCell> getDifferenceCells(int prev, int curr, List<Grid> generations)

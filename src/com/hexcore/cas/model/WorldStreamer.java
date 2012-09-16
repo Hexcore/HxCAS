@@ -37,6 +37,7 @@ public class WorldStreamer
 	private boolean					reset = false;
 	private volatile boolean		started = false;
 	
+	private int						differenceGenerationCounter = 0;
 	private int						numGenerations = 0;
 	
 	private String					cawFilename = null;
@@ -74,7 +75,7 @@ public class WorldStreamer
 	 */
 	public Grid getGeneration(int genNum)
 	{
-		Log.debug(TAG, "Streamer getGeneration(" + genNum + ") called.");
+		Log.debug(TAG, "getGeneration(" + genNum + ") called.");
 		
 		boolean configFound = false;
 		boolean genFound = false;
@@ -159,54 +160,138 @@ public class WorldStreamer
 				return null;
 			}
 			
-			Log.debug(TAG, "Looking for generation file");
-			//Searching for the generation file
-			for(int i = 0; i < listOfFiles.length; i++)
+			String theGenerationData = "";
+			
+			currFilename = genNum + ".cag";
+			currFile = new File(tmpDir + "/" + currFilename);
+			in = new BufferedInputStream(new FileInputStream(currFile));
+			if(currFile.exists())
 			{
-				if(listOfFiles[i].isFile())
+				genFound = true;
+				
+				byte[] data = new byte[1024];
+				int len = 1024;
+				while((len = in.read(data)) > 0)
 				{
-					currFilename = listOfFiles[i].getName();
-					currFile = new File(tmpDir + "/" + currFilename);
-					in = new BufferedInputStream(new FileInputStream(currFile));
+					theGenerationData += new String(data);
+				}
+				
+				theGenerationData = theGenerationData.trim();
+			}
+
+			if(genFound)
+			{
+				Log.debug(TAG, "Found generation " + genNum);
+				
+				StringTokenizer token = new StringTokenizer(theGenerationData);
+				
+				String generationType = token.nextToken();
+				
+				if(generationType.compareTo("E") == 0)
+				{
+					Log.debug(TAG, "Generation " + genNum + " is an entire generation: LOADING");
 					
-					String fileData = "";
-					
-					int index = currFilename.lastIndexOf('/');
-					if(index == -1)
-						index = 0;
-					
-					if(currFilename.substring(index).compareTo(genNum + ".cag") == 0)
+					for(int rows = 0; rows < y; rows++)
 					{
-						genFound = true;
-						
-						byte[] data = new byte[1024];
-						int len = 1024;
-						while((len = in.read(data)) > 0)
+						for(int cols = 0; cols < x; cols++)
 						{
-							fileData += new String(data);
+							double[] vals = new double[properties];
+							
+							for(int j = 0; j < properties; j++)
+								vals[j] = Double.parseDouble(token.nextToken());
+							
+							gen.setCell(cols, rows, vals);
+						}
+					}
+				}
+				else
+				{
+					Log.debug(TAG, "Generation " + genNum + " is a difference generation: Searching for an entire generation to base off of");
+					
+					ArrayList<String> generations = new ArrayList<String>();
+					
+					generations.add(theGenerationData);
+					
+					int prevs = genNum - 1;
+					String prevData;
+					
+					while(true)
+					{
+						prevData = "";
+						
+						Log.debug(TAG, "Looking for generation " + prevs);
+						currFilename = prevs + ".cag";
+						currFile = new File(tmpDir + "/" + currFilename);
+						in = new BufferedInputStream(new FileInputStream(currFile));
+						if(currFile.exists())
+						{
+							byte[] data = new byte[1024];
+							int len = 1024;
+							while((len = in.read(data)) > 0)
+							{
+								prevData += new String(data);
+							}
+							
+							prevData = prevData.trim();
+							
+							generations.add(0, prevData);
+						}
+						else
+						{
+							Log.error(TAG, "Cannot reconstruct generation - unable to find an entire generation to base off.");
+							return null;
 						}
 						
-						StringTokenizer token = new StringTokenizer(fileData);
+						if(prevData.charAt(0) == 'E')
+							break;
 						
-						for(int rows = 0; rows < y; rows++)
+						prevs--;
+					}
+					
+					Log.debug(TAG, "Found all necessary generations: CONSTRUCTING");
+					
+					while(generations.size() > 0)
+					{
+						String theData = generations.get(0);
+						
+						token = new StringTokenizer(theData);
+						generationType = token.nextToken();
+						
+						if(generationType.compareTo("E") == 0)
 						{
-							for(int cols = 0; cols < x; cols++)
+							for(int rows = 0; rows < y; rows++)
 							{
-								double[] vals = new double[properties];
+								for(int cols = 0; cols < x; cols++)
+								{
+									double[] vals = new double[properties];
+									
+									for(int j = 0; j < properties; j++)
+										vals[j] = Double.parseDouble(token.nextToken());
+									
+									gen.setCell(cols, rows, vals);
+								}
+							}
+						}
+						else
+						{
+							while(token.hasMoreTokens())
+							{
+								int col = Integer.parseInt(token.nextToken());
+								int row = Integer.parseInt(token.nextToken());
 								
+								double[] vals = new double[properties];
 								for(int j = 0; j < properties; j++)
 									vals[j] = Double.parseDouble(token.nextToken());
 								
-								gen.setCell(cols, rows, vals);
+								gen.setCell(col, row, vals);
 							}
 						}
 						
-						break;
+						generations.remove(0);
 					}
 				}
 			}
-			
-			if(!genFound)
+			else
 			{
 				Log.error(TAG, "Error retrieving generation - generation file " + genNum + " not found");
 				return null;
@@ -248,7 +333,6 @@ public class WorldStreamer
 		File[] listOfFiles = folder.listFiles();
 		Grid gen = null;
 		InputStream in = null;
-		int arrSize = listOfFiles.length - 3;
 		int properties = 0;
 		int x = -1;
 		int y = -1;
@@ -324,10 +408,17 @@ public class WorldStreamer
 				Log.error(TAG, "Error retrieving all generations - configuration file not found");
 				return null;
 			}
+
+			int arrSize = 0;
+			for(int i = 0; i < listOfFiles.length; i++)
+				if(listOfFiles[i].isFile())
+					if(listOfFiles[i].getName().endsWith(".cag"))
+						arrSize++;
+			int finalGen = arrSize - 1;
 			
 			int gensToLoad = arrSize;
 			int scale = 500;
-			long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);;
+			long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);
 			long maxHeap = bean.getHeapMemoryUsage().getMax();
 			long toBeUsedHeap = generationSize * gensToLoad;
 			
@@ -343,10 +434,11 @@ public class WorldStreamer
 			}
 			Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
 			
-			Grid[] gens = new Grid[gensToLoad];
-			int finalGen = arrSize - 1;
+			ArrayList<String> incompleteGens = new ArrayList<String>();
+			for(int i = 0; i < gensToLoad; i++)
+				incompleteGens.add("");
 			
-			//Searching for all generation files that are to be loaded
+			//Searching for all generation files and adding them to incompleteGens
 			for(int i = 0; i < listOfFiles.length; i++)
 			{
 				if(listOfFiles[i].isFile())
@@ -366,7 +458,7 @@ public class WorldStreamer
 							fileData += new String(data);
 						}
 						
-						StringTokenizer token = new StringTokenizer(fileData);
+						fileData = fileData.trim();
 						
 						int index = currFilename.lastIndexOf('/');
 						if(index == -1)
@@ -378,36 +470,61 @@ public class WorldStreamer
 						else
 							fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 						
-						for(int rows = 0; rows < y; rows++)
-						{
-							for(int cols = 0; cols < x; cols++)
-							{
-								double[] vals = new double[properties];
-								
-								for(int j = 0; j < properties; j++)
-									vals[j] = Double.parseDouble(token.nextToken());
-								
-								gen.setCell(cols, rows, vals);
-							}
-						}
-						
 						int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
 						
 						if(arrIndex < 0)
 							continue;
 						
-						gens[arrIndex] = gen.clone();
+						incompleteGens.remove(arrIndex);
+						incompleteGens.add(arrIndex, fileData);
 					}
 					else
 						continue;
 				}
 			}
 			
+			//Build up all the generations from incompleteGens and add them to generations
+			for(int i = 0; i < incompleteGens.size(); i++)
+			{
+				StringTokenizer token = new StringTokenizer(incompleteGens.get(i));
+				
+				String generationType = token.nextToken();
+				
+				if(generationType.compareTo("E") == 0)
+				{
+					for(int rows = 0; rows < y; rows++)
+					{
+						for(int cols = 0; cols < x; cols++)
+						{
+							double[] vals = new double[properties];
+							
+							for(int j = 0; j < properties; j++)
+								vals[j] = Double.parseDouble(token.nextToken());
+							
+							gen.setCell(cols, rows, vals);
+						}
+					}
+				}
+				else
+				{
+					while(token.hasMoreTokens())
+					{
+						int col = Integer.parseInt(token.nextToken());
+						int row = Integer.parseInt(token.nextToken());
+						
+						double[] vals = new double[properties];
+						for(int j = 0; j < properties; j++)
+							vals[j] = Double.parseDouble(token.nextToken());
+						
+						gen.setCell(col, row, vals);
+					}
+				}
+				
+				generations.add(gen.clone());
+			}
+			
 			in.close();
 			in = null;
-			
-			for(int i = 0; i < gensToLoad; i++)
-				generations.add(gens[i]);
 			
 			return generations;
 		}
@@ -445,19 +562,19 @@ public class WorldStreamer
 	 * If the streamer has already started, then the reset is a soft reset to Generation Zero.
 	 * Otherwise, it is a hard reset to a completely new world.
 	 * 
-	 * @param w - the world that is to be reset to
+	 * @param world - the world that is to be reset to
 	 */
-	public void reset(World w)
+	public void reset(World world)
 	{
 		if(started)
 		{
 			reset = true;
-			start(w);
+			start(world);
 		}
 		else
 		{
 			reset = false;
-			start(w);
+			start(world);
 		}
 	}
 	
@@ -479,19 +596,19 @@ public class WorldStreamer
 	 * Regardless, the streamer sets the generation counter to 0, re-writes the details from the
 	 * world and starts.
 	 * 
-	 * @param w - the world that the streamer is set to
+	 * @param world - the world that the streamer is set to
 	 */
-	public void start(World w)
+	public void start(World world)
 	{
 		if(!reset)
 		{
 			File caw = null;
-			if(w.getFilename() == null)
-				w.setFileName("worlds/newWorld.caw");
+			if(world.getFilename() == null)
+				world.setFileName("worlds/newWorld.caw");
 			
-			int cawIndex = w.getFilename().indexOf(".caw");
+			int cawIndex = world.getFilename().indexOf(".caw");
 			
-			String name = (cawIndex != -1 ? w.getFilename() : w.getFilename() + ".caw");
+			String name = (cawIndex != -1 ? world.getFilename() : world.getFilename() + ".caw");
 			
 			if(cawFilename == null)
 				cawFilename = name;
@@ -540,7 +657,7 @@ public class WorldStreamer
 		
 		numGenerations = 0;
 		
-		writeInitialValues(w);
+		writeInitialValues(world);
 		
 		started = true;
 	}
@@ -597,6 +714,7 @@ public class WorldStreamer
 		}
 		
 		started = false;
+		differenceGenerationCounter = 0;
 	}
 	
 	/**
@@ -604,11 +722,11 @@ public class WorldStreamer
 	 * 
 	 * @param gen - the generation that must be streamed to disk
 	 */
-	public void streamGeneration(Grid gen)
+	public void streamGeneration(Grid prevGen, Grid currGen)
 	{
 		OutputStream out = null;
 		File genFile = null;
-		String data = "";
+		String str = "";
 		
 		try
 		{
@@ -619,18 +737,50 @@ public class WorldStreamer
 				Log.warning(TAG, "Error streaming generation to world - could not create new temporary generation " + genNum + " file. Overwriting.");
 			out = new BufferedOutputStream(new FileOutputStream(genFile));
 			
-			for(int rows = 0; rows < gen.getHeight(); rows++)
+			//Comparing generations
+			List<CoordinatedCell> differentCells = getDifferenceCells(prevGen, currGen, genNum);
+			
+			if(differenceGenerationCounter >= 20)
 			{
-				for(int cols = 0; cols < gen.getWidth(); cols++)
-				{
-					for(int index = 0; index < gen.getNumProperties() - 1; index++)
-						data += gen.getCell(cols, rows).getValue(index) + " ";
-					data += gen.getCell(cols, rows).getValue(gen.getNumProperties() - 1) + "\n";
-				}
-				data += "\n";
+				differentCells.clear();
+				differenceGenerationCounter = 0;
 			}
 			
-			out.write(data.getBytes());
+			if(differentCells.size() == 0)
+			{
+				str += "E\n";
+				
+				for(int rows = 0; rows < currGen.getHeight(); rows++)
+				{
+					for(int cols = 0; cols < currGen.getWidth(); cols++)
+					{
+						for(int index = 0; index < currGen.getNumProperties() - 1; index++)
+							str += currGen.getCell(cols, rows).getValue(index) + " ";
+						str += currGen.getCell(cols, rows).getValue(currGen.getNumProperties() - 1) + "\n";
+					}
+					str += "\n";
+				}
+				
+				differenceGenerationCounter = 0;
+			}
+			else
+			{
+				str += "D\n";
+				
+				for(int j = 0; j < differentCells.size(); j++)
+				{
+					CoordinatedCell cell = differentCells.get(j);
+					str += cell.x + " " + cell.y + " ";
+					
+					for(int index = 0; index < currGen.getNumProperties() - 1; index++)
+						str += cell.getValue(index) + " ";
+					str += cell.getValue(currGen.getNumProperties() - 1) + "\n";
+				}
+				
+				differenceGenerationCounter++;
+			}
+			
+			out.write(str.getBytes());
 			out.close();
 			
 			numGenerations++;
@@ -642,23 +792,79 @@ public class WorldStreamer
 		}
 	}
 	
+	/////////////////////////////////////////////
+	/// Private functions
+	/**
+	 * Gets a list of the cells that are different between the current generation and the previous
+	 * generation.
+	 * 
+	 * If the current generation is Generation Zero, then an empty list is returned.
+	 * 
+	 * If the number of differences between the generations is larger than the threshold,
+	 * an empty list is returned.
+	 * 
+	 * Otherwise returns the list of difference cells.
+	 * 
+	 * @param prevGen - the previous generation
+	 * @param currGen - the current generation
+	 * @param curr - the index of the current generation
+	 * 
+	 * @return - the list of difference cells
+	 */
+	private List<CoordinatedCell> getDifferenceCells(Grid prevGen, Grid currGen, int curr)
+	{
+		if(curr == 0)
+			return new ArrayList<CoordinatedCell>();
+		else
+		{
+			List<CoordinatedCell> differentCells = new ArrayList<CoordinatedCell>();
+			
+			int gridHeight = currGen.getHeight();
+			int gridWidth = currGen.getWidth();
+			int properties = currGen.getNumProperties();
+
+			int totalProperties = gridHeight * gridWidth * properties;
+			int diff = 0;
+			double threshold = (double)properties / (double)(properties + 2);
+			double percent = 1.0;
+			
+			for(int rows = 0; rows < gridHeight; rows++)
+				for(int cols = 0; cols < gridWidth; cols++)
+					for(int props = 0; props < properties; props++)
+						if(prevGen.getCell(cols, rows).getValue(props) != currGen.getCell(cols, rows).getValue(props))
+						{
+							diff++;
+							differentCells.add(new CoordinatedCell(currGen.getCell(cols, rows), cols, rows));
+						}
+			
+			percent = (double)diff / (double)totalProperties;
+			
+			if(percent < threshold)
+				return differentCells;
+			else
+				return new ArrayList<CoordinatedCell>();
+		}
+	}
+	
 	/**
 	 * Requests all the information from the given world and streams everything into the
 	 * temporary folder.
 	 * 
-	 * @param w - the world that the streamer is set to
+	 * @param world - the world that the streamer is set to
 	 */
-	private void writeInitialValues(World w)
+	private void writeInitialValues(World world)
 	{
+		differenceGenerationCounter = 0;
+		
 		OutputStream out = null;
 		File currFile = null;
 		String data = "";
 		
-		w.setKeepHistory(1);
+		world.setKeepHistory(1);
 		
 		try
 		{
-			Grid genZero = w.getInitialGeneration();
+			Grid genZero = world.getInitialGeneration();
 			char type = genZero.getTypeSymbol();
 			int height = genZero.getHeight();
 			int props = genZero.getNumProperties();
@@ -676,12 +882,12 @@ public class WorldStreamer
 			data = "";
 			out = null;
 			
-			if(w.getStepAmount() == 1)
+			if(world.getStepAmount() == 1)
 			{
 				currFile = new File(tmpDir + "/rules.cal");
 				out = new BufferedOutputStream(new FileOutputStream(currFile));
 				
-				out.write(w.getRuleCodes().get(0).getBytes());
+				out.write(world.getRuleCodes().get(0).getBytes());
 				out.close();
 
 				currFile = null;
@@ -690,7 +896,7 @@ public class WorldStreamer
 			}
 			else
 			{
-				ArrayList<String> rulesets = w.getRuleCodes();
+				ArrayList<String> rulesets = world.getRuleCodes();
 				for(int i = 0; i < rulesets.size(); i++)
 				{
 					currFile = new File(tmpDir + "/rules" + (i + 1) + ".cal");
@@ -706,26 +912,62 @@ public class WorldStreamer
 			
 			currFile = new File(tmpDir + "/colours.cacp");
 			out = new BufferedOutputStream(new FileOutputStream(currFile));
-			out.write(w.getColourCode().getBytes());
+			out.write(world.getColourCode().getBytes());
 			out.close();
 			
-			List<Grid> gens = w.getGenerations();
+			List<Grid> gens = world.getGenerations();
 			for (int i = 0; i < gens.size(); i++)
 			{
 				Grid grid = gens.get(i);
 				currFile = new File(tmpDir + "/" + i + ".cag");
 				out = new BufferedOutputStream(new FileOutputStream(currFile));
 				
-				for(int rows = 0; rows < height; rows++)
+				List<CoordinatedCell> differentCells;
+				if(i == 0)
+					differentCells = getDifferenceCells(null, grid, i);
+				else
+					differentCells = getDifferenceCells(gens.get(i - 1), grid, i);
+				
+				if(differenceGenerationCounter >= 20)
 				{
-					for(int cols = 0; cols < width; cols++)
-					{
-						for(int index = 0; index < props - 1; index++)
-							data += grid.getCell(cols, rows).getValue(index) + " ";
-						data += grid.getCell(cols, rows).getValue(props - 1) + "\n";
-					}
-					data += "\n";
+					differentCells.clear();
+					differenceGenerationCounter = 0;
 				}
+				
+				if(differentCells.size() == 0)
+				{
+					data += "E\n";
+					
+					for(int rows = 0; rows < height; rows++)
+					{
+						for(int cols = 0; cols < width; cols++)
+						{
+							for(int index = 0; index < props - 1; index++)
+								data += grid.getCell(cols, rows).getValue(index) + " ";
+							data += grid.getCell(cols, rows).getValue(props - 1) + "\n";
+						}
+						data += "\n";
+					}
+					
+					differenceGenerationCounter = 0;
+				}
+				else
+				{
+					data += "D\n";
+					
+					for(int j = 0; j < differentCells.size(); j++)
+					{
+						CoordinatedCell cell = differentCells.get(j);
+						data += cell.x + " " + cell.y + " ";
+						
+						for(int index = 0; index < props - 1; index++)
+							data += cell.getValue(index) + " ";
+						data += cell.getValue(props - 1) + "\n";
+					}
+					
+					differenceGenerationCounter++;
+				}
+
 				out.write(data.getBytes());
 				out.close();
 				
@@ -736,7 +978,7 @@ public class WorldStreamer
 			
 			numGenerations = gens.size();
 			
-			w.setGenAmount(numGenerations);
+			world.setGenAmount(numGenerations);
 		}
 		catch(IOException ex)
 		{
@@ -744,6 +986,21 @@ public class WorldStreamer
 			ex.printStackTrace();
 		}
 		
-		w.setKeepHistory(2);
+		world.setKeepHistory(2);
+	}
+	
+	/////////////////////////////////////////////
+	/// Inner classes
+	private class CoordinatedCell extends Cell
+	{
+		public int x;
+		public int y;
+		
+		public CoordinatedCell(Cell cell, int x, int y)
+		{
+			super(cell);
+			this.x = x;
+			this.y = y;
+		}
 	}
 }
