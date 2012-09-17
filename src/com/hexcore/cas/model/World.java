@@ -766,6 +766,7 @@ public class World
 		if(list.size() == 0)
 		{
 			setRuleCodes(1);
+			currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 			return;
 		}
 		
