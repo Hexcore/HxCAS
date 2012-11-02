@@ -87,30 +87,40 @@ public class World
 	 */
 	public void addGeneration(Grid gen)
 	{
-		worldGenerations.add(gen);
 		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
 		
 		if(historyType == 0)
 		{
 			genAmount++;
 			
+			worldGenerations.clear();
+			worldGenerations.add(gen);
+			/*
 			if(worldGenerations.size() > 1)
 				for(int i = 0; i < worldGenerations.size() - 1; i++)
-					worldGenerations.remove(0);
+					worldGenerations.remove(0);*/
+		}
+		else if(historyType == 1)
+		{
+			worldGenerations.add(gen);
 		}
 		else if(historyType == 2)
 		{
 			genAmount++;
 			lastIn = genAmount - 1;
 			
-			if(worldGenerations.size() == 1)
+			Grid prevGen = (worldGenerations.size() > 0 ? worldGenerations.get(0) : null);
+			streamer.streamGeneration(prevGen, gen);
+			worldGenerations.clear();
+			worldGenerations.add(gen);
+			/*if(worldGenerations.size() == 1)
 				streamer.streamGeneration(null, gen);
 			else
 				streamer.streamGeneration(worldGenerations.get(0), gen);
 			
 			if(worldGenerations.size() > 1)
 				for(int i = 0; i < worldGenerations.size() - 1; i++)
-					worldGenerations.remove(0);
+					worldGenerations.remove(0);*/
 		}
 	}
 	

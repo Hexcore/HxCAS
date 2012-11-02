@@ -623,11 +623,11 @@ public class WorldStreamer
 			
 			while(caw.exists())
 			{
-				int underIndex = name.indexOf("_");
+				int underIndex = name.lastIndexOf("__");
 				if(underIndex != -1)
-					name = name.substring(0, name.indexOf("_")) + "_" + worldNum + ".caw";
+					name = name.substring(0, underIndex) + "__" + worldNum + ".caw";
 				else
-					name = name.substring(0, name.indexOf(".caw")) + "_" + worldNum + ".caw";
+					name = name.substring(0, name.indexOf(".caw")) + "__" + worldNum + ".caw";
 				
 				caw = new File(name);
 				worldNum++;
