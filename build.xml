@@ -30,25 +30,28 @@
 
 	<!-- Run tests -->
 	<target name="test" depends="compile">
-		<!--
-		<junit printsummary="on" showoutput="true">
+		<mkdir dir="${testresult.dir}"/>
+		<junit printsummary="on" fork="true" failureproperty="junit.failure">
+			<jvmarg value="-javaagent:${jar.dir}/classmexer.jar" />
+
 			<classpath>
+				<fileset dir="${jar.dir}" includes="**/*.jar"/>
 				<pathelement path="./bin"/>
-				<pathelement path="${jar.dir}"/>
 				<pathelement path="."/>
 				<pathelement path=".."/>
 			</classpath>
 
-			<formatter type="xml"/>
+			<formatter type="plain"/>
 
 			<batchtest todir="${testresult.dir}">
 				<fileset dir="bin">
 					<include name="**/*/Test*"/>
 					<exclude name="**/*/*$*"/>
 				</fileset>
-			</batchtest>			
+			</batchtest>
 		</junit>
-		-->
+
+		<fail if="junit.failure" message="Unit test(s) failed. See reports!"/>
 	</target>	
 
 	<!-- Runs the entire TestSuit. All test files must be named with Test*.java -->

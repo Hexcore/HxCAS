@@ -7,13 +7,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import org.junit.Test;
+
 import com.hexcore.cas.model.Cell;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
 
 public class TestRuleLoader
 {
-	
+	@Test
 	public void test()
 	{
 		try
@@ -70,23 +72,32 @@ public class TestRuleLoader
 		
 		if (!file.exists()) throw new Exception("Test bytecode could not be found");
 		
-		InputStream stream = new FileInputStream(file);
+		InputStream stream = null;
+		byte[] bytes = null;
+		try
+		{
+			stream = new FileInputStream(file);
 		
-		int length = (int)file.length();
-		byte[] bytes = new byte[length];
-		
-		System.out.println("Bytecode - File: " + filename + " - Size: " + length);
-		
-		int index = 0;
-	    int numRead = 0;
-	    while (index < bytes.length)
-	    {
-	    	numRead = stream.read(bytes, index, bytes.length-index);
-	    	if (numRead <= 0) break;
-	    	index += numRead;
-	    }
-	    
-	    if (index < length) throw new Exception("Not all bytes were read in");
+			int length = (int)file.length();
+			bytes = new byte[length];
+			
+			System.out.println("Bytecode - File: " + filename + " - Size: " + length);
+			
+			int index = 0;
+		    int numRead = 0;
+		    while (index < bytes.length)
+		    {
+		    	numRead = stream.read(bytes, index, bytes.length-index);
+		    	if (numRead <= 0) break;
+		    	index += numRead;
+		    }
+		    
+		    if (index < length) throw new Exception("Not all bytes were read in");
+		}
+		finally
+		{
+			stream.close();
+		}
 
 	    return bytes;
 	}
