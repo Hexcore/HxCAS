@@ -114,9 +114,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public Button					backButton;
 	
-	public LinearLayout				mainMenuLayout;
-	public LinearLayout				worldLayout;
-	
 	public Set<ClientEntry>			availableClients;   
 	public Set<ClientEntry>			usingClients;
 	
@@ -138,48 +135,22 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Dialog					savingDialog;
 	private Dialog					shutdownDialog;
 	private Dialog					streamingDialog;
-
-	private LinearLayout			changePathLayout;
-	private LinearLayout			loadingLayout;
-	private LinearLayout			savingLayout;
-	private LinearLayout			shutdownLayout;
-	private LinearLayout			streamingLayout;
+	
+	private Cell c;
 	
 	private LayoutParser			layoutParser = new LayoutParser();
-
-	private TextWidget				changePathMessage;
-	private TextWidget				changePathTitle;
-	private TextWidget				loadingMessage;
-	private TextWidget				loadingTitle;
-	private TextWidget				savingMessage;
-	private TextWidget				savingTitle;
-	private TextWidget				shutdownMessage;
-	private TextWidget				shutdownTitle;
-	private TextWidget				streamingMessage;
-	private TextWidget				streamingTitle;
 	//////////////
 	
 	//WORLD PROPERTIES TAB//
 	public CheckBox					wrapCheckBox;
 	public CheckBox					keepHistoryCheckBox;
 	
-	public Container				propertiesContainer;
 	public Container				widget3DPreviewContainer;
 	public Container				widgetPreviewContainer;
 	
 	public DropDownBox				cellShapeDropDownBox;
 	public DropDownBox				historyDropDownBox;
-	
-	public LinearLayout				cellShapeLayout;
-	public LinearLayout				masterPropertiesLayout;
-	public LinearLayout				propertiesLayout;
-	public LinearLayout				widgetPreviewLayout;
-	public LinearLayout				worldSizeLayout;
-	
-	public TextWidget				cellShapeLabel;
-	public TextWidget				worldSizeLabel;
-	public TextWidget				worldSizeXLabel;
-	
+		
 	public NumberBox				worldSizeXNumberBox;
 	public NumberBox				worldSizeYNumberBox;
 	
@@ -193,20 +164,14 @@ public class GUI implements WindowEventListener, LobbyListener
 	public Button					saveCALFileButton;
 	public Button					submitRulesButton;
 	
-	public Container				rulesContainer;
 	public Dialog					dialogCAL;
 	public File						calFile;
 	public FileSelectResult			selectedFile;
 	
-	public LinearLayout				dialogCALLayout;
 	public LinearLayout				outputLayout;
-	public LinearLayout				rulesLayout;
 	
 	public ScrollableContainer		outputContainer;
 	public TextArea					CALTextArea;
-	
-	public TextWidget				dialogCALTitle;
-	public TextWidget				dialogCALMessage;
 	//////////////
 	
 	//DISTRIBUTION TAB//
@@ -223,13 +188,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public ColourRuleSet			colourRules;
 	public Dialog					dialog;
-	
-	public LinearLayout				buttonBarLayout;
-	public LinearLayout				dialogLayout;
-	public LinearLayout				headerLayout;
-	public LinearLayout				innerLayout;
-	public LinearLayout				mainLayout;
-	
+		
 	public Panel					mainPanel;
 	
 	public String					currentThemeName = "lightV2";
@@ -269,13 +228,10 @@ public class GUI implements WindowEventListener, LobbyListener
 	private DiscreteSliderWidget	generationSlider;
 	private Container				coloursContainer;
 	private Grid					currentGrid;
-	private ImageWidget				viewSettingsHeader;
 	private int						currentGeneration = 0;
 	
 	private LinearLayout			viewportsLayout;
 	private LinearLayout			controlLayout;
-	private LinearLayout			masterColoursLayout;
-	private LinearLayout			masterSimulationLayout;
 	
 	private Server					server;
 	private TextWidget				iterationsText;
@@ -313,9 +269,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Button					saveWorldButton;
 	private Button					setColourRangesButton;
 	
-	private Cell					c;
 	private ColourPicker			colourPicker;
-	private Container				previewWindowContainer;
 	
 	private DropDownBox				heightMapPropertySelector;
 	private DropDownBox				worldEditorPropertySelector;
@@ -323,25 +277,14 @@ public class GUI implements WindowEventListener, LobbyListener
 	private EditorToolType			editorToolType = EditorToolType.LOOK;
 	private List<ColourContainer>	colourContainerList;
 	
-	private LinearLayout			cpRGBLayout;
-	private LinearLayout			colourButtonsLayout;
 	private LinearLayout			colourPropertiesLayout;
-	private LinearLayout			leftColourLayout;
-	private LinearLayout			masterWorldPreviewLayout;
 	private LinearLayout			propertyValues;
-	private LinearLayout			rightColourLayout;
 	private LinearLayout			simulationControlsLayout;
-	private LinearLayout			topLayout;
-	private LinearLayout			worldEditorLeftLayout;
-	private LinearLayout			worldEditorRightLayout;
 	private LinearLayout			worldHeaderLayout;
 	
 	private NumberBox				cpBNumberBox;
 	private NumberBox				cpGNumberBox;
 	private NumberBox				cpRNumberBox;
-	
-	private ScrollableContainer		colourPropertiesContainer;
-	private ScrollableContainer		propertyValuesContainer;
 	
 	private SliderWidget			playbackSpeedSlider;
 	private Viewport				previewViewport;
@@ -452,24 +395,24 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public void createWorldEditorTab()
 	{
-		masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout masterWorldPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		masterWorldPreviewLayout.setMargin(new Vector2i(0, 0));
 		masterWorldPreviewLayout.setFlag(Widget.FILL);
 		tabbedWorldView.add(masterWorldPreviewLayout, "World Editor");
 		
-		worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout worldEditorLeftLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		worldEditorLeftLayout.setFlag(Widget.FILL);
 		masterWorldPreviewLayout.add(worldEditorLeftLayout);
 		
 		// Preview window
-		previewWindowContainer = new Container(new Vector2i(100,100));
+		Container previewWindowContainer = new Container(new Vector2i(100,100));
 		previewWindowContainer.setFlag(Widget.FILL);
 		previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f))); 
 		
 		previewViewport = new Viewport(previewWindowContainer, Viewport.Type.TWO_D, colourRules);	
 		worldEditorLeftLayout.add(previewViewport.container);
 		
-		worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout worldEditorRightLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		worldEditorRightLayout.setFlag(Widget.FILL_VERTICAL | Widget.WRAP_HORIZONTAL);
 		masterWorldPreviewLayout.add(worldEditorRightLayout);
 		
@@ -499,7 +442,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		toolLayout.add(editorFillButton);
 		
 		// Property values
-		propertyValuesContainer = new ScrollableContainer(new Vector2i(20, 20));
+		ScrollableContainer propertyValuesContainer = new ScrollableContainer(new Vector2i(20, 20));
 		propertyValuesContainer.setFlag(Widget.FILL);
 		worldEditorRightLayout.add(propertyValuesContainer);
 		
@@ -517,10 +460,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		heightMapLayout.setMargin(new Vector2i(0, 0));
 		heightMapLayout.setFlag(Widget.WRAP_VERTICAL | Widget.FILL_HORIZONTAL);
 		worldEditorRightLayout.add(heightMapLayout);
-		
-		ImageWidget heightMapWidgetHeader = new ImageWidget(theme.getImage("headers", "heightmap_widget_header.png"));
-		heightMapLayout.add(heightMapWidgetHeader);
-		
+				
 		TextWidget label1 = new TextWidget("Property:");
 		heightMapLayout.add(label1);
 		
@@ -883,7 +823,6 @@ public class GUI implements WindowEventListener, LobbyListener
 					}
 					catch(IOException e)
 					{
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -917,17 +856,13 @@ public class GUI implements WindowEventListener, LobbyListener
 				}
 				catch(IOException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			else if(event.target == openCALFileButton)
 			{
 				selectedFile = window.askUserForFileToLoad("Select CAL File", "cal");
-				
-				System.out.println(selectedFile.directory);
-				System.out.println(selectedFile.filename);
-				
+								
 				if(selectedFile.isValid())
 				{
 					if(selectedFile.filename.contains(".cal"))
@@ -1452,7 +1387,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		masterView.setFlag(Widget.FILL);
 		window.add(masterView);
 		
-		mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
+		LinearLayout mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
 		
 		createWorldButton = (Button)mainMenuLayout.findByName("createWorld");
 		loadWorldButton = (Button)mainMenuLayout.findByName("loadWorld");
@@ -1461,7 +1396,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		quitButton = (Button)mainMenuLayout.findByName("quit");
 		
 		// Main WORLD BUILDER
-		worldLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout worldLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		worldLayout.setFlag(Widget.FILL);
 		
 		masterView.add(worldLayout);
@@ -1474,11 +1409,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		worldLayout.add(worldHeaderLayout);
 		worldLayout.add(tabbedWorldView);
 		
-		propertiesContainer = new Container(new Vector2i(100, 100));	
+		Container propertiesContainer = new Container(new Vector2i(100, 100));	
 		propertiesContainer.setFlag(Widget.FILL);
 		tabbedWorldView.add(propertiesContainer, "World Properties");
 		
-		masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		masterPropertiesLayout.setFlag(Widget.FILL);
 		propertiesContainer.setContents(masterPropertiesLayout);
 		
@@ -1492,18 +1427,18 @@ public class GUI implements WindowEventListener, LobbyListener
 		instructionsLayout.add(propertiesInstructions);
 		instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
 		
-		propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		propertiesLayout.setFlag(Widget.FILL);
 		propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
 		masterPropertiesLayout.add(propertiesLayout);
 		
-		worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		worldSizeLayout.setHeight(50);
 		worldSizeLayout.setFlag(Widget.FILL_HORIZONTAL);
 		
 		propertiesLayout.add(worldSizeLayout);
 		
-		worldSizeLabel = new TextWidget("World Size:", Size.MEDIUM);
+		TextWidget worldSizeLabel = new TextWidget("World Size:", Size.MEDIUM);
 		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
@@ -1513,7 +1448,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		worldSizeXNumberBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXNumberBox);
 		
-		worldSizeXLabel = new TextWidget("X", Size.LARGE);
+		TextWidget worldSizeXLabel = new TextWidget("X", Size.LARGE);
 		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
@@ -1536,13 +1471,13 @@ public class GUI implements WindowEventListener, LobbyListener
 		historyDropDownBox.setSelected(1);
 		worldSizeLayout.add(historyDropDownBox);
 		
-		cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
 		cellShapeLayout.setHeight(65);
 		
 		propertiesLayout.add(cellShapeLayout);
 		
-		cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
+		TextWidget cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
 		cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeLayout.add(cellShapeLabel);
 		
@@ -1572,8 +1507,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		widgetPreviewContainer.setContents(gridViewer);
 		
 		LinearLayout buttonHeaderLayout = new LinearLayout(new Vector2i(700, 50), LinearLayout.Direction.HORIZONTAL);
-		buttonHeaderLayout.setBackground(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-		buttonHeaderLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonHeaderLayout.setMargin(new Vector2i(0, 0));
 		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP);
 		worldLayout.add(buttonHeaderLayout);
 			
@@ -1592,7 +1526,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		simulateButton.setHeight(35);
 		buttonHeaderLayout.add(simulateButton);
 		
-		rulesContainer = new Container(new Vector2i(100, 100));
+		Container rulesContainer = new Container(new Vector2i(100, 100));
 		tabbedWorldView.add(rulesContainer, "CAL Rules");
 		rulesContainer.setFlag(Widget.FILL);
 		
@@ -1604,7 +1538,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		CALLayout.setFlag(Widget.FILL);
 		masterRulesLayout.add(CALLayout);
 		
-		ImageWidget calEditorHeader = new ImageWidget(window.getTheme().getImage("headers","cal_editor_header.png"));
+		TextWidget calEditorHeader = new TextWidget("CAL Editor", Text.Size.MEDIUM);
 		calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
 		CALLayout.add(calEditorHeader);	
 		
@@ -1621,7 +1555,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		textAreaContainer.setContents(CALTextArea);
 		
-		ImageWidget compilerOutputHeader = new ImageWidget(window.getTheme().getImage("headers","compiler_output_header.png"));
+		TextWidget compilerOutputHeader = new TextWidget("Compiler Log", Text.Size.MEDIUM);
 		compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
 		CALLayout.add(compilerOutputHeader);
 		
@@ -1673,15 +1607,15 @@ public class GUI implements WindowEventListener, LobbyListener
 		coloursContainer.setFlag(Widget.FILL);
 		tabbedWorldView.add(coloursContainer, "Colour Ranges");
 		
-		masterColoursLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout masterColoursLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		masterColoursLayout.setFlag(Widget.FILL);
 		coloursContainer.setContents(masterColoursLayout);
 		
-		leftColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout leftColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		leftColourLayout.setFlag(Widget.FILL);
 		masterColoursLayout.add(leftColourLayout);
 		
-		rightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout rightColourLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		rightColourLayout.setFlag(Widget.FILL);
 		//rightColourLayout.setWidth(350);
 		masterColoursLayout.add(rightColourLayout);
@@ -1690,11 +1624,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		propertyColourLayout.setFlag(Widget.FILL);
 		leftColourLayout.add(propertyColourLayout);
 		
-		ImageWidget propertyColourHeader = new ImageWidget(theme.getImage("headers", "propery_colour_ranges_header.png"));
+		TextWidget propertyColourHeader = new TextWidget("Property colours", Text.Size.MEDIUM);
 		propertyColourHeader.setMargin(new Vector2i(150,10));
 		propertyColourLayout.add(propertyColourHeader);
 		
-		colourPropertiesContainer = new ScrollableContainer(new Vector2i(560,333));
+		ScrollableContainer colourPropertiesContainer = new ScrollableContainer(new Vector2i(560,333));
 		colourPropertiesContainer.setFlag(Widget.FILL);
 		propertyColourLayout.add(colourPropertiesContainer);
 		
@@ -1714,7 +1648,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		innerRightColourLayout.setFlag(Widget.WRAP);
 		innerRightColourLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		
-		colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout colourButtonsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		colourButtonsLayout.setFlag(Widget.WRAP);
 		colourButtonsLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		rightColourLayout.add(colourButtonsLayout);
@@ -1729,7 +1663,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		colourPicker.setFlag(Widget.CENTER_HORIZONTAL);
 		rightColourLayout.add(colourPicker);
 		
-		cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout cpRGBLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		cpRGBLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		cpRGBLayout.setFlag(Widget.WRAP);
 		rightColourLayout.add(cpRGBLayout);
@@ -1750,7 +1684,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		dialog = new Dialog(window, new Vector2i(400, 200));
 		
-		dialogLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout dialogLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		dialogLayout.setFlag(Widget.FILL);
 		dialog.setContents(dialogLayout);
 		
@@ -1772,15 +1706,15 @@ public class GUI implements WindowEventListener, LobbyListener
 		// Dialog CAL
 		dialogCAL = new Dialog(window, new Vector2i(400, 200));
 		
-		dialogCALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout dialogCALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		dialogCALLayout.setFlag(Widget.FILL);
 		dialogCAL.setContents(dialogCALLayout);
 		
-		dialogCALTitle = new TextWidget("CAL Rules Error", Text.Size.LARGE);
+		TextWidget dialogCALTitle = new TextWidget("CAL Rules Error", Text.Size.LARGE);
 		dialogCALTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		dialogCALLayout.add(dialogCALTitle);
 		
-		dialogCALMessage = new TextWidget("Invalid .cal File");
+		TextWidget dialogCALMessage = new TextWidget("Invalid .cal File");
 		dialogCALMessage.setFlag(Widget.FILL_HORIZONTAL);
 		dialogCALMessage.setFlag(Widget.FILL_VERTICAL); // This pushes the OK button down because it fills the space in between
 		dialogCALMessage.setFlowed(true);
@@ -1792,13 +1726,13 @@ public class GUI implements WindowEventListener, LobbyListener
 		dialogCALLayout.add(dialogCALOKButton);
 		
 		////Simulation
-		masterSimulationLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout masterSimulationLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		masterSimulationLayout.setFlag(Widget.FILL);
 		masterSimulationLayout.setMargin(new Vector2i(0, 0));
 		masterView.add(masterSimulationLayout);
 		masterSimulationLayout.add(worldHeaderLayout);
 		
-		topLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		LinearLayout topLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		topLayout.setMargin(new Vector2i(0, 0));
 		topLayout.setFlag(Widget.FILL);
 		masterSimulationLayout.add(topLayout);
@@ -1856,7 +1790,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		iterationsText = new TextWidget("Generations: 0");
 		innerDetailsLayout2.add(iterationsText);
 		
-		ImageWidget detailsImage = new ImageWidget(this.window.getTheme().getImage("headers", "details_header.png"));
+		TextWidget detailsImage = new TextWidget("World Details", Text.Size.MEDIUM);
 		detailsImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerDetailsLayout.add(detailsImage);
 		
@@ -1909,7 +1843,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		playbackSpeedSlider.setShowValue(true);
 		innerPlaybackLayout3.add(playbackSpeedSlider);
 		
-		ImageWidget playbackImage = new ImageWidget(window.getTheme().getImage("headers", "playback_header.png"));
+		TextWidget playbackImage = new TextWidget("Playback Controls", Text.Size.MEDIUM);
 		playbackImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerPlaybackLayout.add(playbackImage);
 		
@@ -1968,7 +1902,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		resetCameraButton.setMargin(new Vector2i(5, 0));
 		innerCameraLayout2.add(resetCameraButton);
 		
-		ImageWidget cameraImage = new ImageWidget(window.getTheme().getImage("headers", "camera_header.png"));
+		TextWidget cameraImage = new TextWidget("Camera Controls", Text.Size.MEDIUM);
 		cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
 		innerCameraLayout.add(cameraImage);
 		
@@ -2004,8 +1938,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		removeViewportButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(removeViewportButton);
 		
-		viewSettingsHeader = new ImageWidget(this.window.getTheme().getImage("headers", "view_settings_header.png"));
-		cameraImage.setFlag(Widget.CENTER_HORIZONTAL);
+		TextWidget viewSettingsHeader = new TextWidget("View Settings", Text.Size.MEDIUM);
+		viewSettingsHeader.setFlag(Widget.CENTER_HORIZONTAL);
 		innerViewSettingsLayout.add(viewSettingsHeader);
 		
 		toggleShowButton = new Button(new Vector2i(10, 15), "");
@@ -2034,71 +1968,71 @@ public class GUI implements WindowEventListener, LobbyListener
 		//Creating messages to display
 		changePathDialog = new Dialog(window, new Vector2i(460, 80));
 		
-		changePathLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout changePathLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		changePathLayout.setFlag(Widget.FILL);
 		changePathDialog.setContents(changePathLayout);
 		
-		changePathTitle = new TextWidget("Changing Save Path", Text.Size.LARGE);
+		TextWidget changePathTitle = new TextWidget("Changing Save Path", Text.Size.LARGE);
 		changePathTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		changePathLayout.add(changePathTitle);
 		
-		changePathMessage = new TextWidget("The program is busy changing the world path. Please be patient.");
+		TextWidget changePathMessage = new TextWidget("The program is busy changing the world path. Please be patient.");
 		changePathMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		changePathLayout.add(changePathMessage);
 		//
 		loadingDialog = new Dialog(window, new Vector2i(400, 80));
 		
-		loadingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout loadingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		loadingLayout.setFlag(Widget.FILL);
 		loadingDialog.setContents(loadingLayout);
 		
-		loadingTitle = new TextWidget("Loading", Text.Size.LARGE);
+		TextWidget loadingTitle = new TextWidget("Loading", Text.Size.LARGE);
 		loadingTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		loadingLayout.add(loadingTitle);
 		
-		loadingMessage = new TextWidget("The program is busy loading a world. Please be patient.");
+		TextWidget loadingMessage = new TextWidget("The program is busy loading a world. Please be patient.");
 		loadingMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		loadingLayout.add(loadingMessage);
 		//
 		savingDialog = new Dialog(window, new Vector2i(400, 80));
 		
-		savingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout savingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		savingLayout.setFlag(Widget.FILL);
 		savingDialog.setContents(savingLayout);
 		
-		savingTitle = new TextWidget("Saving", Text.Size.LARGE);
+		TextWidget savingTitle = new TextWidget("Saving", Text.Size.LARGE);
 		savingTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		savingLayout.add(savingTitle);
 		
-		savingMessage = new TextWidget("The program is busy saving the world. Please be patient.");
+		TextWidget savingMessage = new TextWidget("The program is busy saving the world. Please be patient.");
 		savingMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		savingLayout.add(savingMessage);
 		//
 		shutdownDialog = new Dialog(window, new Vector2i(400, 80));
 		
-		shutdownLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout shutdownLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		shutdownLayout.setFlag(Widget.FILL);
 		shutdownDialog.setContents(shutdownLayout);
 		
-		shutdownTitle = new TextWidget("Program Shut Down", Text.Size.LARGE);
+		TextWidget shutdownTitle = new TextWidget("Program Shut Down", Text.Size.LARGE);
 		shutdownTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		shutdownLayout.add(shutdownTitle);
 		
-		shutdownMessage = new TextWidget("The program is busy shutting down. Please be patient.");
+		TextWidget shutdownMessage = new TextWidget("The program is busy shutting down. Please be patient.");
 		shutdownMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		shutdownLayout.add(shutdownMessage);
 		//
 		streamingDialog = new Dialog(window, new Vector2i(400, 80));
 		
-		streamingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		LinearLayout streamingLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		streamingLayout.setFlag(Widget.FILL);
 		streamingDialog.setContents(streamingLayout);
 		
-		streamingTitle = new TextWidget("Streaming", Text.Size.LARGE);
+		TextWidget streamingTitle = new TextWidget("Streaming", Text.Size.LARGE);
 		streamingTitle.setFlag(Widget.CENTER_HORIZONTAL);
 		streamingLayout.add(streamingTitle);
 		
-		streamingMessage = new TextWidget("The program is busy streaming to disk. Please be patient.");
+		TextWidget streamingMessage = new TextWidget("The program is busy streaming to disk. Please be patient.");
 		streamingMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		streamingLayout.add(streamingMessage);
 		

@@ -13,3 +13,5 @@
 # Temp files
 /*.cal
 /*.class
+*~
+Thumbs.db

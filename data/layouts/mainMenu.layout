@@ -9,11 +9,11 @@ widget LinearLayout : vertical
 		width: 1000;
 		height: 600;
 		
-	    widget Image
-	    {
-	        alignment: center left;
-	        image: image("backgrounds", "main_bg.png");
-	    }
+		widget Image
+		{
+			alignment: center left;
+			image: image("backgrounds", "main_bg.png");
+		}
 	
 		widget LinearLayout : vertical
 		{

@@ -13,12 +13,13 @@ widget LinearLayout : vertical
 			margin: 0;
 			alignment: fill;
 			
-		    widget Image
-		    {
-		        alignment: top center;
-		        image: image("headers", "available_clients_header.png");
-		    }
-		    
+			widget Text
+	        {
+	            caption: "Available Clients";
+	            text-size: medium;
+	            alignment: top center;
+	        }
+					    
 		    widget List
 		    {
 		    	name: "clientsAvailableList";
@@ -72,11 +73,12 @@ widget LinearLayout : vertical
 			margin: 0;
 			alignment: fill;
 			
-		    widget Image
-		    {
-		        alignment: top center;
-		        image: image("headers", "using_clients_header.png");
-		    }
+		    widget Text
+	        {
+	            caption: "Using Clients";
+	            text-size: medium;
+	            alignment: top center;
+	        }
 		    
 		    widget List
 		    {
