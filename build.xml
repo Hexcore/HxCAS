@@ -27,7 +27,30 @@
 	<target name="clean">
 		<delete dir="bin"/>
 	</target>
-	
+
+	<!-- Run tests -->
+	<target name="test" depends="compile">
+		<!--
+		<junit printsummary="on" showoutput="true">
+			<classpath>
+				<pathelement path="./bin"/>
+				<pathelement path="${jar.dir}"/>
+				<pathelement path="."/>
+				<pathelement path=".."/>
+			</classpath>
+
+			<formatter type="xml"/>
+
+			<batchtest todir="${testresult.dir}">
+				<fileset dir="bin">
+					<include name="**/*/Test*"/>
+					<exclude name="**/*/*$*"/>
+				</fileset>
+			</batchtest>			
+		</junit>
+		-->
+	</target>	
+
 	<!-- Runs the entire TestSuit. All test files must be named with Test*.java -->
 	<!-- This target is location dependant! -->
 	<target name="run_tests_hudson" depends="compile">
@@ -65,7 +88,6 @@
 			<fileset dir="${testresult.dir}/${buildtime}"/>
 		</copy>
 	</target>
-
 
 	<target name="complete" depends="run_tests_hudson"/>
 </project>
