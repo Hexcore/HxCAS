@@ -1,6 +1,8 @@
 HxCAS
 =====
 
+[![Build Status](https://travis-ci.org/Hexcore/HxCAS.png?branch=master)](https://travis-ci.org/Hexcore/HxCAS)
+
 Introduction
 ------------
 HxCAS is a Cellular Automata Simulator and Editor. HxCAS simulates 
