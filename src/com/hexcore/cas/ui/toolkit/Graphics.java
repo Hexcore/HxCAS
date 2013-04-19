@@ -119,7 +119,7 @@ public class Graphics
 	{
 		GL2 gl2 = gl.getGL2();
 		
-		image.bind();
+		image.bind(gl);
 		
 		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
@@ -133,7 +133,7 @@ public class Graphics
 		
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
-		image.unbind();
+		image.unbind(gl);
 	}
 	
 	public static void renderRectangle(GL gl, Vector2i pos, Vector2i size, int radius, Fill fill)

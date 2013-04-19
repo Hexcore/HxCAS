@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 import javax.media.opengl.Threading;
 
@@ -42,17 +43,17 @@ public class Image
 	public int		getHeight() {return valid ? texture.getImageHeight() : 0;}
 	public Vector2i	getSize() {return new Vector2i(getWidth(), getHeight());}
 	
-	public void bind()
+	public void bind(GL gl)
 	{
 		if (!valid) return;
-		texture.enable();
-		texture.bind();
+		texture.enable(gl);
+		texture.bind(gl);
 	}
 	
-	public void unbind()
+	public void unbind(GL gl)
 	{
 		if (!valid) return;
-		texture.disable();
+		texture.disable(gl);
 	}
 	
 	class LoadImageRunnable implements Runnable

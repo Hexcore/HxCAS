@@ -182,7 +182,7 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 	
 	public long getTime()
 	{
-		return animator.getCurrentTime();
+		return animator.getTotalFPSDuration();
 	}
 	
 	public FileSelectResult askUserForFileToSave(String title)
