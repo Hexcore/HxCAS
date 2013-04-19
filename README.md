@@ -9,12 +9,14 @@ HxCAS is a Cellular Automata Simulator and Editor. HxCAS simulates
 2-dimensional cellular automata where each cell can have multiple
 properties.
 
+More information can be found in the [wiki](https://github.com/Hexcore/HxCAS/wiki)
+
 Features
 --------
  * 2D and 3D visualisation
  * Distributed calculation
  * Automatic client discovery
- * Domain-specific language for cell rules
+ * Domain-specific language for cell rules - [language reference](https://github.com/Hexcore/HxCAS/wiki/CAL-Language-Reference)
  * Multiple properties per cell
  * Homogeneous and Heterogeneous worlds
  * Square, Hexagonal and Triangular cell shapes
@@ -26,6 +28,7 @@ successfully compiled with the following versions of Eclipse:
 
  * Helios
  * Indigo
+ * Juno
  
 HxCAS has been successfully compiled with the following versions of Java:
 

@@ -1,8 +1,17 @@
 /bin
 /listing.txt
+
+# Test temp files
 /testResults
 /Test Data/savedWorld.caw
 /Test Data/world/savedWorld.caw
-/*.cal
+
+# Logs
 /log.txt
 /HxCAS.log
+
+# Temp files
+/*.cal
+/*.class
+*~
+Thumbs.db
