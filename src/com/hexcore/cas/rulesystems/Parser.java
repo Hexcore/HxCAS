@@ -530,7 +530,7 @@ static public void reset()
 			loopLabels = CodeGen.initLoop(entry.offset);
 		}
 		
-		Block();
+		Statement();
 		if(valid)
 			CodeGen.endLoop(loopLabels, entry.offset);
 		
