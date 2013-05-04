@@ -13,11 +13,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="HexcoreCAS/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jar/nativewindow.all.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="HexcoreCAS/lib"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="jar/cocolibs.jar"/>
 	<classpathentry kind="lib" path="jar/asm-3.3.1.jar">
 		<attributes>
