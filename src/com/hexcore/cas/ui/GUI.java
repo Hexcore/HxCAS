@@ -35,6 +35,7 @@ import com.hexcore.cas.model.GridType;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.VonNeumannGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.CodeGen;
@@ -80,12 +81,16 @@ import com.hexcore.cas.ui.toolkit.widgets.TextWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGrid3DWidget;
 import com.hexcore.cas.ui.toolkit.widgets.TriangleGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.View;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGrid3DWidget;
+import com.hexcore.cas.ui.toolkit.widgets.VonNeumannGridWidget;
 import com.hexcore.cas.ui.toolkit.widgets.Widget;
 import com.hexcore.cas.utilities.HeightMapConverter;
 import com.hexcore.cas.utilities.Log;
 
 /**
  * Class GUI
+ * 
+ * Later additions made by Megan Duncan
  * 
  * @authors Divan Burger; Leon Van Dyk
  */
@@ -150,7 +155,15 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	public DropDownBox				cellShapeDropDownBox;
 	public DropDownBox				historyDropDownBox;
-		
+
+	
+
+	public TextWidget				emptyLabel;
+	public TextWidget				engineLabel;
+
+	
+	public NumberBox				engineNumberBox;
+
 	public NumberBox				worldSizeXNumberBox;
 	public NumberBox				worldSizeYNumberBox;
 	
@@ -159,11 +172,17 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	//RULES TAB//
 	public Button					clearRulesButton;
+	public Button					compareRulesButton;
 	public Button					dialogCALOKButton;
 	public Button					openCALFileButton;
 	public Button					saveCALFileButton;
 	public Button					submitRulesButton;
 	
+
+	public DropDownBox				rulesetsDropDownBox;
+	
+	public Container				rulesContainer;
+
 	public Dialog					dialogCAL;
 	public File						calFile;
 	public FileSelectResult			selectedFile;
@@ -655,7 +674,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			if(colourContainerList != null)
 			{
 				for(ColourContainer c : colourContainerList)
-				{System.out.println("CHECK BUTTON FOR ID:" + c.id);
+				{
+					System.out.println("CHECK BUTTON FOR ID:" + c.id);
 					if(event.target == c.addRangeButton)
 					{
 						System.out.println("ADD RANGE BUTTON PRESSED FOR: " + c.id);
@@ -666,6 +686,8 @@ public class GUI implements WindowEventListener, LobbyListener
 					
 					if(event.target == c.removeRangeButton)
 					{
+						System.out.println("REMOVE RANGE BUTTON PRESSED FOR: " + c.id);
+						
 						if(!c.rangeContainerList.isEmpty())
 						{
 							c.removeRange();
@@ -768,6 +790,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			{
 				masterView.setIndex(0);
 			}
+			//RULES TAB
 			else if(event.target == clearRulesButton)
 			{
 				CALTextArea.clear();
@@ -795,14 +818,41 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(compiler.getErrorCount() == 0)
 				{
 					saveRuleCodeToWorld();
+					setRulesetsDropDownBox();
 				}
 				else
 				{
 					Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
-					world.setRuleCode("");
+					//No change to current rulesets
 				}
 				
 				createColoursTab();
+			}
+			else if(event.target == compareRulesButton)
+			{
+				ArrayList<String> rulesets = world.getRuleCodes();
+				
+				TextWidget text = new TextWidget("Ruleset comparison");
+				outputLayout.add(text);
+				
+				outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+				outputLayout.setMargin(new Vector2i(0, 0));
+				outputLayout.setFlag(Widget.WRAP);
+				outputContainer.setContents(outputLayout);
+				
+				if(rulesets.size() == 1)
+					outputLayout.add(new TextWidget("There is only a single ruleset. Comparison is unecessary."));
+				else
+				{
+					ArrayList<String> results = world.compareRulesets();
+					if(results.size() == 0)
+						outputLayout.add(new TextWidget("There is no discrepencies between the rulesets."));
+					else
+						for(int i = 0; i < results.size(); i++)
+							outputLayout.add(new TextWidget(results.get(i)));
+				}
+				
+				window.relayout();
 			}
 			else if(event.target == saveCALFileButton)
 			{
@@ -810,7 +860,13 @@ public class GUI implements WindowEventListener, LobbyListener
 				{
 					selectedFile = window.askUserForFileToSave("Select a location to save", "cal");
 					
-					File f = new File(selectedFile.getFullPath() + ".cal");
+					String fullPath = selectedFile.getFullPath();
+					
+					File f = null;
+					if(fullPath.contains(".cal"))
+						f = new File(fullPath);
+					else
+						f = new File(fullPath + ".cal");
 					
 					try
 					{
@@ -828,7 +884,14 @@ public class GUI implements WindowEventListener, LobbyListener
 				}
 				else
 				{
-					File f = new File(selectedFile.getFullPath() + ".cal");
+					String fullPath = selectedFile.getFullPath();
+					
+					File f = null;
+					if(fullPath.contains(".cal"))
+						f = new File(fullPath);
+					else
+						f = new File(fullPath + ".cal");
+					
 					try
 					{
 						PrintWriter out = new PrintWriter(f);
@@ -845,7 +908,14 @@ public class GUI implements WindowEventListener, LobbyListener
 			{
 				FileSelectResult calFile = window.askUserForFileToSave("Select a location to save", "cal");
 				
-				File f = new File(calFile.getFullPath() + ".cal");
+				String fullPath = calFile.getFullPath();
+				
+				File f = null;
+				if(fullPath.contains(".cal"))
+					f = new File(fullPath);
+				else
+					f = new File(fullPath + ".cal");
+				
 				System.out.println(calFile.getFullPath() + "/" + calFile.filename);
 				try
 				{
@@ -889,12 +959,28 @@ public class GUI implements WindowEventListener, LobbyListener
 					} 
 				}
 			}
+			//OTHER
 			else if(event.target == simulateButton)
 			{
-				String ruleCode = world.getRuleCode();
-				if(ruleCode == null || ruleCode.equals(""))
+				int errors = 0;
+				int nulls = 0;
+				
+				ArrayList<String> rulesets = world.getRuleCodes();
+				for(int i = 0; i < rulesets.size(); i++)
 				{
-					showDialog("Simulation", "Cell rules not set yet");
+					CALCompiler compiler = new CALCompiler();
+					if(rulesets.get(i) == null)
+						nulls += 1;
+					else
+					{
+						compiler.compile(rulesets.get(i));
+						errors += compiler.getErrorCount();
+					}
+				}
+				
+				if(errors > 0 || nulls > 0)
+				{
+					showDialog("Simulation", "Cell rules did not compile therefore simulation cannot run.");
 					return;
 				}
 				
@@ -1267,9 +1353,15 @@ public class GUI implements WindowEventListener, LobbyListener
 					
 					if(selectedViewport.type == Viewport.Type.THREE_D)
 					{
-						System.out.println("Changed slice property");
+						System.out.println("Changed slice property in 3D mode");
 						Grid3DWidget grid3DWidget = (Grid3DWidget)selectedViewport.gridWidget;
 						grid3DWidget.setSlice(i, index, index);
+					}
+					else if(selectedViewport.type == Viewport.Type.TWO_D)
+					{
+						System.out.println("Changed slice property in 2D mode");
+						Grid2DWidget grid2DWidget = (Grid2DWidget)selectedViewport.gridWidget;
+						grid2DWidget.setSlice(i, index, index);
 					}
 				}
 			}
@@ -1284,10 +1376,20 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
 				
 				savePropertiesToWorld();
-				saveRuleCodeToWorld();
 				updateWorldEditorTab();
-				createColoursTab();
 				updatePreview();
+			}
+			else if(event.target == engineNumberBox)
+			{
+				int steps = engineNumberBox.getValue(1);
+				if(steps < 1)
+				{
+					engineNumberBox.setValue(1);
+					steps = 1;
+				}
+
+				world.setRuleCodes(steps);
+				setRulesetsDropDownBox();
 			}
 			//Disable generation slider for no history keep
 			else if(event.target == historyDropDownBox)
@@ -1306,6 +1408,16 @@ public class GUI implements WindowEventListener, LobbyListener
 				
 				savePropertiesToWorld();
 				updateSimulationScreen(true);
+			}
+			else if(event.target == rulesetsDropDownBox)
+			{
+				String selectedRuleset = rulesetsDropDownBox.getSelectedText();
+				int colonIndex = selectedRuleset.indexOf(":");
+				String name = selectedRuleset.substring(colonIndex + 1);
+				System.out.println("Looking for name |" + name + "|");
+				String code = world.getRuleCode(name);
+				
+				CALTextArea.setText(code);
 			}
 			else if(event.target == worldEditorPropertySelector)
 			{
@@ -1387,8 +1499,9 @@ public class GUI implements WindowEventListener, LobbyListener
 		masterView.setFlag(Widget.FILL);
 		window.add(masterView);
 		
+
 		LinearLayout mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
-		
+
 		createWorldButton = (Button)mainMenuLayout.findByName("createWorld");
 		loadWorldButton = (Button)mainMenuLayout.findByName("loadWorld");
 		optionsButton = (Button)mainMenuLayout.findByName("options");
@@ -1481,14 +1594,30 @@ public class GUI implements WindowEventListener, LobbyListener
 		cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeLayout.add(cellShapeLabel);
 		
-		cellShapeDropDownBox = new DropDownBox(new Vector2i(100,20));
+		cellShapeDropDownBox = new DropDownBox(new Vector2i(160,20));
 		cellShapeDropDownBox.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
 		cellShapeDropDownBox.addItem("Hexagon");
+		cellShapeDropDownBox.addItem("Von Neumann Square");
 		cellShapeDropDownBox.setSelected(0);
 		
 		cellShapeLayout.add(cellShapeDropDownBox);
+
+		emptyLabel = new TextWidget("", Size.MEDIUM);
+		emptyLabel.setFlag(Widget.CENTER_VERTICAL);
+		emptyLabel.setMargin(new Vector2i(25, 0));
+		cellShapeLayout.add(emptyLabel);
+		
+		engineLabel = new TextWidget("Engine Step Size:", Size.MEDIUM);
+		engineLabel.setFlag(Widget.CENTER_VERTICAL);
+		cellShapeLayout.add(engineLabel);
+		
+		engineNumberBox = new NumberBox(35);
+		engineNumberBox.setWidth(50);
+		engineNumberBox.setValue(1);
+		engineNumberBox.setFlag(Widget.CENTER_VERTICAL);
+		cellShapeLayout.add(engineNumberBox);
 		
 		LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
@@ -1540,7 +1669,17 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		TextWidget calEditorHeader = new TextWidget("CAL Editor", Text.Size.MEDIUM);
 		calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
-		CALLayout.add(calEditorHeader);	
+		CALLayout.add(calEditorHeader);
+		
+		LinearLayout rulesetLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		rulesetLayout.setFlag(Widget.WRAP);
+		rulesetLayout.setFlag(Widget.CENTER_HORIZONTAL);
+		CALLayout.add(rulesetLayout);
+		
+		rulesetsDropDownBox = new DropDownBox(new Vector2i(200, 20));
+		rulesetsDropDownBox.setFlag(Widget.CENTER_VERTICAL);
+		rulesetsDropDownBox.setSelected(0);
+		rulesetLayout.add(rulesetsDropDownBox);
 		
 		CALTextArea = new TextArea(100, 20);
 		CALTextArea.setMargin(new Vector2i(0,0));
@@ -1570,8 +1709,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		outputLayout.setFlag(Widget.WRAP);
 		
 		outputContainer.setContents(outputLayout);
-		
-		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(875, 50), LinearLayout.Direction.HORIZONTAL);
+		//875
+		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(1045, 50), LinearLayout.Direction.HORIZONTAL);
 		buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		masterRulesLayout.add(buttonRulesLayout);
@@ -1585,6 +1724,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		submitRulesButton.setWidth(165);
 		submitRulesButton.setHeight(35);
 		buttonRulesLayout.add(submitRulesButton);
+		
+		compareRulesButton = new Button(new Vector2i(100, 50), "Compare Rules");
+		compareRulesButton.setWidth(165);
+		compareRulesButton.setHeight(35);
+		buttonRulesLayout.add(compareRulesButton);
 		
 		openCALFileButton = new Button(new Vector2i(100, 50), "Open File");
 		openCALFileButton.setWidth(165);
@@ -2057,15 +2201,22 @@ public class GUI implements WindowEventListener, LobbyListener
 			case HEXAGON:
 				cellShapeDropDownBox.setSelected(2);
 				break;
+			case VONNEUMANN:
+				cellShapeDropDownBox.setSelected(3);
+				break;
 		}
 		
 		wrapCheckBox.setChecked(grid.isWrappable());
 		historyDropDownBox.setSelected(world.getHistoryType());
 		
-		String ruleCode = world.getRuleCode();
+		String ruleCode = world.getRuleCode(rulesetsDropDownBox.getSelected());
 		if(ruleCode == null)
 			ruleCode = "";
 		CALTextArea.setText(ruleCode);
+
+		setRulesetsDropDownBox();
+		engineNumberBox.setValue(world.getStepAmount());
+		
 		saveRuleCodeToWorld();
 		
 		Log.debug(TAG, world.getColourCode());
@@ -2128,8 +2279,10 @@ public class GUI implements WindowEventListener, LobbyListener
 			type = GridType.TRIANGLE;
 		else if(cellShapeDropDownBox.getSelectedText() == "Hexagon")
 			type = GridType.HEXAGON;
-		else
+		else if(cellShapeDropDownBox.getSelectedText() == "Square")
 			type = GridType.RECTANGLE;
+		else
+			type = GridType.VONNEUMANN;
 		
 		if(!grid.getSize().equals(size) || grid.getType() != type)
 		{
@@ -2159,11 +2312,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		CALCompiler compiler = new CALCompiler();
 		RuleLoader ruleLoader = new RuleLoader();
 		compiler.compile(code);
-		
+
 		Rule rule = ruleLoader.loadRule(compiler.getCode());
 		
 		Log.information(TAG, "Loading rule code into World");
-		world.setRuleCode(code);
+		world.updateRuleCode(code, rulesetsDropDownBox.getSelected());
 		
 		Grid grid = world.getInitialGeneration();
 		if(grid.getNumProperties() != rule.getNumProperties())
@@ -2188,6 +2341,21 @@ public class GUI implements WindowEventListener, LobbyListener
 			heightMapPropertySelector.addItem(propertyName);
 		
 		heightMapPropertySelector.setSelected(1);
+	}
+	
+	public void setRulesetsDropDownBox()
+	{
+		ArrayList<String> rulesets = world.getRuleCodes();
+
+		rulesetsDropDownBox.clear();
+		
+		for(int i = 0; i < rulesets.size(); i++)
+		{
+			String code = rulesets.get(i);
+			String name = code.substring(0, code.indexOf("\n"));
+			
+			rulesetsDropDownBox.addItem((i + 1) + ":" + name);
+		}
 	}
 	
 	public void showDialog(String caption, String message)
@@ -2297,6 +2465,15 @@ public class GUI implements WindowEventListener, LobbyListener
 				gridViewer = new HexagonGridWidget((HexagonGrid)grid, 16);
 				widgetPreviewContainer.setContents(gridViewer);
 				break;
+				
+			case VONNEUMANN:
+				grid3DViewer = new VonNeumannGrid3DWidget(new Vector2i(400, 300), (VonNeumannGrid)grid, 24);
+				grid3DViewer.setFlag(Widget.FILL);
+				widget3DPreviewContainer.setContents(grid3DViewer);
+				
+				gridViewer = new VonNeumannGridWidget((VonNeumannGrid)grid, 16);
+				widgetPreviewContainer.setContents(gridViewer);
+				break;
 		}
 		
 		grid3DViewer.addSlice(1, 1, 16.0f);
@@ -2318,7 +2495,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			if(generationSlider.getValue() >= origMaximum)
 				generationSlider.setValue(world.getNumGenerations() - 1);
 			
-			// Update tex
+			// Update text
 			iterationsText.setCaption("Generations: " + generations);
 			
 			// Update viewports
@@ -2550,7 +2727,6 @@ public class GUI implements WindowEventListener, LobbyListener
 			rc.fromColour = r.getColour(0);
 			rc.toColour = r.getColour(0);
 			this.layout.add(rc.getLayout());
-		
 		}
 		
 		public Button getAddRangeButton()

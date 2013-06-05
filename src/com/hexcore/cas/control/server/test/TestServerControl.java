@@ -31,6 +31,7 @@ import com.hexcore.cas.model.Grid;
 import com.hexcore.cas.model.HexagonGrid;
 import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.model.TriangleGrid;
+import com.hexcore.cas.model.VonNeumannGrid;
 import com.hexcore.cas.model.World;
 import com.hexcore.cas.utilities.Log;
 
@@ -255,6 +256,7 @@ public class TestServerControl
 				
 		//================================== Creating ServerOverseer ==================================
 		World theWorld = new World(); 
+		theWorld.setRuleCodes(1);
 		
 		server = new Simulator(theWorld, TEST_CLIENT_PORT);
 		
@@ -585,6 +587,10 @@ public class TestServerControl
 							case 'r':
 							case 'R':
 								grid = new RectangleGrid(size, new Cell(n));
+								break;
+							case 'v':
+							case 'V':
+								grid = new VonNeumannGrid(size, new Cell(n));
 								break;
 							default:
 								capMP.sendState(2, "GRID TYPE INVALID");

@@ -1,42 +1,78 @@
 package com.hexcore.cas.model;
 
 import com.hexcore.cas.math.Vector2i;
+
 /**
  * Class TriangleGrid
  * Stores details specific to a grid made of triangle cells.
- * For example, the different number of neighbours that 
- * a triangle grid has.
+ * For example, the different number of neighbours that a triangle grid has.
  * 
  * @author Megan Duncan
  */
+
 public class TriangleGrid extends Grid
 {
+	/**
+	 * TriangleGrid copy constructor.
+	 * 
+	 * @param grid - the grid to be cloned
+	 */
+	public TriangleGrid(Grid grid)
+	{
+		super(grid);
+	}
+	
+	/**
+	 * TriangleGrid custom constructor.
+	 * 
+	 * @param size - width and height of the desired grid size
+	 * @param example - an example cell that will be used to populate the grid
+	 */
 	public TriangleGrid(Vector2i size, Cell example)
 	{
 		super(size, example);
 	}
 	
+	/**
+	 * TriangleGrid custom constructor.
+	 * 
+	 * @param size - width and height of the desired grid size
+	 * @param numProperties - the number of properties that each cell of the grid must have
+	 */
 	public TriangleGrid(Vector2i size, int numProperties)
 	{
 		super(size, numProperties);
 	}
 	
-	public TriangleGrid(Grid g)
-	{
-		super(g);
-	}
-	
+	/**
+	 * Returns a cloned triangle grid of the current triangle grid.
+	 * 
+	 * @return - a new cloned TriangleGrid
+	 */
 	public Grid clone()
 	{
 		return new TriangleGrid(this);
 	}
 	
+	/**
+	 * Returns the range of the triangle grid type, being all the touching cells around it.
+	 * 
+	 * @return - a Vector2i of the range of the triangle grid type, being 1 up and down and 2 left and right 
+	 */
 	public Vector2i getNeighbourhoodRange()
 	{
 		return new Vector2i(2, 1);
 	}
 	
 	@Override
+	/**
+	 * Returns the possible neighbours of the a cell on a triangle grid.
+	 * Returns null if the neighbour is the target cell itself.
+	 * 
+	 * @param pos - location of cell whose neighbours are requested
+	 * 
+	 * @return - cell array of 12 neighbours
+	 */
 	public Cell[] getNeighbours(Vector2i pos)
 	{
 		int x = pos.x;
@@ -59,6 +95,11 @@ public class TriangleGrid extends Grid
 		}
 	}
 	
+	/**
+	 * Returns an enumeration for the triangle grid type.
+	 * 
+	 * @return - the enumerated value of the triangle grid
+	 */
 	public GridType getType()
 	{
 		return GridType.TRIANGLE;
@@ -66,6 +107,14 @@ public class TriangleGrid extends Grid
 	
 	/////////////////////////////////////////////
 	/// Private functions
+	/**
+	 * Helper function to the public getNeighbours function.
+	 * 
+	 * @param up - whether the current triangle is facing upwards or downwards
+	 * @param pos - location of cell whose neighbours are requested
+	 * 
+	 * @return - cell array of 12 neighbours
+	 */
 	private Cell[] getNeighbours(boolean up, Vector2i pos)
 	{
 		Cell[] n = new Cell[12];
@@ -163,17 +212,23 @@ public class TriangleGrid extends Grid
 		return n;
 	}
 	
+	/**
+	 * Chooses whether the neighbour is valid or should be set to null.
+	 * 
+	 * @param x - x position of target cell
+	 * @param y - y position of target cell
+	 * @param xdim - x dimension of the grid
+	 * @param ydim - y dimension of the grid
+	 * 
+	 * @return - the updated neighbours array
+	 */
 	private Cell setNeighbours(int x, int y, int xdim, int ydim)
 	{
 		if((x < 0) || (x >= xdim))
-		{
 			return null;
-		}
 		else if((y < 0) || (y >= ydim))
-		{
 			return null;
-		}
 		else
-			return getCell( x, y);
-	}//end method setNeighbours
+			return getCell(x, y);
+	}
 }

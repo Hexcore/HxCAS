@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -12,16 +13,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.utilities.Log;
 import com.javamex.classmexer.MemoryUtil;
 import com.javamex.classmexer.MemoryUtil.VisibilityFilter;
 
-import com.hexcore.cas.math.Vector2i;
-import com.hexcore.cas.utilities.Log;
-
 /**
  * Class WorldReader
- * 	An instance of this object is used to read all details
- * 	of a world from where it is stored.
+ * 	An instance of this object is used to read all details of a world from where it is stored
+ * 	according to the file name given by the world.
  * 
  * @author Megan Duncan
  */
@@ -32,20 +32,43 @@ public class WorldReader
 	
 	private World					world = null;
 	
-	public WorldReader(World w)
+	/**
+	 * WorldReader custom constructor.
+	 * 
+	 * @param world - the world that all the details must go into
+	 */
+	public WorldReader(World world)
 	{
-		world = w;
+		this.world = world;
 	}
 	
+	/**
+	 * Reads the file given by the file name and populates the world with the details.
+	 * 
+	 * False is returned if any of the following happen during the coarse of reading the file:
+	 * 	The file does not exist;
+	 * 	The file is not a zipped CAW file;
+	 * 	No configuration file was found; or
+	 * 	The configuration file does not have a grid type symbol.
+	 * 
+	 * Handled missing files:
+	 * 	No colour set file resolves to an empty colour set code.
+	 * 	No rule set file resolves to the rule set code for Conway's Game of Life and the colour set
+	 * 	code to match.
+	 * 	A missing generation will have a null grid.
+	 * 
+	 * Otherwise, true is returned.
+	 * 
+	 * @param worldFilename - the file name of the world that needs to be read in
+	 * 
+	 * @return - the boolean value on the status of successful reading
+	 * 
+	 * @throws IOException
+	 */
 	public boolean readWorld(String worldFilename)
 		throws IOException
 	{
-		/*
-		 * Takes the name of the world zip file and reads in.
-		 * It will specifically look for the configuration file first,
-		 * then the rules set then the colours set and then all the generation files
-		 * or the amount of generation files that can be held in memory.
-		 */
+		ArrayList<String> ruleCodes = new ArrayList<String>();
 		boolean coloursFound = false;
 		boolean rulesFound = false;
 		char type = 'N';
@@ -58,7 +81,6 @@ public class WorldReader
 		MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
 		String colourCode = null;
 		String currFilename = null;
-		String ruleCode = null;
 		ZipFile zip = null;
 		
 		if(!cawFile.exists())
@@ -118,6 +140,10 @@ public class WorldReader
 					case 'T':
 						gen = new TriangleGrid(gridSize, cell);
 						break;
+					case 'v':
+					case 'V':
+						gen = new VonNeumannGrid(gridSize, cell);
+						break;
 					default:
 						Log.error(TAG, "Error loading world - unable to create a grid with no type");
 						return false;
@@ -127,22 +153,18 @@ public class WorldReader
 			}
 		}
 
-		//Searching for the colours and rules files
+		//Searching for the colours file
 		allFiles = zip.entries();
 		while(allFiles.hasMoreElements())
 		{
 			ZipEntry entry = (ZipEntry)allFiles.nextElement();
 			currFilename = entry.getName();
 			
-			if(currFilename.endsWith(".car"))
-			{
-				rulesFound = true;
-				ruleCode = getStringFromStream(zip.getInputStream(entry));
-			}
-			else if(currFilename.endsWith(".cacp"))
+			if(currFilename.endsWith(".cacp"))
 			{
 				coloursFound = true;
 				colourCode = getStringFromStream(zip.getInputStream(entry));
+				break;
 			}
 		}
 
@@ -152,20 +174,48 @@ public class WorldReader
 			Log.warning(TAG, "Colour set not found - setting colours to default empty set");
 			colourCode = "colourset colours\n{}";
 		}
+
+		//Searching for the rules files
+		allFiles = zip.entries();
+		while(allFiles.hasMoreElements())
+		{
+			ZipEntry entry = (ZipEntry)allFiles.nextElement();
+			currFilename = entry.getName();
+			
+			if(currFilename.endsWith(".cal"))
+			{
+				rulesFound = true;
+				
+				String number = currFilename.substring(currFilename.indexOf("rules") + 5, currFilename.indexOf("."));
+
+				if(number.compareTo("") != 0)
+					ruleCodes.add(number + ":" + getStringFromStream(zip.getInputStream(entry)));
+				else
+				{
+					ruleCodes.clear();
+					ruleCodes.add(getStringFromStream(zip.getInputStream(entry)));
+					break;
+				}
+			}
+		}
 		
 		//Set to a default ruleset for Conway's Game of Life and change colour set to mirror this, despite if a colour set was found
 		if(!rulesFound)
 		{
 			Log.warning(TAG, "Rule set not found - setting colours and rules to default sets for Conway's Game of Life");
-			ruleCode = "ruleset GameOfLife\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
 			colourCode = "colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}";
 		}
 
 		//Searching for all generation files that are to be loaded
 		allFiles = zip.entries();
-		int arrSize = zip.size() - 3;
+		
+		int arrSize = zip.size() - 2 - ruleCodes.size();
+		int finalGen = arrSize - 1;
 		int gensToLoad = arrSize;
 		int scale = 500;
+		
+		Grid[] gens = new Grid[gensToLoad];
+		
 		long generationSize = MemoryUtil.deepMemoryUsageOf(gen, VisibilityFilter.ALL);
 		long maxHeap = bean.getHeapMemoryUsage().getMax();
 		long toBeUsedHeap = generationSize * gensToLoad;
@@ -182,9 +232,11 @@ public class WorldReader
 		}
 		Log.information(TAG, toBeUsedHeap + " bean heap memory to be used out of a maximum of " + maxHeap + " for " + gensToLoad + " generations.");
 
-		Grid[] gens = new Grid[gensToLoad];
-		int finalGen = arrSize - 1;
-		
+		ArrayList<String> incompleteGens = new ArrayList<String>();
+		for(int i = 0; i < gensToLoad; i++)
+			incompleteGens.add("");
+
+		//Searching for all generation files and adding them to incompleteGens
 		while(allFiles.hasMoreElements())
 		{
 			ZipEntry entry = (ZipEntry)allFiles.nextElement();
@@ -192,8 +244,7 @@ public class WorldReader
 			
 			if(currFilename.endsWith(".cag"))
 			{
-				String fileData = getStringFromStream(zip.getInputStream(entry));
-				StringTokenizer token = new StringTokenizer(fileData);
+				Log.debug(TAG, "Reading generation file " + currFilename);
 				
 				int index = currFilename.lastIndexOf('/');
 				if(index == -1)
@@ -205,35 +256,76 @@ public class WorldReader
 				else
 					fileGenNum = Integer.parseInt(currFilename.substring(index, fileGenIndex));
 				
+				String fileData = getStringFromStream(zip.getInputStream(entry));
+				
+				int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
+					
+				if(arrIndex < 0)
+					continue;
+				
+				incompleteGens.remove(arrIndex);
+				incompleteGens.add(arrIndex, fileData);
+			}
+			else
+				continue;
+		}
+		
+		//Build up all the generations from incompleteGens and add them to generations
+		Log.debug(TAG, "BUILDING GENERATIONS");
+		for(int i = 0; i < incompleteGens.size(); i++)
+		{
+			Log.debug(TAG, "Building generation " + i);
+			
+			boolean newGenerationType = true;
+			String generationData = incompleteGens.get(i);
+			if(generationData.charAt(0) != 'E' && generationData.charAt(0) != 'D')
+				newGenerationType = false;
+			
+			StringTokenizer token = new StringTokenizer(generationData);
+			
+			String generationType = "X";
+			if(newGenerationType)
+				generationType = token.nextToken();
+			
+			if(generationType.compareTo("E") == 0 || !newGenerationType)
+			{
 				for(int rows = 0; rows < y; rows++)
 				{
 					for(int cols = 0; cols < x; cols++)
 					{
 						double[] vals = new double[properties];
-
+						
 						for(int j = 0; j < properties; j++)
 							vals[j] = Double.parseDouble(token.nextToken());
 						
 						gen.setCell(cols, rows, vals);
 					}
 				}
-
-				int arrIndex = gensToLoad - (finalGen - fileGenNum) - 1;
-				
-				if(arrIndex < 0)
-					continue;
-				
-				gens[arrIndex] = gen.clone();
 			}
 			else
-				continue;
+			{
+				while(token.hasMoreTokens())
+				{
+					int col = Integer.parseInt(token.nextToken());
+					int row = Integer.parseInt(token.nextToken());
+					
+					double[] vals = new double[properties];
+					for(int j = 0; j < properties; j++)
+						vals[j] = Double.parseDouble(token.nextToken());
+					
+					gen.setCell(col, row, vals);
+				}
+			}
+			
+			gens[i] = gen.clone();
 		}
 		
-		world.setRuleCode(ruleCode);
+		//If ruleCodes is empty, a single default rule set will be set
+		world.setRuleCodes(ruleCodes);
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
 		
-		Log.information(TAG, "Number of generations from WorldReader : " + world.getNumGenerations());
+		Log.information(TAG, "Number of generations read from WorldReader : " + world.getNumGenerations());
 		
 		return true;
 	}

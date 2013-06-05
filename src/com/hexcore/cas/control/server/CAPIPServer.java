@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -56,7 +57,7 @@ public class CAPIPServer
 	{
 		super();
 		this.clientPort = clientPort;
-		this.clients = new ArrayList<ClientInfo>();
+		this.clients = new CopyOnWriteArrayList<ClientInfo>();//ConcurrentModificationException
 		
 		workQueue = new LinkedBlockingQueue<ThreadWork>();
 		
