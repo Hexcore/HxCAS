@@ -7,7 +7,6 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Text;
-import com.hexcore.cas.ui.toolkit.widgets.ScrollableContainer.DragState;
 
 
 public class TextArea extends TextBox
@@ -18,6 +17,7 @@ public class TextArea extends TextBox
 	private boolean scrollbars = false;
 	private boolean scrollSelected = false;
 	private int scrollDragStart = 0;
+	private boolean textChanged = false;
 	
 
 
@@ -141,18 +141,25 @@ public class TextArea extends TextBox
 					handled = false;
 				
 				if (handled && !event.hasModifier(Event.SHIFT)) selectIndex = cursorIndex;
+				
 			}
-			else if (event.type == Event.Type.KEY_TYPED && event.button == '\n')
+			else if (event.type == Event.Type.KEY_TYPED)
 			{
-				text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
-				
-				if (startIndex != endIndex)
-					cursorIndex = startIndex + 1;
+				textChanged = true;
+				if(event.button == '\n')
+				{
+					text = text.substring(0, startIndex) + (char)event.button + text.substring(endIndex);
+					
+					if (startIndex != endIndex)
+						cursorIndex = startIndex + 1;
+					else
+						cursorIndex++;
+					
+					selectIndex = cursorIndex;
+					handled = true;
+				}
 				else
-					cursorIndex++;
-				
-				selectIndex = cursorIndex;
-				handled = true;
+					handled = false;
 			}
 			else if (event.type == Event.Type.MOUSE_CLICK)
 			{
@@ -210,8 +217,13 @@ public class TextArea extends TextBox
 			Vector2i p = flowedText.getCursorLocation(cursorIndex);
 			int ypos = p.y * lineHeight - textOffset.y + padding.y;
 
-			if (ypos <= 0) scroll(ypos);
-			if (ypos + lineHeight >= size.y) scroll(ypos + lineHeight - size.y);
+			if(textChanged)
+			{
+				if (ypos <= 0) scroll(ypos);
+				if (ypos + lineHeight >= size.y) scroll(ypos + lineHeight - size.y);
+				
+				textChanged = false;
+			}
 		}
 		
 		return handled;
@@ -220,5 +232,6 @@ public class TextArea extends TextBox
 	private void scroll(int y)
 	{
 		textOffset.y = Math.max(Math.min(textOffset.y + y, maxHeight - size.y), 0);
+		System.out.println(textOffset.y);
 	}
 }
