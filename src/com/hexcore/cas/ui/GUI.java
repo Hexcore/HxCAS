@@ -1686,13 +1686,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		CALTextArea.setFlag(Widget.FILL);
 		CALTextArea.setLineNumbers(true);
 		
-		ScrollableContainer textAreaContainer = new ScrollableContainer(new Vector2i(100,100));
-		textAreaContainer.setFlag(Widget.FILL);
+		CALLayout.add(CALTextArea);
 		
-		textAreaContainer.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
-		CALLayout.add(textAreaContainer);
-		
-		textAreaContainer.setContents(CALTextArea);
 		
 		TextWidget compilerOutputHeader = new TextWidget("Compiler Log", Text.Size.MEDIUM);
 		compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
