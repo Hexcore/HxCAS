@@ -7,12 +7,19 @@ import javax.media.opengl.GL;
 import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.ui.toolkit.Event;
 import com.hexcore.cas.ui.toolkit.Text;
+import com.hexcore.cas.ui.toolkit.widgets.ScrollableContainer.DragState;
+
 
 public class TextArea extends TextBox
 {	
 	private	int		rows;
 	private boolean lineNumbers;
 	private int		maxHeight = 0;
+	private boolean scrollbars = false;
+	private boolean scrollSelected = false;
+	private int scrollDragStart = 0;
+	
+
 
 	public TextArea(int width, int rows)
 	{
@@ -100,7 +107,12 @@ public class TextArea extends TextBox
 			window.getTheme().renderTextArea(gl, pos, size, flowedText, selectIndex, cursorIndex, focused, lineNumbers, cursorFlash, textOffset.y);
 		
 		if (maxHeight > size.y)
+		{
 			window.getTheme().renderVerticalScrollbar(gl, pos, size, textOffset.y, maxHeight, size.y);
+			scrollbars = true;
+		}
+		else
+			scrollbars = false;
 
 		window.removeClipRectangle(gl);
 	}
@@ -142,10 +154,47 @@ public class TextArea extends TextBox
 				selectIndex = cursorIndex;
 				handled = true;
 			}
+			else if (event.type == Event.Type.MOUSE_CLICK)
+			{
+				handled = false;
+				if(scrollbars)
+				{
+					if(event.position.x >= (position.add(size).x) - window.getTheme().getScrollbarSize())
+					{
+						scrollSelected = event.pressed;
+						scrollDragStart = event.position.y;
+						handled = true;
+					}				
+				
+					if(scrollSelected && !event.pressed)
+					{
+						scrollSelected = false;
+						handled = true;
+					}
+				}
+			}
+			else if(event.type == Event.Type.MOUSE_MOTION)
+			{
+				if(scrollSelected)
+				{/*
+					if (dragState == DragState.VERTICAL)
+						setScrollY(event.position.y - dragStart.y);
+					else if (dragState == DragState.HORIZONTAL)
+						setScrollX(event.position.x - dragStart.x);
+						*/	
+					
+					int amount = event.position.y - scrollDragStart;
+					scroll(amount);
+					handled = true;
+				}
+				else
+					handled = false;
+				
+			}
 			else if (event.type == Event.Type.MOUSE_SCROLL)
 			{
 				scroll(event.amount);
-				handled = false;
+				handled = true;
 			}
 			else
 				handled = false;
