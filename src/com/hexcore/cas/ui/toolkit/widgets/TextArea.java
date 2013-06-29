@@ -5,7 +5,9 @@ import java.awt.event.KeyEvent;
 import javax.media.opengl.GL;
 
 import com.hexcore.cas.math.Vector2i;
+import com.hexcore.cas.ui.toolkit.Colour;
 import com.hexcore.cas.ui.toolkit.Event;
+import com.hexcore.cas.ui.toolkit.Graphics;
 import com.hexcore.cas.ui.toolkit.Text;
 
 
@@ -115,6 +117,9 @@ public class TextArea extends TextBox
 			scrollbars = false;
 
 		window.removeClipRectangle(gl);
+		
+		if(window.isDebugLayout())
+			Graphics.renderBorder(gl, pos, size, new Colour(1.0f, 0.0f, 0.0f));
 	}
 	
 	@Override
