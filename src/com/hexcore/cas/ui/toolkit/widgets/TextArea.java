@@ -231,7 +231,6 @@ public class TextArea extends TextBox
 	private void scroll(int y)
 	{
 		textOffset.y = Math.max(Math.min(textOffset.y + y, maxHeight - size.y), 0);
-		System.out.println(textOffset.y);
 	}
 	
 	private void setScrollY(int y)
