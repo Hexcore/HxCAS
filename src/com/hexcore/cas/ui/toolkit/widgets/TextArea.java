@@ -188,15 +188,9 @@ public class TextArea extends TextBox
 			else if(event.type == Event.Type.MOUSE_MOTION)
 			{
 				if(scrollSelected)
-				{/*
-					if (dragState == DragState.VERTICAL)
-						setScrollY(event.position.y - dragStart.y);
-					else if (dragState == DragState.HORIZONTAL)
-						setScrollX(event.position.x - dragStart.x);
-						*/	
-					
+				{					
 					int amount = event.position.y - scrollDragStart;
-					scroll(amount);
+					setScrollY(amount);
 					handled = true;
 				}
 				else
@@ -239,4 +233,12 @@ public class TextArea extends TextBox
 		textOffset.y = Math.max(Math.min(textOffset.y + y, maxHeight - size.y), 0);
 		System.out.println(textOffset.y);
 	}
+	
+	private void setScrollY(int y)
+	{
+		textOffset.y = y * maxHeight / size.y;
+		if (textOffset.y < 0) textOffset.y = 0;
+		if (textOffset.y >= maxHeight - size.y) textOffset.y = maxHeight - size.y;
+	}
+
 }
