@@ -3,6 +3,7 @@ import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
+import com.hexcore.cas.rulesystems.TableEntry.Type;
 import org.objectweb.asm.Label;
 
 COMPILER CAL $NC
@@ -72,6 +73,7 @@ static public void reset()
 	Errors.eof = false;
 	valid = true;
 }
+
 
 CHARACTERS
   digit      = "0123456789" .
@@ -163,11 +165,11 @@ PRODUCTIONS
   	Property								(. String name = ""; .)
   	=
   	"property" Ident< out name >			(.
-  												if(table.find(name).type != TableEntry.noType) SemanticError("Identifier \"" + name + "\" already declared.");
+  												if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
   												TableEntry entry = new TableEntry();
   												entry.name = name;
-  												entry.type = TableEntry.doubleType;
-  												entry.kind = TableEntry.Property;
+  												entry.type = TableEntry.Type.DOUBLE;
+  												entry.kind = TableEntry.Kind.PROPERTY;
   												if(valid)
   													entry.offset = CodeGen.declareProperty(name);
   												table.insert(entry);
@@ -235,7 +237,7 @@ PRODUCTIONS
   	
   	
   	/********** Assignment or function call *********/
-  	AssignCall									(. TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;.)
+  	AssignCall									(. TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; TableEntry.Type typeA = TableEntry.Type.NONE;.)
   	=
   	Designator< out entry, false >			(. PostOpE T = PostOpE.UN; .)
   	(
@@ -256,13 +258,13 @@ PRODUCTIONS
   													
   													if(valid)
   													{
-	  													if(entry.kind == TableEntry.Variable)
+	  													if(entry.kind == TableEntry.Kind.VARIABLE)
 	  													{
 	  														if(TableEntry.isBool(type))
 	  															CodeGen.toDouble();
 	  														CodeGen.storeVariable(entry.offset);
 	  													}
-	  													else if(entry.kind == TableEntry.Property)
+	  													else if(entry.kind == TableEntry.Kind.PROPERTY)
 	  													{
 	  														CodeGen.storeProperty(entry.offset);
 	  													}
@@ -270,14 +272,14 @@ PRODUCTIONS
   												.)
   		| PostOp< out T >						(. 
   													if(!TableEntry.isArith(entry.type))
-  														SemanticError("Cannot perform a post operation on a boolan type.");
+  														SemanticError("Cannot perform a post operation on a boolean type.");
   														
   													if(entry.immutable)
   													{
   														SemError("Cannot alter immutable symbol");
   													}
   														
-  													if(entry.kind != TableEntry.Variable)
+  													if(entry.kind != TableEntry.Kind.VARIABLE)
   													{
   														SemanticError("Can only perform post operation on a variable.");
   													}
@@ -297,7 +299,7 @@ PRODUCTIONS
   													SemanticError("Arguments can only be given to a function.");
   												}
   												
-  												if(entry.kind == TableEntry.aFunction)
+  												if(entry.kind == TableEntry.Kind.AFUNCTION)
   												{
   													if(!TableEntry.isArray(typeA))
   													{
@@ -324,8 +326,8 @@ PRODUCTIONS
   	
   	/********** Declared Designator *********/
   	Designator<. out TableEntry entry, boolean attr .>	(.
-			  													int type = TableEntry.noType;
-			  													int typeE = TableEntry.noType;
+			  													TableEntry.Type type = TableEntry.Type.NONE;
+			  													TableEntry.Type typeE = TableEntry.Type.NONE;
 			  													String name = "";
 			  													TableEntry entryA = null;
 			  												.)
@@ -333,16 +335,16 @@ PRODUCTIONS
   	Ident< out name >							(.
 
   													entry = table.find(name);
-  													if(entry.type == TableEntry.noType)
+  													if(entry.type == TableEntry.Type.NONE)
   														SemanticError("Undeclared identifier \"" + name + "\"");
   													else
   														type = entry.type;
   														
-  													if(entry.kind == TableEntry.Property && attr == false)
+  													if(entry.kind == TableEntry.Kind.PROPERTY && attr == false)
   														SemanticError("Properties must be called with \"self\"");
   														
   														
-  													if(entry.kind == TableEntry.Cell)
+  													if(entry.kind == TableEntry.Kind.CELL)
   														if(valid)
 		  													CodeGen.derefRef(entry.offset);
   														
@@ -350,7 +352,7 @@ PRODUCTIONS
   													 
   	[
   		"["												
-  			Expression< out typeE >				(. if((type % 2) == 0) SemanticError("Cannot index scalar type \"" + name +  "\"");
+  			Expression< out typeE >				(. if(TableEntry.isScalar(type)) SemanticError("Cannot index scalar type \"" + name +  "\"");
   													if(!TableEntry.isArith(typeE))
   													{
   														SemanticError("Index must be arithmetic");
@@ -369,21 +371,21 @@ PRODUCTIONS
   													TableEntry entryS = new TableEntry();
   													entryS.name = entry.name;
   													entryS.kind = entry.kind;
-  													entryS.type = entry.type - 1;
+  													entryS.type = TableEntry.Type.values()[(entry.type.ordinal() - 1)];
   													entry = entryS;
   												.)
   	]
   	[  	
   		"." Attribute< out entryA > 				(.
-  														if(entry.kind != TableEntry.Cell) SemanticError("Only cells have attributes.");
-  														if(entryA.kind != TableEntry.Property) SemanticError("Only declared properties can be used as cell attributes.");
+  														if(entry.kind != TableEntry.Kind.CELL) SemanticError("Only cells have attributes.");
+  														if(entryA.kind != TableEntry.Kind.PROPERTY) SemanticError("Only declared properties can be used as cell attributes.");
   														TableEntry entryAA = new TableEntry();
   														entryAA.name = entryA.name;
   														entryAA.kind = entryA.kind;
   														entryAA.offset = entryA.offset;
   														if(TableEntry.isArray(entry.type))
   														{
-  															entryAA.type = entryA.type + 1;
+  															entryAA.type = TableEntry.Type.values()[(entryA.type.ordinal() + 1)];
   														}
   														else
   														{
@@ -408,7 +410,7 @@ PRODUCTIONS
   	
   	
   	/********** If Statement *********/
-  	IfStatement									(. int type = TableEntry.noType; .)
+  	IfStatement									(. TableEntry.Type type = TableEntry.Type.NONE; .)
   	=
   	"if" "("
   	Expression< out type > 
@@ -444,23 +446,23 @@ PRODUCTIONS
   	
   	/********** Loop *********/
   	Loop										(.
-  													int type1 = 0, type2 = 0;
+  													TableEntry.Type type1 = TableEntry.Type.INT, type2 = TableEntry.Type.INT;
   													String name = "";
   													Label[] loopLabels = null;
   													TableEntry entry = new TableEntry();
   												.)
   	=
   	"loop" Ident< out name > 					(.
-  													if(table.find(name).type != TableEntry.noType)
+  													if(table.find(name).type != TableEntry.Type.NONE)
   													{
   														SemError("Redeclared identifier");
   													}
   													
   													if(valid)
   													{  														
-  														entry.kind = TableEntry.Variable;
+  														entry.kind = TableEntry.Kind.VARIABLE;
   														entry.name = name;
-  														entry.type = TableEntry.intType;
+  														entry.type = TableEntry.Type.INT;
   														entry.immutable = true;
   														table.insert(entry);
   														entry.offset = CodeGen.declareLoopVariables();
@@ -508,9 +510,10 @@ PRODUCTIONS
   	
   	
   	/********** Expression **********/
-  	Expression<. out int type .>			(. 	int type1, type2;
-  												type = TableEntry.noType;
-  											.)
+  	Expression<. out Type type .>			(. 	
+  	                                        			   	TableEntry.Type type1, type2;
+  															type = TableEntry.Type.NONE;
+  														.)
   	=
   	AddExp< out type1 >						(.
   												RelOpE op = RelOpE.UN;
@@ -522,10 +525,10 @@ PRODUCTIONS
   												if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
   												{
   													SemanticError("Type mismatch");
-  													type = TableEntry.noType;
+  													type = TableEntry.Type.NONE;
   												}
   													
-  												type = TableEntry.boolType;
+  												type = TableEntry.Type.BOOL;
   												
   												if(valid)
   													CodeGen.performRelationalOp(op);										
@@ -537,9 +540,9 @@ PRODUCTIONS
   	
   	
   	/********** Add-Based Expression **********/
-  	AddExp<. out int type .>				(.
-  												int type1, type2;
-  												type = TableEntry.noType;
+  	AddExp<. out Type type .>				(.
+  												TableEntry.Type type1, type2;
+  												type = TableEntry.Type.NONE;
   												boolean negative = false;
   											.)
   	=
@@ -566,15 +569,15 @@ PRODUCTIONS
   													case OR:
   														if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
   															SemanticError("Boolean Types Required");
-  														type = TableEntry.boolType;
+  														type = TableEntry.Type.BOOL;
   														break;
   													default:
   														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
   															SemanticError("Numeric Types Required");
-  														if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
-  															type = TableEntry.intType;
+  														if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
+  															type = TableEntry.Type.INT;
   														else
-  															type = TableEntry.doubleType;
+  															type = TableEntry.Type.DOUBLE;
   												}
   												
   												if(valid)
@@ -589,9 +592,9 @@ PRODUCTIONS
   	
   	
   	/********** Terms **********/
-  	Term<. out int type .>					(.
-  												int type1, type2;
-  												type = TableEntry.noType; 
+  	Term<. out Type type .>					(.
+  												TableEntry.Type type1, type2;
+  												type = TableEntry.Type.NONE; 
   											.)
   	=
   	Factor< out type1 >						(.
@@ -606,15 +609,15 @@ PRODUCTIONS
   													case AND:
   														if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
   															SemanticError("Boolean Types Required");
-  														type = TableEntry.boolType;
+  														type = TableEntry.Type.BOOL;
   														break;
   													default:
   														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
   															SemanticError("Numeric Types Required");
-  														if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
-  															type = TableEntry.intType;
+  														if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
+  															type = TableEntry.Type.INT;
   														else
-  															type = TableEntry.doubleType;  														
+  															type = TableEntry.Type.DOUBLE; 														
   												}
   												
   												if(valid)
@@ -630,7 +633,7 @@ PRODUCTIONS
   	
   	
   	/********** Factors **********/
-  	Factor<. out int type .>				(.
+  	Factor<. out Type type .>				(.
   												PostOpE T = PostOpE.UN;
   												PrimaryPair p = new PrimaryPair();
   											.)
@@ -640,7 +643,7 @@ PRODUCTIONS
   	PostOp< out T >							(.
   												if(!TableEntry.isArith(type)) SemanticError("Cannot perform a post operation on a boolan type.");
   								
-  												if(p.kind != TableEntry.Variable)
+  												if(p.kind != TableEntry.Kind.VARIABLE)
   												{
   													SemanticError("Can only perform post operations on a variable.");
   												}
@@ -668,10 +671,10 @@ PRODUCTIONS
   	/********** PRIMARY ELEMENT **********/
   	Primary<. out PrimaryPair p .>			(.
   												p = new PrimaryPair();
-  												p.type = TableEntry.noType;
+  												p.type = TableEntry.Type.NONE;
   												
-  												int typeA = TableEntry.noType;
-  												int typeE = TableEntry.noType;
+  												TableEntry.Type typeA = TableEntry.Type.NONE;
+  												TableEntry.Type typeE = TableEntry.Type.NONE;
   												
   												ConstantRecord con;
   												TableEntry entry = null;
@@ -679,15 +682,15 @@ PRODUCTIONS
   	=
   	Designator< out entry, false >		(.
   												p.type = entry.type;
-  												p.kind = TableEntry.Variable;
+  												p.kind = TableEntry.Kind.VARIABLE;
   												p.offset = entry.offset;
   												
   												
   												if(valid)
   												{
-	 												if(entry.kind == TableEntry.Variable)
+	 												if(entry.kind == TableEntry.Kind.VARIABLE)
 			  											CodeGen.derefVariable(entry.offset);		  											 
-			  										else if(entry.kind == TableEntry.Property)
+			  										else if(entry.kind == TableEntry.Kind.PROPERTY)
 			  										{
 			  											if(TableEntry.isArray(entry.type))
 			  												CodeGen.generatePropertyArray(entry.offset);
@@ -704,7 +707,7 @@ PRODUCTIONS
   													SemanticError("Arguments can only be given to a function.");
   												}
   												
-  												if(entry.kind == TableEntry.aFunction)
+  												if(entry.kind == TableEntry.Kind.AFUNCTION)
   												{
   													if(!TableEntry.isArray(typeA))
   													{
@@ -728,7 +731,7 @@ PRODUCTIONS
   															CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
   													}
   												}
-  												p.kind = TableEntry.Constant;
+  												p.kind = TableEntry.Kind.CONSTANT;
   											
   											.)
   	")"										
@@ -736,7 +739,7 @@ PRODUCTIONS
   	|
   	Constant< out con >						(.
   												p.type = con.type;
-  												p.kind = TableEntry.Constant;
+  												p.kind = TableEntry.Kind.CONSTANT;
   												
   												if(valid)
   													CodeGen.loadConstant((double)con.value);
@@ -744,7 +747,7 @@ PRODUCTIONS
   	|
   	"(" Expression< out typeE >				(.
   												p.type = typeE;
-  												p.kind = TableEntry.Constant;
+  												p.kind = TableEntry.Kind.CONSTANT;
   											.)
   	")"										
   	.
@@ -758,8 +761,8 @@ PRODUCTIONS
   												con = new ConstantRecord();
   											.)
   	=
-  	DoubleConst< out con.value >			(.	con.type = TableEntry.doubleType;	.)
-	| IntConst< out con.value >				(.	con.type = TableEntry.intType;		.)
+  	DoubleConst< out con.value >			(.	con.type = TableEntry.Type.DOUBLE;	.)
+	| IntConst< out con.value >				(.	con.type = TableEntry.Type.INT;		.)
   	.
   	/*****************************/
   	
@@ -767,7 +770,7 @@ PRODUCTIONS
   	
   	
   	/********** ARGUMENTS **********/
-  	Arguments<. out int type .>				(. type = TableEntry.noType; .)
+  	Arguments<. out Type type .>				(. type = TableEntry.Type.NONE; .)
   	=
   	[
   		Expression< out type >
@@ -828,17 +831,18 @@ PRODUCTIONS
   	
   	
   	/********** Single Variable **********/
-  	OneVar									(. int type = TableEntry.noType; String name = ""; .)
+  	OneVar									(. TableEntry.Type type = TableEntry.Type.NONE; String name = ""; .)
   	=
   	Ident< out name >						(.
   												TableEntry entry = new TableEntry();
   												entry.name = "__new__";
   												
-  												if(table.find(name).type != TableEntry.noType) 
+  												if(table.find(name).type != TableEntry.Type.NONE) 
   													SemanticError("Identifier \"" + name + "\" already declared.");
   												else
   												{
-  													entry.kind = TableEntry.Variable;
+  													entry.kind = TableEntry.Kind.VARIABLE;
+  													entry.type = TableEntry.Type.INT;
   													entry.name = name;
   													entry.offset = CodeGen.declareLocalVariable(name);
   												}
@@ -847,7 +851,7 @@ PRODUCTIONS
   	"=" Expression< out type >				(.
   												if(!entry.name.equals("__new__"))
   												{
-  													entry.kind = TableEntry.Variable;
+  													entry.kind = TableEntry.Kind.VARIABLE;
   													entry.type = type;
   												}
   												

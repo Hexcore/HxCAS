@@ -8,24 +8,15 @@ package com.hexcore.cas.rulesystems;
 
 public class TableEntry
 {
-	public static final int	Constant = 0,		//Kinds
-							Variable = 1,
-							sFunction = 2,
-							aFunction = 3,
-							Property = 4,		//For cell properties
-							Cell =     5,
-							
-							intType = 0,		//Types
-							doubleType = 2,
-							noType = 4,
-							boolType = 6,
-							cellType = 8;
+	public enum Kind {CONSTANT, VARIABLE, SFUNCTION, AFUNCTION, PROPERTY, CELL, TYPENAME};
+	public enum Type {INT, INT_ARR, DOUBLE, DOUBLE_ARR, NONE, NONE_ARR, BOOL, BOOL_ARR, CELL, CELL_ARR};
 	
-	public int 				type;
-	public int 				kind;
+	
+	public Type 			type;
+	public Kind				kind;
 	public int 				value;				//Constant value
 	public int 				offset;
-	public int				argType;
+	public Type				argType;
 	public String			name;
 	public boolean			immutable = false;
 	
@@ -34,35 +25,45 @@ public class TableEntry
 	public TableEntry()
 	{
 		nextEntry = null;
+		type = Type.NONE;
 	}
 	
-	public static boolean isArith(int type)
+	public static boolean isArith(Type type)
 	{
-		if(type <= 3)
+		if(type.ordinal() <= 3)
 			return true;
 		else
 			return false;
 	}
 	
-	public static boolean isBool(int type)
+	public static boolean isBool(Type type)
 	{
-		if(type == 6 || type == 7)
+		if(type == Type.BOOL || type == Type.BOOL_ARR)
 			return true;
 		else
 			return false;
 	}
 	
-	public static boolean isArray(int type)
+	public static boolean isArray(Type type)
 	{
-		if(type == 1 || type == 3 || type == 9)
+		if(type == Type.INT_ARR|| type == Type.DOUBLE_ARR || type == Type.BOOL_ARR || type == Type.CELL_ARR)
 			return true;
 		else
 			return false;
 	}
 	
-	public static boolean isFunction(int kind)
+	public static boolean isScalar(Type type)
 	{
-		if(kind == 2 || kind == 3)
+		if(type.ordinal() % 2 == 0)
+			return true;
+		else
+			return false;
+	}
+	
+	
+	public static boolean isFunction(Kind kind)
+	{
+		if(kind == Kind.AFUNCTION || kind == Kind.SFUNCTION)
 			return true;
 		else
 			return false;

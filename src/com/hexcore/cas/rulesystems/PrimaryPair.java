@@ -8,7 +8,7 @@ package com.hexcore.cas.rulesystems;
 
 public class PrimaryPair
 {
-	public int type;
-	public int kind;
+	public TableEntry.Type type;
+	public TableEntry.Kind kind;
 	public int offset;
 }

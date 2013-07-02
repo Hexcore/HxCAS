@@ -54,106 +54,106 @@ public class SymbolTable
 			currentScope = currentScope.outer;
 		}
 		TableEntry noEntry = new TableEntry();
-		noEntry.type = TableEntry.noType;
+		noEntry.type = TableEntry.Type.NONE;
 		return noEntry;
 	}
 	
 	public void prepare()
 	{
 		TableEntry selfEntry = new TableEntry();
-		selfEntry.type = TableEntry.cellType;
-		selfEntry.kind = TableEntry.Cell;
+		selfEntry.type = TableEntry.Type.CELL;
+		selfEntry.kind = TableEntry.Kind.CELL;
 		selfEntry.name = "self";
 		selfEntry.offset = 1;
 		insert(selfEntry);
 		
 		TableEntry typeEntry = new TableEntry();
-		typeEntry.type = TableEntry.intType;
-		typeEntry.kind = TableEntry.Property;
+		typeEntry.type = TableEntry.Type.INT;
+		typeEntry.kind = TableEntry.Kind.PROPERTY;
 		typeEntry.name = "type";
 		typeEntry.offset = 0;
 		insert(typeEntry);
 		
 		TableEntry maxEntry = new TableEntry();
-		maxEntry.type = TableEntry.doubleType;
-		maxEntry.kind = TableEntry.aFunction;
+		maxEntry.type = TableEntry.Type.DOUBLE;
+		maxEntry.kind = TableEntry.Kind.AFUNCTION;
 		maxEntry.name = "max";
-		maxEntry.argType = TableEntry.doubleType;
+		maxEntry.argType = TableEntry.Type.DOUBLE;
 		insert(maxEntry);
 		
 		TableEntry minEntry = new TableEntry();
-		minEntry.type = TableEntry.doubleType;
-		minEntry.kind = TableEntry.aFunction;
+		minEntry.type = TableEntry.Type.DOUBLE;
+		minEntry.kind = TableEntry.Kind.AFUNCTION;
 		minEntry.name = "min";
-		minEntry.argType = TableEntry.doubleType;
+		minEntry.argType = TableEntry.Type.DOUBLE;
 		insert(minEntry);
 		
 		TableEntry logEntry = new TableEntry();
-		logEntry.type = TableEntry.doubleType;
-		logEntry.kind = TableEntry.sFunction;
+		logEntry.type = TableEntry.Type.DOUBLE;
+		logEntry.kind = TableEntry.Kind.SFUNCTION;
 		logEntry.name = "log";
-		logEntry.argType = TableEntry.doubleType;
+		logEntry.argType = TableEntry.Type.DOUBLE;
 		insert(logEntry);
 		
 		TableEntry sinEntry = new TableEntry();
-		sinEntry.type = TableEntry.doubleType;
-		sinEntry.kind = TableEntry.sFunction;
+		sinEntry.type = TableEntry.Type.DOUBLE;
+		sinEntry.kind = TableEntry.Kind.SFUNCTION;
 		sinEntry.name = "sin";
-		sinEntry.argType = TableEntry.doubleType;
+		sinEntry.argType = TableEntry.Type.DOUBLE;
 		insert(sinEntry);
 		
 		TableEntry cosEntry = new TableEntry();
-		cosEntry.type = TableEntry.doubleType;
-		cosEntry.kind = TableEntry.sFunction;
+		cosEntry.type = TableEntry.Type.DOUBLE;
+		cosEntry.kind = TableEntry.Kind.SFUNCTION;
 		cosEntry.name = "cos";
-		cosEntry.argType = TableEntry.doubleType;
+		cosEntry.argType = TableEntry.Type.DOUBLE;
 		insert(cosEntry);
 		
 		TableEntry lnEntry = new TableEntry();
-		lnEntry.type = TableEntry.doubleType;
-		lnEntry.kind = TableEntry.sFunction;
+		lnEntry.type = TableEntry.Type.DOUBLE;
+		lnEntry.kind = TableEntry.Kind.SFUNCTION;
 		lnEntry.name = "ln";
-		lnEntry.argType = TableEntry.doubleType;
+		lnEntry.argType = TableEntry.Type.DOUBLE;
 		insert(lnEntry);
 		
 		TableEntry sumEntry = new TableEntry();
-		sumEntry.type = TableEntry.doubleType;
-		sumEntry.kind = TableEntry.aFunction;
+		sumEntry.type = TableEntry.Type.DOUBLE;
+		sumEntry.kind = TableEntry.Kind.AFUNCTION;
 		sumEntry.name = "sum";
-		sumEntry.argType = TableEntry.doubleType;
+		sumEntry.argType = TableEntry.Type.DOUBLE;
 		insert(sumEntry);
 		
 		TableEntry randomEntry = new TableEntry();
-		randomEntry.type = TableEntry.doubleType;
-		randomEntry.kind = TableEntry.sFunction;
+		randomEntry.type = TableEntry.Type.DOUBLE;
+		randomEntry.kind = TableEntry.Kind.SFUNCTION;
 		randomEntry.name = "random";
-		randomEntry.argType = TableEntry.doubleType;
+		randomEntry.argType = TableEntry.Type.DOUBLE;
 		insert(randomEntry);
 		
 		TableEntry roundEntry = new TableEntry();
-		roundEntry.type = TableEntry.intType;
-		roundEntry.kind = TableEntry.sFunction;
+		roundEntry.type = TableEntry.Type.INT;
+		roundEntry.kind = TableEntry.Kind.SFUNCTION;
 		roundEntry.name = "round";
-		roundEntry.argType = TableEntry.doubleType;
+		roundEntry.argType = TableEntry.Type.DOUBLE;
 		insert(roundEntry);
 		
 		TableEntry countEntry = new TableEntry();
-		countEntry.type = TableEntry.intType;
-		countEntry.kind = TableEntry.aFunction;
+		countEntry.type = TableEntry.Type.INT;
+		countEntry.kind = TableEntry.Kind.AFUNCTION;
 		countEntry.name = "count";
-		countEntry.argType = TableEntry.intType;
+		countEntry.argType = TableEntry.Type.INT;
 		insert(countEntry);
 		
 		TableEntry existsEntry = new TableEntry();
-		existsEntry.type = TableEntry.boolType;
-		existsEntry.kind = TableEntry.sFunction;
+		existsEntry.type = TableEntry.Type.BOOL;
+		existsEntry.kind = TableEntry.Kind.SFUNCTION;
 		existsEntry.name = "exists";
-		existsEntry.argType = TableEntry.cellType;
+		existsEntry.argType = TableEntry.Type.CELL;
 		insert(existsEntry);
 		
 		TableEntry neighboursEntry = new TableEntry();
-		neighboursEntry.type = TableEntry.cellType + 1;
-		neighboursEntry.kind = TableEntry.Cell;
+		neighboursEntry.type = TableEntry.Type.values()[(TableEntry.Type.CELL.ordinal() + 1)];
+		neighboursEntry.kind = TableEntry.Kind.CELL;
 		neighboursEntry.name = "neighbours";
 		neighboursEntry.offset = 2;
 		insert(neighboursEntry);

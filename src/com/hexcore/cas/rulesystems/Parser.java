@@ -5,6 +5,7 @@ import com.hexcore.cas.rulesystems.TableEntry;
 import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
+import com.hexcore.cas.rulesystems.TableEntry.Type;
 import org.objectweb.asm.Label;
 
 import java.io.*;
@@ -134,6 +135,7 @@ static public void reset()
 	Errors.eof = false;
 	valid = true;
 }
+
 
 
 
@@ -291,11 +293,11 @@ static public void reset()
 		String name = "";
 		Expect(property_Sym);
 		name  = Ident();
-		if(table.find(name).type != TableEntry.noType) SemanticError("Identifier \"" + name + "\" already declared.");
+		if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
 		TableEntry entry = new TableEntry();
 		entry.name = name;
-		entry.type = TableEntry.doubleType;
-		entry.kind = TableEntry.Property;
+		entry.type = TableEntry.Type.DOUBLE;
+		entry.kind = TableEntry.Kind.PROPERTY;
 		if(valid)
 			entry.offset = CodeGen.declareProperty(name);
 		table.insert(entry);
@@ -368,7 +370,7 @@ static public void reset()
 	}
 
 	static void AssignCall() {
-		TableEntry entry = null; int type = TableEntry.noType; int typeA = TableEntry.noType;
+		TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; TableEntry.Type typeA = TableEntry.Type.NONE;
 		entry = Designator(false);
 		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
@@ -390,13 +392,13 @@ static public void reset()
 			
 			if(valid)
 			{
-				if(entry.kind == TableEntry.Variable)
+				if(entry.kind == TableEntry.Kind.VARIABLE)
 				{
 					if(TableEntry.isBool(type))
 						CodeGen.toDouble();
 					CodeGen.storeVariable(entry.offset);
 				}
-				else if(entry.kind == TableEntry.Property)
+				else if(entry.kind == TableEntry.Kind.PROPERTY)
 				{
 					CodeGen.storeProperty(entry.offset);
 				}
@@ -405,14 +407,14 @@ static public void reset()
 		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
 			T  = PostOp();
 			if(!TableEntry.isArith(entry.type))
-				SemanticError("Cannot perform a post operation on a boolan type.");
+				SemanticError("Cannot perform a post operation on a boolean type.");
 				
 			if(entry.immutable)
 			{
 				SemError("Cannot alter immutable symbol");
 			}
 				
-			if(entry.kind != TableEntry.Variable)
+			if(entry.kind != TableEntry.Kind.VARIABLE)
 			{
 				SemanticError("Can only perform post operation on a variable.");
 			}
@@ -435,7 +437,7 @@ static public void reset()
 			SemanticError("Arguments can only be given to a function.");
 			}
 			
-			if(entry.kind == TableEntry.aFunction)
+			if(entry.kind == TableEntry.Kind.AFUNCTION)
 			{
 			if(!TableEntry.isArray(typeA))
 			{
@@ -456,7 +458,7 @@ static public void reset()
 	}
 
 	static void IfStatement() {
-		int type = TableEntry.noType;
+		TableEntry.Type type = TableEntry.Type.NONE;
 		Expect(if_Sym);
 		Expect(lparen_Sym);
 		type  = Expression();
@@ -489,23 +491,23 @@ static public void reset()
 	}
 
 	static void Loop() {
-		int type1 = 0, type2 = 0;
+		TableEntry.Type type1 = TableEntry.Type.INT, type2 = TableEntry.Type.INT;
 		String name = "";
 		Label[] loopLabels = null;
 		TableEntry entry = new TableEntry();
 		
 		Expect(loop_Sym);
 		name  = Ident();
-		if(table.find(name).type != TableEntry.noType)
+		if(table.find(name).type != TableEntry.Type.NONE)
 		{
 			SemError("Redeclared identifier");
 		}
 		
 		if(valid)
 		{  														
-			entry.kind = TableEntry.Variable;
+			entry.kind = TableEntry.Kind.VARIABLE;
 			entry.name = name;
-			entry.type = TableEntry.intType;
+			entry.type = TableEntry.Type.INT;
 			entry.immutable = true;
 			table.insert(entry);
 			entry.offset = CodeGen.declareLoopVariables();
@@ -548,23 +550,23 @@ static public void reset()
 
 	static TableEntry Designator(boolean attr) {
 		TableEntry entry;
-		int type = TableEntry.noType;
-		int typeE = TableEntry.noType;
+		TableEntry.Type type = TableEntry.Type.NONE;
+		TableEntry.Type typeE = TableEntry.Type.NONE;
 		String name = "";
 		TableEntry entryA = null;
 		
 		name  = Ident();
 		entry = table.find(name);
-		if(entry.type == TableEntry.noType)
+		if(entry.type == TableEntry.Type.NONE)
 			SemanticError("Undeclared identifier \"" + name + "\"");
 		else
 			type = entry.type;
 			
-		if(entry.kind == TableEntry.Property && attr == false)
+		if(entry.kind == TableEntry.Kind.PROPERTY && attr == false)
 			SemanticError("Properties must be called with \"self\"");
 			
 			
-		if(entry.kind == TableEntry.Cell)
+		if(entry.kind == TableEntry.Kind.CELL)
 			if(valid)
 				CodeGen.derefRef(entry.offset);
 			
@@ -572,7 +574,7 @@ static public void reset()
 		if (la.kind == lbrack_Sym) {
 			Get();
 			typeE  = Expression();
-			if((type % 2) == 0) SemanticError("Cannot index scalar type \"" + name +  "\"");
+			if(TableEntry.isScalar(type)) SemanticError("Cannot index scalar type \"" + name +  "\"");
 			if(!TableEntry.isArith(typeE))
 			{
 			SemanticError("Index must be arithmetic");
@@ -589,22 +591,22 @@ static public void reset()
 			TableEntry entryS = new TableEntry();
 			entryS.name = entry.name;
 			entryS.kind = entry.kind;
-			entryS.type = entry.type - 1;
+			entryS.type = TableEntry.Type.values()[(entry.type.ordinal() - 1)];
 			entry = entryS;
 			
 		}
 		if (la.kind == point_Sym) {
 			Get();
 			entryA  = Attribute();
-			if(entry.kind != TableEntry.Cell) SemanticError("Only cells have attributes.");
-			if(entryA.kind != TableEntry.Property) SemanticError("Only declared properties can be used as cell attributes.");
+			if(entry.kind != TableEntry.Kind.CELL) SemanticError("Only cells have attributes.");
+			if(entryA.kind != TableEntry.Kind.PROPERTY) SemanticError("Only declared properties can be used as cell attributes.");
 			TableEntry entryAA = new TableEntry();
 			entryAA.name = entryA.name;
 			entryAA.kind = entryA.kind;
 			entryAA.offset = entryA.offset;
 			if(TableEntry.isArray(entry.type))
 			{
-				entryAA.type = entryA.type + 1;
+				entryAA.type = TableEntry.Type.values()[(entryA.type.ordinal() + 1)];
 			}
 			else
 			{
@@ -617,10 +619,10 @@ static public void reset()
 		return entry;
 	}
 
-	static int Expression() {
-		int type;
-		int type1, type2;
-		type = TableEntry.noType;
+	static Type Expression() {
+		Type type;
+		TableEntry.Type type1, type2;
+		type = TableEntry.Type.NONE;
 		
 		type1  = AddExp();
 		RelOpE op = RelOpE.UN;
@@ -632,10 +634,10 @@ static public void reset()
 			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
 			{
 				SemanticError("Type mismatch");
-				type = TableEntry.noType;
+				type = TableEntry.Type.NONE;
 			}
 				
-			type = TableEntry.boolType;
+			type = TableEntry.Type.BOOL;
 			
 			if(valid)
 				CodeGen.performRelationalOp(op);										
@@ -657,9 +659,9 @@ static public void reset()
 		return op;
 	}
 
-	static int Arguments() {
-		int type;
-		type = TableEntry.noType;
+	static Type Arguments() {
+		Type type;
+		type = TableEntry.Type.NONE;
 		if (StartOf(3)) {
 			type  = Expression();
 		}
@@ -673,16 +675,17 @@ static public void reset()
 	}
 
 	static void OneVar() {
-		int type = TableEntry.noType; String name = "";
+		TableEntry.Type type = TableEntry.Type.NONE; String name = "";
 		name  = Ident();
 		TableEntry entry = new TableEntry();
 		entry.name = "__new__";
 		
-		if(table.find(name).type != TableEntry.noType)
+		if(table.find(name).type != TableEntry.Type.NONE)
 			SemanticError("Identifier \"" + name + "\" already declared.");
 		else
 		{
-			entry.kind = TableEntry.Variable;
+			entry.kind = TableEntry.Kind.VARIABLE;
+			entry.type = TableEntry.Type.INT;
 			entry.name = name;
 			entry.offset = CodeGen.declareLocalVariable(name);
 		}
@@ -692,7 +695,7 @@ static public void reset()
 			type  = Expression();
 			if(!entry.name.equals("__new__"))
 			{
-				entry.kind = TableEntry.Variable;
+				entry.kind = TableEntry.Kind.VARIABLE;
 				entry.type = type;
 			}
 			
@@ -705,10 +708,10 @@ static public void reset()
 		
 	}
 
-	static int AddExp() {
-		int type;
-		int type1, type2;
-		type = TableEntry.noType;
+	static Type AddExp() {
+		Type type;
+		TableEntry.Type type1, type2;
+		type = TableEntry.Type.NONE;
 		boolean negative = false;
 		
 		if (la.kind == plus_Sym || la.kind == minus_Sym) {
@@ -740,15 +743,15 @@ static public void reset()
 				case OR:
 					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
 						SemanticError("Boolean Types Required");
-					type = TableEntry.boolType;
+					type = TableEntry.Type.BOOL;
 					break;
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
 						SemanticError("Numeric Types Required");
-					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
-						type = TableEntry.intType;
+					if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
+						type = TableEntry.Type.INT;
 					else
-						type = TableEntry.doubleType;
+						type = TableEntry.Type.DOUBLE;
 			}
 			
 			if(valid)
@@ -797,10 +800,10 @@ static public void reset()
 		return op;
 	}
 
-	static int Term() {
-		int type;
-		int type1, type2;
-		type = TableEntry.noType;
+	static Type Term() {
+		Type type;
+		TableEntry.Type type1, type2;
+		type = TableEntry.Type.NONE;
 		
 		type1  = Factor();
 		MulOpE op = MulOpE.UN;
@@ -814,15 +817,15 @@ static public void reset()
 				case AND:
 					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
 						SemanticError("Boolean Types Required");
-					type = TableEntry.boolType;
+					type = TableEntry.Type.BOOL;
 					break;
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
 						SemanticError("Numeric Types Required");
-					if((type1 == TableEntry.intType) && (type2 == TableEntry.intType))
-						type = TableEntry.intType;
+					if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
+						type = TableEntry.Type.INT;
 					else
-						type = TableEntry.doubleType;  														
+						type = TableEntry.Type.DOUBLE; 														
 			}
 			
 			if(valid)
@@ -848,8 +851,8 @@ static public void reset()
 		return op;
 	}
 
-	static int Factor() {
-		int type;
+	static Type Factor() {
+		Type type;
 		PostOpE T = PostOpE.UN;
 		PrimaryPair p = new PrimaryPair();
 		
@@ -859,7 +862,7 @@ static public void reset()
 			T  = PostOp();
 			if(!TableEntry.isArith(type)) SemanticError("Cannot perform a post operation on a boolan type.");
 			
-			if(p.kind != TableEntry.Variable)
+			if(p.kind != TableEntry.Kind.VARIABLE)
 			{
 				SemanticError("Can only perform post operations on a variable.");
 			}
@@ -904,10 +907,10 @@ static public void reset()
 	static PrimaryPair Primary() {
 		PrimaryPair p;
 		p = new PrimaryPair();
-		p.type = TableEntry.noType;
+		p.type = TableEntry.Type.NONE;
 		
-		int typeA = TableEntry.noType;
-		int typeE = TableEntry.noType;
+		TableEntry.Type typeA = TableEntry.Type.NONE;
+		TableEntry.Type typeE = TableEntry.Type.NONE;
 		
 		ConstantRecord con;
 		TableEntry entry = null;
@@ -915,15 +918,15 @@ static public void reset()
 		if (la.kind == identifier_Sym || la.kind == type_Sym) {
 			entry = Designator(false);
 			p.type = entry.type;
-			p.kind = TableEntry.Variable;
+			p.kind = TableEntry.Kind.VARIABLE;
 			p.offset = entry.offset;
 			
 			
 			if(valid)
 			{
-			if(entry.kind == TableEntry.Variable)
+			if(entry.kind == TableEntry.Kind.VARIABLE)
 					CodeGen.derefVariable(entry.offset);		  											
-				else if(entry.kind == TableEntry.Property)
+				else if(entry.kind == TableEntry.Kind.PROPERTY)
 				{
 					if(TableEntry.isArray(entry.type))
 						CodeGen.generatePropertyArray(entry.offset);
@@ -940,7 +943,7 @@ static public void reset()
 				SemanticError("Arguments can only be given to a function.");
 				}
 				
-				if(entry.kind == TableEntry.aFunction)
+				if(entry.kind == TableEntry.Kind.AFUNCTION)
 				{
 				if(!TableEntry.isArray(typeA))
 				{
@@ -964,7 +967,7 @@ static public void reset()
 						CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
 				}
 				}
-				p.kind = TableEntry.Constant;
+				p.kind = TableEntry.Kind.CONSTANT;
 				
 				
 				Expect(rparen_Sym);
@@ -972,7 +975,7 @@ static public void reset()
 		} else if (la.kind == number_Sym || la.kind == double_Sym) {
 			con  = Constant();
 			p.type = con.type;
-			p.kind = TableEntry.Constant;
+			p.kind = TableEntry.Kind.CONSTANT;
 			
 			if(valid)
 				CodeGen.loadConstant((double)con.value);
@@ -981,7 +984,7 @@ static public void reset()
 			Get();
 			typeE  = Expression();
 			p.type = typeE;
-			p.kind = TableEntry.Constant;
+			p.kind = TableEntry.Kind.CONSTANT;
 			
 			Expect(rparen_Sym);
 		} else SynErr(47);
@@ -994,10 +997,10 @@ static public void reset()
 		
 		if (la.kind == double_Sym) {
 			con.value  = DoubleConst();
-			con.type = TableEntry.doubleType;	
+			con.type = TableEntry.Type.DOUBLE;	
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
-			con.type = TableEntry.intType;		
+			con.type = TableEntry.Type.INT;		
 		} else SynErr(48);
 		return con;
 	}

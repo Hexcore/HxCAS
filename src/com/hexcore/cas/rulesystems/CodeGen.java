@@ -12,7 +12,6 @@ import org.objectweb.asm.MethodVisitor;
 import com.hexcore.cas.rulesystems.Parser.AddOpE;
 import com.hexcore.cas.rulesystems.Parser.MulOpE;
 import com.hexcore.cas.rulesystems.Parser.RelOpE;
-import com.hexcore.cas.rulesystems.TableEntry;
 
 /**
  * Class CodeGen
@@ -301,55 +300,59 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		}
 	}
 	
-	public static void invokeStandardArrayMethod(String name, int argType, int returnType)
+	public static void invokeStandardArrayMethod(String name, TableEntry.Type argType, TableEntry.Type returnType)
 	{
 		String aType = "";
 		String rType = "";
 		
 		switch(argType)
 		{
-			case TableEntry.intType: aType = "[I"; break;
-			case TableEntry.doubleType: aType = "[D"; break;
-			case TableEntry.cellType: aType = "[Lcom/hexcore/cas/model/Cell"; break;
+			case INT: 		aType = "[I"; break;
+			case DOUBLE: 	aType = "[D"; break;
+			case CELL: 		aType = "[Lcom/hexcore/cas/model/Cell"; break;
+			default: 		throw new InvalidTypeException();
 		}
 		
 		switch(returnType)
 		{
-			case TableEntry.intType: rType = "I"; break;
-			case TableEntry.doubleType: rType = "D"; break;
+			case INT: 		rType = "I"; break;
+			case DOUBLE: 	rType = "D"; break;
+			default:		throw new InvalidTypeException();
 		}
 		
 		
 		debug("Invoking StdLib array method: " + name + " with argtype " + aType + " and rType " + rType);		
 		
 		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.intType)
+		if(returnType == TableEntry.Type.INT)
 			executeVisitor.visitInsn(I2D);
 	}
 	
-	public static void invokeStandardScalarMethod(String name, int argType, int returnType)
+	public static void invokeStandardScalarMethod(String name, TableEntry.Type argType,  TableEntry.Type returnType)
 	{
 		String aType = "";
 		String rType = "";
 		
 		switch(argType)
 		{
-			case TableEntry.intType: aType = "I"; break;
-			case TableEntry.doubleType: aType = "D"; break;
-			case TableEntry.cellType: aType = "Lcom/hexcore/cas/Cell"; break;
+			case INT: aType = "I"; break;
+			case DOUBLE: aType = "D"; break;
+			case CELL: aType = "Lcom/hexcore/cas/Cell"; break;
+			default: throw new InvalidTypeException();
 		}
 		
 		switch(returnType)
 		{
-			case TableEntry.intType: rType = "I"; break;
-			case TableEntry.doubleType: rType = "D"; break;
+			case INT: rType = "I"; break;
+			case DOUBLE: rType = "D"; break;
+			default: throw new InvalidTypeException();
 		}
 		
 		
 		debug("Invoking StdLib scalar method: " + name + " with argtype " + aType + " and rType " + rType);		
 		
 		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.intType)
+		if(returnType == TableEntry.Type.INT)
 			executeVisitor.visitInsn(I2D);
 	}
 	
@@ -379,6 +382,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 			case ADD: executeVisitor.visitInsn(DADD); break;
 			case SUB: executeVisitor.visitInsn(DSUB); break;
 			case OR: executeVisitor.visitInsn(IOR); break;
+			default: throw new UnsupportedOpException();
 		}
 	}
 	
@@ -391,6 +395,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 			case DIV: executeVisitor.visitInsn(DDIV); break;
 			case MOD: executeVisitor.visitInsn(DREM); break;
 			case AND: executeVisitor.visitInsn(IAND); break;
+			default: throw new UnsupportedOpException();
 		}
 	}
 	
@@ -417,6 +422,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 			case GE:	executeVisitor.visitJumpInsn(IFLT, negative); break;
 			case EQ:	executeVisitor.visitJumpInsn(IFNE, negative); break;
 			case NE:	executeVisitor.visitJumpInsn(IFEQ, negative); break;
+			default: throw new UnsupportedOpException();
 		}
 		
 		executeVisitor.visitInsn(ICONST_1);
