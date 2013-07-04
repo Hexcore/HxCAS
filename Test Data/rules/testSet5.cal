@@ -1,6 +1,6 @@
 ruleset set4
 {
-	typecount 1;
+	types {Land};
 	
 	property land;
 	property water;

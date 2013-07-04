@@ -27,23 +27,23 @@ public class Parser {
 	static final int ruleset_Sym = 6;
 	static final int lbrace_Sym = 7;
 	static final int rbrace_Sym = 8;
-	static final int typecount_Sym = 9;
-	static final int semicolon_Sym = 10;
-	static final int property_Sym = 11;
-	static final int type_Sym = 12;
-	static final int equal_Sym = 13;
-	static final int lparen_Sym = 14;
-	static final int rparen_Sym = 15;
-	static final int lbrack_Sym = 16;
-	static final int rbrack_Sym = 17;
-	static final int point_Sym = 18;
-	static final int if_Sym = 19;
-	static final int else_Sym = 20;
-	static final int loop_Sym = 21;
-	static final int from_Sym = 22;
-	static final int to_Sym = 23;
-	static final int var_Sym = 24;
-	static final int comma_Sym = 25;
+	static final int types_Sym = 9;
+	static final int comma_Sym = 10;
+	static final int semicolon_Sym = 11;
+	static final int property_Sym = 12;
+	static final int type_Sym = 13;
+	static final int equal_Sym = 14;
+	static final int lparen_Sym = 15;
+	static final int rparen_Sym = 16;
+	static final int lbrack_Sym = 17;
+	static final int rbrack_Sym = 18;
+	static final int point_Sym = 19;
+	static final int if_Sym = 20;
+	static final int else_Sym = 21;
+	static final int loop_Sym = 22;
+	static final int from_Sym = 23;
+	static final int to_Sym = 24;
+	static final int var_Sym = 25;
 	static final int plus_Sym = 26;
 	static final int minus_Sym = 27;
 	static final int equalequal_Sym = 28;
@@ -217,6 +217,7 @@ static public void reset()
 	static void CAL() {
 		table = new SymbolTable();
 		typeCount = 0;
+		typeCountExpected = 0;
 		
 		RuleSet();
 		if(typeCount != typeCountExpected)
@@ -246,7 +247,7 @@ static public void reset()
 		}
 		
 		Expect(lbrace_Sym);
-		TypeCount();
+		TypeHeader();
 		Property();
 		while (la.kind == property_Sym) {
 			Property();
@@ -273,19 +274,54 @@ static public void reset()
 		return name;
 	}
 
-	static void TypeCount() {
-		int value = 0;
-		Expect(typecount_Sym);
-		value  = IntConst();
-		if(value < 1)
-		{
-			SemanticError("At least one type of cell must be declared");
-		}
-		typeCountExpected = value;
+	static void TypeHeader() {
+		String name = "";
+		Expect(types_Sym);
+		Expect(lbrace_Sym);
+		name  = Ident();
+		if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
+		TableEntry entry = new TableEntry();
+		entry.name = name;
+		entry.kind = TableEntry.Kind.TYPENAME;
+		entry.type = TableEntry.Type.INT;
+		entry.immutable = true;
 		
 		if(valid)
-			CodeGen.initFramework(typeCountExpected);
+		{
+			entry.offset = CodeGen.declareLocalVariable(name);
+			CodeGen.loadConstant(typeCountExpected);
+			CodeGen.storeVariable(entry.offset);
+		}
+			
+		table.insert(entry);
+		typeCountExpected++;
 		
+		while (la.kind == comma_Sym) {
+			Get();
+			name  = Ident();
+			if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
+			entry = new TableEntry();
+			entry.name = name;
+			entry.kind = TableEntry.Kind.TYPENAME;
+			entry.type = TableEntry.Type.INT;
+			entry.immutable = true;
+			
+			if(valid)
+			{
+				entry.offset = CodeGen.declareLocalVariable(name);
+				CodeGen.loadConstant(typeCountExpected);
+				CodeGen.storeVariable(entry.offset);
+			}
+				
+			table.insert(entry);
+			typeCountExpected++;
+			
+			
+		}
+		Expect(rbrace_Sym);
+		if(valid)
+			CodeGen.initFramework(typeCountExpected);
+			
 		Expect(semicolon_Sym);
 	}
 
@@ -306,15 +342,22 @@ static public void reset()
 	}
 
 	static void TypeSpec() {
-		table.pushScope();  												
+		table.pushScope();
+		String name = "";  												
 		
 		Expect(type_Sym);
-		Expect(identifier_Sym);
-		if(typeCount >= typeCountExpected)
+		name  = Ident();
+		typeCount++;
+		if(typeCount > typeCountExpected)
 		{
 			SemanticError("Too many types");
 		}
-		typeCount++;
+		
+		TableEntry entry;
+		entry = table.find(name);
+		if(entry.type == TableEntry.Type.NONE) SemanticError("Typename \"" + name + "\" has not been declared");
+		if(entry.kind != TableEntry.Kind.TYPENAME) SemanticError("Identifier \"" + name + "\" is not a declared typename");
+		
 		if(valid)
 			CodeGen.initType();
 		
@@ -328,21 +371,6 @@ static public void reset()
 		if(valid)
 			CodeGen.endType();
 		
-	}
-
-	static int IntConst() {
-		int value;
-		Expect(number_Sym);
-		try
-		{
-			value = Integer.parseInt(token.val);
-		}
-		catch(NumberFormatException e)
-		{
-			value =  0;
-		}
-		
-		return value;
 	}
 
 	static void Statement() {
@@ -387,7 +415,7 @@ static public void reset()
 			
 			if(entry.immutable)
 			{
-				SemError("Cannot assign to immutable symbol");
+				SemanticError("Cannot assign to immutable symbol");
 			}
 			
 			if(valid)
@@ -924,7 +952,7 @@ static public void reset()
 			
 			if(valid)
 			{
-			if(entry.kind == TableEntry.Kind.VARIABLE)
+			if(entry.kind == TableEntry.Kind.VARIABLE || entry.kind == TableEntry.Kind.TYPENAME)
 					CodeGen.derefVariable(entry.offset);		  											
 				else if(entry.kind == TableEntry.Kind.PROPERTY)
 				{
@@ -1020,6 +1048,21 @@ static public void reset()
 		return value;
 	}
 
+	static int IntConst() {
+		int value;
+		Expect(number_Sym);
+		try
+		{
+			value = Integer.parseInt(token.val);
+		}
+		catch(NumberFormatException e)
+		{
+			value =  0;
+		}
+		
+		return value;
+	}
+
 
 
 	public static void Parse() {
@@ -1033,9 +1076,9 @@ static public void reset()
 
 	private static boolean[][] set = {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}
 
 	};
@@ -1163,23 +1206,23 @@ class Errors {
 			case 6: s = "\"ruleset\" expected"; break;
 			case 7: s = "\"{\" expected"; break;
 			case 8: s = "\"}\" expected"; break;
-			case 9: s = "\"typecount\" expected"; break;
-			case 10: s = "\";\" expected"; break;
-			case 11: s = "\"property\" expected"; break;
-			case 12: s = "\"type\" expected"; break;
-			case 13: s = "\"=\" expected"; break;
-			case 14: s = "\"(\" expected"; break;
-			case 15: s = "\")\" expected"; break;
-			case 16: s = "\"[\" expected"; break;
-			case 17: s = "\"]\" expected"; break;
-			case 18: s = "\".\" expected"; break;
-			case 19: s = "\"if\" expected"; break;
-			case 20: s = "\"else\" expected"; break;
-			case 21: s = "\"loop\" expected"; break;
-			case 22: s = "\"from\" expected"; break;
-			case 23: s = "\"to\" expected"; break;
-			case 24: s = "\"var\" expected"; break;
-			case 25: s = "\",\" expected"; break;
+			case 9: s = "\"types\" expected"; break;
+			case 10: s = "\",\" expected"; break;
+			case 11: s = "\";\" expected"; break;
+			case 12: s = "\"property\" expected"; break;
+			case 13: s = "\"type\" expected"; break;
+			case 14: s = "\"=\" expected"; break;
+			case 15: s = "\"(\" expected"; break;
+			case 16: s = "\")\" expected"; break;
+			case 17: s = "\"[\" expected"; break;
+			case 18: s = "\"]\" expected"; break;
+			case 19: s = "\".\" expected"; break;
+			case 20: s = "\"if\" expected"; break;
+			case 21: s = "\"else\" expected"; break;
+			case 22: s = "\"loop\" expected"; break;
+			case 23: s = "\"from\" expected"; break;
+			case 24: s = "\"to\" expected"; break;
+			case 25: s = "\"var\" expected"; break;
 			case 26: s = "\"+\" expected"; break;
 			case 27: s = "\"-\" expected"; break;
 			case 28: s = "\"==\" expected"; break;

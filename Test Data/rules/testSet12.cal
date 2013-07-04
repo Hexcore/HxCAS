@@ -1,6 +1,6 @@
 ruleset set12
 {
-	typecount 3;
+	types{Land,Water,Fire};
 	property alive;
 
 	type Land

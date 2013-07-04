@@ -1,0 +1,21 @@
+ruleset set15
+{
+	types{Earth,Fire, Water};
+	
+	property p1;
+
+	type Earth
+	{
+		self.type = Water;
+	}
+	
+	type Fire
+	{
+		self.type = 0;
+	}
+	
+	type Water
+	{
+		self.type = Fire;
+	}
+}

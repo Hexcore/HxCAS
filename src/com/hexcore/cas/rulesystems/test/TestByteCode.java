@@ -343,6 +343,63 @@ public class TestByteCode
 	}
 	
 	@Test
+	public void testTypeNames()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet15.cal");
+		assertEquals(0, compiler.getErrorCount());
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		Cell c0 = new Cell(new double[]{0,0});
+		
+		//New Cell Test
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		
+		//Run once
+		rule.run(c0, null);
+
+		
+		//Post run test
+		assertEquals(2.0, c0.getValue(0), 0.0);
+		assertEquals(0.0, c0.getValue(1), 0.0);
+
+		
+		//Run again
+		rule.run(c0, null);
+		
+		
+		//Post run test
+		assertEquals(1.0, c0.getValue(0), 0.0);
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		
+		
+		//Run again
+		rule.run(c0, null);
+				
+				
+		//Post run test
+		assertEquals(0.0, c0.getValue(0), 0.0);
+		assertEquals(0.0, c0.getValue(1), 0.0);	
+
+		
+	}
+	
+	
+	@Test
+	public void testTypeNameRestrictions()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testSet16.cal");
+		
+		int errors = compiler.getErrorCount();		
+		assertEquals(true, errors > 0);
+		RuleLoader rl = new RuleLoader();
+	}
+	
+	@Test
 	public void testLoops()
 	{
 		CALCompiler compiler = new CALCompiler();

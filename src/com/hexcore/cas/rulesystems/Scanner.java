@@ -79,23 +79,23 @@ public class Scanner {
 	static final int ruleset_Sym = 6;
 	static final int lbrace_Sym = 7;
 	static final int rbrace_Sym = 8;
-	static final int typecount_Sym = 9;
-	static final int semicolon_Sym = 10;
-	static final int property_Sym = 11;
-	static final int type_Sym = 12;
-	static final int equal_Sym = 13;
-	static final int lparen_Sym = 14;
-	static final int rparen_Sym = 15;
-	static final int lbrack_Sym = 16;
-	static final int rbrack_Sym = 17;
-	static final int point_Sym = 18;
-	static final int if_Sym = 19;
-	static final int else_Sym = 20;
-	static final int loop_Sym = 21;
-	static final int from_Sym = 22;
-	static final int to_Sym = 23;
-	static final int var_Sym = 24;
-	static final int comma_Sym = 25;
+	static final int types_Sym = 9;
+	static final int comma_Sym = 10;
+	static final int semicolon_Sym = 11;
+	static final int property_Sym = 12;
+	static final int type_Sym = 13;
+	static final int equal_Sym = 14;
+	static final int lparen_Sym = 15;
+	static final int rparen_Sym = 16;
+	static final int lbrack_Sym = 17;
+	static final int rbrack_Sym = 18;
+	static final int point_Sym = 19;
+	static final int if_Sym = 20;
+	static final int else_Sym = 21;
+	static final int loop_Sym = 22;
+	static final int from_Sym = 23;
+	static final int to_Sym = 24;
+	static final int var_Sym = 25;
 	static final int plus_Sym = 26;
 	static final int minus_Sym = 27;
 	static final int equalequal_Sym = 28;
@@ -115,10 +115,10 @@ public class Scanner {
 	static short[] start = {
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-	  0, 17,  0,  0,  0, 25, 26,  0, 10, 11, 23, 28, 15, 29, 14, 24,
-	  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  0,  9, 32, 30, 31,  0,
+	  0, 17,  0,  0,  0, 25, 26,  0, 11, 12, 23, 28,  9, 29, 15, 24,
+	  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  0, 10, 32, 30, 31,  0,
 	  0,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
-	  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5, 12,  0, 13,  0,  0,
+	  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5, 13,  0, 14,  0,  0,
 	  0,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
 	  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  7, 21,  8,  0,  0,
 	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -252,7 +252,7 @@ public class Scanner {
 	static void CheckLiteral() {
 		String lit = t.val;
 		if (lit.compareTo("ruleset") == 0) t.kind = ruleset_Sym;
-		else if (lit.compareTo("typecount") == 0) t.kind = typecount_Sym;
+		else if (lit.compareTo("types") == 0) t.kind = types_Sym;
 		else if (lit.compareTo("property") == 0) t.kind = property_Sym;
 		else if (lit.compareTo("type") == 0) t.kind = type_Sym;
 		else if (lit.compareTo("if") == 0) t.kind = if_Sym;
@@ -301,19 +301,19 @@ public class Scanner {
 				case 8:
 					{ t.kind = rbrace_Sym; done = true; break; }
 				case 9:
-					{ t.kind = semicolon_Sym; done = true; break; }
-				case 10:
-					{ t.kind = lparen_Sym; done = true; break; }
-				case 11:
-					{ t.kind = rparen_Sym; done = true; break; }
-				case 12:
-					{ t.kind = lbrack_Sym; done = true; break; }
-				case 13:
-					{ t.kind = rbrack_Sym; done = true; break; }
-				case 14:
-					{ t.kind = point_Sym; done = true; break; }
-				case 15:
 					{ t.kind = comma_Sym; done = true; break; }
+				case 10:
+					{ t.kind = semicolon_Sym; done = true; break; }
+				case 11:
+					{ t.kind = lparen_Sym; done = true; break; }
+				case 12:
+					{ t.kind = rparen_Sym; done = true; break; }
+				case 13:
+					{ t.kind = lbrack_Sym; done = true; break; }
+				case 14:
+					{ t.kind = rbrack_Sym; done = true; break; }
+				case 15:
+					{ t.kind = point_Sym; done = true; break; }
 				case 16:
 					{ t.kind = equalequal_Sym; done = true; break; }
 				case 17:

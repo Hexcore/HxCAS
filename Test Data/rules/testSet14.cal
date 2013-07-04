@@ -1,6 +1,6 @@
 ruleset set14
 {
-	typecount 1;
+	types{Land};
 	property p1;
 	property p2;
 

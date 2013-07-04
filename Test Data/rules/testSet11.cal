@@ -1,6 +1,6 @@
 ruleset cooloff
 {
-	typecount 1;
+	types{Land};
 	property alive;
 	property cooloff;
 

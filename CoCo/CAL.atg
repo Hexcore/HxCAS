@@ -99,6 +99,7 @@ PRODUCTIONS
 	CAL										(. 	
 												table = new SymbolTable();
 												typeCount = 0;
+												typeCountExpected = 0;
 											.)				
   	=
   	RuleSet									(. 	
@@ -133,7 +134,7 @@ PRODUCTIONS
   												}
   											.)
   	"{"
-	  	TypeCount
+	  	TypeHeader
 	  	Property {Property}
 	  	TypeSpec {TypeSpec}
   	"}"
@@ -144,18 +145,53 @@ PRODUCTIONS
   	
   	
   	/********** Type Count Declaration **********/
-  	TypeCount								(. int value = 0; .)
+  	TypeHeader								(. String name = ""; .)
   	=
-  	"typecount" IntConst< out value >		(.
-  												if(value < 1)
-  												{
-  													SemanticError("At least one type of cell must be declared");
-  												}
-  												typeCountExpected = value;
-  												
-  												if(valid)
-  													CodeGen.initFramework(typeCountExpected);
-  											.)
+  	"types"
+  	"{"
+  	Ident< out name >				(.
+  										if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
+  										TableEntry entry = new TableEntry();
+  										entry.name = name;
+  										entry.kind = TableEntry.Kind.TYPENAME;
+  										entry.type = TableEntry.Type.INT;
+  										entry.immutable = true;
+  										
+  										if(valid)
+  										{
+  											entry.offset = CodeGen.declareLocalVariable(name);
+  											CodeGen.loadConstant(typeCountExpected);
+  											CodeGen.storeVariable(entry.offset);
+  										}
+  											
+  										table.insert(entry);
+  										typeCountExpected++;
+  									.)
+  	{"," Ident< out name >			(.
+  										if(table.find(name).type != TableEntry.Type.NONE) SemanticError("Identifier \"" + name + "\" already declared.");
+  										entry = new TableEntry();
+  										entry.name = name;
+  										entry.kind = TableEntry.Kind.TYPENAME;
+  										entry.type = TableEntry.Type.INT;
+  										entry.immutable = true;
+  										
+  										if(valid)
+  										{
+  											entry.offset = CodeGen.declareLocalVariable(name);
+  											CodeGen.loadConstant(typeCountExpected);
+  											CodeGen.storeVariable(entry.offset);
+  										}
+  											
+  										table.insert(entry);
+  										typeCountExpected++;
+  									
+  									.)
+  	
+  	}
+  	"}"								(.											
+										if(valid)
+											CodeGen.initFramework(typeCountExpected);
+  									.)
   	";"
   	.
 	/********************************************/
@@ -184,16 +220,23 @@ PRODUCTIONS
   	
   	/********** Type Specification **********/
   	TypeSpec								(.
-  												table.pushScope();  												
+  												table.pushScope();
+  												String name = "";  												
   											.)
   	=
-  	"type" identifier
+  	"type" Ident< out name >
   											(.
-  												if(typeCount >= typeCountExpected)
+  												typeCount++;
+  												if(typeCount > typeCountExpected)
   												{
   													SemanticError("Too many types");
   												}
-  												typeCount++;
+  												
+  												TableEntry entry;
+  												entry = table.find(name);
+  												if(entry.type == TableEntry.Type.NONE) SemanticError("Typename \"" + name + "\" has not been declared");
+  												if(entry.kind != TableEntry.Kind.TYPENAME) SemanticError("Identifier \"" + name + "\" is not a declared typename");
+  												
   												if(valid)
   													CodeGen.initType();
   											.)
@@ -253,7 +296,7 @@ PRODUCTIONS
   													
   													if(entry.immutable)
   													{
-  														SemError("Cannot assign to immutable symbol");
+  														SemanticError("Cannot assign to immutable symbol");
   													}
   													
   													if(valid)
@@ -688,7 +731,7 @@ PRODUCTIONS
   												
   												if(valid)
   												{
-	 												if(entry.kind == TableEntry.Kind.VARIABLE)
+	 												if(entry.kind == TableEntry.Kind.VARIABLE || entry.kind == TableEntry.Kind.TYPENAME)
 			  											CodeGen.derefVariable(entry.offset);		  											 
 			  										else if(entry.kind == TableEntry.Kind.PROPERTY)
 			  										{
