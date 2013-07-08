@@ -13,20 +13,45 @@ public class TestParser
 {
 
 	@Test
-	public void testPreconditions()
-	{
-		File in = new File("Test Data/testRules.cal");
-		assertTrue(in.exists());
-	}
-
-	@Test
-	public void testParsing()
+	public void testSimpleParsing()
 	{
 		CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/testRules.cal");
 		
 		assertTrue(Parser.getErrorCount() == 0);
 	}
+	
+	@Test
+	public void testNStepParsing()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testNStepParsing.cal");
+		
+		assertTrue(Parser.getErrorCount() == 0);
+	}
+	
+	@Test
+	public void testNStepParsingRestrictions()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingRestrictions0.cal");		
+		assertTrue(Parser.getErrorCount() != 0);
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingRestrictions1.cal");
+		assertTrue(Parser.getErrorCount() != 0);
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingRestrictions2.cal");
+		assertTrue(Parser.getErrorCount() != 0);
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingRestrictions3.cal");
+		assertTrue(Parser.getErrorCount() != 0);
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingRestrictions4.cal");
+		assertTrue(Parser.getErrorCount() != 0);
+	}
+	
+
 
 	
 	

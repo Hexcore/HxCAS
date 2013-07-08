@@ -1,0 +1,19 @@
+ruleset testNStepParsingRestrictions1
+{
+	types{Alpha,Beta};
+	
+	property p1;
+	
+	type Alpha
+	{
+
+	}
+	
+	type Beta
+	{
+		step 0
+		{
+			self.p1 = 0;
+		}
+	}
+}

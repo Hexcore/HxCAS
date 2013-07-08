@@ -1,0 +1,32 @@
+ruleset testNStepParsing
+{
+	types{Alpha,Beta};
+	
+	property p1;
+	
+	type Alpha
+	{
+		step 0
+		{
+			self.p1 = 0;
+		}
+		
+		step 1
+		{
+			self.p1 = 1;
+		}
+	}
+	
+	type Beta
+	{
+		step 0
+		{
+			self.p1 = 2;
+		}
+		
+		step 1
+		{
+		
+		}
+	}
+}

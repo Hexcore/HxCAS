@@ -32,35 +32,36 @@ public class Parser {
 	static final int semicolon_Sym = 11;
 	static final int property_Sym = 12;
 	static final int type_Sym = 13;
-	static final int equal_Sym = 14;
-	static final int lparen_Sym = 15;
-	static final int rparen_Sym = 16;
-	static final int lbrack_Sym = 17;
-	static final int rbrack_Sym = 18;
-	static final int point_Sym = 19;
-	static final int if_Sym = 20;
-	static final int else_Sym = 21;
-	static final int loop_Sym = 22;
-	static final int from_Sym = 23;
-	static final int to_Sym = 24;
-	static final int var_Sym = 25;
-	static final int plus_Sym = 26;
-	static final int minus_Sym = 27;
-	static final int equalequal_Sym = 28;
-	static final int bangequal_Sym = 29;
-	static final int greater_Sym = 30;
-	static final int less_Sym = 31;
-	static final int greaterequal_Sym = 32;
-	static final int lessequal_Sym = 33;
-	static final int barbar_Sym = 34;
-	static final int star_Sym = 35;
-	static final int slash_Sym = 36;
-	static final int percent_Sym = 37;
-	static final int andand_Sym = 38;
-	static final int NOT_SYM = 39;
+	static final int step_Sym = 14;
+	static final int equal_Sym = 15;
+	static final int lparen_Sym = 16;
+	static final int rparen_Sym = 17;
+	static final int lbrack_Sym = 18;
+	static final int rbrack_Sym = 19;
+	static final int point_Sym = 20;
+	static final int if_Sym = 21;
+	static final int else_Sym = 22;
+	static final int loop_Sym = 23;
+	static final int from_Sym = 24;
+	static final int to_Sym = 25;
+	static final int var_Sym = 26;
+	static final int plus_Sym = 27;
+	static final int minus_Sym = 28;
+	static final int equalequal_Sym = 29;
+	static final int bangequal_Sym = 30;
+	static final int greater_Sym = 31;
+	static final int less_Sym = 32;
+	static final int greaterequal_Sym = 33;
+	static final int lessequal_Sym = 34;
+	static final int barbar_Sym = 35;
+	static final int star_Sym = 36;
+	static final int slash_Sym = 37;
+	static final int percent_Sym = 38;
+	static final int andand_Sym = 39;
+	static final int NOT_SYM = 40;
 	// pragmas
 
-	static final int maxT = 39;
+	static final int maxT = 40;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -78,6 +79,10 @@ static enum PostOpE{INC, DEC, UN};
 static SymbolTable table;
 static int typeCountExpected = 0;
 static int typeCountActual = 0;
+static boolean firstTypeDone = false;
+static boolean usingNStep = false;
+static int stepCount = 0;
+static int expectedStepCount = 0;
 static boolean postOpQueued = false;
 static PostOpE postOpType;
 static boolean valid = true;
@@ -218,6 +223,7 @@ static public void reset()
 		table = new SymbolTable();
 		typeCount = 0;
 		typeCountExpected = 0;
+		firstTypeDone = false;
 		
 		RuleSet();
 		if(typeCount != typeCountExpected)
@@ -270,7 +276,7 @@ static public void reset()
 		} else if (la.kind == type_Sym) {
 			Get();
 			name = "type";
-		} else SynErr(40);
+		} else SynErr(41);
 		return name;
 	}
 
@@ -362,11 +368,62 @@ static public void reset()
 			CodeGen.initType();
 		
 		Expect(lbrace_Sym);
-		while (StartOf(1)) {
-			Statement();
-		}
+		if (StartOf(1)) {
+			if(!firstTypeDone)
+				usingNStep = false;
+			else if(usingNStep == true)
+				SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+			
+			while (StartOf(2)) {
+				Statement();
+			}
+		} else if (la.kind == step_Sym) {
+			int value = 0;
+			stepCount = 0;
+			
+			if(!firstTypeDone)
+				usingNStep = true;
+			else if(usingNStep == false)
+				SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+				
+			
+			Get();
+			value  = IntConst();
+			if(value != stepCount)
+				SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
+			stepCount++;
+			
+			Block();
+			while (la.kind == step_Sym) {
+				Get();
+				value  = IntConst();
+				if(value != stepCount)
+					SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
+				stepCount++;
+				
+				Block();
+			}
+		} else SynErr(42);
 		Expect(rbrace_Sym);
 		table.popScope();
+		
+		if(!firstTypeDone)
+		{
+			firstTypeDone = true;
+			
+			if(usingNStep)
+			{
+				expectedStepCount = stepCount;
+			}
+		}
+		else
+		{
+			if(usingNStep)
+			{
+				if(stepCount != expectedStepCount)
+					SemanticError("Invalid Type Specification. Each type must have the same number of steps.");
+			}
+		}
 		
 		if(valid)
 			CodeGen.endType();
@@ -384,13 +441,28 @@ static public void reset()
 			Loop();
 		} else if (la.kind == var_Sym) {
 			VarDeclaration();
-		} else SynErr(41);
+		} else SynErr(43);
+	}
+
+	static int IntConst() {
+		int value;
+		Expect(number_Sym);
+		try
+		{
+			value = Integer.parseInt(token.val);
+		}
+		catch(NumberFormatException e)
+		{
+			value =  0;
+		}
+		
+		return value;
 	}
 
 	static void Block() {
 		Expect(lbrace_Sym);
 		table.pushScope();
-		while (StartOf(1)) {
+		while (StartOf(2)) {
 			Statement();
 		}
 		Expect(rbrace_Sym);
@@ -481,7 +553,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(42);
+		} else SynErr(44);
 		Expect(semicolon_Sym);
 	}
 
@@ -656,7 +728,7 @@ static public void reset()
 		RelOpE op = RelOpE.UN;
 		type = type1;
 		
-		if (StartOf(2)) {
+		if (StartOf(3)) {
 			op  = RelOp();
 			type2  = AddExp();
 			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
@@ -683,14 +755,14 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(43);
+		} else SynErr(45);
 		return op;
 	}
 
 	static Type Arguments() {
 		Type type;
 		type = TableEntry.Type.NONE;
-		if (StartOf(3)) {
+		if (StartOf(4)) {
 			type  = Expression();
 		}
 		return type;
@@ -823,7 +895,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(44); break;
+		default: SynErr(46); break;
 		}
 		return op;
 	}
@@ -837,7 +909,7 @@ static public void reset()
 		MulOpE op = MulOpE.UN;
 		type = type1;
 		
-		while (StartOf(4)) {
+		while (StartOf(5)) {
 			op  = MulOp();
 			type2  = Factor();
 			switch(op)
@@ -875,7 +947,7 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(45);
+		} else SynErr(47);
 		return op;
 	}
 
@@ -928,7 +1000,7 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(46);
+		} else SynErr(48);
 		return op;
 	}
 
@@ -1015,7 +1087,7 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			Expect(rparen_Sym);
-		} else SynErr(47);
+		} else SynErr(49);
 		return p;
 	}
 
@@ -1029,7 +1101,7 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.Type.INT;		
-		} else SynErr(48);
+		} else SynErr(50);
 		return con;
 	}
 
@@ -1048,21 +1120,6 @@ static public void reset()
 		return value;
 	}
 
-	static int IntConst() {
-		int value;
-		Expect(number_Sym);
-		try
-		{
-			value = Integer.parseInt(token.val);
-		}
-		catch(NumberFormatException e)
-		{
-			value =  0;
-		}
-		
-		return value;
-	}
-
 
 
 	public static void Parse() {
@@ -1075,11 +1132,12 @@ static public void reset()
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, T,x,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,x,x, x,x,x,x, x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x}
 
 	};
 
@@ -1211,41 +1269,43 @@ class Errors {
 			case 11: s = "\";\" expected"; break;
 			case 12: s = "\"property\" expected"; break;
 			case 13: s = "\"type\" expected"; break;
-			case 14: s = "\"=\" expected"; break;
-			case 15: s = "\"(\" expected"; break;
-			case 16: s = "\")\" expected"; break;
-			case 17: s = "\"[\" expected"; break;
-			case 18: s = "\"]\" expected"; break;
-			case 19: s = "\".\" expected"; break;
-			case 20: s = "\"if\" expected"; break;
-			case 21: s = "\"else\" expected"; break;
-			case 22: s = "\"loop\" expected"; break;
-			case 23: s = "\"from\" expected"; break;
-			case 24: s = "\"to\" expected"; break;
-			case 25: s = "\"var\" expected"; break;
-			case 26: s = "\"+\" expected"; break;
-			case 27: s = "\"-\" expected"; break;
-			case 28: s = "\"==\" expected"; break;
-			case 29: s = "\"!=\" expected"; break;
-			case 30: s = "\">\" expected"; break;
-			case 31: s = "\"<\" expected"; break;
-			case 32: s = "\">=\" expected"; break;
-			case 33: s = "\"<=\" expected"; break;
-			case 34: s = "\"||\" expected"; break;
-			case 35: s = "\"*\" expected"; break;
-			case 36: s = "\"/\" expected"; break;
-			case 37: s = "\"%\" expected"; break;
-			case 38: s = "\"&&\" expected"; break;
-			case 39: s = "??? expected"; break;
-			case 40: s = "invalid Ident"; break;
-			case 41: s = "invalid Statement"; break;
-			case 42: s = "invalid AssignCall"; break;
-			case 43: s = "invalid PostOp"; break;
-			case 44: s = "invalid RelOp"; break;
-			case 45: s = "invalid AddOp"; break;
-			case 46: s = "invalid MulOp"; break;
-			case 47: s = "invalid Primary"; break;
-			case 48: s = "invalid Constant"; break;
+			case 14: s = "\"step\" expected"; break;
+			case 15: s = "\"=\" expected"; break;
+			case 16: s = "\"(\" expected"; break;
+			case 17: s = "\")\" expected"; break;
+			case 18: s = "\"[\" expected"; break;
+			case 19: s = "\"]\" expected"; break;
+			case 20: s = "\".\" expected"; break;
+			case 21: s = "\"if\" expected"; break;
+			case 22: s = "\"else\" expected"; break;
+			case 23: s = "\"loop\" expected"; break;
+			case 24: s = "\"from\" expected"; break;
+			case 25: s = "\"to\" expected"; break;
+			case 26: s = "\"var\" expected"; break;
+			case 27: s = "\"+\" expected"; break;
+			case 28: s = "\"-\" expected"; break;
+			case 29: s = "\"==\" expected"; break;
+			case 30: s = "\"!=\" expected"; break;
+			case 31: s = "\">\" expected"; break;
+			case 32: s = "\"<\" expected"; break;
+			case 33: s = "\">=\" expected"; break;
+			case 34: s = "\"<=\" expected"; break;
+			case 35: s = "\"||\" expected"; break;
+			case 36: s = "\"*\" expected"; break;
+			case 37: s = "\"/\" expected"; break;
+			case 38: s = "\"%\" expected"; break;
+			case 39: s = "\"&&\" expected"; break;
+			case 40: s = "??? expected"; break;
+			case 41: s = "invalid Ident"; break;
+			case 42: s = "invalid TypeSpec"; break;
+			case 43: s = "invalid Statement"; break;
+			case 44: s = "invalid AssignCall"; break;
+			case 45: s = "invalid PostOp"; break;
+			case 46: s = "invalid RelOp"; break;
+			case 47: s = "invalid AddOp"; break;
+			case 48: s = "invalid MulOp"; break;
+			case 49: s = "invalid Primary"; break;
+			case 50: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

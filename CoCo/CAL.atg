@@ -16,6 +16,10 @@ static enum PostOpE{INC, DEC, UN};
 static SymbolTable table;
 static int typeCountExpected = 0;
 static int typeCountActual = 0;
+static boolean firstTypeDone = false;
+static boolean usingNStep = false;
+static int stepCount = 0;
+static int expectedStepCount = 0;
 static boolean postOpQueued = false;
 static PostOpE postOpType;
 static boolean valid = true;
@@ -100,6 +104,7 @@ PRODUCTIONS
 												table = new SymbolTable();
 												typeCount = 0;
 												typeCountExpected = 0;
+												firstTypeDone = false;
 											.)				
   	=
   	RuleSet									(. 	
@@ -241,9 +246,59 @@ PRODUCTIONS
   													CodeGen.initType();
   											.)
   	"{"
-  		{Statement}
+  		(										(.
+  													if(!firstTypeDone)
+  														usingNStep = false;
+  													else if(usingNStep == true)
+  														SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+  												.)
+  			{Statement} |  			
+  			(									(.
+  													int value = 0;
+  													stepCount = 0;
+  													
+  													if(!firstTypeDone)
+  														usingNStep = true;
+  													else if(usingNStep == false)
+  														SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+  														
+  												.)
+  				"step" IntConst < out value >		(.
+  														if(value != stepCount)
+  															SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
+  														stepCount++;
+  													.)
+  				Block
+  				{
+	  				"step" IntConst < out value > 	(.
+	  													if(value != stepCount)
+  															SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
+  														stepCount++;
+  													.)
+	  				Block
+  				}
+  			)
+  		)
   	"}"										(.
   												table.popScope();
+  												
+  												if(!firstTypeDone)
+  												{
+  													firstTypeDone = true;
+  													
+  													if(usingNStep)
+  													{
+  														expectedStepCount = stepCount;
+  													}
+  												}
+  												else
+  												{
+  													if(usingNStep)
+  													{
+  														if(stepCount != expectedStepCount)
+  															SemanticError("Invalid Type Specification. Each type must have the same number of steps.");
+  													}
+  												}
   												
   												if(valid)
   													CodeGen.endType();
