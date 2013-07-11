@@ -233,7 +233,13 @@ static public void reset()
 		
 		if(valid)
 		{
-			CodeGen.endExecute();
+			
+			CodeGen.endExecute();  													
+			if(usingNStep)
+			{
+				CodeGen.implementStepFunction(expectedStepCount);
+				CodeGen.implementResetStepFunction();
+			}
 			CodeGen.endClass();
 		}
 		
@@ -295,7 +301,7 @@ static public void reset()
 		if(valid)
 		{
 			entry.offset = CodeGen.declareLocalVariable(name);
-			CodeGen.loadConstant(typeCountExpected);
+			CodeGen.loadConstantDouble(typeCountExpected);
 			CodeGen.storeVariable(entry.offset);
 		}
 			
@@ -315,7 +321,7 @@ static public void reset()
 			if(valid)
 			{
 				entry.offset = CodeGen.declareLocalVariable(name);
-				CodeGen.loadConstant(typeCountExpected);
+				CodeGen.loadConstantDouble(typeCountExpected);
 				CodeGen.storeVariable(entry.offset);
 			}
 				
@@ -382,9 +388,15 @@ static public void reset()
 			stepCount = 0;
 			
 			if(!firstTypeDone)
+			{
 				usingNStep = true;
+				CodeGen.initNStepEngine();
+			}
 			else if(usingNStep == false)
 				SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+				
+			Label nextStep = null;
+			Label end = new Label();
 				
 			
 			Get();
@@ -393,7 +405,15 @@ static public void reset()
 				SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
 			stepCount++;
 			
+			if(valid)
+			{
+				nextStep = CodeGen.engineJump(value);
+			}
+			
 			Block();
+			if(valid)
+				CodeGen.jump(end);
+			
 			while (la.kind == step_Sym) {
 				Get();
 				value  = IntConst();
@@ -401,8 +421,24 @@ static public void reset()
 					SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
 				stepCount++;
 				
+				if(valid)
+				{
+					CodeGen.visitLabel(nextStep);
+					nextStep = CodeGen.engineJump(value);
+				}
+				
+				
 				Block();
+				if(valid)
+					CodeGen.jump(end);
+				
 			}
+			if(valid)
+			{
+				CodeGen.visitLabel(nextStep);
+				CodeGen.visitLabel(end);
+			}
+			
 		} else SynErr(42);
 		Expect(rbrace_Sym);
 		table.popScope();
@@ -1078,7 +1114,7 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			if(valid)
-				CodeGen.loadConstant((double)con.value);
+				CodeGen.loadConstantDouble((double)con.value);
 			
 		} else if (la.kind == lparen_Sym) {
 			Get();

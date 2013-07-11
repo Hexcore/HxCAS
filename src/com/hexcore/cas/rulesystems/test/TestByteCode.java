@@ -396,7 +396,6 @@ public class TestByteCode
 		
 		int errors = compiler.getErrorCount();		
 		assertEquals(true, errors > 0);
-		RuleLoader rl = new RuleLoader();
 	}
 	
 	@Test
@@ -415,6 +414,61 @@ public class TestByteCode
 		//Post run test
 		assertEquals(0.0, c0.getValue(0), 0.0);
 		assertEquals(10.0, c0.getValue(1), 0.0);
+	}
+	
+	@Test
+	public void testNStepEngine()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testNStepEngine.cal");
+		assertEquals(0, compiler.getErrorCount());
+		
+		RuleLoader rl = new RuleLoader();
+		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Cell c0 = new Cell(new double[]{0,0});
+		Cell c1 = new Cell(new double[]{0,0});
+		
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(0.0, c1.getValue(1), 0.0);
+		
+		
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(1.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c1.getValue(1), 0.0);
+		
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(2.0, c0.getValue(1), 0.0);
+		assertEquals(2.0, c1.getValue(1), 0.0);
+		
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(0.0, c1.getValue(1), 0.0);
+		
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(1.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c1.getValue(1), 0.0);
+		
+		rule.resetStep();
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();		
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(0.0, c1.getValue(1), 0.0);
+		
 	}
 	
 }

@@ -40,6 +40,8 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static Label				executeEnd;
 	private static Label[]				frameworkLabels;
 	private static MethodVisitor		executeVisitor;
+	private static String				ruleSetName;
+	
 	
 	public static int declareLocalVariable(String name)
 	{
@@ -66,6 +68,8 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		return propertyIndex++;
 	}
 	
+
+	
 	public static void derefArrayRef()
 	{
 		debug("Dereferencing array");
@@ -91,6 +95,18 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	{
 		debug("Deref var: " + index);
 		executeVisitor.visitVarInsn(DLOAD, index);
+	}
+	
+	public static Label engineJump(int stepNum)
+	{
+		debug("N-Step Jump");
+		executeVisitor.visitFieldInsn(GETSTATIC, ruleSetName, "engineStep", "I");
+		loadConstantInteger(stepNum);
+		
+		Label nextStep = new Label();
+		
+		executeVisitor.visitJumpInsn(IF_ICMPNE, nextStep);
+		return nextStep;
 	}
 	
 	public static void endClass()
@@ -153,6 +169,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		return properties;
 	}
 	
+	
 	public static void implementPropertyCountFunction()
 	{
 		debug("Implement property count");
@@ -177,6 +194,46 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		mVisitor.visitEnd();
 	}
 	
+	public static void implementResetStepFunction()
+	{
+		debug("Implementing resetStepFunction");
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "resetStep", "()V", null, null);
+		mVisitor.visitCode();
+		mVisitor.visitLdcInsn(new Integer(0));
+		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		mVisitor.visitInsn(RETURN);
+		mVisitor.visitMaxs(0,0);
+		mVisitor.visitEnd();
+	}
+	
+	public static void implementStepFunction(int numSteps)
+	{
+		debug("implementing step function");
+		MethodVisitor stepVisitor = cw.visitMethod(ACC_PUBLIC, "step", "()V", null, null);
+		stepVisitor.visitCode();
+
+		/*
+		 * Push current step number onto stack. Add 1 to it (increment instruction not used as it requires a var.
+		 */
+		stepVisitor.visitFieldInsn(GETSTATIC, ruleSetName, "engineStep", "I");
+		stepVisitor.visitLdcInsn(new Integer(1));
+		stepVisitor.visitInsn(IADD);
+		
+		/*
+		 * Push the total number of steps onto the stack. MOD the previous result with it.
+		 * Store the new value.
+		 */
+		stepVisitor.visitLdcInsn(new Integer(numSteps));
+		stepVisitor.visitInsn(IREM);
+		stepVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		
+
+		stepVisitor.visitInsn(RETURN);
+
+		stepVisitor.visitMaxs(0, 0);
+		stepVisitor.visitEnd();
+	}
+	
 	static void initClass(String ruleset)
 	{
 		debug("initClass");
@@ -193,8 +250,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
 		
 		//Class initialisation
+		ruleSetName = "com/hexcore/cas/rulesystems/"+ruleset+"Rule";
 		String[] interfaces = {"com/hexcore/cas/rulesystems/Rule"};
-		cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, "com/hexcore/cas/rulesystems/"+ruleset+"Rule", null, "java/lang/Object", interfaces);
+		cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, ruleSetName, null, "java/lang/Object", interfaces);
+		
+		cw.visitField(ACC_PRIVATE | ACC_STATIC, "engineStep", "I", null, new Integer(0));
 		
 		//Visit constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -280,6 +340,13 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		
 	}
 	
+	public static void initNStepEngine()
+	{	
+		//debug("Initialising N-Step Engine");
+		//loadConstantInteger(0);
+		//executeVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+	}
+	
 	public static void initType()
 	{
 		debug("initType");
@@ -362,10 +429,16 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitJumpInsn(GOTO, label);
 	}
 	
-	public static void loadConstant(double value)
+	public static void loadConstantDouble(double value)
 	{
-		debug("Loading constant: " + value);
+		debug("Loading constant double: " + value);
 		executeVisitor.visitLdcInsn(new Double(value));
+	}
+	
+	public static void loadConstantInteger(int value)
+	{
+		debug("Loading constant integer: " + value);
+		executeVisitor.visitLdcInsn(new Integer(value));
 	}
 	
 	public static void negate()

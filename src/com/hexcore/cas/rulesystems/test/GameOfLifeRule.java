@@ -40,6 +40,15 @@ public class GameOfLifeRule implements Rule
 		return a;
 	}
 	
+	public void step()
+	{
+	
+	}
+	
+	public void resetStep()
+	{
+		
+	}
 	
 	
 	

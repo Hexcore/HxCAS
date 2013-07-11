@@ -115,7 +115,13 @@ PRODUCTIONS
   												
   												if(valid)
   												{
-  													CodeGen.endExecute();
+  													
+  													CodeGen.endExecute();  													
+  													if(usingNStep)
+  													{
+  														CodeGen.implementStepFunction(expectedStepCount);
+  														CodeGen.implementResetStepFunction();
+  													}
   													CodeGen.endClass();
   												}
   											.)
@@ -165,7 +171,7 @@ PRODUCTIONS
   										if(valid)
   										{
   											entry.offset = CodeGen.declareLocalVariable(name);
-  											CodeGen.loadConstant(typeCountExpected);
+  											CodeGen.loadConstantDouble(typeCountExpected);
   											CodeGen.storeVariable(entry.offset);
   										}
   											
@@ -183,7 +189,7 @@ PRODUCTIONS
   										if(valid)
   										{
   											entry.offset = CodeGen.declareLocalVariable(name);
-  											CodeGen.loadConstant(typeCountExpected);
+  											CodeGen.loadConstantDouble(typeCountExpected);
   											CodeGen.storeVariable(entry.offset);
   										}
   											
@@ -258,26 +264,56 @@ PRODUCTIONS
   													stepCount = 0;
   													
   													if(!firstTypeDone)
+  													{
   														usingNStep = true;
+  														CodeGen.initNStepEngine();
+  													}
   													else if(usingNStep == false)
   														SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
+  														
+  													Label nextStep = null;
+  													Label end = new Label();
   														
   												.)
   				"step" IntConst < out value >		(.
   														if(value != stepCount)
   															SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
   														stepCount++;
+  														
+  														if(valid)
+  														{
+  															nextStep = CodeGen.engineJump(value);
+  														}
   													.)
-  				Block
+  				Block								(.
+  														if(valid)
+  															CodeGen.jump(end);
+  													.)
   				{
 	  				"step" IntConst < out value > 	(.
 	  													if(value != stepCount)
   															SemanticError("Invalid step number. Steps must be declared in ascending order.");  															
   														stepCount++;
+  														
+  														if(valid)
+  														{
+  															CodeGen.visitLabel(nextStep);
+  															nextStep = CodeGen.engineJump(value);
+  														}
+  														
   													.)
-	  				Block
+	  				Block							(.
+	  													if(valid)
+	  														CodeGen.jump(end);
+	  												.)
   				}
-  			)
+  			)										(.
+  														if(valid)
+  														{
+  															CodeGen.visitLabel(nextStep);
+  															CodeGen.visitLabel(end);
+  														}
+  													.)
   		)
   	"}"										(.
   												table.popScope();
@@ -840,7 +876,7 @@ PRODUCTIONS
   												p.kind = TableEntry.Kind.CONSTANT;
   												
   												if(valid)
-  													CodeGen.loadConstant((double)con.value);
+  													CodeGen.loadConstantDouble((double)con.value);
   											.)
   	|
   	"(" Expression< out typeE >				(.
