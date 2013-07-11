@@ -237,9 +237,12 @@ static public void reset()
 			CodeGen.endExecute();  													
 			if(usingNStep)
 			{
-				CodeGen.implementStepFunction(expectedStepCount);
-				CodeGen.implementResetStepFunction();
+				CodeGen.implementStepFunction(expectedStepCount);  														
 			}
+			else
+				CodeGen.implementStepFunction(1);
+			
+			CodeGen.implementResetStepFunction();
 			CodeGen.endClass();
 		}
 		
@@ -388,10 +391,7 @@ static public void reset()
 			stepCount = 0;
 			
 			if(!firstTypeDone)
-			{
 				usingNStep = true;
-				CodeGen.initNStepEngine();
-			}
 			else if(usingNStep == false)
 				SemanticError("Invalid Type Specification. You may not mix the use or non-use of the N-Step Engine. All types must make use of steps, or none at all.");
 				

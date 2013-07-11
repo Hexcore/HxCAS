@@ -340,13 +340,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		
 	}
 	
-	public static void initNStepEngine()
-	{	
-		//debug("Initialising N-Step Engine");
-		//loadConstantInteger(0);
-		//executeVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
-	}
-	
 	public static void initType()
 	{
 		debug("initType");
