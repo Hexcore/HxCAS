@@ -742,7 +742,7 @@ public class World
 			return;
 		
 		String gameOfLifeRulesBegin = "ruleset GameOfLife";
-		String gameOfLifeRulesEnd = "\n{\n\ttypecount 1;\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
+		String gameOfLifeRulesEnd = "\n{\n\ttypes{Land};\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
 		
 		if(ruleCodes.size() < steps)
 			for(int i = ruleCodes.size(); i < steps; i++)
