@@ -887,33 +887,14 @@ public class WorldStreamer
 			data = "";
 			out = null;
 			
-			if(world.getStepAmount() == 1)
-			{
-				currFile = new File(tmpDir + "/rules.cal");
-				out = new BufferedOutputStream(new FileOutputStream(currFile));
-				
-				out.write(world.getRuleCodes().get(0).getBytes());
-				out.close();
-
-				currFile = null;
-				data = "";
-				out = null;
-			}
-			else
-			{
-				ArrayList<String> rulesets = world.getRuleCodes();
-				for(int i = 0; i < rulesets.size(); i++)
-				{
-					currFile = new File(tmpDir + "/rules" + (i + 1) + ".cal");
-					out = new BufferedOutputStream(new FileOutputStream(currFile));
-					out.write(rulesets.get(i).getBytes());
-					out.close();
-					
-					currFile = null;
-					data = "";
-					out = null;
-				}
-			}
+			currFile = new File(tmpDir + "/rules.cal");
+			out = new BufferedOutputStream(new FileOutputStream(currFile));
+			out.write(world.getRuleCode().getBytes());
+			out.close();
+			    
+			currFile = null;
+			data = "";
+			out = null;
 			
 			currFile = new File(tmpDir + "/colours.cacp");
 			out = new BufferedOutputStream(new FileOutputStream(currFile));

@@ -65,24 +65,11 @@ public class WorldSaver
 		out.write(configStr.getBytes());
 		out.closeEntry();
 		
-		if(world.getStepAmount() == 1)
-		{
-			ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
-			out.putNextEntry(ruleCodeEntry);
-			out.write(world.getRuleCode().getBytes());
-			out.closeEntry();
-		}
-		else
-		{
-			ArrayList<String> rulesets = world.getRuleCodes();
-			for(int i = 0; i < rulesets.size(); i++)
-			{
-				ZipEntry ruleCodeEntry = new ZipEntry("rules" + (i + 1) + ".cal");
-				out.putNextEntry(ruleCodeEntry);
-				out.write(rulesets.get(i).getBytes());
-				out.closeEntry();
-			}
-		}
+		ZipEntry ruleCodeEntry = new ZipEntry("rules.cal");
+		out.putNextEntry(ruleCodeEntry);
+		out.write(world.getRuleCode().getBytes());
+		out.closeEntry();
+
 		
 		ZipEntry colourCodeEntry = new ZipEntry("colours.cacp");
 		out.putNextEntry(colourCodeEntry);

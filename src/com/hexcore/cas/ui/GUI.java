@@ -156,14 +156,6 @@ public class GUI implements WindowEventListener, LobbyListener
 	public DropDownBox				cellShapeDropDownBox;
 	public DropDownBox				historyDropDownBox;
 
-	
-
-	public TextWidget				emptyLabel;
-	public TextWidget				engineLabel;
-
-	
-	public NumberBox				engineNumberBox;
-
 	public NumberBox				worldSizeXNumberBox;
 	public NumberBox				worldSizeYNumberBox;
 	
@@ -172,14 +164,10 @@ public class GUI implements WindowEventListener, LobbyListener
 	
 	//RULES TAB//
 	public Button					clearRulesButton;
-	public Button					compareRulesButton;
 	public Button					dialogCALOKButton;
 	public Button					openCALFileButton;
 	public Button					saveCALFileButton;
 	public Button					submitRulesButton;
-	
-
-	public DropDownBox				rulesetsDropDownBox;
 	
 	public Container				rulesContainer;
 
@@ -818,41 +806,14 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(compiler.getErrorCount() == 0)
 				{
 					saveRuleCodeToWorld();
-					setRulesetsDropDownBox();
 				}
 				else
 				{
 					Log.information(TAG, "Rule code contains " + compiler.getErrorCount() + " errors");
-					//No change to current rulesets
+					world.setRuleCode("");
 				}
 				
 				createColoursTab();
-			}
-			else if(event.target == compareRulesButton)
-			{
-				ArrayList<String> rulesets = world.getRuleCodes();
-				
-				TextWidget text = new TextWidget("Ruleset comparison");
-				outputLayout.add(text);
-				
-				outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-				outputLayout.setMargin(new Vector2i(0, 0));
-				outputLayout.setFlag(Widget.WRAP);
-				outputContainer.setContents(outputLayout);
-				
-				if(rulesets.size() == 1)
-					outputLayout.add(new TextWidget("There is only a single ruleset. Comparison is unecessary."));
-				else
-				{
-					ArrayList<String> results = world.compareRulesets();
-					if(results.size() == 0)
-						outputLayout.add(new TextWidget("There is no discrepencies between the rulesets."));
-					else
-						for(int i = 0; i < results.size(); i++)
-							outputLayout.add(new TextWidget(results.get(i)));
-				}
-				
-				window.relayout();
 			}
 			else if(event.target == saveCALFileButton)
 			{
@@ -962,25 +923,10 @@ public class GUI implements WindowEventListener, LobbyListener
 			//OTHER
 			else if(event.target == simulateButton)
 			{
-				int errors = 0;
-				int nulls = 0;
-				
-				ArrayList<String> rulesets = world.getRuleCodes();
-				for(int i = 0; i < rulesets.size(); i++)
+				String ruleCode = world.getRuleCode();
+				if(ruleCode == null || ruleCode.equals(""))
 				{
-					CALCompiler compiler = new CALCompiler();
-					if(rulesets.get(i) == null)
-						nulls += 1;
-					else
-					{
-						compiler.compile(rulesets.get(i));
-						errors += compiler.getErrorCount();
-					}
-				}
-				
-				if(errors > 0 || nulls > 0)
-				{
-					showDialog("Simulation", "Cell rules did not compile therefore simulation cannot run.");
+					showDialog("Simulation", "Cell rules not set yet");
 					return;
 				}
 				
@@ -1376,20 +1322,10 @@ public class GUI implements WindowEventListener, LobbyListener
 				if(worldSizeYNumberBox.getValue(5) < 5) worldSizeYNumberBox.setValue(5);
 				
 				savePropertiesToWorld();
+				saveRuleCodeToWorld();
 				updateWorldEditorTab();
+				createColoursTab();
 				updatePreview();
-			}
-			else if(event.target == engineNumberBox)
-			{
-				int steps = engineNumberBox.getValue(1);
-				if(steps < 1)
-				{
-					engineNumberBox.setValue(1);
-					steps = 1;
-				}
-
-				world.setRuleCodes(steps);
-				setRulesetsDropDownBox();
 			}
 			//Disable generation slider for no history keep
 			else if(event.target == historyDropDownBox)
@@ -1408,16 +1344,6 @@ public class GUI implements WindowEventListener, LobbyListener
 				
 				savePropertiesToWorld();
 				updateSimulationScreen(true);
-			}
-			else if(event.target == rulesetsDropDownBox)
-			{
-				String selectedRuleset = rulesetsDropDownBox.getSelectedText();
-				int colonIndex = selectedRuleset.indexOf(":");
-				String name = selectedRuleset.substring(colonIndex + 1);
-				System.out.println("Looking for name |" + name + "|");
-				String code = world.getRuleCode(name);
-				
-				CALTextArea.setText(code);
 			}
 			else if(event.target == worldEditorPropertySelector)
 			{
@@ -1604,20 +1530,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		cellShapeLayout.add(cellShapeDropDownBox);
 
-		emptyLabel = new TextWidget("", Size.MEDIUM);
-		emptyLabel.setFlag(Widget.CENTER_VERTICAL);
-		emptyLabel.setMargin(new Vector2i(25, 0));
-		cellShapeLayout.add(emptyLabel);
-		
-		engineLabel = new TextWidget("Engine Step Size:", Size.MEDIUM);
-		engineLabel.setFlag(Widget.CENTER_VERTICAL);
-		cellShapeLayout.add(engineLabel);
-		
-		engineNumberBox = new NumberBox(35);
-		engineNumberBox.setWidth(50);
-		engineNumberBox.setValue(1);
-		engineNumberBox.setFlag(Widget.CENTER_VERTICAL);
-		cellShapeLayout.add(engineNumberBox);
 		
 		LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
@@ -1671,16 +1583,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
 		CALLayout.add(calEditorHeader);
 		
-		LinearLayout rulesetLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		rulesetLayout.setFlag(Widget.WRAP);
-		rulesetLayout.setFlag(Widget.CENTER_HORIZONTAL);
-		CALLayout.add(rulesetLayout);
-		
-		rulesetsDropDownBox = new DropDownBox(new Vector2i(200, 20));
-		rulesetsDropDownBox.setFlag(Widget.CENTER_VERTICAL);
-		rulesetsDropDownBox.setSelected(0);
-		rulesetLayout.add(rulesetsDropDownBox);
-		
 		CALTextArea = new TextArea(100, 20);
 		CALTextArea.setMargin(new Vector2i(0,0));
 		CALTextArea.setFlag(Widget.FILL);
@@ -1704,8 +1606,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		outputLayout.setFlag(Widget.WRAP);
 		
 		outputContainer.setContents(outputLayout);
-		//875
-		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(1045, 50), LinearLayout.Direction.HORIZONTAL);
+		
+		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(875, 50), LinearLayout.Direction.HORIZONTAL);
 		buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
 		buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
 		masterRulesLayout.add(buttonRulesLayout);
@@ -1719,11 +1621,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		submitRulesButton.setWidth(165);
 		submitRulesButton.setHeight(35);
 		buttonRulesLayout.add(submitRulesButton);
-		
-		compareRulesButton = new Button(new Vector2i(100, 50), "Compare Rules");
-		compareRulesButton.setWidth(165);
-		compareRulesButton.setHeight(35);
-		buttonRulesLayout.add(compareRulesButton);
 		
 		openCALFileButton = new Button(new Vector2i(100, 50), "Open File");
 		openCALFileButton.setWidth(165);
@@ -2204,13 +2101,10 @@ public class GUI implements WindowEventListener, LobbyListener
 		wrapCheckBox.setChecked(grid.isWrappable());
 		historyDropDownBox.setSelected(world.getHistoryType());
 		
-		String ruleCode = world.getRuleCode(rulesetsDropDownBox.getSelected());
+		String ruleCode = world.getRuleCode();
 		if(ruleCode == null)
 			ruleCode = "";
 		CALTextArea.setText(ruleCode);
-
-		setRulesetsDropDownBox();
-		engineNumberBox.setValue(world.getStepAmount());
 		
 		saveRuleCodeToWorld();
 		
@@ -2311,7 +2205,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		Rule rule = ruleLoader.loadRule(compiler.getCode());
 		
 		Log.information(TAG, "Loading rule code into World");
-		world.updateRuleCode(code, rulesetsDropDownBox.getSelected());
+		world.setRuleCode(code);
 		
 		Grid grid = world.getInitialGeneration();
 		if(grid.getNumProperties() != rule.getNumProperties())
@@ -2338,20 +2232,6 @@ public class GUI implements WindowEventListener, LobbyListener
 		heightMapPropertySelector.setSelected(1);
 	}
 	
-	public void setRulesetsDropDownBox()
-	{
-		ArrayList<String> rulesets = world.getRuleCodes();
-
-		rulesetsDropDownBox.clear();
-		
-		for(int i = 0; i < rulesets.size(); i++)
-		{
-			String code = rulesets.get(i);
-			String name = code.substring(0, code.indexOf("\n"));
-			
-			rulesetsDropDownBox.addItem((i + 1) + ":" + name);
-		}
-	}
 	
 	public void showDialog(String caption, String message)
 	{

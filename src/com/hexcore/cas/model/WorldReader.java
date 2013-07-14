@@ -68,7 +68,7 @@ public class WorldReader
 	public boolean readWorld(String worldFilename)
 		throws IOException
 	{
-		ArrayList<String> ruleCodes = new ArrayList<String>();
+		String ruleCode = null;
 		boolean coloursFound = false;
 		boolean rulesFound = false;
 		char type = 'N';
@@ -153,29 +153,7 @@ public class WorldReader
 			}
 		}
 
-		//Searching for the colours file
-		allFiles = zip.entries();
-		while(allFiles.hasMoreElements())
-		{
-			ZipEntry entry = (ZipEntry)allFiles.nextElement();
-			currFilename = entry.getName();
-			
-			if(currFilename.endsWith(".cacp"))
-			{
-				coloursFound = true;
-				colourCode = getStringFromStream(zip.getInputStream(entry));
-				break;
-			}
-		}
-
-		//Set to a default empty colour set
-		if(!coloursFound)
-		{
-			Log.warning(TAG, "Colour set not found - setting colours to default empty set");
-			colourCode = "colourset colours\n{}";
-		}
-
-		//Searching for the rules files
+		//Searching for the colours and rules files
 		allFiles = zip.entries();
 		while(allFiles.hasMoreElements())
 		{
@@ -185,31 +163,34 @@ public class WorldReader
 			if(currFilename.endsWith(".cal"))
 			{
 				rulesFound = true;
-				
-				String number = currFilename.substring(currFilename.indexOf("rules") + 5, currFilename.indexOf("."));
-
-				if(number.compareTo("") != 0)
-					ruleCodes.add(number + ":" + getStringFromStream(zip.getInputStream(entry)));
-				else
-				{
-					ruleCodes.clear();
-					ruleCodes.add(getStringFromStream(zip.getInputStream(entry)));
-					break;
-				}
+				ruleCode = getStringFromStream(zip.getInputStream(entry));
 			}
+			if(currFilename.endsWith(".cacp"))
+			{
+				coloursFound = true;
+				colourCode = getStringFromStream(zip.getInputStream(entry));
+			}
+		}
+
+		//Set to a default empty colour set
+		if(!coloursFound)
+		{
+			Log.warning(TAG, "Colour set not found - setting colours to default empty set");
+			colourCode = "colourset colours\n{}";
 		}
 		
 		//Set to a default ruleset for Conway's Game of Life and change colour set to mirror this, despite if a colour set was found
 		if(!rulesFound)
 		{
 			Log.warning(TAG, "Rule set not found - setting colours and rules to default sets for Conway's Game of Life");
+			ruleCode = "ruleset GameOfLife\n{\n\ttypes{Land};\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
 			colourCode = "colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}";
 		}
 
 		//Searching for all generation files that are to be loaded
 		allFiles = zip.entries();
 		
-		int arrSize = zip.size() - 2 - ruleCodes.size();
+		int arrSize = zip.size() - 3;
 		int finalGen = arrSize - 1;
 		int gensToLoad = arrSize;
 		int scale = 500;
@@ -321,7 +302,7 @@ public class WorldReader
 		}
 		
 		//If ruleCodes is empty, a single default rule set will be set
-		world.setRuleCodes(ruleCodes);
+		world.setRuleCode(ruleCode);
 		world.setColourCode(colourCode);
 		world.setWorldGenerations(gens);
 		

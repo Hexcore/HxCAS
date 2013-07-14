@@ -26,9 +26,7 @@ public class World
 {
 	private static final String		TAG = "World";
 	
-	private ArrayList<String>		ruleCodes;
 	
-	private int						currEngineStep = -1;
 	private int						genAmount = 0;
 	private int						historyType = 1;
 	private int						lastIn = -1;
@@ -36,6 +34,7 @@ public class World
 	private List<Grid> 				worldGenerations = null;
 	
 	private String					colourCode = null;
+	private String					ruleCode = null;
 	private String					worldFileName = null;
 	
 	private WorldStreamer 			streamer = null;
@@ -49,7 +48,6 @@ public class World
 		
 		streamer = new WorldStreamer();
 		
-		ruleCodes = new ArrayList<String>();
 	}
 	
 	/**
@@ -61,13 +59,10 @@ public class World
 	{
 		this.historyType = world.historyType;
 		this.worldFileName = world.worldFileName;
+		this.ruleCode = world.ruleCode;
 		this.colourCode = world.colourCode;
 		this.worldGenerations.clear();
 		this.worldGenerations.addAll(world.worldGenerations);
-		
-		this.ruleCodes.clear();
-		this.ruleCodes.addAll(world.ruleCodes);
-		this.currEngineStep = world.currEngineStep;
 		
 		if(historyType == 2)
 		{
@@ -86,9 +81,7 @@ public class World
 	 * @param gen - generation to be added
 	 */
 	public void addGeneration(Grid gen)
-	{
-		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
-		
+	{		
 		if(historyType == 0)
 		{
 			genAmount++;
@@ -151,119 +144,7 @@ public class World
 		}
 	}
 	
-	/**
-	 * Compares the rule sets of the world for inconsistencies, such as different typecount values;
-	 * different amount of properties and different property names; and different amount of declared
-	 * types and different type names.
-	 * 
-	 * Returns a list of the differences that were found, which can be an empty list for no such finds.
-	 * 
-	 * @return - a list of the errors that were discovered
-	 */
-	public ArrayList<String> compareRulesets()
-	{
-		ArrayList<String> results = new ArrayList<String>();
-		ArrayList<String> ruleset0Properties = new ArrayList<String>();
-		ArrayList<String> ruleset0Typenames = new ArrayList<String>();
-		int ruleset0Typecount = 0;
-		String ruleset0 = ruleCodes.get(0);
-		
-		//Get information on ruleset 0
-		int begin = 0, end = 0;
-		
-		//Typecount amount
-		begin = ruleset0.indexOf("typecount ");
-		end = ruleset0.indexOf(";", begin);
-		ruleset0Typecount = Integer.parseInt(ruleset0.substring(begin + "typecount ".length(), end));
 
-		//Property names
-		begin = end;
-		while(true)
-		{
-			begin = ruleset0.indexOf("property ", begin);
-			if(begin == -1)
-				break;
-			end = ruleset0.indexOf(";", begin);
-			ruleset0Properties.add(ruleset0.substring(begin + "property ".length(), end));
-			begin = end;
-		}
-
-		//Typenames
-		while(true)
-		{
-			begin = ruleset0.indexOf("type ", begin);
-			if(begin == -1)
-				break;
-			end = ruleset0.indexOf("\n", begin);
-			ruleset0Typenames.add(ruleset0.substring(begin + "type ".length(), end));
-			begin = end;
-		}
-		
-		for(int i = 1; i < ruleCodes.size(); i++)
-		{
-			String ruleseti = ruleCodes.get(i);
-			int rulesetiTypecount = 0;
-			ArrayList<String> rulesetiProperties = new ArrayList<String>();
-			ArrayList<String> rulesetiTypenames = new ArrayList<String>();
-			
-			begin = 0;
-			end = 0;
-			
-			//Typecount amount
-			begin = ruleseti.indexOf("typecount ");
-			end = ruleseti.indexOf(";", begin);
-			rulesetiTypecount = Integer.parseInt(ruleseti.substring(begin + "typecount ".length(), end));
-
-			//Property names
-			begin = end;
-			while(true)
-			{
-				begin = ruleseti.indexOf("property ", begin);
-				if(begin == -1)
-					break;
-				end = ruleseti.indexOf(";", begin);
-				rulesetiProperties.add(ruleseti.substring(begin + "property ".length(), end));
-				begin = end;
-			}
-
-			//Typenames
-			while(true)
-			{
-				begin = ruleseti.indexOf("type ", begin);
-				if(begin == -1)
-					break;
-				end = ruleseti.indexOf("\n", begin);
-				rulesetiTypenames.add(ruleseti.substring(begin + "type ".length(), end));
-				begin = end;
-			}
-			
-			if(rulesetiTypecount != ruleset0Typecount)
-				results.add("Ruleset " + (i + 1) + " has a different typecount to the first ruleset.[typecount of " + rulesetiTypecount + "]");
-			if(rulesetiProperties.size() != ruleset0Properties.size())
-				results.add("Ruleset " + (i + 1) + " has a different amount of properties to the first ruleset.[" + rulesetiProperties.size() + " properties]");
-			else
-			{
-				for(int j = 0; j < rulesetiProperties.size(); j++)
-				{
-					if(rulesetiProperties.get(j).compareTo(ruleset0Properties.get(j)) != 0)
-						results.add("Ruleset " + (i + 1) + " has a different property to the first ruleset.[property " + (j + 1) + ":" + rulesetiProperties.get(j) + "]");
-				}
-			}
-			if(rulesetiTypenames.size() != ruleset0Typenames.size())
-				results.add("Ruleset " + (i + 1) + " has a different amount of types specified to the first ruleset.[" + rulesetiProperties.size() + " properties]");
-			else
-			{
-				for(int j = 0; j < rulesetiTypenames.size(); j++)
-				{
-					if(rulesetiTypenames.get(j).compareTo(ruleset0Typenames.get(j)) != 0)
-						results.add("Ruleset " + (i + 1) + " has a different type to the first ruleset.[type " + (j + 1) + ":" + rulesetiTypenames.get(j) + "]");
-				}
-			}
-		}
-		
-		return results;
-	}
-	
 	/**
 	 * Returns the colour set code for the current world.
 	 * 
@@ -464,78 +345,18 @@ public class World
 			return -1;
 	}
 	
-	/**
-	 * Returns the byte code of the current step rule set.
-	 * 
-	 * @return - the byte array of the rule set code
-	 */
-	public byte[] getRuleByteCode()
-	{
-		String code = ruleCodes.get(currEngineStep);
-		
-		CALCompiler compiler = new CALCompiler();
-		compiler.compile(code);
-		
-		return compiler.getCode();
-	}
 	
 	/**
-	 * Returns the string of the current step rule set.
+	 * Returns the string of the current rule set.
 	 * 
 	 * @return - the rule set code
 	 */
 	public String getRuleCode()
 	{
-		return ruleCodes.get(currEngineStep);
+		return ruleCode;
 	}
 	
-	/**
-	 * Returns the string of the rule set at the given index
-	 * 
-	 * @param index - the rule set index
-	 * @return - the rule set code
-	 */
-	public String getRuleCode(int index)
-	{
-		return ruleCodes.get(index);
-	}
 	
-	/**
-	 * Returns the string of the rule set with the given rule set declaration
-	 * 
-	 * If no rule set is found with the given declaration, null is returned.
-	 * 
-	 * @param ruleDeclaration - the line of the rule set that declares a rule set with its name
-	 * @return - the rule set code
-	 */
-	public String getRuleCode(String ruleDeclaration)
-	{
-		for(int i = 0; i < ruleCodes.size(); i++)
-			if(ruleCodes.get(i).indexOf(ruleDeclaration) != -1)
-				return ruleCodes.get(i);
-		
-		return null;
-	}
-	
-	/**
-	 * Returns all the rule sets for the world.
-	 * 
-	 * @return - the list of rule sets
-	 */
-	public ArrayList<String> getRuleCodes()
-	{
-		return ruleCodes;
-	}
-	
-	/**
-	 * Returns the number of steps for the current world.
-	 * 
-	 * @return - the step number
-	 */
-	public int getStepAmount()
-	{
-		return ruleCodes.size();
-	}
 	
 	/**
 	 * Returns the name of the world as given by the file name.
@@ -651,12 +472,10 @@ public class World
 		Log.debug(TAG, "Resetting world.");
 		
 		this.worldFileName = world.worldFileName;
+		this.ruleCode = world.ruleCode;
 		this.colourCode = world.colourCode;
 		this.worldGenerations.clear();
 		
-		this.ruleCodes.clear();
-		this.ruleCodes.addAll(world.ruleCodes);
-		this.currEngineStep = world.currEngineStep;
 		
 		if(historyType != 0)
 			this.worldGenerations.addAll(world.worldGenerations);
@@ -723,90 +542,12 @@ public class World
 		historyType = hT;
 	}
 	
-	/**
-	 * Sets the number of rule set codes to the number of steps given.
-	 * 
-	 * If the current number of rule set codes is the same as the value given, then nothing happens.
-	 * 
-	 * If the current number of rule set codes is less, then extra rule set codes are generated using
-	 * the default rule set code until the value is matched.
-	 * 
-	 * If the current number of rule set codes is more, then the extra rule set codes are erased
-	 * until the value is matched.
-	 * 
-	 * @param steps - the number of rule set codes there should be
-	 */
-	public void setRuleCodes(int steps)
+	public void setRuleCode(String ruleCode)
 	{
-		if(ruleCodes.size() == steps)
-			return;
-		
-		String gameOfLifeRulesBegin = "ruleset GameOfLife";
-		String gameOfLifeRulesEnd = "\n{\n\ttypes{Land};\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}";
-		
-		if(ruleCodes.size() < steps)
-			for(int i = ruleCodes.size(); i < steps; i++)
-			{
-				String code = gameOfLifeRulesBegin + i + gameOfLifeRulesEnd;
-				ruleCodes.add(code);
-			}
-		else
-			for(int i = ruleCodes.size() - 1; i >= steps; i--)
-				ruleCodes.remove(i);
-
-		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
+		this.ruleCode = ruleCode;
 	}
 	
-	/**
-	 * Sets the rule set codes to the given list of rule set codes.
-	 * 
-	 * If the list is empty, the list of world rule set codes is populated with a single
-	 * default rule set.
-	 * 
-	 * If the list has a single element, the list of world rule set codes is populated with
-	 * that single rule set.
-	 * 
-	 * Otherwise, the list of world rule set codes is populated with the rule set codes in
-	 * the list after the rule sets have been extracted from the ordering prefix.
-	 * 
-	 * @param list - the list of rule set codes that should be used
-	 */
-	public void setRuleCodes(ArrayList<String> list)
-	{
-		if(list.size() == 0)
-		{
-			setRuleCodes(1);
-			currEngineStep = (currEngineStep + 1) % ruleCodes.size();
-			return;
-		}
-		
-		ruleCodes.clear();
-		if(list.size() == 1)
-		{
-			ruleCodes.addAll(list);
-			currEngineStep = (currEngineStep + 1) % ruleCodes.size();
-			return;
-		}
 
-		int i = 1;
-		int j = 0;
-
-		while(j < list.size())
-		{
-			String currCode = list.get(j);
-			String numberStr = currCode.substring(0, currCode.indexOf(":"));
-			int number = Integer.parseInt(numberStr);
-			if(number == i)
-			{
-				ruleCodes.add(currCode.substring(currCode.indexOf(":") + 1));
-				j++;
-			}
-			
-			i++;
-		}
-
-		currEngineStep = (currEngineStep + 1) % ruleCodes.size();
-	}
 	
 	/**
 	 * Sets the world generations to the generations given.
@@ -874,15 +615,4 @@ public class World
 			streamer.stop();
 	}
 	
-	/**
-	 * Updates the rule set code at the given index with the given rule set code.
-	 * 
-	 * @param code - the rule set code that the rule set at index must be set to
-	 * @param index - the index of the rule set code that must be changed
-	 */
-	public void updateRuleCode(String code, int index)
-	{
-		ruleCodes.remove(index);
-		ruleCodes.add(index, code);
-	}
 }
