@@ -246,6 +246,7 @@ public class ClientOverseer extends Thread
 							Cell cell = new Cell(work.grid.getCell(location));
 							Cell[] neighbours = work.grid.getNeighbours(location);
 							
+							rule.setStepForGen(work.generation-1);
 							rule.run(cell, neighbours);
 							newGrid.setCell(x, y, cell);
 						}

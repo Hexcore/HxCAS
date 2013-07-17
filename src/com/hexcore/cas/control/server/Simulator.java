@@ -338,10 +338,8 @@ public class Simulator extends Thread
 	}
 	
 	private void startGeneration()
-	{		
-		isFinishedGenerations.set(false);
-		
-		currentGeneration++;
+	{	
+		isFinishedGenerations.set(false);		
 		GenerationThread generationThread = new GenerationThread();
 		generationThread.start();		
 	}
@@ -451,6 +449,7 @@ public class Simulator extends Thread
 				return;
 			}
 			
+			currentGeneration++;
 			if(numOfGenerations > 0)
 				numOfGenerations--;
 			
