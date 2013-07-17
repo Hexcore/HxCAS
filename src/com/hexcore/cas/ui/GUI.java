@@ -327,7 +327,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		colourRules.setColourRule(3, colourRule);  
 		
 		theme = new Theme();
-		window = new Window("Cellular Automata Simulator - v1.0", 1366, 700, theme);
+		window = new Window("Cellular Automata Simulator - " + Server.VERSION, 1366, 700, theme);
 		
 		window.addListener(this);
 		
