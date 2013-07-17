@@ -23,7 +23,7 @@ import com.hexcore.cas.utilities.Log;
 
 public class Simulator extends Thread
 {
-	private static final String TAG = "Server";
+	private static final String TAG = "Simulator";
 	
 	private CAPIPServer informationProcessor = null;
 	

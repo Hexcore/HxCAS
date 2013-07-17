@@ -36,7 +36,7 @@ import com.hexcore.cas.utilities.Log;
 public class CAPIPServer
 {
 	private final static int					PROTOCOL_VERSION = 1;
-	private static final String					TAG = "Server";
+	private static final String					TAG = "CAPIPServer";
 	
 	private Grid								currentGrid;
 
