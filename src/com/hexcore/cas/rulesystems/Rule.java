@@ -14,6 +14,7 @@ public interface Rule
 {
 	public void run(Cell cell, Cell[] neighbours);
 	public void step();
+	public void setStepForGen(int gen);
 	public void resetStep();
 	public int getNumProperties();
 	public ArrayList<String> getPropertyList();

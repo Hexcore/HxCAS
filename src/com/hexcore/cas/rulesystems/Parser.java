@@ -237,10 +237,14 @@ static public void reset()
 			CodeGen.endExecute();  													
 			if(usingNStep)
 			{
-				CodeGen.implementStepFunction(expectedStepCount);  														
+				CodeGen.implementStepFunction(expectedStepCount);
+				CodeGen.implementSetStepForGenFunction(expectedStepCount);  														
 			}
 			else
+			{
 				CodeGen.implementStepFunction(1);
+				CodeGen.implementSetStepForGenFunction(1);
+			}
 			
 			CodeGen.implementResetStepFunction();
 			CodeGen.endClass();

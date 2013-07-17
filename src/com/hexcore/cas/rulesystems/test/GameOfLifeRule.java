@@ -49,6 +49,12 @@ public class GameOfLifeRule implements Rule
 	{
 		
 	}
+
+	@Override
+	public void setStepForGen(int gen)
+	{
+		
+	}
 	
 	
 	

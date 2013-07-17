@@ -469,6 +469,20 @@ public class TestByteCode
 		assertEquals(0.0, c0.getValue(1), 0.0);
 		assertEquals(0.0, c1.getValue(1), 0.0);
 		
+		
+		rule.setStepForGen(27);
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(0.0, c1.getValue(1), 0.0);
+		
+		rule.setStepForGen(59);
+		rule.run(c0, null);
+		rule.run(c1, null);
+		rule.step();
+		assertEquals(2.0, c0.getValue(1), 0.0);
+		assertEquals(2.0, c1.getValue(1), 0.0);
 	}
 	
 }

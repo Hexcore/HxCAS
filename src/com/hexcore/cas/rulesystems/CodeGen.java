@@ -30,7 +30,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	/////////////////////////////////////////////
 	/// Private Variables
 	private static ArrayList<String>	properties;
-	private static boolean				debugEnabled = true;
+	private static boolean				debugEnabled = false;
 	private static int					currentFrameworkIndex = 0;
 	private static int					numProperties = 1;
 	private static int					propertyIndex = 1;
@@ -202,6 +202,33 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		mVisitor.visitLdcInsn(new Integer(0));
 		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
 		mVisitor.visitInsn(RETURN);
+		mVisitor.visitMaxs(0,0);
+		mVisitor.visitEnd();
+	}
+	
+	public static void implementSetStepForGenFunction(int numSteps)
+	{
+		debug("Implementing setStepForGenFunction");
+		MethodVisitor mVisitor = cw.visitMethod(ACC_PUBLIC, "setStepForGen", "(I)V", null, null);
+		mVisitor.visitCode();
+		Label mBegin = new Label();
+		mVisitor.visitLabel(mBegin);
+		
+		mVisitor.visitVarInsn(ILOAD, 1); //Load parameter 0;
+		mVisitor.visitLdcInsn(new Integer(numSteps));
+		
+		mVisitor.visitLdcInsn(new Integer(0));
+		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		mVisitor.visitInsn(IREM);
+		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		
+		mVisitor.visitInsn(RETURN);
+		Label mEnd = new Label();
+		mVisitor.visitLabel(mEnd);
+		
+		mVisitor.visitLocalVariable("this", "Lcom/hexcore/cas/rulesystems/"+name+"Rule;", null, mBegin, mEnd, 0);
+		mVisitor.visitLocalVariable("gN", "I", null, mBegin, mEnd, 1);
+		
 		mVisitor.visitMaxs(0,0);
 		mVisitor.visitEnd();
 	}
