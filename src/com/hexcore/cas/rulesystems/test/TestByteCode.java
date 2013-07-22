@@ -485,4 +485,12 @@ public class TestByteCode
 		assertEquals(2.0, c1.getValue(1), 0.0);
 	}
 	
+	@Test
+	public void testFunctionResultDiscarding()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testFunctionResultDiscarding.cal");
+		assertEquals(0, compiler.getErrorCount());
+	}
+	
 }

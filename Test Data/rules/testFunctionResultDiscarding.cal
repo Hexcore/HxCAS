@@ -1,0 +1,12 @@
+ruleset testFunctionResultDiscarding
+{
+	types{Earth};
+	
+	property p1;
+
+	type Earth
+	{
+		count(neighbours.p1);
+		sum(neighbours.p1);
+	}
+}

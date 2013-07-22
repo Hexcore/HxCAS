@@ -51,6 +51,23 @@ public class TestParser
 		assertTrue(Parser.getErrorCount() != 0);
 	}
 	
+	@Test
+	public void testFunctionParameterChecking()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testFunctionParameterChecking.cal");		
+		assertTrue(Parser.getErrorCount() == 0);
+	}
+	
+	@Test
+	public void testFunctionParameterCheckingRestrictions()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testFunctionParameterCheckingRestrictions.cal");		
+		assertTrue(Parser.getErrorCount() != 0);
+	}
 
 
 	

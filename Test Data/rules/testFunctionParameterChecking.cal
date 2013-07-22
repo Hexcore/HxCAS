@@ -1,0 +1,11 @@
+ruleset testFunctionParameterChecking
+{
+	types{Earth};
+	
+	property p1;
+
+	type Earth
+	{
+		var c = count(neighbours.p1);
+	}
+}

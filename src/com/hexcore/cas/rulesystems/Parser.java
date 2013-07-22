@@ -6,6 +6,7 @@ import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
 import com.hexcore.cas.rulesystems.TableEntry.Type;
+import com.hexcore.cas.rulesystems.ArgList;
 import org.objectweb.asm.Label;
 
 import java.io.*;
@@ -302,7 +303,7 @@ static public void reset()
 		TableEntry entry = new TableEntry();
 		entry.name = name;
 		entry.kind = TableEntry.Kind.TYPENAME;
-		entry.type = TableEntry.Type.INT;
+		entry.type = TableEntry.Type.DOUBLE;
 		entry.immutable = true;
 		
 		if(valid)
@@ -322,7 +323,7 @@ static public void reset()
 			entry = new TableEntry();
 			entry.name = name;
 			entry.kind = TableEntry.Kind.TYPENAME;
-			entry.type = TableEntry.Type.INT;
+			entry.type = TableEntry.Type.DOUBLE;
 			entry.immutable = true;
 			
 			if(valid)
@@ -510,7 +511,7 @@ static public void reset()
 	}
 
 	static void AssignCall() {
-		TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; TableEntry.Type typeA = TableEntry.Type.NONE;
+		TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; ArgList args;
 		entry = Designator(false);
 		PostOpE T = PostOpE.UN;
 		if (la.kind == equal_Sym) {
@@ -531,15 +532,16 @@ static public void reset()
 			}
 			
 			if(valid)
-			{
+			{  															
 				if(entry.kind == TableEntry.Kind.VARIABLE)
 				{
-					if(TableEntry.isBool(type))
-						CodeGen.toDouble();
+					entry.type = type;
 					CodeGen.storeVariable(entry.offset);
 				}
 				else if(entry.kind == TableEntry.Kind.PROPERTY)
 				{
+					if(entry.type != type)
+						CodeGen.convert(entry.type, type);
 					CodeGen.storeProperty(entry.offset);
 				}
 			}
@@ -571,24 +573,26 @@ static public void reset()
 			
 		} else if (la.kind == lparen_Sym) {
 			Get();
-			typeA  = Arguments();
-			if(!TableEntry.isFunction(entry.kind))
+			args  = Arguments();
+			if(entry.kind != TableEntry.Kind.METHOD)
 			{
 			SemanticError("Arguments can only be given to a function.");
 			}
 			
-			if(entry.kind == TableEntry.Kind.AFUNCTION)
+			if(!entry.checkArguments(args))
 			{
-			if(!TableEntry.isArray(typeA))
-			{
-			SemanticError("Invalid argument. Argument must be an array");
+			
+			SemanticError("Function \"" + entry.name + "\" has arguments:\n" + entry.arguments +
+			"\n provided arguments:\n" +
+			args);
 			}
-			}
-			else
+			
+			if(valid)
 			{
-			if(TableEntry.isArray(typeA))
+			CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+			if(entry.type != TableEntry.Type.VOID)
 			{
-			SemanticError("Invalid argument. Argument must be a scalar type");
+			CodeGen.pop(entry.type);
 			}
 			}
 			
@@ -647,7 +651,7 @@ static public void reset()
 		{  														
 			entry.kind = TableEntry.Kind.VARIABLE;
 			entry.name = name;
-			entry.type = TableEntry.Type.INT;
+			entry.type = TableEntry.Type.DOUBLE;
 			entry.immutable = true;
 			table.insert(entry);
 			entry.offset = CodeGen.declareLoopVariables();
@@ -655,6 +659,9 @@ static public void reset()
 		
 		Expect(from_Sym);
 		type1  = Expression();
+		if(type1 == TableEntry.Type.INT)
+			CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+		
 		Expect(to_Sym);
 		type2  = Expression();
 		if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
@@ -666,6 +673,9 @@ static public void reset()
 		{
 			SemError("Loop bounds must be scalar");
 		}
+		
+		if(type2 == TableEntry.Type.INT)
+			CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
 		
 		if(valid)
 		{
@@ -770,12 +780,18 @@ static public void reset()
 		
 		if (StartOf(3)) {
 			op  = RelOp();
+			if(type1 == TableEntry.Type.INT)
+				CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+			
 			type2  = AddExp();
 			if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
 			{
 				SemanticError("Type mismatch");
 				type = TableEntry.Type.NONE;
 			}
+			
+			if(type2 == TableEntry.Type.INT)
+				CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
 				
 			type = TableEntry.Type.BOOL;
 			
@@ -799,13 +815,19 @@ static public void reset()
 		return op;
 	}
 
-	static Type Arguments() {
-		Type type;
-		type = TableEntry.Type.NONE;
+	static ArgList Arguments() {
+		ArgList types;
+		types = new ArgList(); TableEntry.Type type = null;
 		if (StartOf(4)) {
 			type  = Expression();
+			types.add(type);
+			while (la.kind == comma_Sym) {
+				Get();
+				type  = Expression();
+				types.add(type);
+			}
 		}
-		return type;
+		return types;
 	}
 
 	static TableEntry Attribute() {
@@ -866,6 +888,14 @@ static public void reset()
 		AddOpE op = AddOpE.UN;
 		type = type1;
 		
+		
+		if(type1 == TableEntry.Type.INT)
+		{
+			CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+			type = TableEntry.Type.DOUBLE;
+			type1 = TableEntry.Type.DOUBLE;
+		}
+		
 		if(negative)
 		{
 			if(!TableEntry.isArith(type1))
@@ -878,8 +908,15 @@ static public void reset()
 		while (la.kind == plus_Sym || la.kind == minus_Sym || la.kind == barbar_Sym) {
 			op  = AddOp();
 			type2  = Term();
-			switch(op)
+			if(type2 == TableEntry.Type.INT)
 			{
+				CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+				type = TableEntry.Type.DOUBLE;
+				type2 = TableEntry.Type.DOUBLE;
+			}
+			
+			switch(op)
+			{  												
 				case OR:
 					if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
 						SemanticError("Boolean Types Required");
@@ -888,10 +925,7 @@ static public void reset()
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
 						SemanticError("Numeric Types Required");
-					if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
-						type = TableEntry.Type.INT;
-					else
-						type = TableEntry.Type.DOUBLE;
+					type = TableEntry.Type.DOUBLE;
 			}
 			
 			if(valid)
@@ -951,7 +985,20 @@ static public void reset()
 		
 		while (StartOf(5)) {
 			op  = MulOp();
+			if(type1 == TableEntry.Type.INT)
+			{
+				CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+				type = TableEntry.Type.DOUBLE;
+				type1 = TableEntry.Type.DOUBLE;
+			}
+			
 			type2  = Factor();
+			if(type2 == TableEntry.Type.INT)
+			{
+				CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+				type = TableEntry.Type.DOUBLE;
+				type2 = TableEntry.Type.DOUBLE;
+			}
 			switch(op)
 			{
 				case AND:
@@ -962,10 +1009,7 @@ static public void reset()
 				default:
 					if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
 						SemanticError("Numeric Types Required");
-					if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
-						type = TableEntry.Type.INT;
-					else
-						type = TableEntry.Type.DOUBLE; 														
+					type = TableEntry.Type.DOUBLE; 														
 			}
 			
 			if(valid)
@@ -1008,6 +1052,12 @@ static public void reset()
 			}
 			else
 			{
+			if(p.type == TableEntry.Type.INT)
+			{
+			CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+			type = TableEntry.Type.DOUBLE;
+			}
+			
 			if(valid)
 			{
 			if(T == PostOpE.INC)
@@ -1049,7 +1099,7 @@ static public void reset()
 		p = new PrimaryPair();
 		p.type = TableEntry.Type.NONE;
 		
-		TableEntry.Type typeA = TableEntry.Type.NONE;
+		ArgList args = null;
 		TableEntry.Type typeE = TableEntry.Type.NONE;
 		
 		ConstantRecord con;
@@ -1077,37 +1127,26 @@ static public void reset()
 			
 			if (la.kind == lparen_Sym) {
 				Get();
-				typeA  = Arguments();
-				if(!TableEntry.isFunction(entry.kind))
+				args  = Arguments();
+				if(entry.kind != TableEntry.Kind.METHOD)
 				{
 				SemanticError("Arguments can only be given to a function.");
 				}
 				
-				if(entry.kind == TableEntry.Kind.AFUNCTION)
+				
+				if(!entry.checkArguments(args))
 				{
-				if(!TableEntry.isArray(typeA))
-				{
-					SemanticError("Invalid argument. Argument must be an array");
-				}
-				else
-				{
-					if(valid)
-						CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
-				}
-				}
-				else
-				{
-				if(TableEntry.isArray(typeA))
-				{
-					SemanticError("Invalid argument. Argument must be a scalar type");
-				}
-				else
-				{
-					if(valid)
-						CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
-				}
+				
+				SemanticError("Function \"" + entry.name + "\" has arguments:\n" + entry.arguments +
+				"\n provided arguments:\n" +
+				args);
 				}
 				p.kind = TableEntry.Kind.CONSTANT;
+				
+				if(valid)
+				{
+				CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+				}
 				
 				
 				Expect(rparen_Sym);
@@ -1118,7 +1157,12 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			if(valid)
-				CodeGen.loadConstantDouble((double)con.value);
+			{
+				if(con.type == TableEntry.Type.INT)
+					CodeGen.loadConstantInteger((int)con.value);
+				else if(con.type == TableEntry.Type.DOUBLE)
+					CodeGen.loadConstantDouble(con.value);
+			}
 			
 		} else if (la.kind == lparen_Sym) {
 			Get();

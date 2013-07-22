@@ -1,5 +1,7 @@
 package com.hexcore.cas.rulesystems;
 
+import java.util.List;
+
 /**
  * Class TableEntry
 
@@ -8,15 +10,48 @@ package com.hexcore.cas.rulesystems;
 
 public class TableEntry
 {
-	public enum Kind {CONSTANT, VARIABLE, SFUNCTION, AFUNCTION, PROPERTY, CELL, TYPENAME};
-	public enum Type {INT, INT_ARR, DOUBLE, DOUBLE_ARR, NONE, NONE_ARR, BOOL, BOOL_ARR, CELL, CELL_ARR};
+	public enum Kind {CONSTANT, VARIABLE, METHOD, PROPERTY, CELL, TYPENAME};
+	
+	/** Language supported types.
+	 * 
+	 * Includes internal JVM 7 specified name.
+	 * 
+	 * @author Karl Zöller
+	 *
+	 */
+	public enum Type 
+	{
+		INT("I"), 
+		INT_ARR("[I"), 
+		DOUBLE("D"), 
+		DOUBLE_ARR("[D"), 
+		NONE(""), 
+		NONE_ARR(""), 
+		BOOL("Z"), 
+		BOOL_ARR("[Z"), 
+		CELL("Lcom/hexcore/cas/model/Cell;"), 
+		CELL_ARR("[Lcom/hexcore/cas/model/Cell;"),
+		VOID("V");
+		
+		private final String iName;
+		
+		private Type(String internalName)
+		{
+			iName = internalName;
+		};
+		
+		public String getInternalName()
+		{
+			return iName;
+		}
+	};
 	
 	
 	public Type 			type;
 	public Kind				kind;
 	public int 				value;				//Constant value
 	public int 				offset;
-	public Type				argType;
+	public ArgList			arguments;
 	public String			name;
 	public boolean			immutable = false;
 	
@@ -60,12 +95,20 @@ public class TableEntry
 			return false;
 	}
 	
-	
-	public static boolean isFunction(Kind kind)
+	public boolean checkArguments(ArgList list)
 	{
-		if(kind == Kind.AFUNCTION || kind == Kind.SFUNCTION)
-			return true;
-		else
+		List<Type> myTypes = arguments.getList();
+		List<Type> otherTypes = list.getList();
+		
+		if(myTypes.size() != otherTypes.size())
 			return false;
+		
+		for(int i = 0; i < myTypes.size(); i++)
+		{
+			if(myTypes.get(i) != otherTypes.get(i))
+				return false;
+		}
+		
+		return true;
 	}
 }

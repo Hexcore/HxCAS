@@ -4,6 +4,7 @@ import com.hexcore.cas.rulesystems.ConstantRecord;
 import com.hexcore.cas.rulesystems.SymbolTable;
 import com.hexcore.cas.rulesystems.PrimaryPair;
 import com.hexcore.cas.rulesystems.TableEntry.Type;
+import com.hexcore.cas.rulesystems.ArgList;
 import org.objectweb.asm.Label;
 
 COMPILER CAL $NC
@@ -172,7 +173,7 @@ PRODUCTIONS
   										TableEntry entry = new TableEntry();
   										entry.name = name;
   										entry.kind = TableEntry.Kind.TYPENAME;
-  										entry.type = TableEntry.Type.INT;
+  										entry.type = TableEntry.Type.DOUBLE;
   										entry.immutable = true;
   										
   										if(valid)
@@ -190,7 +191,7 @@ PRODUCTIONS
   										entry = new TableEntry();
   										entry.name = name;
   										entry.kind = TableEntry.Kind.TYPENAME;
-  										entry.type = TableEntry.Type.INT;
+  										entry.type = TableEntry.Type.DOUBLE;
   										entry.immutable = true;
   										
   										if(valid)
@@ -375,7 +376,7 @@ PRODUCTIONS
   	
   	
   	/********** Assignment or function call *********/
-  	AssignCall									(. TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; TableEntry.Type typeA = TableEntry.Type.NONE;.)
+  	AssignCall									(. TableEntry entry = null; TableEntry.Type type = TableEntry.Type.NONE; ArgList args;.)
   	=
   	Designator< out entry, false >			(. PostOpE T = PostOpE.UN; .)
   	(
@@ -395,15 +396,16 @@ PRODUCTIONS
   													}
   													
   													if(valid)
-  													{
+  													{  															
 	  													if(entry.kind == TableEntry.Kind.VARIABLE)
 	  													{
-	  														if(TableEntry.isBool(type))
-	  															CodeGen.toDouble();
+	  														entry.type = type;
 	  														CodeGen.storeVariable(entry.offset);
 	  													}
 	  													else if(entry.kind == TableEntry.Kind.PROPERTY)
 	  													{
+	  														if(entry.type != type)
+  																CodeGen.convert(entry.type, type);
 	  														CodeGen.storeProperty(entry.offset);
 	  													}
   													}
@@ -432,23 +434,25 @@ PRODUCTIONS
   														}
   													}
   												.)
-  		| "(" Arguments< out typeA >			(.	if(!TableEntry.isFunction(entry.kind))
+  		| "(" Arguments< out args >			(.	if(entry.kind != TableEntry.Kind.METHOD)
   												{
   													SemanticError("Arguments can only be given to a function.");
   												}
   												
-  												if(entry.kind == TableEntry.Kind.AFUNCTION)
+  												if(!entry.checkArguments(args))
   												{
-  													if(!TableEntry.isArray(typeA))
-  													{
-  														SemanticError("Invalid argument. Argument must be an array");
-  													}
+  
+  													SemanticError("Function \"" + entry.name + "\" has arguments:\n" + entry.arguments +
+  													"\n provided arguments:\n" +
+  													args);
   												}
-  												else
+  												
+  												if(valid)
   												{
-  													if(TableEntry.isArray(typeA))
+  													CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+  													if(entry.type != TableEntry.Type.VOID)
   													{
-  														SemanticError("Invalid argument. Argument must be a scalar type");
+  														CodeGen.pop(entry.type);
   													}
   												}
   											.)
@@ -600,13 +604,16 @@ PRODUCTIONS
   													{  														
   														entry.kind = TableEntry.Kind.VARIABLE;
   														entry.name = name;
-  														entry.type = TableEntry.Type.INT;
+  														entry.type = TableEntry.Type.DOUBLE;
   														entry.immutable = true;
   														table.insert(entry);
   														entry.offset = CodeGen.declareLoopVariables();
   													}
   												.)
-  	"from" Expression< out type1 > 
+  	"from" Expression< out type1 >				(.
+  													if(type1 == TableEntry.Type.INT)
+  														CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  												.)
   	"to" Expression< out type2 >				(.
   													if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
   													{
@@ -617,6 +624,9 @@ PRODUCTIONS
   													{
   														SemError("Loop bounds must be scalar");
   													}
+  													
+  													if(type2 == TableEntry.Type.INT)
+  														CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
   													
   													if(valid)
   													{
@@ -658,13 +668,19 @@ PRODUCTIONS
   												type = type1;
   											.) 
   	[
-  	RelOp< out op >							
+  	RelOp< out op >							(.
+  												if(type1 == TableEntry.Type.INT)
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  											.)					
   	AddExp< out type2 >						(.
   												if(!(TableEntry.isArith(type1) && TableEntry.isArith(type2)) && !(TableEntry.isBool(type1) && TableEntry.isBool(type2)))
   												{
   													SemanticError("Type mismatch");
   													type = TableEntry.Type.NONE;
   												}
+  												
+  												if(type2 == TableEntry.Type.INT)
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
   													
   												type = TableEntry.Type.BOOL;
   												
@@ -690,6 +706,14 @@ PRODUCTIONS
   												AddOpE op = AddOpE.UN;
   												type = type1;
   												
+  												
+  												if(type1 == TableEntry.Type.INT)
+  												{
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  													type = TableEntry.Type.DOUBLE;
+  													type1 = TableEntry.Type.DOUBLE;
+  												}
+  												
   												if(negative)
   												{
 	  												if(!TableEntry.isArith(type1))
@@ -702,8 +726,15 @@ PRODUCTIONS
   	{
   	AddOp< out op > 
   	Term< out type2 >						(.
+  												if(type2 == TableEntry.Type.INT)
+												{
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  													type = TableEntry.Type.DOUBLE;
+  													type2 = TableEntry.Type.DOUBLE;
+												}
+												
   												switch(op)
-  												{
+  												{  												
   													case OR:
   														if(!TableEntry.isBool(type1) || !TableEntry.isBool(type2))
   															SemanticError("Boolean Types Required");
@@ -712,10 +743,7 @@ PRODUCTIONS
   													default:
   														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
   															SemanticError("Numeric Types Required");
-  														if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
-  															type = TableEntry.Type.INT;
-  														else
-  															type = TableEntry.Type.DOUBLE;
+  														type = TableEntry.Type.DOUBLE;
   												}
   												
   												if(valid)
@@ -740,8 +768,22 @@ PRODUCTIONS
   												type = type1;
   											.)
   	{
-  	MulOp< out op >					
+  	MulOp< out op >							(.
+  												if(type1 == TableEntry.Type.INT)
+  												{
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  													type = TableEntry.Type.DOUBLE;
+  													type1 = TableEntry.Type.DOUBLE;
+  												}
+  											.)
   	Factor< out type2 >						(.
+  	
+  												if(type2 == TableEntry.Type.INT)
+  												{
+  													CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+  													type = TableEntry.Type.DOUBLE;
+  													type2 = TableEntry.Type.DOUBLE;
+  												}
   												switch(op)
   												{
   													case AND:
@@ -752,10 +794,7 @@ PRODUCTIONS
   													default:
   														if(!TableEntry.isArith(type1) || !TableEntry.isArith(type2))
   															SemanticError("Numeric Types Required");
-  														if((type1 == TableEntry.Type.INT) && (type2 == TableEntry.Type.INT))
-  															type = TableEntry.Type.INT;
-  														else
-  															type = TableEntry.Type.DOUBLE; 														
+  														type = TableEntry.Type.DOUBLE; 														
   												}
   												
   												if(valid)
@@ -787,6 +826,12 @@ PRODUCTIONS
   												}
 												else
 												{
+													if(p.type == TableEntry.Type.INT)
+													{
+														CodeGen.convert(TableEntry.Type.DOUBLE, TableEntry.Type.INT);
+														type = TableEntry.Type.DOUBLE;
+													}
+													
 													if(valid)
 													{
 														if(T == PostOpE.INC)
@@ -811,7 +856,7 @@ PRODUCTIONS
   												p = new PrimaryPair();
   												p.type = TableEntry.Type.NONE;
   												
-  												TableEntry.Type typeA = TableEntry.Type.NONE;
+  												ArgList args = null;
   												TableEntry.Type typeE = TableEntry.Type.NONE;
   												
   												ConstantRecord con;
@@ -839,37 +884,26 @@ PRODUCTIONS
   											.)
   	[
   	"("		
-  		Arguments< out typeA >				(.	
-   												if(!TableEntry.isFunction(entry.kind))
+  		Arguments< out args >				(.	
+   												if(entry.kind != TableEntry.Kind.METHOD)
   												{
   													SemanticError("Arguments can only be given to a function.");
   												}
   												
-  												if(entry.kind == TableEntry.Kind.AFUNCTION)
+												
+												if(!entry.checkArguments(args))
   												{
-  													if(!TableEntry.isArray(typeA))
-  													{
-  														SemanticError("Invalid argument. Argument must be an array");
-  													}
-  													else
-  													{
-  														if(valid)
-  															CodeGen.invokeStandardArrayMethod(entry.name, entry.argType, entry.type);
-  													}
-  												}
-  												else
-  												{
-  													if(TableEntry.isArray(typeA))
-  													{
-  														SemanticError("Invalid argument. Argument must be a scalar type");
-  													}
-  													else
-  													{
-  														if(valid)
-  															CodeGen.invokeStandardScalarMethod(entry.name, entry.argType, entry.type);
-  													}
+  
+  													SemanticError("Function \"" + entry.name + "\" has arguments:\n" + entry.arguments +
+  													"\n provided arguments:\n" +
+  													args);
   												}
   												p.kind = TableEntry.Kind.CONSTANT;
+  												
+  												if(valid)
+  												{
+  													CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+  												}
   											
   											.)
   	")"										
@@ -880,7 +914,12 @@ PRODUCTIONS
   												p.kind = TableEntry.Kind.CONSTANT;
   												
   												if(valid)
-  													CodeGen.loadConstantDouble((double)con.value);
+  												{
+  													if(con.type == TableEntry.Type.INT)
+  														CodeGen.loadConstantInteger((int)con.value);
+  													else if(con.type == TableEntry.Type.DOUBLE)
+  														CodeGen.loadConstantDouble(con.value);
+  												}
   											.)
   	|
   	"(" Expression< out typeE >				(.
@@ -908,15 +947,15 @@ PRODUCTIONS
   	
   	
   	/********** ARGUMENTS **********/
-  	Arguments<. out Type type .>				(. type = TableEntry.Type.NONE; .)
+  	Arguments<. out ArgList types .>				(. types = new ArgList(); TableEntry.Type type = null;.)
   	=
   	[
-  		Expression< out type >
+  		Expression< out type >						(.	types.add(type); .)
   		
-  		/*
-  		Current version support and requirement for only one argument
-  		{"," Expression< out type >
-  		}*/
+  		
+  		
+  		{"," Expression< out type >					(. types.add(type); .)
+  		}
   	]
   	.
   	/*******************************/

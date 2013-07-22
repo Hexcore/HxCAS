@@ -12,6 +12,7 @@ import org.objectweb.asm.MethodVisitor;
 import com.hexcore.cas.rulesystems.Parser.AddOpE;
 import com.hexcore.cas.rulesystems.Parser.MulOpE;
 import com.hexcore.cas.rulesystems.Parser.RelOpE;
+import com.hexcore.cas.rulesystems.TableEntry.Type;
 
 /**
  * Class CodeGen
@@ -30,7 +31,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	/////////////////////////////////////////////
 	/// Private Variables
 	private static ArrayList<String>	properties;
-	private static boolean				debugEnabled = false;
+	private static boolean				debugEnabled = true;
 	private static int					currentFrameworkIndex = 0;
 	private static int					numProperties = 1;
 	private static int					propertyIndex = 1;
@@ -42,6 +43,21 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	private static MethodVisitor		executeVisitor;
 	private static String				ruleSetName;
 	
+	
+	public static void convert(TableEntry.Type target, TableEntry.Type given)
+	{	
+		debug("Converting types.");
+		if(target == TableEntry.Type.DOUBLE && given == TableEntry.Type.INT)
+		{
+			debug("Converting from integer to double");
+			executeVisitor.visitInsn(I2D);
+		}
+		else if(target == TableEntry.Type.INT && given == TableEntry.Type.DOUBLE)
+		{
+			debug("Converting from double to integer");
+			executeVisitor.visitInsn(D2I);
+		}
+	}
 	
 	public static int declareLocalVariable(String name)
 	{
@@ -387,6 +403,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		}
 	}
 	
+	/*
 	public static void invokeStandardArrayMethod(String name, TableEntry.Type argType, TableEntry.Type returnType)
 	{
 		String aType = "";
@@ -413,8 +430,9 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
 		if(returnType == TableEntry.Type.INT)
 			executeVisitor.visitInsn(I2D);
-	}
+	}*/
 	
+	/*
 	public static void invokeStandardScalarMethod(String name, TableEntry.Type argType,  TableEntry.Type returnType)
 	{
 		String aType = "";
@@ -441,6 +459,13 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
 		if(returnType == TableEntry.Type.INT)
 			executeVisitor.visitInsn(I2D);
+	}
+	*/
+	
+	public static void invokeStdLibFunction(String name, ArgList argTypes, TableEntry.Type returnType)
+	{
+		debug("Invoking StdLib method: " + name + " ,args: " + argTypes + " ,returning: " + returnType);
+		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + argTypes.getInternal() + ")" + returnType.getInternalName());
 	}
 	
 	public static void jump(Label label)
@@ -523,6 +548,15 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitLabel(negative);
 		executeVisitor.visitInsn(ICONST_0);
 		executeVisitor.visitLabel(end);
+	}
+	
+	public static void pop(TableEntry.Type type)
+	{
+		debug("Popping top value");
+		if(type == TableEntry.Type.DOUBLE)
+			executeVisitor.visitInsn(POP2);
+		else
+			executeVisitor.visitInsn(POP);
 	}
 	
 	public static void storeProperty(int index)
