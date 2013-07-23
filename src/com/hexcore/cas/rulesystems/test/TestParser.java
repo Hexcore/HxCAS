@@ -68,6 +68,15 @@ public class TestParser
 		compiler.compileFile("Test Data/rules/testFunctionParameterCheckingRestrictions.cal");		
 		assertTrue(Parser.getErrorCount() != 0);
 	}
+	
+	@Test
+	public void testIfElseAdvanced()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testIfElseAdvanced.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+	}
 
 
 	

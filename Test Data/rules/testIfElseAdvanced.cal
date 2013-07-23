@@ -1,0 +1,17 @@
+ruleset testIfElseAdvanced
+{
+	types{Earth};
+	
+	property p1;
+
+	type Earth
+	{
+		if(self.p1 == 0)
+		{
+			var d = 1;
+			self.p1 = d;
+		}
+		else
+			self.p1 = 2;
+	}
+}
