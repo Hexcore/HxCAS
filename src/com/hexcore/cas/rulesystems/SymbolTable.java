@@ -134,7 +134,7 @@ public class SymbolTable
 		roundEntry.type = TableEntry.Type.INT;
 		roundEntry.kind = TableEntry.Kind.METHOD;
 		roundEntry.name = "round";
-		roundEntry.arguments = new ArgList(TableEntry.Type.INT);
+		roundEntry.arguments = new ArgList(TableEntry.Type.DOUBLE);
 		insert(roundEntry);
 		
 		TableEntry countEntry = new TableEntry();
