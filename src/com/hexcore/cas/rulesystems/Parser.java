@@ -444,6 +444,9 @@ static public void reset()
 				CodeGen.visitLabel(end);
 			}
 			
+			while (StartOf(2)) {
+				Statement();
+			}
 		} else SynErr(42);
 		Expect(rbrace_Sym);
 		table.popScope();

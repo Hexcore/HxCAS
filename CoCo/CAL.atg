@@ -319,6 +319,7 @@ PRODUCTIONS
   															CodeGen.visitLabel(end);
   														}
   													.)
+  			{Statement}
   		)
   	"}"										(.
   												table.popScope();

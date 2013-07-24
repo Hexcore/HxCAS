@@ -486,6 +486,41 @@ public class TestByteCode
 	}
 	
 	@Test
+	public void testNStepEngineWithIndependentCode()
+	{
+		CALCompiler compiler = new CALCompiler();
+		compiler.compileFile("Test Data/rules/testNStepEngineWithIndependentCode.cal");
+		assertEquals(0, compiler.getErrorCount());
+		
+
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Cell c0 = new Cell(new double[]{0,0,0});
+		
+		rule.run(c0, null);
+		rule.step();		
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(-1.0, c0.getValue(2), 0.0);
+		
+		rule.run(c0, null);
+		rule.step();		
+		assertEquals(1.0, c0.getValue(1), 0.0);
+		assertEquals(-1.0, c0.getValue(2), 0.0);
+		
+		rule.run(c0, null);
+		rule.step();		
+		assertEquals(2.0, c0.getValue(1), 0.0);
+		assertEquals(-1.0, c0.getValue(2), 0.0);
+		
+		rule.run(c0, null);
+		rule.step();		
+		assertEquals(0.0, c0.getValue(1), 0.0);
+		assertEquals(-1.0, c0.getValue(2), 0.0);
+	}
+	
+	@Test
 	public void testFunctionResultDiscarding()
 	{
 		CALCompiler compiler = new CALCompiler();

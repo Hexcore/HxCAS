@@ -52,6 +52,15 @@ public class TestParser
 	}
 	
 	@Test
+	public void testNStepParsingWithIndependentCode()
+	{
+CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testNStepParsingWithIndependentCode.cal");		
+		assertTrue(compiler.getErrorCount() != 0);
+	}
+	
+	@Test
 	public void testFunctionParameterChecking()
 	{
 		CALCompiler compiler = new CALCompiler();
