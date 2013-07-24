@@ -86,8 +86,25 @@ CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/rules/testIfElseAdvanced.cal");		
 		assertTrue(compiler.getErrorCount() == 0);
 	}
-
-
 	
+	@Test
+	public void testArrayParsing()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testArrayParsing.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+	}
 	
+	@Test
+	public void testArrayParsingRestrictions()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testArrayParsingRestrictions0.cal");		
+		assertTrue(compiler.getErrorCount() != 0);
+		
+		compiler.compileFile("Test Data/rules/testArrayParsingRestrictions1.cal");		
+		assertTrue(compiler.getErrorCount() != 0);
+	}
 }

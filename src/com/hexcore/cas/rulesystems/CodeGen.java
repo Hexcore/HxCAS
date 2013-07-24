@@ -59,6 +59,19 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		}
 	}
 	
+	public static int declareArray(int size)
+	{
+		debug("Creating an array of size " + size + " ...");
+		loadConstantInteger(size);
+		executeVisitor.visitIntInsn(NEWARRAY, T_DOUBLE);
+		int res = varIndex;
+		
+		debug("Storing array ref at index: " + res);
+		executeVisitor.visitVarInsn(ASTORE, res);
+		varIndex++;
+		return res;
+	}
+	
 	public static int declareLocalVariable(String name)
 	{
 		debug("Declare var index: " + varIndex);
@@ -84,12 +97,15 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		return propertyIndex++;
 	}
 	
-
+	public static void derefArrayDouble()
+	{
+		debug("Dereferencing double array");
+		executeVisitor.visitInsn(DALOAD);
+	}
 	
 	public static void derefArrayRef()
 	{
-		debug("Dereferencing array");
-		executeVisitor.visitInsn(D2I);
+		debug("Dereferencing ref array");
 		executeVisitor.visitInsn(AALOAD);
 	}
 	
@@ -557,6 +573,12 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 			executeVisitor.visitInsn(POP2);
 		else
 			executeVisitor.visitInsn(POP);
+	}
+	
+	public static void storeArray()
+	{
+		debug("Storing in array");
+		executeVisitor.visitInsn(DASTORE);
 	}
 	
 	public static void storeProperty(int index)

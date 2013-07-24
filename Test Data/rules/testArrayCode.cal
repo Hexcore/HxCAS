@@ -1,0 +1,25 @@
+ruleset testArrayCode
+{
+	types{Earth};
+	
+	property p1;
+	property p2;
+	property p3;
+	property p4;
+	property p5;
+
+	type Earth
+	{
+		array a1[5] = {5,4,3,2,1};
+		
+		self.p1 = a1[0];
+		self.p2 = a1[1];
+		self.p3 = a1[2];
+		self.p4 = a1[3];
+		self.p5 = a1[4];
+		
+		a1[3] = 99.5;
+		var v = a1[3];	
+		self.p4 = v;
+	}
+}

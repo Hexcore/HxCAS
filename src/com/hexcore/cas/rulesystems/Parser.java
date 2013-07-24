@@ -46,23 +46,24 @@ public class Parser {
 	static final int from_Sym = 24;
 	static final int to_Sym = 25;
 	static final int var_Sym = 26;
-	static final int plus_Sym = 27;
-	static final int minus_Sym = 28;
-	static final int equalequal_Sym = 29;
-	static final int bangequal_Sym = 30;
-	static final int greater_Sym = 31;
-	static final int less_Sym = 32;
-	static final int greaterequal_Sym = 33;
-	static final int lessequal_Sym = 34;
-	static final int barbar_Sym = 35;
-	static final int star_Sym = 36;
-	static final int slash_Sym = 37;
-	static final int percent_Sym = 38;
-	static final int andand_Sym = 39;
-	static final int NOT_SYM = 40;
+	static final int array_Sym = 27;
+	static final int plus_Sym = 28;
+	static final int minus_Sym = 29;
+	static final int equalequal_Sym = 30;
+	static final int bangequal_Sym = 31;
+	static final int greater_Sym = 32;
+	static final int less_Sym = 33;
+	static final int greaterequal_Sym = 34;
+	static final int lessequal_Sym = 35;
+	static final int barbar_Sym = 36;
+	static final int star_Sym = 37;
+	static final int slash_Sym = 38;
+	static final int percent_Sym = 39;
+	static final int andand_Sym = 40;
+	static final int NOT_SYM = 41;
 	// pragmas
 
-	static final int maxT = 40;
+	static final int maxT = 41;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -290,7 +291,7 @@ static public void reset()
 		} else if (la.kind == type_Sym) {
 			Get();
 			name = "type";
-		} else SynErr(41);
+		} else SynErr(42);
 		return name;
 	}
 
@@ -447,7 +448,7 @@ static public void reset()
 			while (StartOf(2)) {
 				Statement();
 			}
-		} else SynErr(42);
+		} else SynErr(43);
 		Expect(rbrace_Sym);
 		table.popScope();
 		
@@ -483,9 +484,9 @@ static public void reset()
 			IfStatement();
 		} else if (la.kind == loop_Sym) {
 			Loop();
-		} else if (la.kind == var_Sym) {
+		} else if (la.kind == var_Sym || la.kind == array_Sym) {
 			VarDeclaration();
-		} else SynErr(43);
+		} else SynErr(44);
 	}
 
 	static int IntConst() {
@@ -547,6 +548,10 @@ static public void reset()
 						CodeGen.convert(entry.type, type);
 					CodeGen.storeProperty(entry.offset);
 				}
+				else if(entry.kind == TableEntry.Kind.ARRAY)
+				{
+					CodeGen.storeArray();
+				}
 			}
 			
 		} else if (la.kind == postInc_Sym || la.kind == postDec_Sym) {
@@ -600,7 +605,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(44);
+		} else SynErr(45);
 		Expect(semicolon_Sym);
 	}
 
@@ -692,12 +697,17 @@ static public void reset()
 	}
 
 	static void VarDeclaration() {
-		Expect(var_Sym);
-		OneVar();
-		while (la.kind == comma_Sym) {
+		if (la.kind == var_Sym) {
 			Get();
 			OneVar();
-		}
+			while (la.kind == comma_Sym) {
+				Get();
+				OneVar();
+			}
+		} else if (la.kind == array_Sym) {
+			Get();
+			ArraySpec();
+		} else SynErr(46);
 		Expect(semicolon_Sym);
 	}
 
@@ -722,6 +732,10 @@ static public void reset()
 		if(entry.kind == TableEntry.Kind.CELL)
 			if(valid)
 				CodeGen.derefRef(entry.offset);
+				
+		if(entry.kind == TableEntry.Kind.ARRAY)
+			if(valid)
+				CodeGen.derefRef(entry.offset);
 			
 		
 		if (la.kind == lbrack_Sym) {
@@ -730,11 +744,24 @@ static public void reset()
 			if(TableEntry.isScalar(type)) SemanticError("Cannot index scalar type \"" + name +  "\"");
 			if(!TableEntry.isArith(typeE))
 			{
-			SemanticError("Index must be arithmetic");
+			SemanticError("Index must be arithmetic");  														
+			}
+			
+			if(typeE == TableEntry.Type.DOUBLE)
+			{
+			CodeGen.convert(TableEntry.Type.INT, TableEntry.Type.DOUBLE);
 			}
 			
 			if(valid)
+			{
+			if(type == TableEntry.Type.CELL_ARR)
 			CodeGen.derefArrayRef();
+			else if(type == TableEntry.Type.DOUBLE_ARR)
+			{
+			//	CodeGen.derefArrayDouble();
+			
+			}
+			}
 			
 			Expect(rbrack_Sym);
 			if(!TableEntry.isArray(type))
@@ -814,7 +841,7 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(45);
+		} else SynErr(47);
 		return op;
 	}
 
@@ -871,6 +898,77 @@ static public void reset()
 		if(!entry.name.equals("__new__"))
 			table.insert(entry);
 		
+	}
+
+	static void ArraySpec() {
+		String name = "";
+		int size = -1;
+		double value;
+		
+		name  = Ident();
+		TableEntry entry = new TableEntry();
+		entry.name = "__new__";
+		
+		if(table.find(name).type != TableEntry.Type.NONE)
+			SemanticError("Identifier \"" + name + "\" already declared.");
+		else
+		{
+			entry.kind = TableEntry.Kind.ARRAY;
+			entry.type = TableEntry.Type.DOUBLE_ARR;
+			entry.name = name;
+		}
+		
+		Expect(lbrack_Sym);
+		size  = IntConst();
+		if(size < 1)
+			SemanticError("Array size must be 1 or greater");
+		
+		Expect(rbrack_Sym);
+		if(valid)
+		{
+			entry.offset = CodeGen.declareArray(size);
+			table.insert(entry);  													
+		}
+		
+		if (la.kind == equal_Sym) {
+			Get();
+			Expect(lbrace_Sym);
+			int initted = 0;
+			ConstantRecord con = new ConstantRecord();
+			if(valid)
+			{
+				CodeGen.derefRef(entry.offset);
+				CodeGen.loadConstantInteger(initted++);
+			}
+			
+			con  = Constant();
+			if(valid)
+			{
+				CodeGen.loadConstantDouble(con.value); 											
+				CodeGen.storeArray();
+			}
+			
+			while (la.kind == comma_Sym) {
+				if(initted >= size)
+					SemanticError("Too many initializations");
+					
+				if(valid)
+				{
+					CodeGen.derefRef(entry.offset);
+					CodeGen.loadConstantInteger(initted++);
+				}
+				
+				Get();
+				con  = Constant();
+				if(valid)
+				{
+					CodeGen.loadConstantDouble(con.value);
+					CodeGen.storeArray();
+				}
+				
+			}
+			Expect(rbrace_Sym);
+		}
 	}
 
 	static Type AddExp() {
@@ -972,7 +1070,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(46); break;
+		default: SynErr(48); break;
 		}
 		return op;
 	}
@@ -1034,7 +1132,7 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(47);
+		} else SynErr(49);
 		return op;
 	}
 
@@ -1093,7 +1191,7 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(48);
+		} else SynErr(50);
 		return op;
 	}
 
@@ -1125,6 +1223,10 @@ static public void reset()
 						CodeGen.generatePropertyArray(entry.offset);
 					else
 						CodeGen.derefProperty(entry.offset);
+				}
+				else if(entry.kind == TableEntry.Kind.ARRAY)
+				{
+					CodeGen.derefArrayDouble();  														
 				}
 			}
 			
@@ -1174,7 +1276,7 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			Expect(rparen_Sym);
-		} else SynErr(49);
+		} else SynErr(51);
 		return p;
 	}
 
@@ -1188,7 +1290,7 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.Type.INT;		
-		} else SynErr(50);
+		} else SynErr(52);
 		return con;
 	}
 
@@ -1219,12 +1321,12 @@ static public void reset()
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x}
 
 	};
 
@@ -1369,30 +1471,32 @@ class Errors {
 			case 24: s = "\"from\" expected"; break;
 			case 25: s = "\"to\" expected"; break;
 			case 26: s = "\"var\" expected"; break;
-			case 27: s = "\"+\" expected"; break;
-			case 28: s = "\"-\" expected"; break;
-			case 29: s = "\"==\" expected"; break;
-			case 30: s = "\"!=\" expected"; break;
-			case 31: s = "\">\" expected"; break;
-			case 32: s = "\"<\" expected"; break;
-			case 33: s = "\">=\" expected"; break;
-			case 34: s = "\"<=\" expected"; break;
-			case 35: s = "\"||\" expected"; break;
-			case 36: s = "\"*\" expected"; break;
-			case 37: s = "\"/\" expected"; break;
-			case 38: s = "\"%\" expected"; break;
-			case 39: s = "\"&&\" expected"; break;
-			case 40: s = "??? expected"; break;
-			case 41: s = "invalid Ident"; break;
-			case 42: s = "invalid TypeSpec"; break;
-			case 43: s = "invalid Statement"; break;
-			case 44: s = "invalid AssignCall"; break;
-			case 45: s = "invalid PostOp"; break;
-			case 46: s = "invalid RelOp"; break;
-			case 47: s = "invalid AddOp"; break;
-			case 48: s = "invalid MulOp"; break;
-			case 49: s = "invalid Primary"; break;
-			case 50: s = "invalid Constant"; break;
+			case 27: s = "\"array\" expected"; break;
+			case 28: s = "\"+\" expected"; break;
+			case 29: s = "\"-\" expected"; break;
+			case 30: s = "\"==\" expected"; break;
+			case 31: s = "\"!=\" expected"; break;
+			case 32: s = "\">\" expected"; break;
+			case 33: s = "\"<\" expected"; break;
+			case 34: s = "\">=\" expected"; break;
+			case 35: s = "\"<=\" expected"; break;
+			case 36: s = "\"||\" expected"; break;
+			case 37: s = "\"*\" expected"; break;
+			case 38: s = "\"/\" expected"; break;
+			case 39: s = "\"%\" expected"; break;
+			case 40: s = "\"&&\" expected"; break;
+			case 41: s = "??? expected"; break;
+			case 42: s = "invalid Ident"; break;
+			case 43: s = "invalid TypeSpec"; break;
+			case 44: s = "invalid Statement"; break;
+			case 45: s = "invalid AssignCall"; break;
+			case 46: s = "invalid VarDeclaration"; break;
+			case 47: s = "invalid PostOp"; break;
+			case 48: s = "invalid RelOp"; break;
+			case 49: s = "invalid AddOp"; break;
+			case 50: s = "invalid MulOp"; break;
+			case 51: s = "invalid Primary"; break;
+			case 52: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

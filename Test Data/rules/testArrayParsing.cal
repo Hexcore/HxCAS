@@ -1,0 +1,21 @@
+ruleset testArrayParsing
+{
+	types{Earth};
+	
+	property p1;
+
+	type Earth
+	{
+		array a1[5];
+		array a2[5] = {2,4,6,1,2};
+		array a3[5] = {1,2};
+		
+		var a = a1[3];
+		
+		var b;		
+		b = a2[2];
+		
+		
+		a2[1] = 5;
+	}
+}

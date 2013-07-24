@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TableEntry
 {
-	public enum Kind {CONSTANT, VARIABLE, METHOD, PROPERTY, CELL, TYPENAME};
+	public enum Kind {CONSTANT, VARIABLE, METHOD, PROPERTY, CELL, TYPENAME, ARRAY};
 	
 	/** Language supported types.
 	 * 
@@ -54,6 +54,7 @@ public class TableEntry
 	public ArgList			arguments;
 	public String			name;
 	public boolean			immutable = false;
+	public int 				index = -1;
 	
 	public TableEntry 		nextEntry;
 	

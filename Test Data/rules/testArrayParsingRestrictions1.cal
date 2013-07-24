@@ -1,0 +1,11 @@
+ruleset testArrayParsingRestrictions1
+{
+	types{Earth};
+	
+	property p1;
+
+	type Earth
+	{
+		array test2[2] = {1,2,3};
+	}
+}

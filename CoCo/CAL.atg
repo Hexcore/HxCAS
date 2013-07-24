@@ -409,6 +409,10 @@ PRODUCTIONS
   																CodeGen.convert(entry.type, type);
 	  														CodeGen.storeProperty(entry.offset);
 	  													}
+	  													else if(entry.kind == TableEntry.Kind.ARRAY)
+	  													{
+	  														CodeGen.storeArray();
+	  													}
   													}
   												.)
   		| PostOp< out T >						(. 
@@ -490,6 +494,10 @@ PRODUCTIONS
   													if(entry.kind == TableEntry.Kind.CELL)
   														if(valid)
 		  													CodeGen.derefRef(entry.offset);
+		  													
+		  											if(entry.kind == TableEntry.Kind.ARRAY)
+		  												if(valid)
+		  													CodeGen.derefRef(entry.offset);
   														
   												.)
   													 
@@ -498,11 +506,24 @@ PRODUCTIONS
   			Expression< out typeE >				(. if(TableEntry.isScalar(type)) SemanticError("Cannot index scalar type \"" + name +  "\"");
   													if(!TableEntry.isArith(typeE))
   													{
-  														SemanticError("Index must be arithmetic");
+  														SemanticError("Index must be arithmetic");  														
   													}
   													
+  													if(typeE == TableEntry.Type.DOUBLE)
+													{
+														CodeGen.convert(TableEntry.Type.INT, TableEntry.Type.DOUBLE);
+													}
+  													
   													if(valid)
-  														CodeGen.derefArrayRef();
+  													{
+  														if(type == TableEntry.Type.CELL_ARR)
+  															CodeGen.derefArrayRef();
+  														else if(type == TableEntry.Type.DOUBLE_ARR)
+  														{
+  														//	CodeGen.derefArrayDouble();
+  														
+  														}
+  													}
   												.)
   												
   												
@@ -646,11 +667,16 @@ PRODUCTIONS
   	/********** Variable Declaration *********/
   	VarDeclaration
   	=
+  	(
  	"var"
 	OneVar
 	{
 	"," OneVar
 	}
+	|
+	"array"
+	ArraySpec
+	)
 	";"
 	.
   	
@@ -881,6 +907,10 @@ PRODUCTIONS
 			  											else
 			  												CodeGen.derefProperty(entry.offset);
 			  										}
+			  										else if(entry.kind == TableEntry.Kind.ARRAY)
+  													{
+  														CodeGen.derefArrayDouble();  														
+  													}
 			  									}
   											.)
   	[
@@ -1046,6 +1076,81 @@ PRODUCTIONS
   	
   	
   	
+  	/**********Array Declaration**********/
+  	ArraySpec								(. String name = "";
+  	         								   int size = -1;
+  	         								   double value;
+  	         								.)
+  	=
+  	Ident< out name >						(.
+  												TableEntry entry = new TableEntry();
+  												entry.name = "__new__";
+  												
+  												if(table.find(name).type != TableEntry.Type.NONE) 
+  													SemanticError("Identifier \"" + name + "\" already declared.");
+  												else
+  												{
+  													entry.kind = TableEntry.Kind.ARRAY;
+  													entry.type = TableEntry.Type.DOUBLE_ARR;
+  													entry.name = name;
+  												}
+  											.)
+  	"["
+  	IntConst< out size >					(.
+  												if(size < 1)
+  													SemanticError("Array size must be 1 or greater");
+  											.)
+  	"]"										(.
+  												if(valid)
+  												{
+  													entry.offset = CodeGen.declareArray(size);
+  													table.insert(entry);  													
+  												}
+  											.)
+  	[
+  	"="
+  	"{"										(. 
+  												int initted = 0;
+  												ConstantRecord con = new ConstantRecord();
+  												if(valid)
+  												{
+	  												CodeGen.derefRef(entry.offset);
+	  												CodeGen.loadConstantInteger(initted++);
+  												}
+  											.)
+  											
+  	Constant < out con >					(. 
+  												if(valid)
+  												{
+  													CodeGen.loadConstantDouble(con.value); 											
+  													CodeGen.storeArray();
+  												}
+  											.)
+  	{										(. 	
+  												if(initted >= size)
+  													SemanticError("Too many initializations");
+  													
+  												if(valid)
+  												{
+  													CodeGen.derefRef(entry.offset);
+  													CodeGen.loadConstantInteger(initted++);
+  												}
+  											.)
+  	","
+  											
+  	Constant< out con >						(.	
+  												if(valid)
+  												{
+  													CodeGen.loadConstantDouble(con.value);
+  													CodeGen.storeArray();
+  												}
+  											.)									
+  	}
+  	"}"
+  	]
+  	.
+  	
+  	/*************************************/
   	
   	/********** Double Constant **********/
   	DoubleConst<. out double value .>		
