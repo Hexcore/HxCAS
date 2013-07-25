@@ -66,4 +66,16 @@ public class TestCell
 		assertEquals(1.0, testVals[0], 0.0);
 		assertEquals(3.0, testVals[1], 0.0);
 	}
+	
+	@Test
+	public void testPrivateProperties()
+	{
+		Cell c = new Cell(2);
+		c.setPrivateProperty(0, 23.2);
+		c.setPrivateProperty(3, 1);
+		
+		assertEquals(23.2, c.getPrivateProperty(0), 0.0);
+		assertEquals(1, c.getPrivateProperty(3), 0.0);
+		assertEquals(0, c.getPrivateProperty(2), 0.0);
+	}
 }
