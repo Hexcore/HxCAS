@@ -54,7 +54,6 @@ public class TableEntry
 	public ArgList			arguments;
 	public String			name;
 	public boolean			immutable = false;
-	public int 				index = -1;
 	
 	public TableEntry 		nextEntry;
 	

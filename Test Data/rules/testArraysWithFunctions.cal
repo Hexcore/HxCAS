@@ -1,0 +1,14 @@
+ruleset testArraysWithFunctions
+{
+	types{Earth};
+	
+	property p1;
+
+
+	type Earth
+	{
+		array a1[5] = {12,10,22,3,6};
+		
+		self.p1 = count(a1);
+	}
+}

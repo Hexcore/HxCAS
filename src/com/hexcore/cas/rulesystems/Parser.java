@@ -734,9 +734,10 @@ static public void reset()
 				CodeGen.derefRef(entry.offset);
 				
 		if(entry.kind == TableEntry.Kind.ARRAY)
+		{
 			if(valid)
 				CodeGen.derefRef(entry.offset);
-			
+		}
 		
 		if (la.kind == lbrack_Sym) {
 			Get();
@@ -756,11 +757,6 @@ static public void reset()
 			{
 			if(type == TableEntry.Type.CELL_ARR)
 			CodeGen.derefArrayRef();
-			else if(type == TableEntry.Type.DOUBLE_ARR)
-			{
-			//	CodeGen.derefArrayDouble();
-			
-			}
 			}
 			
 			Expect(rbrack_Sym);
@@ -1226,7 +1222,8 @@ static public void reset()
 				}
 				else if(entry.kind == TableEntry.Kind.ARRAY)
 				{
-					CodeGen.derefArrayDouble();  														
+					if(!TableEntry.isArray(entry.type))
+						CodeGen.derefArrayDouble(); 														
 				}
 			}
 			

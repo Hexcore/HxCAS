@@ -496,9 +496,10 @@ PRODUCTIONS
 		  													CodeGen.derefRef(entry.offset);
 		  													
 		  											if(entry.kind == TableEntry.Kind.ARRAY)
+		  											{
 		  												if(valid)
 		  													CodeGen.derefRef(entry.offset);
-  														
+  													}
   												.)
   													 
   	[
@@ -518,11 +519,6 @@ PRODUCTIONS
   													{
   														if(type == TableEntry.Type.CELL_ARR)
   															CodeGen.derefArrayRef();
-  														else if(type == TableEntry.Type.DOUBLE_ARR)
-  														{
-  														//	CodeGen.derefArrayDouble();
-  														
-  														}
   													}
   												.)
   												
@@ -909,7 +905,8 @@ PRODUCTIONS
 			  										}
 			  										else if(entry.kind == TableEntry.Kind.ARRAY)
   													{
-  														CodeGen.derefArrayDouble();  														
+  														if(!TableEntry.isArray(entry.type))
+  															CodeGen.derefArrayDouble(); 														
   													}
 			  									}
   											.)
