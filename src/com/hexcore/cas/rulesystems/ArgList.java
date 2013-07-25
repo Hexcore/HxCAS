@@ -1,7 +1,6 @@
 package com.hexcore.cas.rulesystems;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.hexcore.cas.rulesystems.TableEntry.Type;

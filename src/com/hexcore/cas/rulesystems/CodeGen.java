@@ -12,7 +12,6 @@ import org.objectweb.asm.MethodVisitor;
 import com.hexcore.cas.rulesystems.Parser.AddOpE;
 import com.hexcore.cas.rulesystems.Parser.MulOpE;
 import com.hexcore.cas.rulesystems.Parser.RelOpE;
-import com.hexcore.cas.rulesystems.TableEntry.Type;
 
 /**
  * Class CodeGen
@@ -418,65 +417,6 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 			
 		}
 	}
-	
-	/*
-	public static void invokeStandardArrayMethod(String name, TableEntry.Type argType, TableEntry.Type returnType)
-	{
-		String aType = "";
-		String rType = "";
-		
-		switch(argType)
-		{
-			case INT: 		aType = "[I"; break;
-			case DOUBLE: 	aType = "[D"; break;
-			case CELL: 		aType = "[Lcom/hexcore/cas/model/Cell"; break;
-			default: 		throw new InvalidTypeException();
-		}
-		
-		switch(returnType)
-		{
-			case INT: 		rType = "I"; break;
-			case DOUBLE: 	rType = "D"; break;
-			default:		throw new InvalidTypeException();
-		}
-		
-		
-		debug("Invoking StdLib array method: " + name + " with argtype " + aType + " and rType " + rType);		
-		
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.Type.INT)
-			executeVisitor.visitInsn(I2D);
-	}*/
-	
-	/*
-	public static void invokeStandardScalarMethod(String name, TableEntry.Type argType,  TableEntry.Type returnType)
-	{
-		String aType = "";
-		String rType = "";
-		
-		switch(argType)
-		{
-			case INT: aType = "I"; break;
-			case DOUBLE: aType = "D"; break;
-			case CELL: aType = "Lcom/hexcore/cas/Cell"; break;
-			default: throw new InvalidTypeException();
-		}
-		
-		switch(returnType)
-		{
-			case INT: rType = "I"; break;
-			case DOUBLE: rType = "D"; break;
-			default: throw new InvalidTypeException();
-		}
-		
-		
-		debug("Invoking StdLib scalar method: " + name + " with argtype " + aType + " and rType " + rType);		
-		
-		executeVisitor.visitMethodInsn(INVOKESTATIC, "com/hexcore/cas/rulesystems/StdLib", name, "(" + aType + ")" + rType);
-		if(returnType == TableEntry.Type.INT)
-			executeVisitor.visitInsn(I2D);
-	}
-	*/
 	
 	public static void invokeStdLibFunction(String name, ArgList argTypes, TableEntry.Type returnType)
 	{

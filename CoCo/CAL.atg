@@ -1076,7 +1076,6 @@ PRODUCTIONS
   	/**********Array Declaration**********/
   	ArraySpec								(. String name = "";
   	         								   int size = -1;
-  	         								   double value;
   	         								.)
   	=
   	Ident< out name >						(.

@@ -899,7 +899,6 @@ static public void reset()
 	static void ArraySpec() {
 		String name = "";
 		int size = -1;
-		double value;
 		
 		name  = Ident();
 		TableEntry entry = new TableEntry();
