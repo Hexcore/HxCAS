@@ -157,6 +157,20 @@ public class SymbolTable
 		neighboursEntry.name = "neighbours";
 		neighboursEntry.offset = 2;
 		insert(neighboursEntry);
+		
+		TableEntry moveEntry = new TableEntry();
+		moveEntry.type = TableEntry.Type.VOID;
+		moveEntry.kind = TableEntry.Kind.BEHAVIOUR;
+		moveEntry.name = "move";
+		moveEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.INT, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
+		insert(moveEntry);
+		
+		TableEntry acceptEntry = new TableEntry();
+		acceptEntry.type = TableEntry.Type.VOID;
+		acceptEntry.kind = TableEntry.Kind.BEHAVIOUR;
+		acceptEntry.name = "accept";
+		acceptEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.INT, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
+		insert(acceptEntry);
 	}
 	
 	public void insert(TableEntry entry)

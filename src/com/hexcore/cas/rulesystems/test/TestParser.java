@@ -107,4 +107,13 @@ CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/rules/testArrayParsingRestrictions1.cal");		
 		assertTrue(compiler.getErrorCount() != 0);
 	}
+	
+	@Test
+	public void testBehaviourGeneralParsing()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testBehaviourGeneralParsing.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+	}
 }

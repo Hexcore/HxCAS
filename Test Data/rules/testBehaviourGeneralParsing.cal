@@ -1,0 +1,20 @@
+ruleset testArrayCode
+{
+	types{Earth,Water,Fire};
+	
+	property p1;
+
+	type Earth
+	{
+		behaviour move(self.p1 == 1, 1.0);
+	}
+	
+	type Water
+	{
+		behaviour accept(self.p1 == 2);
+	}
+	
+	type Fire
+	{
+	}
+}

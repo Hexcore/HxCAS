@@ -1,0 +1,60 @@
+ruleset testMovementEngine
+{
+	types{A,B,C,D,E,F,G,H,I};
+	
+	property p1;
+
+	type A
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 0.0);
+	}
+	
+	type B
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 1.0);
+	}
+	
+	type C
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 2.0);
+	}
+	
+	type D
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 3.0);
+	}
+	
+	type E
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 4.0);
+	}
+	
+	type F
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 5.0);
+	}
+	
+	type G
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 6.0);
+	}
+	
+	type H
+	{
+		self.p1 = 1;
+		behaviour move(self.p1 == 1, 7.0);
+	}
+	
+	type I
+	{
+		self.p1 = 2;
+		behaviour accept(self.p1 == 2);
+	}
+}

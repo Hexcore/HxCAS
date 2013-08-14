@@ -1,6 +1,8 @@
 package com.hexcore.cas.model;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Class Cell:
@@ -21,11 +23,11 @@ public class Cell
 	/*
 	 * Ad-hoc values used when needed by CAL behaviour engines.
 	 */
-	private HashMap<Integer, Double> privateProperties;
+	private HashMap<String, Double> privateProperties;
 	
 	private Cell()
 	{
-		privateProperties = new HashMap<Integer, Double>();
+		privateProperties = new HashMap<String, Double>();
 	}
 	
 	public Cell(int valueCount)
@@ -48,7 +50,16 @@ public class Cell
 	{
 		this();
 		this.values = (double[])cell.values.clone();
-		this.privateProperties = (HashMap<Integer,Double>)cell.privateProperties.clone();
+		
+		Set<String> keys = cell.privateProperties.keySet();
+		Iterator<String> iter = keys.iterator();
+		
+		while(iter.hasNext())
+		{
+			String current = iter.next();
+			this.privateProperties.put(current, cell.privateProperties.get(current));
+		}
+		//this.privateProperties = (HashMap<String,Double>)cell.privateProperties.clone();
 	}
 	
 	public double getValue(int index)
@@ -75,13 +86,13 @@ public class Cell
 		values[index] = value;
 	}
 	
-	public void setPrivateProperty(int key, double value)
+	public void setPrivateProperty(String key, double value)
 	{
 		privateProperties.put(key, value);
 	}
 	
-	public double getPrivateProperty(int key)
+	public double getPrivateProperty(String key)
 	{
-		return privateProperties.get(key) == null ? 0.0 : privateProperties.get(key);
+		return privateProperties.get(key) == null ? -1.0 : privateProperties.get(key);
 	}
 }

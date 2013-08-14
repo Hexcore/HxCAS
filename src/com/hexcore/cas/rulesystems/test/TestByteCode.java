@@ -1,12 +1,16 @@
 package com.hexcore.cas.rulesystems.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
 import org.junit.Test;
 
+import com.hexcore.cas.math.Vector2i;
 import com.hexcore.cas.model.Cell;
+import com.hexcore.cas.model.Grid;
+import com.hexcore.cas.model.RectangleGrid;
 import com.hexcore.cas.rulesystems.CALCompiler;
 import com.hexcore.cas.rulesystems.Rule;
 import com.hexcore.cas.rulesystems.RuleLoader;
@@ -576,7 +580,7 @@ public class TestByteCode
 	@Test
 	public void testArraysWithFunctions()
 	{
-CALCompiler compiler = new CALCompiler();
+		CALCompiler compiler = new CALCompiler();
 		
 		compiler.compileFile("Test Data/rules/testArraysWithFunctions.cal");		
 		assertTrue(compiler.getErrorCount() == 0);
@@ -589,6 +593,61 @@ CALCompiler compiler = new CALCompiler();
 		rule.run(c0, null);
 		
 		assertEquals(5.0, c0.getValue(1), 0.0);
+	}
+	
+	@Test
+	public void testMovementEngine()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testMovementEngine.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+		
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Grid g = new RectangleGrid(new Vector2i(10, 10), 2);
+		g.setWrappable(true);
+		
+		for(int n = 0; n < 8; n++)
+		{		
+			//Init grid to acceptors
+			for(int r = 0; r < 10; r++)
+				for(int c = 0; c < 10; c++)
+					g.setCell(new Vector2i(c,r), new double[]{8,2});
+			
+			//Set middle cell to a mover
+			g.setCell(new Vector2i(5, 5), new double[]{n,0});
+				
+			Grid old = g.clone();		
+			rule.setStepForGen(0);
+			for(int x = 0; x < 10; x++)
+				for(int y = 0; y < 10; y++)
+					rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+			
+			assertEquals(n, g.getCell(5,5).getPrivateProperty("target"), 0.0);
+			
+			old = g.clone();		
+			rule.setStepForGen(1);
+			for(int x = 0; x < 10; x++)
+				for(int y = 0; y < 10; y++)
+					rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+	
+			assertEquals(7-n, g.getNeighbours(new Vector2i(5,5))[n].getPrivateProperty("parent"), 0.0);
+			
+			old = g.clone();		
+			rule.setStepForGen(2);
+			for(int x = 0; x < 10; x++)
+				for(int y = 0; y < 10; y++)
+					rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+			
+			assertEquals(8.0, g.getCell(5, 5).getValue(0), 0.0);
+			assertEquals(n, g.getNeighbours(new Vector2i(5,5))[n].getValue(0), 0.0);
+		
+		}
+		
+		
 	}
 	
 }

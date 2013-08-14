@@ -14,6 +14,8 @@ static enum AddOpE{ADD, SUB, OR, UN};
 static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
 
+static enum BehaviourType{MOVER, ACCEPTOR};
+
 static SymbolTable table;
 static int typeCountExpected = 0;
 static int typeCountActual = 0;
@@ -371,7 +373,8 @@ PRODUCTIONS
   	 | AssignCall
   	 | IfStatement
   	 | Loop
-  	 | VarDeclaration 
+  	 | VarDeclaration
+  	 | Behaviour
   	.
   	/*******************************/
   	
@@ -656,6 +659,78 @@ PRODUCTIONS
   														CodeGen.endLoop(loopLabels, entry.offset);
   												.)
   	.
+  	/*************************/
+  	
+  	
+  	/*****Behaviour Block*****/
+  	Behaviour								(.
+  												TableEntry entry = null;
+  												ArgList args = null;
+  											.)
+  	=
+  	"behaviour" 
+  	Designator< out entry, false >			(.
+  												if(entry.kind != TableEntry.Kind.BEHAVIOUR)
+  												{
+  													SemanticError("Behaviour \"" + entry.name + "\" does not exist.");
+  												}
+  											.)
+  	"("
+  		Arguments< out args >				(.
+  												if(entry.name.equals("move") || entry.name.equals("accept"))
+  													args.add(TableEntry.Type.INT);
+  													
+  												args.add(TableEntry.Type.CELL);
+  												args.add(TableEntry.Type.CELL_ARR);
+  												if(!entry.checkArguments(args))
+  													SemanticError("Invalid use of behaviour");
+  												if(valid)
+  												{
+  													if(entry.name.equals("move") || entry.name.equals("accept"))
+  														CodeGen.loadField("moveStep");
+  														
+  													CodeGen.derefRef(1);
+  													CodeGen.derefRef(2);
+  													
+  													CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+  												}	
+  												
+  											.)
+  	")"
+  	";"
+  	.
+  	
+  	/*
+  	Behaviour								(.	
+  	         								  	TableEntry.Type type = null;
+  	         								   	TableEntry.Type typeR = null;
+  	         								   	BehaviourType b = null;
+  	         								.)
+  	=
+  	(
+  	"move"									(.	b = BehaviourType.MOVER;
+  											.)
+  												
+  	|
+  	"accept"								(.	b = BehaviourType.ACCEPTOR;
+  											.)
+  	)
+  	"(" Expression< out type >				(.	if(type != TableEntry.Type.BOOL)
+  													SemanticError("Behavioral condition must be of boolean type.");
+  											.)
+  												
+  	")"
+  	"{"
+  		{Statement}					
+  		"return" Expression< out typeR >	(.
+  												if(typeR != TableEntry.Type.INT || typeR != TableEntry.Type.DOUBLE)
+  													SemanticError("Must return a numeric type");
+  											.)
+  	"}"
+  	.
+  	*/
+  	
+  	
   	/*************************/
   	
   	

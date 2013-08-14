@@ -232,6 +232,8 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		mVisitor.visitCode();
 		mVisitor.visitLdcInsn(new Integer(0));
 		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		mVisitor.visitLdcInsn(new Integer(0));
+		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "moveStep", "I");
 		mVisitor.visitInsn(RETURN);
 		mVisitor.visitMaxs(0,0);
 		mVisitor.visitEnd();
@@ -252,6 +254,11 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
 		mVisitor.visitInsn(IREM);
 		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		
+		mVisitor.visitVarInsn(ILOAD, 1);
+		mVisitor.visitLdcInsn(new Integer(3));
+		mVisitor.visitInsn(IREM);
+		mVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "moveStep", "I");
 		
 		mVisitor.visitInsn(RETURN);
 		Label mEnd = new Label();
@@ -276,6 +283,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		stepVisitor.visitFieldInsn(GETSTATIC, ruleSetName, "engineStep", "I");
 		stepVisitor.visitLdcInsn(new Integer(1));
 		stepVisitor.visitInsn(IADD);
+
 		
 		/*
 		 * Push the total number of steps onto the stack. MOD the previous result with it.
@@ -284,6 +292,24 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		stepVisitor.visitLdcInsn(new Integer(numSteps));
 		stepVisitor.visitInsn(IREM);
 		stepVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "engineStep", "I");
+		
+		
+		/*
+		 * Push current step number onto stack. Add 1 to it (increment instruction not used as it requires a var.
+		 */
+		stepVisitor.visitFieldInsn(GETSTATIC, ruleSetName, "moveStep", "I");
+		stepVisitor.visitLdcInsn(new Integer(1));
+		stepVisitor.visitInsn(IADD);
+
+		
+		/*
+		 * Push the total number of steps onto the stack. MOD the previous result with it.
+		 * Store the new value.
+		 */
+		stepVisitor.visitLdcInsn(new Integer(3));
+		stepVisitor.visitInsn(IREM);
+		stepVisitor.visitFieldInsn(PUTSTATIC, ruleSetName, "moveStep", "I");
+
 		
 
 		stepVisitor.visitInsn(RETURN);
@@ -313,6 +339,7 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, ruleSetName, null, "java/lang/Object", interfaces);
 		
 		cw.visitField(ACC_PRIVATE | ACC_STATIC, "engineStep", "I", null, new Integer(0));
+		cw.visitField(ACC_PRIVATE | ACC_STATIC, "moveStep", "I", null, new Integer(0));
 		
 		//Visit constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -440,6 +467,12 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 	{
 		debug("Loading constant integer: " + value);
 		executeVisitor.visitLdcInsn(new Integer(value));
+	}
+	
+	public static void loadField(String name)
+	{
+		debug("Loading static field " + name);
+		executeVisitor.visitFieldInsn(GETSTATIC, ruleSetName, name, "I");
 	}
 	
 	public static void negate()

@@ -45,25 +45,26 @@ public class Parser {
 	static final int loop_Sym = 23;
 	static final int from_Sym = 24;
 	static final int to_Sym = 25;
-	static final int var_Sym = 26;
-	static final int array_Sym = 27;
-	static final int plus_Sym = 28;
-	static final int minus_Sym = 29;
-	static final int equalequal_Sym = 30;
-	static final int bangequal_Sym = 31;
-	static final int greater_Sym = 32;
-	static final int less_Sym = 33;
-	static final int greaterequal_Sym = 34;
-	static final int lessequal_Sym = 35;
-	static final int barbar_Sym = 36;
-	static final int star_Sym = 37;
-	static final int slash_Sym = 38;
-	static final int percent_Sym = 39;
-	static final int andand_Sym = 40;
-	static final int NOT_SYM = 41;
+	static final int behaviour_Sym = 26;
+	static final int var_Sym = 27;
+	static final int array_Sym = 28;
+	static final int plus_Sym = 29;
+	static final int minus_Sym = 30;
+	static final int equalequal_Sym = 31;
+	static final int bangequal_Sym = 32;
+	static final int greater_Sym = 33;
+	static final int less_Sym = 34;
+	static final int greaterequal_Sym = 35;
+	static final int lessequal_Sym = 36;
+	static final int barbar_Sym = 37;
+	static final int star_Sym = 38;
+	static final int slash_Sym = 39;
+	static final int percent_Sym = 40;
+	static final int andand_Sym = 41;
+	static final int NOT_SYM = 42;
 	// pragmas
 
-	static final int maxT = 41;
+	static final int maxT = 42;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -77,6 +78,8 @@ public class Parser {
 static enum AddOpE{ADD, SUB, OR, UN};
 static enum MulOpE{MUL, DIV, MOD, AND, UN};
 static enum PostOpE{INC, DEC, UN};
+
+static enum BehaviourType{MOVER, ACCEPTOR};
 
 static SymbolTable table;
 static int typeCountExpected = 0;
@@ -291,7 +294,7 @@ static public void reset()
 		} else if (la.kind == type_Sym) {
 			Get();
 			name = "type";
-		} else SynErr(42);
+		} else SynErr(43);
 		return name;
 	}
 
@@ -448,7 +451,7 @@ static public void reset()
 			while (StartOf(2)) {
 				Statement();
 			}
-		} else SynErr(43);
+		} else SynErr(44);
 		Expect(rbrace_Sym);
 		table.popScope();
 		
@@ -476,17 +479,33 @@ static public void reset()
 	}
 
 	static void Statement() {
-		if (la.kind == lbrace_Sym) {
+		switch (la.kind) {
+		case lbrace_Sym: {
 			Block();
-		} else if (la.kind == identifier_Sym || la.kind == type_Sym) {
+			break;
+		}
+		case identifier_Sym: case type_Sym: {
 			AssignCall();
-		} else if (la.kind == if_Sym) {
+			break;
+		}
+		case if_Sym: {
 			IfStatement();
-		} else if (la.kind == loop_Sym) {
+			break;
+		}
+		case loop_Sym: {
 			Loop();
-		} else if (la.kind == var_Sym || la.kind == array_Sym) {
+			break;
+		}
+		case var_Sym: case array_Sym: {
 			VarDeclaration();
-		} else SynErr(44);
+			break;
+		}
+		case behaviour_Sym: {
+			Behaviour();
+			break;
+		}
+		default: SynErr(45); break;
+		}
 	}
 
 	static int IntConst() {
@@ -605,7 +624,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(45);
+		} else SynErr(46);
 		Expect(semicolon_Sym);
 	}
 
@@ -707,7 +726,43 @@ static public void reset()
 		} else if (la.kind == array_Sym) {
 			Get();
 			ArraySpec();
-		} else SynErr(46);
+		} else SynErr(47);
+		Expect(semicolon_Sym);
+	}
+
+	static void Behaviour() {
+		TableEntry entry = null;
+		ArgList args = null;
+		
+		Expect(behaviour_Sym);
+		entry = Designator(false);
+		if(entry.kind != TableEntry.Kind.BEHAVIOUR)
+		{
+			SemanticError("Behaviour \"" + entry.name + "\" does not exist.");
+		}
+		
+		Expect(lparen_Sym);
+		args  = Arguments();
+		if(entry.name.equals("move") || entry.name.equals("accept"))
+			args.add(TableEntry.Type.INT);
+			
+		args.add(TableEntry.Type.CELL);
+		args.add(TableEntry.Type.CELL_ARR);
+		if(!entry.checkArguments(args))
+			SemanticError("Invalid use of behaviour");
+		if(valid)
+		{
+			if(entry.name.equals("move") || entry.name.equals("accept"))
+				CodeGen.loadField("moveStep");
+				
+			CodeGen.derefRef(1);
+			CodeGen.derefRef(2);
+			
+			CodeGen.invokeStdLibFunction(entry.name, args, entry.type);
+		}	
+		
+		
+		Expect(rparen_Sym);
 		Expect(semicolon_Sym);
 	}
 
@@ -837,7 +892,7 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(47);
+		} else SynErr(48);
 		return op;
 	}
 
@@ -1065,7 +1120,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(48); break;
+		default: SynErr(49); break;
 		}
 		return op;
 	}
@@ -1127,7 +1182,7 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(49);
+		} else SynErr(50);
 		return op;
 	}
 
@@ -1186,7 +1241,7 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(50);
+		} else SynErr(51);
 		return op;
 	}
 
@@ -1272,7 +1327,7 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			Expect(rparen_Sym);
-		} else SynErr(51);
+		} else SynErr(52);
 		return p;
 	}
 
@@ -1286,7 +1341,7 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.Type.INT;		
-		} else SynErr(52);
+		} else SynErr(53);
 		return con;
 	}
 
@@ -1317,12 +1372,12 @@ static public void reset()
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x}
 
 	};
 
@@ -1466,33 +1521,34 @@ class Errors {
 			case 23: s = "\"loop\" expected"; break;
 			case 24: s = "\"from\" expected"; break;
 			case 25: s = "\"to\" expected"; break;
-			case 26: s = "\"var\" expected"; break;
-			case 27: s = "\"array\" expected"; break;
-			case 28: s = "\"+\" expected"; break;
-			case 29: s = "\"-\" expected"; break;
-			case 30: s = "\"==\" expected"; break;
-			case 31: s = "\"!=\" expected"; break;
-			case 32: s = "\">\" expected"; break;
-			case 33: s = "\"<\" expected"; break;
-			case 34: s = "\">=\" expected"; break;
-			case 35: s = "\"<=\" expected"; break;
-			case 36: s = "\"||\" expected"; break;
-			case 37: s = "\"*\" expected"; break;
-			case 38: s = "\"/\" expected"; break;
-			case 39: s = "\"%\" expected"; break;
-			case 40: s = "\"&&\" expected"; break;
-			case 41: s = "??? expected"; break;
-			case 42: s = "invalid Ident"; break;
-			case 43: s = "invalid TypeSpec"; break;
-			case 44: s = "invalid Statement"; break;
-			case 45: s = "invalid AssignCall"; break;
-			case 46: s = "invalid VarDeclaration"; break;
-			case 47: s = "invalid PostOp"; break;
-			case 48: s = "invalid RelOp"; break;
-			case 49: s = "invalid AddOp"; break;
-			case 50: s = "invalid MulOp"; break;
-			case 51: s = "invalid Primary"; break;
-			case 52: s = "invalid Constant"; break;
+			case 26: s = "\"behaviour\" expected"; break;
+			case 27: s = "\"var\" expected"; break;
+			case 28: s = "\"array\" expected"; break;
+			case 29: s = "\"+\" expected"; break;
+			case 30: s = "\"-\" expected"; break;
+			case 31: s = "\"==\" expected"; break;
+			case 32: s = "\"!=\" expected"; break;
+			case 33: s = "\">\" expected"; break;
+			case 34: s = "\"<\" expected"; break;
+			case 35: s = "\">=\" expected"; break;
+			case 36: s = "\"<=\" expected"; break;
+			case 37: s = "\"||\" expected"; break;
+			case 38: s = "\"*\" expected"; break;
+			case 39: s = "\"/\" expected"; break;
+			case 40: s = "\"%\" expected"; break;
+			case 41: s = "\"&&\" expected"; break;
+			case 42: s = "??? expected"; break;
+			case 43: s = "invalid Ident"; break;
+			case 44: s = "invalid TypeSpec"; break;
+			case 45: s = "invalid Statement"; break;
+			case 46: s = "invalid AssignCall"; break;
+			case 47: s = "invalid VarDeclaration"; break;
+			case 48: s = "invalid PostOp"; break;
+			case 49: s = "invalid RelOp"; break;
+			case 50: s = "invalid AddOp"; break;
+			case 51: s = "invalid MulOp"; break;
+			case 52: s = "invalid Primary"; break;
+			case 53: s = "invalid Constant"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

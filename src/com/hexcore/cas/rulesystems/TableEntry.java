@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TableEntry
 {
-	public enum Kind {CONSTANT, VARIABLE, METHOD, PROPERTY, CELL, TYPENAME, ARRAY};
+	public enum Kind {CONSTANT, VARIABLE, METHOD, PROPERTY, CELL, TYPENAME, ARRAY, BEHAVIOUR};
 	
 	/** Language supported types.
 	 * 

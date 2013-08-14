@@ -71,11 +71,11 @@ public class TestCell
 	public void testPrivateProperties()
 	{
 		Cell c = new Cell(2);
-		c.setPrivateProperty(0, 23.2);
-		c.setPrivateProperty(3, 1);
+		c.setPrivateProperty("pp1", 23.2);
+		c.setPrivateProperty("pp2", 1);
 		
-		assertEquals(23.2, c.getPrivateProperty(0), 0.0);
-		assertEquals(1, c.getPrivateProperty(3), 0.0);
-		assertEquals(0, c.getPrivateProperty(2), 0.0);
+		assertEquals(23.2, c.getPrivateProperty("pp1"), 0.0);
+		assertEquals(1, c.getPrivateProperty("pp2"), 0.0);
+		assertEquals(0, c.getPrivateProperty("umm"), 0.0);
 	}
 }

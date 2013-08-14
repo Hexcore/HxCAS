@@ -67,8 +67,8 @@ public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
-	static final int maxT = 41;
-	static final int noSym = 41;
+	static final int maxT = 42;
+	static final int noSym = 42;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
@@ -96,22 +96,23 @@ public class Scanner {
 	static final int loop_Sym = 23;
 	static final int from_Sym = 24;
 	static final int to_Sym = 25;
-	static final int var_Sym = 26;
-	static final int array_Sym = 27;
-	static final int plus_Sym = 28;
-	static final int minus_Sym = 29;
-	static final int equalequal_Sym = 30;
-	static final int bangequal_Sym = 31;
-	static final int greater_Sym = 32;
-	static final int less_Sym = 33;
-	static final int greaterequal_Sym = 34;
-	static final int lessequal_Sym = 35;
-	static final int barbar_Sym = 36;
-	static final int star_Sym = 37;
-	static final int slash_Sym = 38;
-	static final int percent_Sym = 39;
-	static final int andand_Sym = 40;
-	static final int NOT_SYM = 41;
+	static final int behaviour_Sym = 26;
+	static final int var_Sym = 27;
+	static final int array_Sym = 28;
+	static final int plus_Sym = 29;
+	static final int minus_Sym = 30;
+	static final int equalequal_Sym = 31;
+	static final int bangequal_Sym = 32;
+	static final int greater_Sym = 33;
+	static final int less_Sym = 34;
+	static final int greaterequal_Sym = 35;
+	static final int lessequal_Sym = 36;
+	static final int barbar_Sym = 37;
+	static final int star_Sym = 38;
+	static final int slash_Sym = 39;
+	static final int percent_Sym = 40;
+	static final int andand_Sym = 41;
+	static final int NOT_SYM = 42;
 	// pragmas
 
 	static short[] start = {
@@ -263,6 +264,7 @@ public class Scanner {
 		else if (lit.compareTo("loop") == 0) t.kind = loop_Sym;
 		else if (lit.compareTo("from") == 0) t.kind = from_Sym;
 		else if (lit.compareTo("to") == 0) t.kind = to_Sym;
+		else if (lit.compareTo("behaviour") == 0) t.kind = behaviour_Sym;
 		else if (lit.compareTo("var") == 0) t.kind = var_Sym;
 		else if (lit.compareTo("array") == 0) t.kind = array_Sym;
 	}
