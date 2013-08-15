@@ -76,6 +76,6 @@ public class TestCell
 		
 		assertEquals(23.2, c.getPrivateProperty("pp1"), 0.0);
 		assertEquals(1, c.getPrivateProperty("pp2"), 0.0);
-		assertEquals(0, c.getPrivateProperty("umm"), 0.0);
+		assertEquals(-1, c.getPrivateProperty("umm"), 0.0);
 	}
 }
