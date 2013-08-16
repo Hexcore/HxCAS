@@ -41,6 +41,11 @@ public class DictNode extends Node
 		return values.containsKey(key);
 	}
 	
+	public int size()
+	{
+		return values.size();
+	}
+	
 	@Override
 	public String toString()
 	{

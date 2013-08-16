@@ -5,6 +5,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import com.hexcore.cas.control.protocol.ByteNode;
 import com.hexcore.cas.control.protocol.CAPMessageProtocol;
 import com.hexcore.cas.control.protocol.DictNode;
@@ -132,14 +136,36 @@ public class CAPIPClient extends Thread
 			for(int x = 0; x < g.getWidth(); x++)
 			{
 				ListNode currCell = new ListNode();
+				
+				//Add each property value to list
 				for(int i = 0; i < g.getCell(x, y).getValueCount(); i++)
 				{
 					currCell.addToList(new DoubleNode(g.getCell(x, y).getValue(i)));
 				}
+				
+				//Add all private properties to the end
+				Map<String,Double> pp = g.getCell(x, y).getPrivateProperties();
+				Set<String> keys = pp.keySet();
+				Iterator<String> iter = keys.iterator();
+				
+				DictNode privateProps = new DictNode();
+				
+				while(iter.hasNext())
+				{
+					String current = iter.next();
+					privateProps.addToDict(current, new DoubleNode(pp.get(current)));
+				}
+				
+				if(privateProps.size() > 0)
+					currCell.addToList(privateProps);
+				
+				
 				currRow.addToList(currCell);
 			}
 			rows.addToList(currRow);
 		}
+		
+		
 		
 		DictNode d = new DictNode();
 		d.addToDict("DATA", rows);
@@ -389,9 +415,39 @@ public class CAPIPClient extends Thread
 				for(int x = 0; x < currRow.size(); x++)
 				{
 					ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
-					for(int i = 0; i < currCell.size(); i++)
+					int propCount = 0;
+					boolean privateProps;
+					
+					if(currCell.get(currCell.size()-1) instanceof DictNode)
+					{
+						propCount = currCell.size()-1;
+						privateProps = true;
+					}
+					else
+					{
+						propCount = currCell.size();
+						privateProps = false;
+					}
+					
+					//Set properties
+					for(int i = 0; i < propCount; i++)
 					{
 						grid.getCell(x, y).setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
+					}
+					
+					//Set private properties
+					if(privateProps)
+					{
+						Map<String,Node> pp = ((DictNode)currCell.get(currCell.size()-1)).getDictValues();
+						
+						Set<String> keys = pp.keySet();
+						Iterator<String> iter = keys.iterator();
+						
+						while(iter.hasNext())
+						{
+							String current = iter.next();
+							grid.getCell(x,y).setPrivateProperty(current, ((DoubleNode)pp.get(current)).getDoubleValue());
+						}
 					}
 				}
 			}

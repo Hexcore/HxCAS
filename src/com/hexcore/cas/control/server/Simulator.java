@@ -412,7 +412,8 @@ public class Simulator extends Thread
 					int yy = (grid.getHeight() + y) % grid.getHeight();
 					for(int j = 0; j < grid.getCell(xx, yy).getValueCount(); j++)
 					{
-						workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
+						workingGrid.setCell(new Vector2i(gXPos, gYPos), grid.getCell(xx, yy));
+						//workingGrid.getCell(gXPos, gYPos).setValue(j, grid.getCell(xx, yy).getValue(j));
 					}
 					gXPos++;
 					if(gXPos >= workArea.getSize().x + (borderSize.x * 2))

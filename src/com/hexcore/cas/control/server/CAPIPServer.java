@@ -5,8 +5,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -197,10 +199,31 @@ public class CAPIPServer
 			for(int x = 0; x < work.getGrid().getWidth(); x++)
 			{
 				ListNode currCell = new ListNode();
+				//Add all properties
 				for(int j = 0; j < work.getGrid().getCell(x, y).getValueCount(); j++)
 				{
 					currCell.addToList(new DoubleNode(work.getGrid().getCell(x, y).getValue(j)));
 				}
+				
+				//Add all private properties to the end
+				Map<String,Double> pp = work.getGrid().getCell(x, y).getPrivateProperties();
+				Set<String> keys = pp.keySet();
+				Iterator<String> iter = keys.iterator();
+				
+				DictNode privateProps = new DictNode();
+				
+				while(iter.hasNext())
+				{
+					String current = iter.next();
+					privateProps.addToDict(current, new DoubleNode(pp.get(current)));
+				}
+				
+				if(privateProps.size() > 0)
+					currCell.addToList(privateProps);
+				
+				
+				
+				System.err.println(currCell);
 				currRow.addToList(currCell);
 			}
 			rows.addToList(currRow);
@@ -421,11 +444,44 @@ public class CAPIPServer
 					for(int x = 0; x < currRow.size(); x++)
 					{
 						ArrayList<Node> currCell = ((ListNode)currRow.get(x)).getListValues();
-						Cell cell = new Cell(currCell.size());
-						for(int i = 0; i < currCell.size(); i++)
+					
+						int propCount = 0;
+						boolean privateProps;
+						
+						if(currCell.get(currCell.size()-1) instanceof DictNode)
+						{
+							propCount = currCell.size()-1;
+							privateProps = true;
+						}
+						else
+						{
+							propCount = currCell.size();
+							privateProps = false;
+						}						
+						
+						
+						Cell cell = new Cell(propCount);
+						for(int i = 0; i < propCount; i++)
 						{
 							cell.setValue(i, ((DoubleNode)currCell.get(i)).getDoubleValue());
 						}
+						
+						
+						//Set private properties
+						if(privateProps)
+						{
+							Map<String,Node> pp = ((DictNode)currCell.get(currCell.size()-1)).getDictValues();
+							
+							Set<String> keys = pp.keySet();
+							Iterator<String> iter = keys.iterator();
+							
+							while(iter.hasNext())
+							{
+								String current = iter.next();
+								cell.setPrivateProperty(current, ((DoubleNode)pp.get(current)).getDoubleValue());
+							}
+						}						
+						
 						currentGrid.setCell(orig.getPosition().add(x, y), cell);
 					}
 				}

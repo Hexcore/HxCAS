@@ -2,6 +2,7 @@ package com.hexcore.cas.model;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -94,5 +95,10 @@ public class Cell
 	public double getPrivateProperty(String key)
 	{
 		return privateProperties.get(key) == null ? -1.0 : privateProperties.get(key);
+	}
+	
+	public Map<String, Double> getPrivateProperties()
+	{
+		return privateProperties;
 	}
 }
