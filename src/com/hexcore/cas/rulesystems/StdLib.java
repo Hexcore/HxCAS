@@ -99,14 +99,8 @@ public class StdLib
 		return values;
 	}
 	
-	//TODO: Add access to neighbours
-	//TODO: Change private props to use strings
-	//TODO: Add 3-step movementStep
-	//TODO: ??
-	//TODO: Profit?
 	public static void move(boolean active, double target, int step, Cell cell, Cell[] neighbours)
 	{
-		System.err.println("MOVE CALLED: " + active + " " + target + " " + step);
 		if(!active)
 		{
 			cell.setPrivateProperty("target", -1);
@@ -115,26 +109,21 @@ public class StdLib
 		
 		if(step == 0)
 		{
-			System.err.println("Setting target: " + target);
 			cell.setPrivateProperty("target", target);
 		}
 		else if(step == 1)
 		{
 			cell.setPrivateProperty("parent", -1);
-			System.err.println("My target: " + cell.getPrivateProperty("target"));
 		}
 		else if(step == 2)
 		{
 			if(active)
 			{
-				System.out.println("Checking...");
 				for(int i = 0; i < neighbours.length; i++)
 				{
 					int j = neighbours.length - (i+1);
-					System.err.println(neighbours[i].getPrivateProperty("parent"));
-					if(neighbours[i].getPrivateProperty("parent") == j)
+					if(neighbours[i] != null && neighbours[i].getPrivateProperty("parent") == j)
 					{
-						System.out.println("MOVING TO: " + i);
 						cell.setValue(0, neighbours[i].getValue(0));
 						cell.setPrivateProperty("target", -1);
 					}
@@ -153,7 +142,6 @@ public class StdLib
 	 */
 	public static void accept(boolean active, int step, Cell cell, Cell[] neighbours)
 	{
-		System.err.println("ACCEPT CALLED: " + active + " " + step);
 		if(!active)
 		{
 			return;
@@ -166,14 +154,12 @@ public class StdLib
 		else if(step == 1)
 		{
 			boolean done = false;
-			System.err.println("Neighbours lenght: " + neighbours.length);
 			for(int i = 0; i < neighbours.length; i++)
 			{
 				
 				int j = neighbours.length - (i+1);
-				if(neighbours[i].getPrivateProperty("target") == j)
+				if(neighbours[i] != null && neighbours[i].getPrivateProperty("target") == j)
 				{
-					System.err.println("Parent found! " + i);
 					cell.setPrivateProperty("parent", i);
 					done = true;
 				}
