@@ -221,9 +221,6 @@ public class CAPIPServer
 				if(privateProps.size() > 0)
 					currCell.addToList(privateProps);
 				
-				
-				
-				System.err.println(currCell);
 				currRow.addToList(currCell);
 			}
 			rows.addToList(currRow);
