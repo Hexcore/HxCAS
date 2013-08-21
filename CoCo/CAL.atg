@@ -700,37 +700,6 @@ PRODUCTIONS
   	";"
   	.
   	
-  	/*
-  	Behaviour								(.	
-  	         								  	TableEntry.Type type = null;
-  	         								   	TableEntry.Type typeR = null;
-  	         								   	BehaviourType b = null;
-  	         								.)
-  	=
-  	(
-  	"move"									(.	b = BehaviourType.MOVER;
-  											.)
-  												
-  	|
-  	"accept"								(.	b = BehaviourType.ACCEPTOR;
-  											.)
-  	)
-  	"(" Expression< out type >				(.	if(type != TableEntry.Type.BOOL)
-  													SemanticError("Behavioral condition must be of boolean type.");
-  											.)
-  												
-  	")"
-  	"{"
-  		{Statement}					
-  		"return" Expression< out typeR >	(.
-  												if(typeR != TableEntry.Type.INT || typeR != TableEntry.Type.DOUBLE)
-  													SemanticError("Must return a numeric type");
-  											.)
-  	"}"
-  	.
-  	*/
-  	
-  	
   	/*************************/
   	
   	
