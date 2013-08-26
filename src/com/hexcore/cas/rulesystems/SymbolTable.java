@@ -171,6 +171,13 @@ public class SymbolTable
 		acceptEntry.name = "accept";
 		acceptEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.INT, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
 		insert(acceptEntry);
+		
+		TableEntry propagateEntry = new TableEntry();
+		propagateEntry.type = TableEntry.Type.VOID;
+		propagateEntry.kind = TableEntry.Kind.BEHAVIOUR;
+		propagateEntry.name = "propagate";
+		propagateEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
+		insert(propagateEntry);
 	}
 	
 	public void insert(TableEntry entry)

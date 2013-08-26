@@ -178,4 +178,28 @@ public class StdLib
 		}
 		
 	}
+	
+	public static void propagate(boolean active, double index, Cell cell, Cell[] neighbours)
+	{
+		//Hehe ;)
+		double x = StdLib.max(StdLib.generatePropertyArray(neighbours, (int)index));
+		
+		if((x > cell.getValue((int)index)) && (cell.getPrivateProperty("sat1") <= 0) && (cell.getPrivateProperty("sat2") <= 0))
+		{
+			cell.setValue((int)index, x-1);
+			cell.setPrivateProperty("sat1", 1);
+		}
+		else if(cell.getPrivateProperty("sat1") == 1)
+		{
+			cell.setValue((int)index, 0);
+			
+			if(cell.getPrivateProperty("sat2") == 1)
+			{
+				cell.setPrivateProperty("sat2", 0);
+				cell.setPrivateProperty("sat1", 0);
+			}
+			else
+				cell.setPrivateProperty("sat2", 1);
+		}
+	}
 }

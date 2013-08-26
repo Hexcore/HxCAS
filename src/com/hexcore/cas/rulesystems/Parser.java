@@ -743,13 +743,20 @@ static public void reset()
 		
 		Expect(lparen_Sym);
 		args  = Arguments();
-		if(entry.name.equals("move") || entry.name.equals("accept"))
-			args.add(TableEntry.Type.INT);
+		if(valid)
+		{
+			if(entry.name.equals("move") || entry.name.equals("accept"))
+				args.add(TableEntry.Type.INT);
+		}
 			
 		args.add(TableEntry.Type.CELL);
 		args.add(TableEntry.Type.CELL_ARR);
-		if(!entry.checkArguments(args))
-			SemanticError("Invalid use of behaviour");
+		
+		if(valid)
+		{
+			if(!entry.checkArguments(args))
+				SemanticError("Invalid use of behaviour");
+		}
 		if(valid)
 		{
 			if(entry.name.equals("move") || entry.name.equals("accept"))
