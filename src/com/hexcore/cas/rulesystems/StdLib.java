@@ -83,9 +83,9 @@ public class StdLib
 		return (int) Math.round(val);
 	}
 	
-	public int exists(Cell c)
+	public static boolean exists(Cell c)
 	{
-		return c == null ? 0 : 1;
+		return c == null ? false : true;
 	}
 	
 	public static double[] generatePropertyArray(Cell[] cells, int propertyIndex)
