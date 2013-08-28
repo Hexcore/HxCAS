@@ -1,0 +1,18 @@
+ruleset TestSignalEngine
+{
+	types{Matter, Generator};
+	property signal;
+	property sat;
+	property time;
+	property n;
+
+	type Matter
+	{
+		behaviour propagate(1 == 1, 1);
+	}
+
+	type Generator
+	{
+		behaviour pulsar(1 == 1, 1, 10, 5);
+	}
+}
