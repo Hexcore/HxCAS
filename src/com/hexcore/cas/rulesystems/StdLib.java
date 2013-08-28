@@ -181,6 +181,9 @@ public class StdLib
 	
 	public static void propagate(boolean active, double index, Cell cell, Cell[] neighbours)
 	{
+		if(!active)
+			return;
+		
 		//Hehe ;)
 		double x = StdLib.max(StdLib.generatePropertyArray(neighbours, (int)index));
 		
@@ -200,6 +203,28 @@ public class StdLib
 			}
 			else
 				cell.setPrivateProperty("sat2", 1);
+		}
+	}
+	
+	public static void pulsar(boolean active, double index, double strength, double interval, Cell cell, Cell[] neighbours)
+	{
+		if(!active)
+			return;
+		
+		double time = cell.getPrivateProperty("time");
+		cell.setPrivateProperty("time", time+1);
+		
+		if(time >= interval)
+		{
+			if((int)index < cell.getValueCount())
+				cell.setValue((int)index, strength);
+			
+			cell.setPrivateProperty("time", 0);
+		}
+		else
+		{
+			if((int)index < cell.getValueCount())
+				cell.setValue((int)index, 0);
 		}
 	}
 }

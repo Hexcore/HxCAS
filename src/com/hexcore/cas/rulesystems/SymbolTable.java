@@ -178,6 +178,13 @@ public class SymbolTable
 		propagateEntry.name = "propagate";
 		propagateEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
 		insert(propagateEntry);
+		
+		TableEntry pulsarEntry = new TableEntry();
+		pulsarEntry.type = TableEntry.Type.VOID;
+		pulsarEntry.kind = TableEntry.Kind.BEHAVIOUR;
+		pulsarEntry.name = "pulsar";
+		pulsarEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
+		insert(pulsarEntry);
 	}
 	
 	public void insert(TableEntry entry)
