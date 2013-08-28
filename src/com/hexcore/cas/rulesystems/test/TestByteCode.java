@@ -650,4 +650,83 @@ public class TestByteCode
 		
 	}
 	
+	
+	@Test
+	public void testSignalEngine()
+	{
+CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testSignalEngine.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+		
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Grid g = new RectangleGrid(new Vector2i(10, 10), 2);
+		g.setWrappable(true);
+
+		//Init grid to Matter
+		for(int r = 0; r < 10; r++)
+			for(int c = 0; c < 10; c++)
+				g.setCell(new Vector2i(c,r), new double[]{0,0});
+		
+		//Set middle cell to a Generator
+		g.setCell(new Vector2i(5, 5), new double[]{1,0});
+		
+		Grid old;
+		for(int i = 0; i < 6; i++)
+		{
+			old = g.clone();		
+			for(int x = 0; x < 10; x++)
+				for(int y = 0; y < 10; y++)
+					rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+		}
+		
+		
+		
+		old = g.clone();		
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+
+		assertEquals(10, g.getCell(5, 5).getValue(1), 0.0);
+		
+		old = g.clone();		
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+		
+		
+		for(int x = 4; x < 7; x++)
+		{
+			for(int y = 4; y < 7; y++)
+			{
+				if(x == 5 && y == 5)
+					assertEquals(0.0, g.getCell(5, 5).getValue(1), 0.0);
+				else
+					assertEquals(9.0, g.getCell(x, y).getValue(1), 0.0);
+			}
+		}
+		
+		old = g.clone();		
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+		
+		
+		for(int x = 3; x < 8; x++)
+		{
+			for(int y = 3; y < 8; y++)
+			{
+				if(x >3 && x < 7 && y > 3 && y < 7)
+					assertEquals(0.0, g.getCell(x, y).getValue(1), 0.0);
+				else
+					assertEquals(8.0, g.getCell(x, y).getValue(1), 0.0);
+			}
+		}
+		
+
+	}
+	
 }
