@@ -67,8 +67,8 @@ public class Scanner {
 	static final char EOL = '\n';
 	static final int  eofSym = 0;
 	static final int charSetSize = 256;
-	static final int maxT = 42;
-	static final int noSym = 42;
+	static final int maxT = 44;
+	static final int noSym = 44;
 	// terminals
 	static final int EOF_SYM = 0;
 	static final int number_Sym = 1;
@@ -112,7 +112,9 @@ public class Scanner {
 	static final int slash_Sym = 39;
 	static final int percent_Sym = 40;
 	static final int andand_Sym = 41;
-	static final int NOT_SYM = 42;
+	static final int true_Sym = 42;
+	static final int false_Sym = 43;
+	static final int NOT_SYM = 44;
 	// pragmas
 
 	static short[] start = {
@@ -267,6 +269,8 @@ public class Scanner {
 		else if (lit.compareTo("behaviour") == 0) t.kind = behaviour_Sym;
 		else if (lit.compareTo("var") == 0) t.kind = var_Sym;
 		else if (lit.compareTo("array") == 0) t.kind = array_Sym;
+		else if (lit.compareTo("true") == 0) t.kind = true_Sym;
+		else if (lit.compareTo("false") == 0) t.kind = false_Sym;
 	}
 
 	/* AW Scan() renamed to NextToken() */

@@ -61,10 +61,12 @@ public class Parser {
 	static final int slash_Sym = 39;
 	static final int percent_Sym = 40;
 	static final int andand_Sym = 41;
-	static final int NOT_SYM = 42;
+	static final int true_Sym = 42;
+	static final int false_Sym = 43;
+	static final int NOT_SYM = 44;
 	// pragmas
 
-	static final int maxT = 42;
+	static final int maxT = 44;
 
 	static final boolean T = true;
 	static final boolean x = false;
@@ -294,7 +296,7 @@ static public void reset()
 		} else if (la.kind == type_Sym) {
 			Get();
 			name = "type";
-		} else SynErr(43);
+		} else SynErr(45);
 		return name;
 	}
 
@@ -451,7 +453,7 @@ static public void reset()
 			while (StartOf(2)) {
 				Statement();
 			}
-		} else SynErr(44);
+		} else SynErr(46);
 		Expect(rbrace_Sym);
 		table.popScope();
 		
@@ -504,7 +506,7 @@ static public void reset()
 			Behaviour();
 			break;
 		}
-		default: SynErr(45); break;
+		default: SynErr(47); break;
 		}
 	}
 
@@ -624,7 +626,7 @@ static public void reset()
 			}
 			
 			Expect(rparen_Sym);
-		} else SynErr(46);
+		} else SynErr(48);
 		Expect(semicolon_Sym);
 	}
 
@@ -726,7 +728,7 @@ static public void reset()
 		} else if (la.kind == array_Sym) {
 			Get();
 			ArraySpec();
-		} else SynErr(47);
+		} else SynErr(49);
 		Expect(semicolon_Sym);
 	}
 
@@ -899,7 +901,7 @@ static public void reset()
 		} else if (la.kind == postDec_Sym) {
 			Get();
 			op = PostOpE.DEC;	
-		} else SynErr(48);
+		} else SynErr(50);
 		return op;
 	}
 
@@ -1127,7 +1129,7 @@ static public void reset()
 			op = RelOpE.LE;	
 			break;
 		}
-		default: SynErr(49); break;
+		default: SynErr(51); break;
 		}
 		return op;
 	}
@@ -1189,7 +1191,7 @@ static public void reset()
 		} else if (la.kind == barbar_Sym) {
 			Get();
 			op = AddOpE.OR;	
-		} else SynErr(50);
+		} else SynErr(52);
 		return op;
 	}
 
@@ -1248,7 +1250,7 @@ static public void reset()
 		} else if (la.kind == andand_Sym) {
 			Get();
 			op = MulOpE.AND;	
-		} else SynErr(51);
+		} else SynErr(53);
 		return op;
 	}
 
@@ -1314,14 +1316,14 @@ static public void reset()
 				
 				Expect(rparen_Sym);
 			}
-		} else if (la.kind == number_Sym || la.kind == double_Sym) {
+		} else if (StartOf(6)) {
 			con  = Constant();
 			p.type = con.type;
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			if(valid)
 			{
-				if(con.type == TableEntry.Type.INT)
+				if(con.type == TableEntry.Type.INT || con.type == TableEntry.Type.BOOL)
 					CodeGen.loadConstantInteger((int)con.value);
 				else if(con.type == TableEntry.Type.DOUBLE)
 					CodeGen.loadConstantDouble(con.value);
@@ -1334,7 +1336,7 @@ static public void reset()
 			p.kind = TableEntry.Kind.CONSTANT;
 			
 			Expect(rparen_Sym);
-		} else SynErr(52);
+		} else SynErr(54);
 		return p;
 	}
 
@@ -1348,7 +1350,10 @@ static public void reset()
 		} else if (la.kind == number_Sym) {
 			con.value  = IntConst();
 			con.type = TableEntry.Type.INT;		
-		} else SynErr(53);
+		} else if (la.kind == true_Sym || la.kind == false_Sym) {
+			con.value  = BoolConst();
+			con.type = TableEntry.Type.BOOL;	
+		} else SynErr(55);
 		return con;
 	}
 
@@ -1367,6 +1372,19 @@ static public void reset()
 		return value;
 	}
 
+	static int BoolConst() {
+		int value;
+		value = 0;
+		if (la.kind == true_Sym) {
+			Get();
+			value = 1;
+		} else if (la.kind == false_Sym) {
+			Get();
+			value = 0;
+		} else SynErr(56);
+		return value;
+	}
+
 
 
 	public static void Parse() {
@@ -1379,12 +1397,13 @@ static public void reset()
 	}
 
 	private static boolean[][] set = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,T,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,x,x,x, x,x,x,x, x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,x},
+		{x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x}
 
 	};
 
@@ -1544,18 +1563,21 @@ class Errors {
 			case 39: s = "\"/\" expected"; break;
 			case 40: s = "\"%\" expected"; break;
 			case 41: s = "\"&&\" expected"; break;
-			case 42: s = "??? expected"; break;
-			case 43: s = "invalid Ident"; break;
-			case 44: s = "invalid TypeSpec"; break;
-			case 45: s = "invalid Statement"; break;
-			case 46: s = "invalid AssignCall"; break;
-			case 47: s = "invalid VarDeclaration"; break;
-			case 48: s = "invalid PostOp"; break;
-			case 49: s = "invalid RelOp"; break;
-			case 50: s = "invalid AddOp"; break;
-			case 51: s = "invalid MulOp"; break;
-			case 52: s = "invalid Primary"; break;
-			case 53: s = "invalid Constant"; break;
+			case 42: s = "\"true\" expected"; break;
+			case 43: s = "\"false\" expected"; break;
+			case 44: s = "??? expected"; break;
+			case 45: s = "invalid Ident"; break;
+			case 46: s = "invalid TypeSpec"; break;
+			case 47: s = "invalid Statement"; break;
+			case 48: s = "invalid AssignCall"; break;
+			case 49: s = "invalid VarDeclaration"; break;
+			case 50: s = "invalid PostOp"; break;
+			case 51: s = "invalid RelOp"; break;
+			case 52: s = "invalid AddOp"; break;
+			case 53: s = "invalid MulOp"; break;
+			case 54: s = "invalid Primary"; break;
+			case 55: s = "invalid Constant"; break;
+			case 56: s = "invalid BoolConst"; break;
 			default: s = "error " + n; break;
 		}
 		storeError(line, col, s);

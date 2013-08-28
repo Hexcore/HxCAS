@@ -1,0 +1,20 @@
+ruleset testBoolConst
+{
+	types{Earth};
+	
+	property p1;
+	property p2;
+
+	type Earth
+	{
+		if(true)
+			self.p1 = 10;
+		else
+			self.p1 = 20;
+		
+		if(false)
+			self.p2 = 10;
+		else
+			self.p2 = 20;
+	}
+}

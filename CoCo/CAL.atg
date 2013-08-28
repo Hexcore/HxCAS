@@ -994,7 +994,7 @@ PRODUCTIONS
   												
   												if(valid)
   												{
-  													if(con.type == TableEntry.Type.INT)
+  													if(con.type == TableEntry.Type.INT || con.type == TableEntry.Type.BOOL)
   														CodeGen.loadConstantInteger((int)con.value);
   													else if(con.type == TableEntry.Type.DOUBLE)
   														CodeGen.loadConstantDouble(con.value);
@@ -1019,6 +1019,7 @@ PRODUCTIONS
   	=
   	DoubleConst< out con.value >			(.	con.type = TableEntry.Type.DOUBLE;	.)
 	| IntConst< out con.value >				(.	con.type = TableEntry.Type.INT;		.)
+	| BoolConst< out con.value > 			(.	con.type = TableEntry.Type.BOOL;	.)
   	.
   	/*****************************/
   	
@@ -1230,6 +1231,14 @@ PRODUCTIONS
   													value =  0;
   												} 
   											.)
+  	.
+  	/**************************************/
+  	
+  /********** Boolean Constant **********/
+  	BoolConst<. out int value .>			(. value = 0; .)
+  	=
+  	"true"									(. value = 1; .)
+  	| "false"								(. value = 0; .)
   	.
   	/**************************************/
 	

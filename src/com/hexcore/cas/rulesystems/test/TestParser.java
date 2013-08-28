@@ -116,4 +116,13 @@ CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/rules/testBehaviourGeneralParsing.cal");		
 		assertTrue(compiler.getErrorCount() == 0);
 	}
+	
+	@Test
+	public void testBooleanConstParsing()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testBoolConst.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+	}
 }

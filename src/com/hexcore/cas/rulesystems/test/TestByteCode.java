@@ -729,4 +729,23 @@ CALCompiler compiler = new CALCompiler();
 
 	}
 	
+	@Test
+	public void testBoolConst()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testBoolConst.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+		
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		Cell c0 = new Cell(new double[]{0,0,0});
+		
+		rule.run(c0, null);
+		
+		assertEquals(10.0, c0.getValue(1), 0.0);
+		assertEquals(20.0, c0.getValue(2), 0.0);
+	}
+	
 }
