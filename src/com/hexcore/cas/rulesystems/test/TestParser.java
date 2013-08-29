@@ -125,4 +125,19 @@ CALCompiler compiler = new CALCompiler();
 		compiler.compileFile("Test Data/rules/testBoolConst.cal");		
 		assertTrue(compiler.getErrorCount() == 0);
 	}
+	
+	@Test
+	public void testArrayAssignmentRestrictions()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testArrayAssignmentRestrictions0.cal");		
+		assertTrue(compiler.getErrorCount() > 0);
+		
+		
+		compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testArrayAssignmentRestrictions1.cal");		
+		assertTrue(compiler.getErrorCount() > 0);
+	}
 }
