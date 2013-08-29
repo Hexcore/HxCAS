@@ -23,7 +23,7 @@ public class Client
 	/////////////////////////////////////////////
 	/// Public Variables
 	public final static String	TAG = "Client";
-	public final static String	VERSION = "v0.1";
+	public final static String	VERSION = "v1.2";
 
 	/////////////////////////////////////////////
 	/// Private Variables
