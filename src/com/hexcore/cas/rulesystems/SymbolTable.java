@@ -185,6 +185,34 @@ public class SymbolTable
 		pulsarEntry.name = "pulsar";
 		pulsarEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
 		insert(pulsarEntry);
+		
+		TableEntry appendEntry = new TableEntry();
+		appendEntry.type = TableEntry.Type.DOUBLE_ARR;
+		appendEntry.kind = TableEntry.Kind.METHOD;
+		appendEntry.name = "append";
+		appendEntry.arguments = new ArgList(TableEntry.Type.DOUBLE_ARR, TableEntry.Type.DOUBLE);
+		insert(appendEntry);
+		
+		TableEntry insertEntry = new TableEntry();
+		insertEntry.type = TableEntry.Type.DOUBLE_ARR;
+		insertEntry.kind = TableEntry.Kind.METHOD;
+		insertEntry.name = "insert";
+		insertEntry.arguments = new ArgList(TableEntry.Type.DOUBLE_ARR, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE);
+		insert(insertEntry);
+		
+		TableEntry deleteEntry = new TableEntry();
+		deleteEntry.type = TableEntry.Type.DOUBLE_ARR;
+		deleteEntry.kind = TableEntry.Kind.METHOD;
+		deleteEntry.name = "delete";
+		deleteEntry.arguments = new ArgList(TableEntry.Type.DOUBLE_ARR, TableEntry.Type.DOUBLE);
+		insert(deleteEntry);
+		
+		TableEntry deleteAllEntry = new TableEntry();
+		deleteAllEntry.type = TableEntry.Type.DOUBLE_ARR;
+		deleteAllEntry.kind = TableEntry.Kind.METHOD;
+		deleteAllEntry.name = "deleteAll";
+		deleteAllEntry.arguments = new ArgList(TableEntry.Type.DOUBLE_ARR, TableEntry.Type.DOUBLE);
+		insert(deleteAllEntry);
 	}
 	
 	public void insert(TableEntry entry)

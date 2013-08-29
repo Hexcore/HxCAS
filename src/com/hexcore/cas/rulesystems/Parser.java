@@ -571,7 +571,13 @@ static public void reset()
 				}
 				else if(entry.kind == TableEntry.Kind.ARRAY)
 				{
-					CodeGen.storeArray();
+					if(entry.type == TableEntry.Type.DOUBLE)
+						CodeGen.storeArray();
+					else
+					{
+						CodeGen.storeArrayReference(entry.offset);
+						CodeGen.pop(TableEntry.Type.INT);
+					}
 				}
 			}
 			

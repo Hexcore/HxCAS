@@ -748,4 +748,36 @@ CALCompiler compiler = new CALCompiler();
 		assertEquals(20.0, c0.getValue(2), 0.0);
 	}
 	
+	@Test
+	public void testArrayMethods()
+	{
+		CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testArrayMethods.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+		
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		Cell c0 = new Cell(new double[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0});
+		
+		rule.run(c0, null);
+		
+		assertEquals(7.0, c0.getValue(1), 0.0);
+		assertEquals(1.0, c0.getValue(2), 0.0);
+		assertEquals(2.0, c0.getValue(3), 0.0);
+		assertEquals(3.0, c0.getValue(4), 0.0);
+		assertEquals(4.0, c0.getValue(5), 0.0);
+		assertEquals(5.0, c0.getValue(6), 0.0);
+		assertEquals(6.0, c0.getValue(7), 0.0);
+		assertEquals(1.0, c0.getValue(8), 0.0);
+		assertEquals(2.0, c0.getValue(9), 0.0);
+		assertEquals(3.0, c0.getValue(10), 0.0);
+		assertEquals(5.0, c0.getValue(11), 0.0);
+		assertEquals(1.0, c0.getValue(12), 0.0);
+		assertEquals(1.0, c0.getValue(13), 0.0);
+		assertEquals(3.0, c0.getValue(14), 0.0);
+	
+	}
+	
 }

@@ -1,5 +1,6 @@
 package com.hexcore.cas.rulesystems;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,7 +98,12 @@ public class TableEntry
 	
 	public boolean checkArguments(ArgList list)
 	{
-		List<Type> myTypes = arguments.getList();
+		List<Type> myTypes;
+		if(arguments != null)
+			myTypes = arguments.getList();
+		else
+			myTypes = new ArrayList<Type>();
+		
 		List<Type> otherTypes = list.getList();
 		
 		if(myTypes.size() != otherTypes.size())

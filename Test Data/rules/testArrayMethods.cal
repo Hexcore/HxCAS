@@ -1,0 +1,53 @@
+ruleset testArrayCode
+{
+	types{Alpha};
+	
+	property p1;
+	property p2;
+	property p3;
+	property p4;
+	property p5;
+	
+	property p6;
+	property p7;
+	property p8;
+	property p9;
+	property p10;
+	
+	property p11;
+	property p12;
+	property p13;
+	property p14;
+
+	type Alpha
+	{
+		array a1[5] = {1,2,3,4,5};
+		array a2[5] = {1,2,3,4,5};
+		array a3[5] = {1,1,2,2,3};
+		
+		a1 = append(a1, 6);
+		a1 = insert(a1, 7, 0);
+		
+		a2 = delete(a2, 3);
+		a3 = deleteAll(a3, 2);
+		
+		self.p1 = a1[0];
+		self.p2 = a1[1];
+		self.p3 = a1[2];
+		self.p4 = a1[3];
+		self.p5 = a1[4];
+		self.p6 = a1[5];
+		self.p7 = a1[6];
+		
+		self.p8 = a2[0];
+		self.p9 = a2[1];
+		self.p10 = a2[2];
+		self.p11 = a2[3];
+		
+		self.p12 = a3[0];
+		self.p13 = a3[1];
+		self.p14 = a3[2];
+		
+
+	}
+}

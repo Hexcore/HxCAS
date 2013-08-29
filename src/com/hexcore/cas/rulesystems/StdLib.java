@@ -1,5 +1,7 @@
 package com.hexcore.cas.rulesystems;
 
+import java.util.ArrayList;
+
 import com.hexcore.cas.model.Cell;
 
 /**
@@ -227,4 +229,92 @@ public class StdLib
 				cell.setValue((int)index, 0);
 		}
 	}
+	
+	public static double[] append(double[] values, double x)
+	{
+		double[] temp = new double[values.length];
+		
+		for(int i = 0; i < temp.length; i++)
+			temp[i] = values[i];
+		
+		values = new double[values.length+1];
+		
+		for(int i = 0; i < temp.length; i++)
+			values[i] = temp[i];
+		
+		values[values.length-1] = x;
+		
+		return values;
+	}
+	
+	public static double[] insert(double[] values, double x, double index)
+	{
+		
+		if(index >= values.length)
+		{
+			append(values, x);
+		}
+		else
+		{
+			if(index < 0)
+				index = 0;
+			
+			double[] temp = new double[values.length];			
+			for(int i = 0; i < temp.length; i++)
+				temp[i] = values[i];			
+			values = new double[values.length+1];
+			
+			for(int i = 0; i < index; i++)
+				values[i] = temp[i];
+			
+			values[(int)index] = x;
+			
+			for(int i = (int)index+1; i < values.length; i++)
+				values[i] = temp[i-1];
+		}
+	
+		return values;
+	}
+	
+	public static double[] delete(double[] values, double index)
+	{
+		if(index < 0)
+			index = 0;
+		else if(index >= values.length)
+			index = values.length-1;
+		
+		double[] temp = new double[values.length];
+		
+		for(int i = 0; i < values.length; i++)
+			temp[i] = values[i];
+		
+		values = new double[values.length-1];
+		
+		for(int i = 0; i < index; i++)
+			values[i] = temp[i];
+		
+		for(int i = (int)index+1; i < temp.length; i++)
+			values[i-1] = temp[i];
+		
+		return values;
+	}
+	
+	public static double[] deleteAll(double[] values, double x)
+	{
+		ArrayList<Double> newArray = new ArrayList<Double>();
+		
+		for(int i = 0; i < values.length; i++)
+		{
+			if(values[i] != x)
+				newArray.add(values[i]);
+		}
+		
+		values = new double[newArray.size()];
+		
+		for(int i = 0; i < newArray.size(); i++)
+			values[i] = newArray.get(i);
+		
+		return values;
+	}
+	
 }

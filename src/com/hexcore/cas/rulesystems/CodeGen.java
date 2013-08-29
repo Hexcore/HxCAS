@@ -554,6 +554,12 @@ public class CodeGen implements org.objectweb.asm.Opcodes
 		executeVisitor.visitInsn(DASTORE);
 	}
 	
+	public static void storeArrayReference(int index)
+	{
+		debug("Storing array reference: " + index);
+		executeVisitor.visitVarInsn(ASTORE, index);
+	}
+	
 	public static void storeProperty(int index)
 	{
 		debug("Storing at property: " + index);
