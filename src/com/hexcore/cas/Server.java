@@ -245,6 +245,7 @@ public class Server
 						
 						world = new World(initialState);
 						ui.setWorld(world);
+						ui.onFinishedSaving();
 						
 						serverLock.unlock();
 						

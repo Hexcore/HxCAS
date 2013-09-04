@@ -140,6 +140,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	private Dialog					savingDialog;
 	private Dialog					shutdownDialog;
 	private Dialog					streamingDialog;
+	private Dialog					resettingDialog;
 	
 	private Cell c;
 	
@@ -966,6 +967,8 @@ public class GUI implements WindowEventListener, LobbyListener
 			}			
 			else if(event.target == resetButton)
 			{
+				
+				window.showModalDialog(resettingDialog);
 				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.RESET_SIMULATION);
 				server.sendEvent(serverEvent);
 			}		
@@ -2044,6 +2047,20 @@ public class GUI implements WindowEventListener, LobbyListener
 		savingMessage.setFlag(Widget.CENTER_HORIZONTAL);
 		savingLayout.add(savingMessage);
 		//
+		resettingDialog = new Dialog(window, new Vector2i(400, 80));
+		
+		LinearLayout resetLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		resetLayout.setFlag(Widget.FILL);
+		resettingDialog.setContents(resetLayout);
+		
+		TextWidget resettingTitle = new TextWidget("Resetting", Text.Size.LARGE);
+		resettingTitle.setFlag(Widget.CENTER_HORIZONTAL);
+		resetLayout.add(resettingTitle);
+		
+		TextWidget resettingMessage = new TextWidget("Resetting the simulation. This may take a moment.");
+		resettingMessage.setFlag(Widget.CENTER_HORIZONTAL);
+		resetLayout.add(resettingMessage);
+		//
 		shutdownDialog = new Dialog(window, new Vector2i(400, 80));
 		
 		LinearLayout shutdownLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
@@ -2238,6 +2255,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		dialogTitle.setCaption(caption);
 		dialogMessage.setCaption(message);
 		window.showModalDialog(dialog);
+	}
+	
+	public void onFinishedSaving()
+	{
+		window.closeModalDialog();
 	}
 	
 	public void shutdownProcess()
