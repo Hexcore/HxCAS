@@ -117,7 +117,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	/// Public Variables
 	public static final String		TAG = "GUI";
 	
-	public Button					backButton;
+	public Button					mainMenuButton;
 	
 	public Set<ClientEntry>			availableClients;   
 	public Set<ClientEntry>			usingClients;
@@ -265,7 +265,7 @@ public class GUI implements WindowEventListener, LobbyListener
 	private ArrayList<NumberBox>	numberboxList;
 	
 	private Button					addSliceButton;
-	private Button					backToMainMenuButton;
+	private Button					backButton;
 	private Button					editorApplyButton;
 	private Button					editorBrushButton;
 	private Button					editorFillButton;
@@ -774,7 +774,7 @@ public class GUI implements WindowEventListener, LobbyListener
 			{
 				window.closeModalDialog();
 			}
-			else if(event.target == backButton)
+			else if(event.target == mainMenuButton)
 			{
 				masterView.setIndex(0);
 			}
@@ -945,7 +945,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				currentGeneration = 0;
 				updateSimulationScreen(true);
 			}
-			else if(event.target == backToMainMenuButton)
+			else if(event.target == backButton)
 			{
 				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
 				server.sendEvent(serverEvent);
@@ -1197,7 +1197,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				simulationControlsLayout.setVisible(false);
 				toggleShowButton.setVisible(true);
 				worldHeaderLayout.setVisible(false);
-				backToMainMenuButton.setVisible(false);
+				backButton.setVisible(false);
 				window.relayout();
 			}
 			else if(event.target == toggleShowButton)
@@ -1206,7 +1206,7 @@ public class GUI implements WindowEventListener, LobbyListener
 				simulationControlsLayout.setVisible(true);
 				toggleShowButton.setVisible(false);
 				worldHeaderLayout.setVisible(true);
-				backToMainMenuButton.setVisible(true);
+				backButton.setVisible(true);
 				window.relayout();
 			}
 			else if(event.target == toggleWireframeButton)
@@ -1552,10 +1552,10 @@ public class GUI implements WindowEventListener, LobbyListener
 		buttonHeaderLayout.setFlag(Widget.CENTER_HORIZONTAL | Widget.WRAP);
 		worldLayout.add(buttonHeaderLayout);
 			
-		backButton = new Button(new Vector2i(100, 50), "Main Menu");
-		backButton.setWidth(165);
-		backButton.setHeight(35);
-		buttonHeaderLayout.add(backButton);
+		mainMenuButton = new Button(new Vector2i(100, 50), "Main Menu");
+		mainMenuButton.setWidth(165);
+		mainMenuButton.setHeight(35);
+		buttonHeaderLayout.add(mainMenuButton);
 		
 		saveWorldButton = new Button(new Vector2i(100, 50), "Save World");
 		saveWorldButton.setWidth(165);
@@ -1988,9 +1988,9 @@ public class GUI implements WindowEventListener, LobbyListener
 		backToMainMenuLayout.setFlag(Widget.WRAP | Widget.CENTER_HORIZONTAL);
 		worldHeaderLayout.add(backToMainMenuLayout);
 		
-		backToMainMenuButton = new Button(new Vector2i(60, 30), "Back");
-		backToMainMenuButton.setMargin(new Vector2i(0,0));
-		backToMainMenuLayout.add(backToMainMenuButton);
+		backButton = new Button(new Vector2i(60, 30), "Back");
+		backButton.setMargin(new Vector2i(0,0));
+		backToMainMenuLayout.add(backButton);
 		
 		Container headerLogoContainer = new Container(new Vector2i(10, 10));
 		headerLogoContainer.setMargin(new Vector2i(0,0));
@@ -2257,6 +2257,14 @@ public class GUI implements WindowEventListener, LobbyListener
 		updateWorldEditorTab();
 		
 		masterView.setIndex(1);
+		window.relayout();
+	}
+	
+	public void setWorld(World world)
+	{
+		this.world = world;
+		loadPropertiesFromWorld();
+		updateWorldEditorTab();
 		window.relayout();
 	}
 	

@@ -53,6 +53,7 @@ public class Server
 	private ReentrantLock						serverLock = new ReentrantLock();
 	private Simulator 							simulate = null;
 	private World								world = null;
+	private World								initialState = null;
 	
 	public static void main(String[] args)
 	{
@@ -133,6 +134,8 @@ public class Server
 						world.setRuleCode("ruleset GameOfLife\n{\n\ttypes{Land};\n\tproperty alive;\n\n\ttype Land\n\t{\n\t\tvar c = sum(neighbours.alive);\n\t\tif ((c < 2) || (c > 3))\n\t\t\tself.alive = 0;\n\t\telse if (c == 3)\n\t\t\tself.alive = 1;\t\t\n\t}\n}");
 						world.setColourCode("colourset colours\n{\n\tproperty alive\n\t{\n\t\t0 - 1 : rgb(0.0, 0.25, 0.5) rgb(0.0, 0.8, 0.5);\n\t\t1 - 2 : rgb(0.0, 0.8, 0.5) rgb(0.8, 0.5, 0.3);\n\t}\n\t}\n}");
 						
+						initialState = new World(world);
+						
 						ui.startWorldEditor(world);
 
 						serverLock.unlock();
@@ -146,6 +149,8 @@ public class Server
 						world.setFileName(event.filename);
 						world.load();
 						
+						initialState = new World(world);
+						
 						ui.startWorldEditor(world);
 						
 						serverLock.unlock();
@@ -158,6 +163,7 @@ public class Server
 						try
 						{
 							world.save();
+							initialState = new World(world);
 							Log.information(TAG, "Saved world");
 						}
 						catch(IOException e)
@@ -224,6 +230,24 @@ public class Server
 						}
 						
 						serverLock.unlock();
+						break;
+					}
+					case RESET_SIMULATION:
+					{
+						serverLock.lock();
+						
+						//Stop Simulation
+						if(activeSimulation.getAndSet(false))
+						{
+							simulate.disconnect();
+							simulate = null;
+						}
+						
+						world = new World(initialState);
+						ui.setWorld(world);
+						
+						serverLock.unlock();
+						
 						break;
 					}
 					case SET_PLAYBACK_SPEED:
