@@ -967,9 +967,10 @@ public class GUI implements WindowEventListener, LobbyListener
 			}			
 			else if(event.target == resetButton)
 			{
-				
+				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
+				server.sendEvent(serverEvent);
 				window.showModalDialog(resettingDialog);
-				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.RESET_SIMULATION);
+				serverEvent = new ServerEvent(ServerEvent.Type.RESET_SIMULATION);
 				server.sendEvent(serverEvent);
 			}		
 			else if(event.target == stepForwardButton)

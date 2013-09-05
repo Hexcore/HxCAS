@@ -236,13 +236,6 @@ public class Server
 					{
 						serverLock.lock();
 						
-						//Stop Simulation
-						if(activeSimulation.getAndSet(false))
-						{
-							simulate.disconnect();
-							simulate = null;
-						}
-						
 						world = new World(initialState);
 						ui.setWorld(world);
 						ui.onFinishedSaving();
