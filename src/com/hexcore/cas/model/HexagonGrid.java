@@ -69,8 +69,8 @@ public class HexagonGrid extends Grid
 			}//if
 			else//the column is odd
 			{
-				neighbours[0] = this.getCell(new Vector2i( x, (y+ydim-1)%ydim));
-				neighbours[1] = this.getCell(new Vector2i( (x+xdim-1)%xdim, y));
+				neighbours[1] = this.getCell(new Vector2i( x, (y+ydim-1)%ydim));
+				neighbours[0] = this.getCell(new Vector2i( (x+xdim-1)%xdim, y));
 				neighbours[2] = this.getCell(new Vector2i((x+1)%xdim, y));
 				
 				neighbours[3] = this.getCell(new Vector2i( (x+xdim-1)%xdim, (y+1)%ydim));
@@ -80,6 +80,7 @@ public class HexagonGrid extends Grid
 		}//if
 		else
 		{
+			
 			if((x%2) == 0)//if the column is even:
 			{
 				neighbours = setNeighbours(neighbours, x-1, y-1, 	xdim, ydim, i++);
@@ -87,18 +88,19 @@ public class HexagonGrid extends Grid
 				neighbours = setNeighbours(neighbours, x+1, y-1, 	xdim, ydim, i++);
 				
 				neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
-				neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
+				neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
 			}//if
 			else//the column is odd
 			{
-				neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x-1, y, 		xdim, ydim, i++);
+				neighbours = setNeighbours(neighbours, x, y-1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y, 		xdim, ydim, i++);
 				
 				neighbours = setNeighbours(neighbours, x-1, y+1, 	xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x, y+1, 		xdim, ydim, i++);
 				neighbours = setNeighbours(neighbours, x+1, y+1, 	xdim, ydim, i++);
+				
 			}//else
 		}//else
 		
