@@ -328,7 +328,7 @@ public class StdLib
 		return values;
 	}
 	
-	public static void setMovementFlag(int index, Cell c, Cell[] n)
+	public static void setMovementFlag(double index, Cell c, Cell[] n)
 	{
 		if(index >= c.getValueCount())
 			return;
@@ -339,6 +339,8 @@ public class StdLib
 			count = 1;
 		else
 			count++;
+		
+		c.setPrivateProperty("flag_count", count);
 		
 		c.setPrivateProperty("mflag_" + Integer.toString(count-1), index);
 

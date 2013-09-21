@@ -780,4 +780,57 @@ CALCompiler compiler = new CALCompiler();
 	
 	}
 	
+	@Test
+	public void testMovementFlags()
+	{
+	CALCompiler compiler = new CALCompiler();
+		
+		compiler.compileFile("Test Data/rules/testMovementFlags.cal");		
+		assertTrue(compiler.getErrorCount() == 0);
+		
+		RuleLoader rl = new RuleLoader();		
+		Rule rule = rl.loadRule(compiler.getCode());
+		
+		
+		Grid g = new RectangleGrid(new Vector2i(10, 10), 2);
+		g.setWrappable(true);
+		
+		
+		//Init grid to acceptors
+		for(int r = 0; r < 10; r++)
+			for(int c = 0; c < 10; c++)
+				g.setCell(new Vector2i(c,r), new double[]{1,0});
+		
+		//Set middle cell to a mover
+		g.setCell(new Vector2i(5, 5), new double[]{0,5.0});
+		
+			
+		Grid old = g.clone();		
+		rule.setStepForGen(0);
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+		
+		
+		old = g.clone();		
+		rule.setStepForGen(1);
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+
+		
+		old = g.clone();		
+		rule.setStepForGen(2);
+		for(int x = 0; x < 10; x++)
+			for(int y = 0; y < 10; y++)
+				rule.run(g.getCell(x, y), old.getNeighbours(new Vector2i(x, y)));
+		
+		assertEquals(1.0, g.getCell(5, 5).getValue(0), 0.0);
+		assertEquals(0.0, g.getNeighbours(new Vector2i(5,5))[0].getValue(0), 0.0);
+		assertEquals(5.0, g.getNeighbours(new Vector2i(5,5))[0].getValue(1), 0.0);
+		
+	
+		
+	}
+	
 }

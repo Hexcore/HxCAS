@@ -1,0 +1,18 @@
+ruleset testMovementEngine
+{
+	types{A,B};
+	
+	property p1;
+
+	type A
+	{
+		behaviour move(true, 0.0);
+		behaviour setMovementFlag(1);
+	}
+	
+	type B
+	{
+		behaviour accept(true);
+	}
+
+}
