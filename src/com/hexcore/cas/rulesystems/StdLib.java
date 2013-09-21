@@ -112,6 +112,9 @@ public class StdLib
 		if(step == 0)
 		{
 			cell.setPrivateProperty("target", target);
+			
+			//clear any existing movement flags
+			cell.setPrivateProperty("flag_count", -1);
 		}
 		else if(step == 1)
 		{
@@ -175,6 +178,14 @@ public class StdLib
 			if(cell.getPrivateProperty("parent") != -1)
 			{
 				cell.setValue(0, neighbours[(int)cell.getPrivateProperty("parent")].getValue(0));
+				
+				//Copy any flagged properties
+				int count = (int)neighbours[(int)cell.getPrivateProperty("parent")].getPrivateProperty("flag_count");				
+				for(int i = 0; i < count; i++)
+				{
+					int copyIndex = (int)neighbours[(int)cell.getPrivateProperty("parent")].getPrivateProperty("mflag_" + Integer.toString(i));
+					cell.setValue(copyIndex, neighbours[(int)cell.getPrivateProperty("parent")].getValue(copyIndex));
+				}
 			}
 			cell.setPrivateProperty("parent", -1);
 		}
@@ -315,6 +326,22 @@ public class StdLib
 			values[i] = newArray.get(i);
 		
 		return values;
+	}
+	
+	public static void setMovementFlag(int index, Cell c, Cell[] n)
+	{
+		if(index >= c.getValueCount())
+			return;
+		
+		int count = (int) c.getPrivateProperty("flag_count");
+		
+		if(count == -1)
+			count = 1;
+		else
+			count++;
+		
+		c.setPrivateProperty("mflag_" + Integer.toString(count-1), index);
+
 	}
 	
 }

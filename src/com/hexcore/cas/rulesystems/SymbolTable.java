@@ -186,6 +186,13 @@ public class SymbolTable
 		pulsarEntry.arguments = new ArgList(TableEntry.Type.BOOL, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
 		insert(pulsarEntry);
 		
+		TableEntry setMovFlag = new TableEntry();
+		setMovFlag.type = TableEntry.Type.VOID;
+		setMovFlag.kind = TableEntry.Kind.BEHAVIOUR;
+		setMovFlag.name = "setMovementFlag";
+		setMovFlag.arguments = new ArgList(TableEntry.Type.DOUBLE, TableEntry.Type.CELL, TableEntry.Type.CELL_ARR);
+		insert(setMovFlag);
+		
 		TableEntry appendEntry = new TableEntry();
 		appendEntry.type = TableEntry.Type.DOUBLE_ARR;
 		appendEntry.kind = TableEntry.Kind.METHOD;
