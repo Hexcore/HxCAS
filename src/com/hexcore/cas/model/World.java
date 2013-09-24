@@ -61,6 +61,8 @@ public class World
 		this.worldFileName = world.worldFileName;
 		this.ruleCode = world.ruleCode;
 		this.colourCode = world.colourCode;
+		
+		worldGenerations = Collections.synchronizedList(new ArrayList<Grid>());
 		this.worldGenerations.clear();
 		this.worldGenerations.addAll(world.worldGenerations);
 		
