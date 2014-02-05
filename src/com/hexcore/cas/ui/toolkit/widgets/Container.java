@@ -81,6 +81,14 @@ public class Container extends Widget implements StyledWidget
 		contents.relayout();
 	}
 	
+	public void setParent(Widget parent)
+	{
+		this.parent = parent;
+		if (parent.getWindow() != null) setWindow(parent.getWindow());
+		if (contents != null) contents.setParent(parent);
+		relayout();
+	}
+	
 	@Override
 	public void update(Vector2i position, float delta)
 	{

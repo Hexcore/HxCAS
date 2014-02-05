@@ -189,9 +189,9 @@ public class GUI implements WindowEventListener, LobbyListener
 	//MAIN MENU//
 	public Button					createWorldButton;
 	public Button					dialogOKButton;
-	public Button					helpButton;
+	//public Button					helpButton;
 	public Button					loadWorldButton;
-	public Button					optionsButton;
+	//public Button					optionsButton;
 	public Button					quitButton;
 	
 	public ColourRuleSet			colourRules;
@@ -414,6 +414,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		
 		// Preview window
 		Container previewWindowContainer = new Container(new Vector2i(100,100));
+		previewWindowContainer.setMargin(new Vector2i());
 		previewWindowContainer.setFlag(Widget.FILL);
 		previewWindowContainer.setBackground(new Fill(new Colour(0f,0f,0f))); 
 		
@@ -764,9 +765,6 @@ public class GUI implements WindowEventListener, LobbyListener
 				
 				refreshClients();
 			}
-			else if(event.target == helpButton)
-			{
-			}
 			else if(event.target == quitButton)
 			{
 				shutdownProcess();
@@ -951,9 +949,15 @@ public class GUI implements WindowEventListener, LobbyListener
 				ServerEvent serverEvent = new ServerEvent(ServerEvent.Type.STOP_SIMULATION);
 				server.sendEvent(serverEvent);
 				
-				masterView.setIndex(1);
-				
-				updateWorldSettings();
+				if (masterView.getIndex() == 1)
+				{
+					masterView.setIndex(0);
+				}
+				else
+				{
+					masterView.setIndex(1);
+					updateWorldSettings();
+				}
 			}
 			else if(event.target == playButton)
 			{
@@ -1429,13 +1433,12 @@ public class GUI implements WindowEventListener, LobbyListener
 		masterView.setFlag(Widget.FILL);
 		window.add(masterView);
 		
-
 		LinearLayout mainMenuLayout = (LinearLayout)layoutParser.parse("mainMenu", masterView);
 
 		createWorldButton = (Button)mainMenuLayout.findByName("createWorld");
 		loadWorldButton = (Button)mainMenuLayout.findByName("loadWorld");
-		optionsButton = (Button)mainMenuLayout.findByName("options");
-		helpButton = (Button)mainMenuLayout.findByName("help");
+		//optionsButton = (Button)mainMenuLayout.findByName("options");
+		//helpButton = (Button)mainMenuLayout.findByName("help");
 		quitButton = (Button)mainMenuLayout.findByName("quit");
 		
 		// Main WORLD BUILDER
@@ -1451,37 +1454,20 @@ public class GUI implements WindowEventListener, LobbyListener
 		worldHeaderLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
 		worldLayout.add(worldHeaderLayout);
 		worldLayout.add(tabbedWorldView);
-		
-		Container propertiesContainer = new Container(new Vector2i(100, 100));	
-		propertiesContainer.setFlag(Widget.FILL);
-		tabbedWorldView.add(propertiesContainer, "World Properties");
-		
-		LinearLayout masterPropertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		masterPropertiesLayout.setFlag(Widget.FILL);
-		propertiesContainer.setContents(masterPropertiesLayout);
-		
-		LinearLayout instructionsLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		instructionsLayout.setHeight(35);
-		instructionsLayout.setFlag(Widget.CENTER_HORIZONTAL);
-		instructionsLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-		masterPropertiesLayout.add(instructionsLayout);
-		
-		TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
-		instructionsLayout.add(propertiesInstructions);
-		instructionsLayout.setWidth(propertiesInstructions.getWidth()+ 20);
-		
+
 		LinearLayout propertiesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		propertiesLayout.setFlag(Widget.FILL);
-		propertiesLayout.setBorder(new Fill(new Colour(0.6f,0.6f,0.6f)));
-		masterPropertiesLayout.add(propertiesLayout);
+		tabbedWorldView.add(propertiesLayout, "World Properties");
+				
+		TextWidget propertiesInstructions = new TextWidget("Specify your world properties such as cell shape, world size and whether the world is wrappable.");
+		propertiesInstructions.setFlag(Widget.CENTER_HORIZONTAL);
+		propertiesLayout.add(propertiesInstructions);
 		
 		LinearLayout worldSizeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		worldSizeLayout.setHeight(50);
-		worldSizeLayout.setFlag(Widget.FILL_HORIZONTAL);
+		worldSizeLayout.setMargin(new Vector2i(0, 0));
+		worldSizeLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
 		
-		propertiesLayout.add(worldSizeLayout);
-		
-		TextWidget worldSizeLabel = new TextWidget("World Size:", Size.MEDIUM);
+		TextWidget worldSizeLabel = new TextWidget("World size:");
 		worldSizeLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeLabel);
 		
@@ -1491,7 +1477,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		worldSizeXNumberBox.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXNumberBox);
 		
-		TextWidget worldSizeXLabel = new TextWidget("X", Size.LARGE);
+		TextWidget worldSizeXLabel = new TextWidget("x");
 		worldSizeXLabel.setFlag(Widget.CENTER_VERTICAL);
 		worldSizeLayout.add(worldSizeXLabel);
 		
@@ -1506,25 +1492,35 @@ public class GUI implements WindowEventListener, LobbyListener
 		wrapCheckBox.setMargin(new Vector2i(50,0));
 		worldSizeLayout.add(wrapCheckBox);
 		
-		historyDropDownBox = new DropDownBox(new Vector2i(135,20));
+		propertiesLayout.add(worldSizeLayout);
+		
+		LinearLayout historyTypeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
+		historyTypeLayout.setMargin(new Vector2i(0, 0));
+		historyTypeLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
+
+		TextWidget historyLabel = new TextWidget("History:");
+		historyLabel.setFlag(Widget.CENTER_VERTICAL);
+		historyTypeLayout.add(historyLabel);
+		
+		historyDropDownBox = new DropDownBox(new Vector2i(165,20));
 		historyDropDownBox.setFlag(Widget.CENTER_VERTICAL);
-		historyDropDownBox.addItem("No History");
-		historyDropDownBox.addItem("Memory history");
-		historyDropDownBox.addItem("Harddisk history");
+		historyDropDownBox.addItem("None");
+		historyDropDownBox.addItem("Memory");
+		historyDropDownBox.addItem("Harddisk streaming");
 		historyDropDownBox.setSelected(1);
-		worldSizeLayout.add(historyDropDownBox);
+		historyTypeLayout.add(historyDropDownBox);
+		
+		propertiesLayout.add(historyTypeLayout);
 		
 		LinearLayout cellShapeLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
-		cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL);
-		cellShapeLayout.setHeight(65);
+		cellShapeLayout.setMargin(new Vector2i(0, 0));
+		cellShapeLayout.setFlag(Widget.FILL_HORIZONTAL | Widget.WRAP_VERTICAL);
 		
-		propertiesLayout.add(cellShapeLayout);
-		
-		TextWidget cellShapeLabel = new TextWidget("Cell Shape:",Size.MEDIUM);
+		TextWidget cellShapeLabel = new TextWidget("Cell Shape:");
 		cellShapeLabel.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeLayout.add(cellShapeLabel);
 		
-		cellShapeDropDownBox = new DropDownBox(new Vector2i(160,20));
+		cellShapeDropDownBox = new DropDownBox(new Vector2i(180,20));
 		cellShapeDropDownBox.setFlag(Widget.CENTER_VERTICAL);
 		cellShapeDropDownBox.addItem("Square");
 		cellShapeDropDownBox.addItem("Triangle");
@@ -1533,7 +1529,8 @@ public class GUI implements WindowEventListener, LobbyListener
 		cellShapeDropDownBox.setSelected(0);
 		
 		cellShapeLayout.add(cellShapeDropDownBox);
-
+		
+		propertiesLayout.add(cellShapeLayout);
 		
 		LinearLayout widgetPreviewLayout = new LinearLayout(LinearLayout.Direction.HORIZONTAL);
 		widgetPreviewLayout.setBackground(new Fill(new Colour(0.0f,0.0f,0.0f)));
@@ -1570,18 +1567,11 @@ public class GUI implements WindowEventListener, LobbyListener
 		simulateButton.setWidth(165);
 		simulateButton.setHeight(35);
 		buttonHeaderLayout.add(simulateButton);
-		
-		Container rulesContainer = new Container(new Vector2i(100, 100));
-		tabbedWorldView.add(rulesContainer, "CAL Rules");
-		rulesContainer.setFlag(Widget.FILL);
-		
-		LinearLayout masterRulesLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
-		masterRulesLayout.setFlag(Widget.FILL);
-		rulesContainer.setContents(masterRulesLayout);
-		
+
 		LinearLayout CALLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
+		CALLayout.setMargin(new Vector2i(16, 8));
 		CALLayout.setFlag(Widget.FILL);
-		masterRulesLayout.add(CALLayout);
+		tabbedWorldView.add(CALLayout, "CAL Rules");
 		
 		TextWidget calEditorHeader = new TextWidget("CAL Editor", Text.Size.MEDIUM);
 		calEditorHeader.setFlag(Widget.CENTER_HORIZONTAL);
@@ -1591,30 +1581,27 @@ public class GUI implements WindowEventListener, LobbyListener
 		CALTextArea.setMargin(new Vector2i(0,0));
 		CALTextArea.setFlag(Widget.FILL);
 		CALTextArea.setLineNumbers(true);
-		
 		CALLayout.add(CALTextArea);
-		
 		
 		TextWidget compilerOutputHeader = new TextWidget("Compiler Log", Text.Size.MEDIUM);
 		compilerOutputHeader.setFlag(Widget.CENTER_HORIZONTAL);
 		CALLayout.add(compilerOutputHeader);
 		
 		outputContainer = new ScrollableContainer(new Vector2i(250, 100));
-		outputContainer.setFlag(Widget.FILL_HORIZONTAL);
-		outputContainer.setFlag(Widget.CENTER_HORIZONTAL);
+		outputContainer.setMargin(new Vector2i());
+		outputContainer.setFlag(Widget.FILL_HORIZONTAL | Widget.CENTER_HORIZONTAL);
 		outputContainer.setThemeClass("List");
 		CALLayout.add(outputContainer);
 		
 		outputLayout = new LinearLayout(LinearLayout.Direction.VERTICAL);
 		outputLayout.setMargin(new Vector2i(0, 0));
 		outputLayout.setFlag(Widget.WRAP);
-		
 		outputContainer.setContents(outputLayout);
 		
 		LinearLayout buttonRulesLayout = new LinearLayout(new Vector2i(875, 50), LinearLayout.Direction.HORIZONTAL);
-		buttonRulesLayout.setBorder(new Fill(new Colour(0.7f, 0.7f, 0.7f)));
+		buttonRulesLayout.setMargin(new Vector2i());
 		buttonRulesLayout.setFlag(Widget.CENTER_HORIZONTAL);
-		masterRulesLayout.add(buttonRulesLayout);
+		CALLayout.add(buttonRulesLayout);
 		
 		clearRulesButton = new Button(new Vector2i(100, 50), "Clear Rules");
 		clearRulesButton.setWidth(165);
@@ -1899,6 +1886,7 @@ public class GUI implements WindowEventListener, LobbyListener
 		cameraLayout.add(innerCameraLayout2);
 		
 		zoomInButton = new Button(window.getTheme().getImage("icons", "zoom_in_icon.png"));
+		zoomInButton.setTooltip("Zoom in");
 		zoomInButton.setMargin(new Vector2i(5, 0));
 		innerCameraLayout2.add(zoomInButton);
 		
@@ -1959,22 +1947,27 @@ public class GUI implements WindowEventListener, LobbyListener
 		viewSettingsLayout.add(innerViewSettingsLayout2);
 		
 		toggleHideButton = new Button(window.getTheme().getImage("icons", "toggle_hide_icon.png"));
+		toggleHideButton.setTooltip("Toggle fullscreen");
 		toggleHideButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(toggleHideButton);
 		
 		toggle3dButton = new Button(this.window.getTheme().getImage("icons", "3d_icon.png"));
+		toggle3dButton.setTooltip("Switch between 3D and 2D mode");
 		toggle3dButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(toggle3dButton);
 		
 		toggleWireframeButton = new Button(this.window.getTheme().getImage("icons", "toggle_wireframe_icon.png"));
+		toggleWireframeButton.setTooltip("Toggle wireframe");
 		toggleWireframeButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(toggleWireframeButton);
 		
 		addViewportButton = new Button(this.window.getTheme().getImage("icons", "add_viewport_icon.png"));
+		addViewportButton.setTooltip("Add another viewport");
 		addViewportButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(addViewportButton);
 		
 		removeViewportButton = new Button(this.window.getTheme().getImage("icons", "remove_viewport_icon.png"));
+		removeViewportButton.setTooltip("Remove the rightmost viewport");
 		removeViewportButton.setMargin(new Vector2i(5, 0));
 		innerViewSettingsLayout2.add(removeViewportButton);
 		

@@ -93,6 +93,18 @@ public class Layout extends Widget implements StyledWidget
 	}
 	
 	@Override
+	public void setParent(Widget parent)
+	{
+		this.parent = parent;
+		if (parent.getWindow() != null) setWindow(parent.getWindow());
+		synchronized(components)
+		{
+			for (Widget component : components) component.setParent(parent);
+		}
+		relayout();
+	}
+	
+	@Override
 	public void update(Vector2i position, float delta)
 	{
 		if (!visible) return;

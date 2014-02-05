@@ -44,26 +44,6 @@ widget LinearLayout : vertical
 		    
 		    widget Button
 		    {
-		        name: "options";
-		        caption: "Options";
-		        width: 300;
-		        height: 50;
-		        alignment: top center;
-		        icon: image("icons", "options_icon.png");
-		    }    
-		    
-		    widget Button
-		    {
-		        name: "help";
-		        caption: "Help";
-		        width: 300;
-		        height: 50;
-		        alignment: top center;
-		        icon: image("icons", "help_icon.png");
-		    }
-		    
-		    widget Button
-		    {
 		        name: "quit";
 		        caption: "Quit";
 		        width: 300;

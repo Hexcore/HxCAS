@@ -133,7 +133,7 @@ public abstract class Widget
 	public void setParent(Widget parent)
 	{
 		this.parent = parent;
-		setWindow(parent.getWindow());
+		if (parent.getWindow() != null) setWindow(parent.getWindow());
 		relayout();
 	}
 	

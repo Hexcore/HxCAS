@@ -492,14 +492,20 @@ public class Window extends Layout implements GLEventListener, MouseMotionListen
 		{
 			long diff = System.nanoTime() - lastMouseMove;
 			
-			if (diff > 1000000000)
+			if (diff > 500000000)
 			{
 				Vector2i pos = mousePos.add(16, 16);
 				String tooltip = wantsTooltip.getTooltip();
-				Vector2i textSize = theme.calculateTextSize(tooltip, Text.Size.SMALL);
+				Vector2i textSize = theme.calculateTextSize(tooltip, Text.Size.SMALL).add(8, 8);
 				
-				Graphics.renderRectangle(gl, pos, textSize.add(8, 8), Colour.WHITE);
-				Graphics.renderBorder(gl, pos, textSize.add(8, 8), Colour.BLACK);
+				if (pos.x+textSize.x >= size.x)
+					pos.x -= 16 + textSize.x;
+				
+				if (pos.y+textSize.y >= size.y)
+					pos.y -= 16 + textSize.y;
+				
+				Graphics.renderRectangle(gl, pos, textSize, Colour.WHITE);
+				Graphics.renderBorder(gl, pos, textSize, Colour.BLACK);
 				theme.renderText(gl, wantsTooltip.getTooltip(), pos.add(4, 4), Colour.BLACK, Text.Size.SMALL);
 			}
 		}

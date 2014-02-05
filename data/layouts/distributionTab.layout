@@ -5,6 +5,7 @@ widget LinearLayout : vertical
 	widget LinearLayout : horizontal
 	{
 		name: "listLayout";
+		margin: 0;
 		alignment: fill;
 		
 		widget LinearLayout : vertical
@@ -90,6 +91,7 @@ widget LinearLayout : vertical
 	
 	widget LinearLayout : horizontal
 	{
+		margin: 0;
 		alignment: top fill;
 		shrink-wrap: vertical;
 		
